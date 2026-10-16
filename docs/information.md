@@ -1,0 +1,1 @@
+# Pasta responsável por armazenar toda a documentação do projeto
