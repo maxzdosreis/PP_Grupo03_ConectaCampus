@@ -1,0 +1,6 @@
+* text=auto
+
+# Arquivos lidos dentro de containers Linux: CRLF quebra scripts e comandos.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
