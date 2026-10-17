@@ -61,6 +61,14 @@ Com os serviços no ar, em outro terminal dentro de `src`:
 docker compose exec backend python manage.py createsuperuser
 ```
 
+O comando pede **e-mail, nome, matrícula e senha**. O login no admin é feito com o e-mail, e o superusuário é criado com o perfil **Gestor**.
+
+> **Quem subiu o banco antes da AUT-02:** a migration `contas.0002` remove o `username` e torna nome e matrícula obrigatórios, partindo de uma tabela de usuários vazia. Apague o banco local uma vez antes de subir de novo:
+>
+> ```bash
+> docker compose down -v
+> ```
+
 ### Frontend: lint e build
 
 Com os serviços no ar, dentro de `src`:
