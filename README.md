@@ -6,11 +6,10 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 - Python 3.12, Django 5.2 LTS, Django REST Framework 3.18
 - PostgreSQL 16 (driver psycopg 3)
+- Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10
 - Docker e Docker Compose
 
 ## Como executar
-
-> **Situação atual:** o banco de dados (`db`) e o backend (`backend`) sobem. O frontend depende da criação do projeto Vite/React (INF-05); até lá, suba só os dois primeiros serviços: `docker compose up --build db backend`.
 
 ### Pré-requisito
 
@@ -32,16 +31,17 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
    Se já existir um PostgreSQL rodando na porta 5432 do seu computador, mude só `DB_PORT_HOST` (ex.: `5433`). `DB_PORT` é a porta usada pelo Django dentro da rede do Docker e deve continuar `5432`.
 
-2. Entre na pasta `src` e suba os serviços:
+2. Entre na pasta `src` e suba os três serviços (banco, backend e frontend):
 
    ```bash
    cd src
-   docker compose up --build db backend
+   docker compose up --build
    ```
 
    As migrations do banco são aplicadas automaticamente quando o backend sobe.
 
 3. Acesse:
+   - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
@@ -59,6 +59,24 @@ Com os serviços no ar, em outro terminal dentro de `src`:
 
 ```bash
 docker compose exec backend python manage.py createsuperuser
+```
+
+### Frontend: lint e build
+
+Com os serviços no ar, dentro de `src`:
+
+```bash
+docker compose exec frontend npm run lint
+```
+
+```bash
+docker compose exec frontend npm run build
+```
+
+As dependências do frontend ficam num volume próprio do container (`/app/node_modules`). Ao mudar o `package.json` (instalar, remover ou atualizar pacotes), recrie esse volume:
+
+```bash
+docker compose up --build -V frontend
 ```
 
 ### Parar a aplicação
