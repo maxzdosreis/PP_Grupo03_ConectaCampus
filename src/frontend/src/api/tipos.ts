@@ -7,5 +7,6 @@ export type RespostaErro = {
   erro: {
     codigo: string
     mensagem: string
+    campos?: Record<string, string[]>
   }
 }

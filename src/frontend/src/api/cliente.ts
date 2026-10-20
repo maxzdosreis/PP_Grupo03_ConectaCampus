@@ -18,12 +18,19 @@ const MENSAGEM_API_NAO_CONFIGURADA =
 export class ErroDaApi extends Error {
   readonly status: number
   readonly codigo: string
+  readonly campos: Record<string, string[]>
 
-  constructor(status: number, codigo: string, mensagem: string) {
+  constructor(
+    status: number,
+    codigo: string,
+    mensagem: string,
+    campos: Record<string, string[]> = {},
+  ) {
     super(mensagem)
     this.name = 'ErroDaApi'
     this.status = status
     this.codigo = codigo
+    this.campos = campos
   }
 }
 
@@ -83,7 +90,8 @@ export async function requisitar<T>(
     return corpo
   }
   if (ehRespostaErro(corpo)) {
-    throw new ErroDaApi(resposta.status, corpo.erro.codigo, corpo.erro.mensagem)
+    const { codigo, mensagem, campos } = corpo.erro
+    throw new ErroDaApi(resposta.status, codigo, mensagem, campos)
   }
   throw new ErroDaApi(resposta.status, 'ERRO_INESPERADO', MENSAGEM_ERRO_INESPERADO)
 }

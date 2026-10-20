@@ -11,6 +11,9 @@ extend-exclude = ["migrations"]
 # PT: estilo do pytest        T20: proíbe print (regra de negócio não imprime)
 # RUF fica de fora: RUF001-RUF003 acusam caracteres legítimos do português.
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "N", "DJ", "PT", "T20"]
+# N818 exige o sufixo inglês "Error"; as exceções seguem a linguagem ubíqua
+# em português (ErroDeDominio, ConflitoDeHorario).
+ignore = ["N818"]
 
 [tool.ruff.lint.per-file-ignores]
 # Os caminhos pontuados dos validadores de senha do Django são strings que não
@@ -18,19 +21,19 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "N", "DJ", "PT", "T20"]
 "config/settings.py" = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["config", "espacos", "reservas", "contas"]
+known-first-party = ["config", "compartilhado", "espacos", "reservas", "contas"]
 
 [tool.ruff.format]
 quote-style = "double"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
-testpaths = ["espacos", "reservas", "contas"]
+testpaths = ["compartilhado", "espacos", "reservas", "contas"]
 python_files = ["test_*.py"]
 addopts = "-ra --strict-markers"
 
 [tool.coverage.run]
-source = ["espacos", "reservas", "contas"]
+source = ["compartilhado", "espacos", "reservas", "contas"]
 branch = true
 # O models.py da raiz de cada app só reexporta os models de infrastructure/.
 omit = [
@@ -47,14 +50,41 @@ show_missing = true
 # Cobertura-alvo: quando o grupo decidir, defina fail_under aqui.
 
 [tool.importlinter]
-root_packages = ["config", "espacos", "reservas", "contas"]
+root_packages = ["config", "compartilhado", "espacos", "reservas", "contas"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Domínio é Python puro"
 type = "forbidden"
-source_modules = ["espacos.domain", "reservas.domain", "contas.domain"]
+source_modules = [
+    "compartilhado.domain",
+    "espacos.domain",
+    "reservas.domain",
+    "contas.domain",
+]
 forbidden_modules = ["django", "rest_framework"]
+
+[[tool.importlinter.contracts]]
+name = "compartilhado não depende dos contextos"
+type = "forbidden"
+source_modules = ["compartilhado"]
+forbidden_modules = ["espacos", "reservas", "contas", "config"]
+
+[[tool.importlinter.contracts]]
+name = "Só a camada api usa compartilhado.api"
+type = "forbidden"
+source_modules = [
+    "espacos.domain",
+    "espacos.application",
+    "espacos.infrastructure",
+    "reservas.domain",
+    "reservas.application",
+    "reservas.infrastructure",
+    "contas.domain",
+    "contas.application",
+    "contas.infrastructure",
+]
+forbidden_modules = ["compartilhado.api"]
 
 [[tool.importlinter.contracts]]
 name = "Camadas de cada contexto"

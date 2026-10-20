@@ -6,7 +6,8 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+
+from compartilhado.api.respostas import resposta_erro, resposta_sucesso
 
 
 @api_view(["GET"])
@@ -17,13 +18,9 @@ def health(request):
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
     except DatabaseError:
-        return Response(
-            {
-                "erro": {
-                    "codigo": "BANCO_INDISPONIVEL",
-                    "mensagem": "Não foi possível conectar ao banco de dados.",
-                }
-            },
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        return resposta_erro(
+            "BANCO_INDISPONIVEL",
+            "Não foi possível conectar ao banco de dados.",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
         )
-    return Response({"mensagem": "API no ar.", "dados": {"banco": "ok"}})
+    return resposta_sucesso("API no ar.", {"banco": "ok"})
