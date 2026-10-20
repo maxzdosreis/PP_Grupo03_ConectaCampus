@@ -87,6 +87,46 @@ As dependências do frontend ficam num volume próprio do container (`/app/node_
 docker compose up --build -V frontend
 ```
 
+### Qualidade do código (backend)
+
+Com os serviços no ar, dentro de `src`. As configurações ficam em `src/backend/pyproject.toml`.
+
+Testes (pytest):
+
+```bash
+docker compose exec backend pytest
+```
+
+Cobertura de testes dos contextos `espacos`, `reservas` e `contas`:
+
+```bash
+docker compose exec backend pytest --cov
+```
+
+Linter e formatação (ruff):
+
+```bash
+docker compose exec backend sh -c "ruff check . && ruff format --check ."
+```
+
+Regra de dependência entre camadas e contextos (import-linter):
+
+```bash
+docker compose exec backend lint-imports
+```
+
+Verificação completa, antes de cada PR:
+
+```bash
+docker compose exec backend sh -c "ruff check . && ruff format --check . && lint-imports && pytest"
+```
+
+Ao mudar o `requirements.txt` ou o `requirements-dev.txt`, reconstrua a imagem do backend:
+
+```bash
+docker compose up --build -d backend
+```
+
 ### Parar a aplicação
 
 ```bash
