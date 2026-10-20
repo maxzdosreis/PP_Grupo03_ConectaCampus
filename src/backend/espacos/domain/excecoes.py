@@ -29,6 +29,12 @@ class CapacidadeInvalida(DadosInvalidos):
     mensagem_padrao = "A capacidade deve ser um número inteiro maior que zero."
 
 
+class NomeDeEspacoJaCadastrado(ConflitoDeEstado):
+    codigo = "NOME_DE_ESPACO_JA_CADASTRADO"
+    campo = "nome"
+    mensagem_padrao = "Já existe um espaço com este nome."
+
+
 class EspacoNaoEncontrado(RecursoNaoEncontrado):
     codigo = "ESPACO_NAO_ENCONTRADO"
 

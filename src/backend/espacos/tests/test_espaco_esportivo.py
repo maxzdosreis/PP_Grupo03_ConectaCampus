@@ -7,6 +7,7 @@ from espacos.domain.excecoes import (
     CapacidadeInvalida,
     EspacoInativo,
     EspacoNaoEncontrado,
+    NomeDeEspacoJaCadastrado,
     NomeDeEspacoMuitoLongo,
     TipoDeEspacoInvalido,
 )
@@ -212,6 +213,22 @@ def test_espaco_inativo_vira_409():
     # Assert
     assert resposta.status_code == 409
     assert resposta.data["erro"]["codigo"] == "ESPACO_INATIVO"
+
+
+def test_nome_de_espaco_ja_cadastrado_vira_409_marcando_o_campo():
+    # Act
+    resposta = tratar_excecao(NomeDeEspacoJaCadastrado(), {})
+
+    # Assert
+    mensagem = "Já existe um espaço com este nome."
+    assert resposta.status_code == 409
+    assert resposta.data == {
+        "erro": {
+            "codigo": "NOME_DE_ESPACO_JA_CADASTRADO",
+            "mensagem": mensagem,
+            "campos": {"nome": [mensagem]},
+        }
+    }
 
 
 def test_capacidade_invalida_vira_400_marcando_o_campo():
