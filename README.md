@@ -97,7 +97,7 @@ Testes (pytest):
 docker compose exec backend pytest
 ```
 
-Cobertura de testes dos contextos `espacos`, `reservas` e `contas`:
+Cobertura de testes dos contextos `espacos`, `reservas` e `contas` e do pacote `compartilhado`:
 
 ```bash
 docker compose exec backend pytest --cov

@@ -120,6 +120,6 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": _RENDERIZADORES,
-    # A AUT-05 troca por IsAuthenticated e permissões por perfil.
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao",
 }
