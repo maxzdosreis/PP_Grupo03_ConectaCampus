@@ -53,6 +53,62 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 - **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}`
 - **503** — `{"erro": {"codigo": "BANCO_INDISPONIVEL", "mensagem": "Não foi possível conectar ao banco de dados."}}`
 
+### Exemplos de uso da API
+
+Por enquanto os endpoints de espaços não exigem login; a restrição do cadastro ao perfil Gestor entra na AUT-05. Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
+
+Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`.
+
+Cadastrar um espaço (`POST /api/espacos/`):
+
+```bash
+curl -X POST http://localhost:8000/api/espacos/ -H "Content-Type: application/json" -d '{"nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20}'
+```
+
+No Prompt de Comando do Windows, as aspas internas são escapadas:
+
+```bat
+curl -X POST http://localhost:8000/api/espacos/ -H "Content-Type: application/json" -d "{\"nome\": \"Quadra Central\", \"tipo\": \"QUADRA_POLIESPORTIVA\", \"capacidade\": 20}"
+```
+
+Resposta **201**:
+
+```json
+{"mensagem": "Espaço cadastrado com sucesso.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 20, "ativo": true}}
+```
+
+Repetir o mesmo cadastro responde **409**:
+
+```json
+{"erro": {"codigo": "NOME_DE_ESPACO_JA_CADASTRADO", "mensagem": "Já existe um espaço com este nome.", "campos": {"nome": ["Já existe um espaço com este nome."]}}}
+```
+
+Outros erros de cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; tipo fora da lista → **400** `TIPO_DE_ESPACO_INVALIDO`; nome vazio → **400** `CAMPO_OBRIGATORIO_AUSENTE`.
+
+> No Windows, nomes com acento passados direto no `-d` podem chegar fora de UTF-8 e a API responde `JSON_INVALIDO`. Nesse caso, salve o corpo num arquivo UTF-8 e envie com `--data-binary @espaco.json`.
+
+Listar os espaços (`GET /api/espacos/`), ordenados por nome. Filtros opcionais: `apenas_ativos=true` e `tipo=<TIPO>`, combináveis:
+
+```bash
+curl "http://localhost:8000/api/espacos/?tipo=QUADRA_POLIESPORTIVA&apenas_ativos=true"
+```
+
+```json
+{"mensagem": "1 espaço encontrado.", "dados": [{"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 20, "ativo": true}]}
+```
+
+Obter um espaço (`GET /api/espacos/{id}/`):
+
+```bash
+curl http://localhost:8000/api/espacos/1/
+```
+
+Um id inexistente responde **404**:
+
+```json
+{"erro": {"codigo": "ESPACO_NAO_ENCONTRADO", "mensagem": "Espaço de código 9999 não encontrado."}}
+```
+
 ### Criar um superusuário (acesso ao admin)
 
 Com os serviços no ar, em outro terminal dentro de `src`:
