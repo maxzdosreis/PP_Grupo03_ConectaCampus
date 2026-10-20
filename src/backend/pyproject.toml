@@ -1,0 +1,90 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle (PEP 8)    F: pyflakes             I: ordem dos imports
+# B: bugbear (bugs comuns)    UP: sintaxe do Python 3.12
+# SIM: simplificações         N: nomes no padrão PEP 8
+# DJ: boas práticas Django (ex.: model sem __str__)
+# PT: estilo do pytest        T20: proíbe print (regra de negócio não imprime)
+# RUF fica de fora: RUF001-RUF003 acusam caracteres legítimos do português.
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "N", "DJ", "PT", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+# Os caminhos pontuados dos validadores de senha do Django são strings que não
+# podem ser quebradas e passam de 88 colunas.
+"config/settings.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "espacos", "reservas", "contas"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+testpaths = ["espacos", "reservas", "contas"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["espacos", "reservas", "contas"]
+branch = true
+# O models.py da raiz de cada app só reexporta os models de infrastructure/.
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "*/admin.py",
+    "espacos/models.py",
+    "reservas/models.py",
+    "contas/models.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+# Cobertura-alvo: quando o grupo decidir, defina fail_under aqui.
+
+[tool.importlinter]
+root_packages = ["config", "espacos", "reservas", "contas"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Domínio é Python puro"
+type = "forbidden"
+source_modules = ["espacos.domain", "reservas.domain", "contas.domain"]
+forbidden_modules = ["django", "rest_framework"]
+
+[[tool.importlinter.contracts]]
+name = "Camadas de cada contexto"
+type = "layers"
+containers = ["espacos", "reservas", "contas"]
+layers = ["api", "infrastructure", "application", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "espacos não depende de outros contextos"
+type = "forbidden"
+source_modules = ["espacos"]
+forbidden_modules = ["reservas", "contas"]
+
+[[tool.importlinter.contracts]]
+name = "contas não depende de outros contextos"
+type = "forbidden"
+source_modules = ["contas"]
+forbidden_modules = ["espacos", "reservas"]
+
+[[tool.importlinter.contracts]]
+name = "reservas não importa contas"
+type = "forbidden"
+source_modules = ["reservas"]
+forbidden_modules = ["contas"]
+
+[[tool.importlinter.contracts]]
+name = "reservas só conversa com espacos pela aplicação"
+type = "forbidden"
+source_modules = ["reservas"]
+forbidden_modules = ["espacos.domain", "espacos.infrastructure", "espacos.api"]
+# Só imports diretos: a cadeia reservas -> espacos.application -> espacos.domain
+# é o caminho permitido e não pode quebrar o contrato.
+allow_indirect_imports = true
