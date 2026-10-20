@@ -1,0 +1,48 @@
+from rest_framework import status
+from rest_framework.views import APIView
+
+from compartilhado.api.respostas import resposta_sucesso
+from espacos.api import dependencias
+from espacos.api.serializers import (
+    EspacoEntradaSerializer,
+    EspacoSaidaSerializer,
+    FiltrosEspacosSerializer,
+)
+
+
+class EspacosView(APIView):
+    def get(self, request):
+        filtros = FiltrosEspacosSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+        espacos = dependencias.listar_espacos().executar(**filtros.validated_data)
+        return resposta_sucesso(
+            _mensagem_de_contagem(len(espacos)),
+            EspacoSaidaSerializer(espacos, many=True).data,
+        )
+
+    def post(self, request):
+        # AUT-05: restringir a GESTOR.
+        entrada = EspacoEntradaSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        espaco = dependencias.cadastrar_espaco().executar(**entrada.validated_data)
+        return resposta_sucesso(
+            "Espaço cadastrado com sucesso.",
+            EspacoSaidaSerializer(espaco).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class EspacoDetalheView(APIView):
+    def get(self, request, espaco_id):
+        espaco = dependencias.obter_espaco().executar(espaco_id)
+        return resposta_sucesso(
+            "Espaço encontrado.", EspacoSaidaSerializer(espaco).data
+        )
+
+
+def _mensagem_de_contagem(total):
+    if total == 0:
+        return "Nenhum espaço encontrado."
+    if total == 1:
+        return "1 espaço encontrado."
+    return f"{total} espaços encontrados."
