@@ -36,3 +36,13 @@ class ObterEspaco:
         if espaco is None:
             raise EspacoNaoEncontrado(espaco_id)
         return espaco
+
+
+class VerificarEspacoDisponivel:
+    def __init__(self, repositorio: RepositorioEspacos) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, espaco_id: int) -> EspacoEsportivo:
+        espaco = ObterEspaco(self._repositorio).executar(espaco_id)
+        espaco.garantir_que_esta_ativo()
+        return espaco
