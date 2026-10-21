@@ -1,10 +1,16 @@
 import pytest
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
-from espacos.application.casos_de_uso import CadastrarEspaco, ListarEspacos, ObterEspaco
+from espacos.application.casos_de_uso import (
+    CadastrarEspaco,
+    ListarEspacos,
+    ObterEspaco,
+    VerificarEspacoDisponivel,
+)
 from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
     CapacidadeInvalida,
+    EspacoInativo,
     EspacoNaoEncontrado,
     NomeDeEspacoJaCadastrado,
     TipoDeEspacoInvalido,
@@ -27,7 +33,7 @@ def _dados_validos(**sobrescritas):
 
 
 def _salvar(repositorio, nome, tipo, *, ativo=True):
-    repositorio.salvar(
+    return repositorio.salvar(
         EspacoEsportivo(nome=nome, tipo=tipo, capacidade=10, ativo=ativo)
     )
 
@@ -122,6 +128,38 @@ def test_obter_espaco_inexistente_lanca_espaco_nao_encontrado(repositorio):
     # Act
     with pytest.raises(EspacoNaoEncontrado) as erro:
         ObterEspaco(repositorio).executar(ID_INEXISTENTE)
+
+    # Assert
+    assert erro.value.espaco_id == ID_INEXISTENTE
+
+
+def test_verificar_espaco_disponivel_ativo_devolve_o_espaco(repositorio):
+    # Arrange
+    salvo = _salvar(repositorio, "Ginásio Novo", TipoEspaco.GINASIO)
+
+    # Act
+    espaco = VerificarEspacoDisponivel(repositorio).executar(salvo.id)
+
+    # Assert
+    assert espaco == salvo
+    assert espaco.nome == "Ginásio Novo"
+
+
+def test_verificar_espaco_disponivel_inativo_lanca_espaco_inativo(repositorio):
+    # Arrange
+    salvo = _salvar(repositorio, "Ginásio Antigo", TipoEspaco.GINASIO, ativo=False)
+
+    # Act / Assert
+    with pytest.raises(EspacoInativo):
+        VerificarEspacoDisponivel(repositorio).executar(salvo.id)
+
+
+def test_verificar_espaco_disponivel_inexistente_lanca_espaco_nao_encontrado(
+    repositorio,
+):
+    # Act
+    with pytest.raises(EspacoNaoEncontrado) as erro:
+        VerificarEspacoDisponivel(repositorio).executar(ID_INEXISTENTE)
 
     # Assert
     assert erro.value.espaco_id == ID_INEXISTENTE

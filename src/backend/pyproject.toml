@@ -11,13 +11,10 @@ extend-exclude = ["migrations"]
 # PT: estilo do pytest        T20: proíbe print (regra de negócio não imprime)
 # RUF fica de fora: RUF001-RUF003 acusam caracteres legítimos do português.
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "N", "DJ", "PT", "T20"]
-# N818 exige o sufixo inglês "Error"; as exceções seguem a linguagem ubíqua
-# em português (ErroDeDominio, ConflitoDeHorario).
 ignore = ["N818"]
 
 [tool.ruff.lint.per-file-ignores]
-# Os caminhos pontuados dos validadores de senha do Django são strings que não
-# podem ser quebradas e passam de 88 colunas.
+
 "config/settings.py" = ["E501"]
 
 [tool.ruff.lint.isort]
@@ -35,7 +32,6 @@ addopts = "-ra --strict-markers"
 [tool.coverage.run]
 source = ["compartilhado", "espacos", "reservas", "contas"]
 branch = true
-# O models.py da raiz de cada app só reexporta os models de infrastructure/.
 omit = [
     "*/migrations/*",
     "*/tests/*",
@@ -47,7 +43,6 @@ omit = [
 
 [tool.coverage.report]
 show_missing = true
-# Cobertura-alvo: quando o grupo decidir, defina fail_under aqui.
 
 [tool.importlinter]
 root_packages = ["config", "compartilhado", "espacos", "reservas", "contas"]
@@ -111,10 +106,19 @@ source_modules = ["reservas"]
 forbidden_modules = ["contas"]
 
 [[tool.importlinter.contracts]]
-name = "reservas só conversa com espacos pela aplicação"
+name = "reservas só conversa com espacos pela fachada pública"
 type = "forbidden"
 source_modules = ["reservas"]
-forbidden_modules = ["espacos.domain", "espacos.infrastructure", "espacos.api"]
-# Só imports diretos: a cadeia reservas -> espacos.application -> espacos.domain
-# é o caminho permitido e não pode quebrar o contrato.
+forbidden_modules = [
+    "espacos.domain",
+    "espacos.application",
+    "espacos.infrastructure",
+    "espacos.api",
+]
 allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Domínio e aplicação de reservas não conhecem espacos"
+type = "forbidden"
+source_modules = ["reservas.domain", "reservas.application"]
+forbidden_modules = ["espacos"]
