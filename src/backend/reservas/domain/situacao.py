@@ -16,6 +16,10 @@ class SituacaoReserva(StrEnum):
     def eh_final(self) -> bool:
         return not TRANSICOES_PERMITIDAS[self]
 
+    @property
+    def ocupa_horario(self) -> bool:
+        return self in SITUACOES_QUE_OCUPAM_HORARIO
+
 
 _ROTULOS = {
     SituacaoReserva.SOLICITADA: "Solicitada",
@@ -43,6 +47,10 @@ TRANSICOES_PERMITIDAS: dict[SituacaoReserva, frozenset[SituacaoReserva]] = {
 
 SITUACOES_QUE_EXIGEM_MOTIVO = frozenset(
     {SituacaoReserva.RECUSADA, SituacaoReserva.CANCELADA}
+)
+
+SITUACOES_QUE_OCUPAM_HORARIO = frozenset(
+    {SituacaoReserva.SOLICITADA, SituacaoReserva.CONFIRMADA}
 )
 
 

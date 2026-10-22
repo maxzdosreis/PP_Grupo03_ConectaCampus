@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING
+
 from compartilhado.domain.erros import (
     ConflitoDeEstado,
     DadosInvalidos,
     RecursoNaoEncontrado,
 )
 from reservas.domain.situacao import SituacaoReserva
+
+if TYPE_CHECKING:
+    from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 
 _SITUACOES_ACEITAS = ", ".join(situacao.rotulo for situacao in SituacaoReserva)
 
@@ -55,6 +60,20 @@ class TransicaoDeSituacaoInvalida(ConflitoDeEstado):
         self.nova = nova
         super().__init__(
             f"Não é possível alterar uma reserva {atual.rotulo} para {nova.rotulo}."
+        )
+
+
+class ConflitoDeHorario(ConflitoDeEstado):
+    codigo = "CONFLITO_DE_HORARIO"
+
+    def __init__(
+        self, intervalo: "IntervaloDeHorario", situacao: SituacaoReserva
+    ) -> None:
+        self.intervalo = intervalo
+        self.situacao = situacao
+        super().__init__(
+            f"Este espaço já tem uma reserva {situacao.rotulo} em {intervalo}. "
+            "Escolha outro horário."
         )
 
 

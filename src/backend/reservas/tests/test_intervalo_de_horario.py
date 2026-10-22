@@ -83,3 +83,49 @@ def test_fim_combina_data_e_hora_com_fuso_de_sao_paulo():
 def test_str_mostra_data_e_horarios():
     # Assert
     assert str(_criar_intervalo()) == "25/10/2026 10:00–11:00"
+
+
+CASOS_DE_SOBREPOSICAO = [
+    pytest.param(time(10, 0), time(11, 0), True, id="iguais"),
+    pytest.param(time(10, 15), time(10, 45), True, id="contido"),
+    pytest.param(time(9, 0), time(12, 0), True, id="contendo"),
+    pytest.param(time(9, 30), time(10, 30), True, id="parcial-no-inicio"),
+    pytest.param(time(10, 30), time(11, 30), True, id="parcial-no-fim"),
+    pytest.param(time(9, 0), time(10, 0), False, id="encostado-antes"),
+    pytest.param(time(11, 0), time(12, 0), False, id="encostado-depois"),
+]
+
+
+@pytest.mark.parametrize(("hora_inicio", "hora_fim", "esperado"), CASOS_DE_SOBREPOSICAO)
+def test_sobrepoe_compara_os_horarios_como_intervalo_semiaberto(
+    hora_inicio, hora_fim, esperado
+):
+    # Arrange
+    base = _criar_intervalo()
+    outro = _criar_intervalo(hora_inicio=hora_inicio, hora_fim=hora_fim)
+
+    # Act
+    sobrepoe = base.sobrepoe(outro)
+
+    # Assert
+    assert sobrepoe is esperado
+
+
+@pytest.mark.parametrize(("hora_inicio", "hora_fim", "esperado"), CASOS_DE_SOBREPOSICAO)
+def test_sobrepoe_e_simetrico(hora_inicio, hora_fim, esperado):
+    # Arrange
+    base = _criar_intervalo()
+    outro = _criar_intervalo(hora_inicio=hora_inicio, hora_fim=hora_fim)
+
+    # Assert
+    assert base.sobrepoe(outro) is outro.sobrepoe(base) is esperado
+
+
+def test_mesmo_horario_em_datas_diferentes_nao_se_sobrepoe():
+    # Arrange
+    base = _criar_intervalo()
+    dia_seguinte = _criar_intervalo(data=date(2026, 10, 26))
+
+    # Assert
+    assert base.sobrepoe(dia_seguinte) is False
+    assert dia_seguinte.sobrepoe(base) is False
