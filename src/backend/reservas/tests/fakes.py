@@ -18,8 +18,10 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
     ) -> None:
         self._espacos = {espaco.id: espaco for espaco in espacos}
         self._ids_inativos = frozenset(ids_inativos)
+        self.ids_consultados: list[int] = []
 
     def obter_espaco_reservavel(self, espaco_id: int) -> EspacoReservavel:
+        self.ids_consultados.append(espaco_id)
         espaco = self._espacos.get(espaco_id)
         if espaco is None:
             raise RecursoNaoEncontrado(f"Espaço de código {espaco_id} não encontrado.")
@@ -36,7 +38,6 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
     def salvar(self, reserva: Reserva) -> Reserva:
         if reserva.id is not None and reserva.id not in self._reservas:
             raise ReservaNaoEncontrada(reserva.id)
-        # Imita a exclusion constraint do banco, que só vale para quem ocupa horário.
         if reserva.situacao.ocupa_horario:
             garantir_horario_livre(reserva, self._reservas.values())
         reserva_id = reserva.id if reserva.id is not None else self._gerar_id()

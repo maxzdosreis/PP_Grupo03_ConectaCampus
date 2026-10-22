@@ -121,6 +121,13 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": _RENDERIZADORES,
+    # Provisório até a AUT-03, que troca por JWT. A Basic vem primeiro porque o
+    # DRF usa o WWW-Authenticate do primeiro autenticador: assim o pedido sem
+    # login sai 401 NAO_AUTENTICADO; com a Session primeiro, sairia 403.
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao",
 }
