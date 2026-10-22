@@ -145,6 +145,58 @@ Repetir o pedido no mesmo horário responde **409**:
 
 Outros erros: sem `-u` → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
 
+#### Consultar reservas
+
+Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas ordenadas pelo início. Filtros opcionais, que funcionam sozinhos ou combinados:
+
+| Parâmetro | Exemplo | Efeito |
+|---|---|---|
+| `espaco` | `espaco=1` | reservas do espaço com esse id (um id inexistente devolve lista vazia) |
+| `situacao` | `situacao=SOLICITADA` | `SOLICITADA`, `CONFIRMADA`, `RECUSADA`, `CANCELADA` ou `CONCLUIDA` |
+| `data` | `data=2026-11-10` | reservas desse dia (`AAAA-MM-DD`) |
+| `solicitante` | `solicitante=souza` | trecho do nome ou da matrícula, sem diferenciar maiúsculas |
+| `minhas` | `minhas=true` | só as reservas do usuário logado |
+
+> Por enquanto, qualquer usuário logado vê todas as reservas. A restrição do perfil Solicitante às próprias reservas entra na AUT-05.
+
+Por um critério:
+
+```bash
+curl "http://localhost:8000/api/reservas/?situacao=SOLICITADA" -u ana@exemplo.com:senha-de-teste-123
+```
+
+Por dois critérios combinados:
+
+```bash
+curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -u ana@exemplo.com:senha-de-teste-123
+```
+
+Só as reservas do usuário logado:
+
+```bash
+curl "http://localhost:8000/api/reservas/?minhas=true" -u ana@exemplo.com:senha-de-teste-123
+```
+
+Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
+
+```json
+{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}]}
+```
+
+Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
+
+Obter uma reserva (`GET /api/reservas/{id}/`), no mesmo formato da criação:
+
+```bash
+curl http://localhost:8000/api/reservas/1/ -u ana@exemplo.com:senha-de-teste-123
+```
+
+Um id inexistente responde **404**:
+
+```json
+{"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 9999 não encontrada."}}
+```
+
 ### Criar um superusuário (acesso ao admin)
 
 Com os serviços no ar, em outro terminal dentro de `src`:

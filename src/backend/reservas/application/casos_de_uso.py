@@ -2,8 +2,9 @@ from collections.abc import Callable
 from datetime import date, datetime, time
 
 from reservas.application.portas import ConsultaDeEspacos
-from reservas.application.repositorio import RepositorioReservas
+from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
 from reservas.domain.conflito_de_horario import garantir_horario_livre
+from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.reserva import Reserva
 from reservas.domain.solicitante import Solicitante
 
@@ -44,3 +45,22 @@ class CriarReserva:
         )
         garantir_horario_livre(reserva, existentes)
         return self._repositorio.salvar(reserva)
+
+
+class ConsultarReservas:
+    def __init__(self, repositorio: RepositorioReservas) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, filtros: FiltrosDeReservas) -> list[Reserva]:
+        return self._repositorio.listar(filtros)
+
+
+class ObterReserva:
+    def __init__(self, repositorio: RepositorioReservas) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, reserva_id: int) -> Reserva:
+        reserva = self._repositorio.obter_por_id(reserva_id)
+        if reserva is None:
+            raise ReservaNaoEncontrada(reserva_id)
+        return reserva
