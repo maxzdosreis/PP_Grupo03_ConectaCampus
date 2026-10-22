@@ -70,6 +70,7 @@ def _reconstituir(**sobrescritas):
         "criada_em": AGORA,
     }
     dados.update(sobrescritas)
+    dados.setdefault("motivo_da_situacao", _motivo_para(dados["situacao"]))
     return Reserva(**dados)
 
 
@@ -214,6 +215,27 @@ def test_reconstituir_aceita_situacao_e_motivo_como_texto():
     assert reserva.motivo_da_situacao == "Chuva"
 
 
+@pytest.mark.parametrize("situacao", [S.RECUSADA, S.CANCELADA])
+@pytest.mark.parametrize("motivo", [None, "", "   "])
+def test_reconstituir_recusada_ou_cancelada_sem_motivo_e_recusado(situacao, motivo):
+    # Act
+    with pytest.raises(MotivoObrigatorio) as erro:
+        _reconstituir(situacao=situacao, motivo_da_situacao=motivo)
+
+    # Assert
+    assert erro.value.campo == "motivo"
+
+
+@pytest.mark.parametrize("situacao", [S.SOLICITADA, S.CONFIRMADA, S.CONCLUIDA])
+def test_reconstituir_situacao_que_nao_exige_motivo_sem_motivo_e_aceito(situacao):
+    # Act
+    reserva = _reconstituir(situacao=situacao, motivo_da_situacao=None)
+
+    # Assert
+    assert reserva.situacao is situacao
+    assert reserva.motivo_da_situacao is None
+
+
 @pytest.mark.parametrize(("campo"), ["solicitante", "intervalo", "situacao"])
 def test_reconstituir_sem_campo_obrigatorio_e_recusado(campo):
     # Act
@@ -261,14 +283,15 @@ def test_transicao_permitida_altera_a_situacao(atual, nova):
 def test_transicao_proibida_e_recusada_e_preserva_a_situacao(atual, nova):
     # Arrange
     reserva = _reconstituir(situacao=atual)
+    motivo_antes = reserva.motivo_da_situacao
 
     # Act
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        reserva.alterar_situacao(nova, motivo="Motivo informado")
+        reserva.alterar_situacao(nova, motivo="Outro motivo")
 
     # Assert
     assert reserva.situacao is atual
-    assert reserva.motivo_da_situacao is None
+    assert reserva.motivo_da_situacao == motivo_antes
     assert (erro.value.atual, erro.value.nova) == (atual, nova)
 
 

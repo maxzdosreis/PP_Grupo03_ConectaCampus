@@ -41,6 +41,7 @@ class Reserva:
         self.finalidade = _normalizar_finalidade(finalidade)
         self.situacao = _converter_situacao(situacao)
         self.motivo_da_situacao = _normalizar_motivo(motivo_da_situacao)
+        _exigir_motivo_se_necessario(self.situacao, self.motivo_da_situacao)
         self.criada_em = _validar_criada_em(criada_em)
 
     @classmethod
@@ -77,8 +78,7 @@ class Reserva:
         if not transicao_permitida(self.situacao, nova):
             raise TransicaoDeSituacaoInvalida(self.situacao, nova)
         motivo_normalizado = _normalizar_motivo(motivo)
-        if nova in SITUACOES_QUE_EXIGEM_MOTIVO and motivo_normalizado is None:
-            raise MotivoObrigatorio()
+        _exigir_motivo_se_necessario(nova, motivo_normalizado)
         self.situacao = nova
         self.motivo_da_situacao = motivo_normalizado
 
@@ -146,6 +146,11 @@ def _normalizar_motivo(motivo: str | None) -> str | None:
         rotulo="Motivo",
         limite=MOTIVO_MAXIMO_CARACTERES,
     )
+
+
+def _exigir_motivo_se_necessario(situacao: SituacaoReserva, motivo: str | None) -> None:
+    if situacao in SITUACOES_QUE_EXIGEM_MOTIVO and motivo is None:
+        raise MotivoObrigatorio()
 
 
 def _converter_situacao(situacao: SituacaoReserva | str | None) -> SituacaoReserva:
