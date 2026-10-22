@@ -30,8 +30,8 @@ class Reserva:
         intervalo: IntervaloDeHorario,
         finalidade: str,
         situacao: SituacaoReserva | str,
+        criada_em: datetime,
         motivo_da_situacao: str | None = None,
-        criada_em: datetime | None = None,
         id: int | None = None,
     ) -> None:
         self.id = id
@@ -42,7 +42,8 @@ class Reserva:
         self.situacao = _converter_situacao(situacao)
         self.motivo_da_situacao = _normalizar_motivo(motivo_da_situacao)
         _exigir_motivo_se_necessario(self.situacao, self.motivo_da_situacao)
-        self.criada_em = _validar_criada_em(criada_em)
+        _exigir_fuso(criada_em, "criada_em")
+        self.criada_em = criada_em
 
     @classmethod
     def solicitar(
@@ -160,12 +161,6 @@ def _converter_situacao(situacao: SituacaoReserva | str | None) -> SituacaoReser
         return SituacaoReserva(situacao)
     except ValueError:
         raise SituacaoInvalida() from None
-
-
-def _validar_criada_em(criada_em: datetime | None) -> datetime | None:
-    if criada_em is not None:
-        _exigir_fuso(criada_em, "criada_em")
-    return criada_em
 
 
 def _exigir_fuso(momento: datetime, nome: str) -> None:
