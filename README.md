@@ -109,6 +109,42 @@ Um id inexistente responde **404**:
 {"erro": {"codigo": "ESPACO_NAO_ENCONTRADO", "mensagem": "Espaço de código 9999 não encontrado."}}
 ```
 
+#### Solicitar uma reserva
+
+Solicitar uma reserva exige login. **Por enquanto a autenticação é Basic (e-mail e senha em cada pedido, com `-u`) e é provisória:** a AUT-03 troca por login com token (JWT). O solicitante é sempre o usuário logado; um `solicitante` enviado no corpo é ignorado.
+
+Primeiro crie um usuário de teste. Pode ser um superusuário (`createsuperuser`, veja a seção abaixo) ou um usuário comum pelo shell do Django:
+
+```bash
+docker compose exec backend python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_user('ana@exemplo.com', 'senha-de-teste-123', nome='Ana Souza', matricula='2026001')"
+```
+
+Solicitar a reserva (`POST /api/reservas/`), com data no formato `AAAA-MM-DD` e horas em `HH:MM`, usando o id de um espaço cadastrado:
+
+```bash
+curl -X POST http://localhost:8000/api/reservas/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei"}'
+```
+
+No Prompt de Comando do Windows:
+
+```bat
+curl -X POST http://localhost:8000/api/reservas/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d "{\"espaco_id\": 1, \"data\": \"2026-11-10\", \"hora_inicio\": \"10:00\", \"hora_fim\": \"11:00\", \"finalidade\": \"Treino de volei\"}"
+```
+
+Resposta **201**, com a reserva na situação inicial `SOLICITADA` (a resposta traz `espaco_id`; o nome do espaço vem da listagem de espaços):
+
+```json
+{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+```
+
+Repetir o pedido no mesmo horário responde **409**:
+
+```json
+{"erro": {"codigo": "CONFLITO_DE_HORARIO", "mensagem": "Este espaço já tem uma reserva Solicitada em 10/11/2026 10:00–11:00. Escolha outro horário."}}
+```
+
+Outros erros: sem `-u` → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
+
 ### Criar um superusuário (acesso ao admin)
 
 Com os serviços no ar, em outro terminal dentro de `src`:
