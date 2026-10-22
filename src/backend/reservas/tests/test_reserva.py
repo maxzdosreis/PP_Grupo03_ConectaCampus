@@ -252,18 +252,15 @@ def test_reconstituir_com_situacao_desconhecida_e_recusado():
         _reconstituir(situacao="PENDENTE")
 
 
-def test_reconstituir_sem_criada_em_e_aceito():
-    # Act
-    reserva = _reconstituir(criada_em=None)
-
-    # Assert
-    assert reserva.criada_em is None
-
-
-def test_reconstituir_com_criada_em_sem_fuso_e_erro_de_programacao():
+@pytest.mark.parametrize(
+    "criada_em",
+    [None, datetime(2026, 10, 21, 12, 0)],
+    ids=["ausente", "sem-fuso"],
+)
+def test_reconstituir_sem_criada_em_com_fuso_e_erro_de_programacao(criada_em):
     # Act / Assert
-    with pytest.raises(TypeError):
-        _reconstituir(criada_em=datetime(2026, 10, 21, 12, 0))
+    with pytest.raises(TypeError, match="criada_em"):
+        _reconstituir(criada_em=criada_em)
 
 
 @pytest.mark.parametrize(("atual", "nova"), TRANSICOES_PERMITIDAS)
