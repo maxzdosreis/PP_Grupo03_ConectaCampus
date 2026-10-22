@@ -1,4 +1,10 @@
-from compartilhado.api.respostas import corpo_de_erro, resposta_sucesso
+import pytest
+
+from compartilhado.api.respostas import (
+    corpo_de_erro,
+    mensagem_de_contagem,
+    resposta_sucesso,
+)
 
 
 def test_resposta_sucesso_devolve_mensagem_dados_e_status_pedidos():
@@ -38,3 +44,25 @@ def test_corpo_de_erro_com_campos_inclui_os_campos():
 
     # Assert
     assert corpo["erro"]["campos"] == {"nome": ["Obrigatório."]}
+
+
+@pytest.mark.parametrize(
+    ("total", "esperada"),
+    [
+        (0, "Nenhum item encontrado."),
+        (1, "1 item encontrado."),
+        (3, "3 itens encontrados."),
+    ],
+    ids=["nenhum", "um", "varios"],
+)
+def test_mensagem_de_contagem_escolhe_o_texto_pelo_total(total, esperada):
+    # Act
+    mensagem = mensagem_de_contagem(
+        total,
+        nenhum="Nenhum item encontrado.",
+        um="1 item encontrado.",
+        varios="{total} itens encontrados.",
+    )
+
+    # Assert
+    assert mensagem == esperada

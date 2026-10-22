@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.views import APIView
 
-from compartilhado.api.respostas import resposta_sucesso
+from compartilhado.api.respostas import mensagem_de_contagem, resposta_sucesso
 from espacos.api import dependencias
 from espacos.api.serializers import (
     EspacoEntradaSerializer,
@@ -16,7 +16,12 @@ class EspacosView(APIView):
         filtros.is_valid(raise_exception=True)
         espacos = dependencias.listar_espacos().executar(**filtros.validated_data)
         return resposta_sucesso(
-            _mensagem_de_contagem(len(espacos)),
+            mensagem_de_contagem(
+                len(espacos),
+                nenhum="Nenhum espaço encontrado.",
+                um="1 espaço encontrado.",
+                varios="{total} espaços encontrados.",
+            ),
             EspacoSaidaSerializer(espacos, many=True).data,
         )
 
@@ -38,11 +43,3 @@ class EspacoDetalheView(APIView):
         return resposta_sucesso(
             "Espaço encontrado.", EspacoSaidaSerializer(espaco).data
         )
-
-
-def _mensagem_de_contagem(total):
-    if total == 0:
-        return "Nenhum espaço encontrado."
-    if total == 1:
-        return "1 espaço encontrado."
-    return f"{total} espaços encontrados."
