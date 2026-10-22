@@ -6,6 +6,7 @@ from reservas.application.repositorio import FiltrosDeReservas, RepositorioReser
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.reserva import Reserva
+from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
 
 
@@ -60,7 +61,27 @@ class ObterReserva:
         self._repositorio = repositorio
 
     def executar(self, reserva_id: int) -> Reserva:
-        reserva = self._repositorio.obter_por_id(reserva_id)
-        if reserva is None:
-            raise ReservaNaoEncontrada(reserva_id)
-        return reserva
+        return _obter_ou_falhar(self._repositorio, reserva_id)
+
+
+class AlterarSituacaoReserva:
+    def __init__(self, repositorio: RepositorioReservas) -> None:
+        self._repositorio = repositorio
+
+    def executar(
+        self,
+        *,
+        reserva_id: int,
+        nova_situacao: SituacaoReserva | str,
+        motivo: str | None = None,
+    ) -> Reserva:
+        reserva = _obter_ou_falhar(self._repositorio, reserva_id)
+        reserva.alterar_situacao(nova_situacao, motivo=motivo)
+        return self._repositorio.salvar(reserva)
+
+
+def _obter_ou_falhar(repositorio: RepositorioReservas, reserva_id: int) -> Reserva:
+    reserva = repositorio.obter_por_id(reserva_id)
+    if reserva is None:
+        raise ReservaNaoEncontrada(reserva_id)
+    return reserva

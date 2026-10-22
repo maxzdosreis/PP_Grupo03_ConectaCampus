@@ -6,6 +6,7 @@ from compartilhado.api.respostas import mensagem_de_contagem, resposta_sucesso
 from reservas.api import dependencias
 from reservas.api.autenticacao import solicitante_autenticado
 from reservas.api.serializers import (
+    AlteracaoDeSituacaoSerializer,
     FiltrosReservasSerializer,
     ReservaEntradaSerializer,
     ReservaSaidaSerializer,
@@ -53,4 +54,22 @@ class ReservaDetalheView(APIView):
         reserva = dependencias.obter_reserva().executar(reserva_id)
         return resposta_sucesso(
             "Reserva encontrada.", ReservaSaidaSerializer(reserva).data
+        )
+
+
+# AUT-05: GESTOR confirma, recusa, conclui e cancela; SOLICITANTE só cancela as próprias
+class ReservaSituacaoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, reserva_id):
+        entrada = AlteracaoDeSituacaoSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        reserva = dependencias.alterar_situacao_reserva().executar(
+            reserva_id=reserva_id,
+            nova_situacao=entrada.validated_data["situacao"],
+            motivo=entrada.validated_data.get("motivo"),
+        )
+        return resposta_sucesso(
+            f"Reserva {reserva.situacao.rotulo.lower()} com sucesso.",
+            ReservaSaidaSerializer(reserva).data,
         )
