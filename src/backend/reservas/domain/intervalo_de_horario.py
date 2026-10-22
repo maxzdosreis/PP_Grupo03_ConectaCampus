@@ -27,6 +27,9 @@ class IntervaloDeHorario:
     def fim(self) -> datetime:
         return datetime.combine(self.data, self.hora_fim, tzinfo=FUSO_HORARIO)
 
+    def sobrepoe(self, outro: "IntervaloDeHorario") -> bool:
+        return self.inicio() < outro.fim() and outro.inicio() < self.fim()
+
     def __str__(self) -> str:
         return f"{self.data:%d/%m/%Y} {self.hora_inicio:%H:%M}–{self.hora_fim:%H:%M}"
 

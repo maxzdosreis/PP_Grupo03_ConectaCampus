@@ -4,6 +4,7 @@ import pytest
 
 from reservas.domain.situacao import (
     SITUACOES_QUE_EXIGEM_MOTIVO,
+    SITUACOES_QUE_OCUPAM_HORARIO,
     SituacaoReserva,
     transicao_permitida,
 )
@@ -65,3 +66,29 @@ def test_rotulo_em_portugues(situacao, rotulo):
 def test_recusar_e_cancelar_exigem_motivo():
     # Assert
     assert frozenset({S.RECUSADA, S.CANCELADA}) == SITUACOES_QUE_EXIGEM_MOTIVO
+
+
+def test_solicitada_e_confirmada_ocupam_horario():
+    # Assert
+    assert frozenset({S.SOLICITADA, S.CONFIRMADA}) == SITUACOES_QUE_OCUPAM_HORARIO
+
+
+@pytest.mark.parametrize(
+    ("situacao", "ocupa"),
+    [
+        (S.SOLICITADA, True),
+        (S.CONFIRMADA, True),
+        (S.RECUSADA, False),
+        (S.CANCELADA, False),
+        (S.CONCLUIDA, False),
+    ],
+)
+def test_ocupa_horario_segue_o_conjunto(situacao, ocupa):
+    # Assert
+    assert situacao.ocupa_horario is ocupa
+
+
+@pytest.mark.parametrize("situacao", [s for s in SituacaoReserva if s.eh_final])
+def test_nenhum_estado_final_ocupa_horario(situacao):
+    # Assert
+    assert situacao.ocupa_horario is False
