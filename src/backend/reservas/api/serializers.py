@@ -45,6 +45,11 @@ class FiltrosReservasSerializer(serializers.Serializer):
         )
 
 
+class AlteracaoDeSituacaoSerializer(serializers.Serializer):
+    situacao = serializers.CharField()
+    motivo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+
 class SolicitanteSaidaSerializer(serializers.Serializer):
     usuario_id = serializers.IntegerField()
     nome = serializers.CharField()

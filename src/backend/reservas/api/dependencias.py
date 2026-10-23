@@ -1,6 +1,7 @@
 from django.utils import timezone
 
 from reservas.application.casos_de_uso import (
+    AlterarSituacaoReserva,
     ConsultarReservas,
     CriarReserva,
     ObterReserva,
@@ -21,3 +22,7 @@ def consultar_reservas() -> ConsultarReservas:
 
 def obter_reserva() -> ObterReserva:
     return ObterReserva(RepositorioReservasDjango())
+
+
+def alterar_situacao_reserva() -> AlterarSituacaoReserva:
+    return AlterarSituacaoReserva(RepositorioReservasDjango())

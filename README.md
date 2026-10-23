@@ -197,6 +197,54 @@ Um id inexistente responde **404**:
 {"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 9999 não encontrada."}}
 ```
 
+#### Alterar a situação de uma reserva
+
+Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. O corpo leva `situacao` e, para recusar ou cancelar, um `motivo`. Só estas mudanças são aceitas:
+
+| Situação atual | Pode ir para |
+|---|---|
+| `SOLICITADA` | `CONFIRMADA`, `RECUSADA` (com motivo), `CANCELADA` (com motivo) |
+| `CONFIRMADA` | `CONCLUIDA`, `CANCELADA` (com motivo) |
+| `CONCLUIDA`, `RECUSADA`, `CANCELADA` | nenhuma (situações finais) |
+
+> Por enquanto, qualquer usuário logado executa qualquer mudança permitida. A restrição por perfil (Gestor confirma, recusa, conclui e cancela; Solicitante só cancela as próprias) entra na AUT-05.
+
+Confirmar a reserva:
+
+```bash
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
+```
+
+No Prompt de Comando do Windows:
+
+```bat
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d "{\"situacao\": \"CONFIRMADA\"}"
+```
+
+Resposta **200**, com a reserva atualizada (a mensagem acompanha a nova situação: confirmada, recusada, cancelada ou concluída):
+
+```json
+{"mensagem": "Reserva confirmada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CONFIRMADA", "situacao_rotulo": "Confirmada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+```
+
+Uma mudança fora da tabela (por exemplo, voltar a confirmada para `SOLICITADA`) responde **409** e a reserva fica como estava:
+
+```json
+{"erro": {"codigo": "TRANSICAO_DE_SITUACAO_INVALIDA", "mensagem": "Não é possível alterar uma reserva Confirmada para Solicitada."}}
+```
+
+Cancelar com motivo (o horário fica livre para outra reserva):
+
+```bash
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"situacao": "CANCELADA", "motivo": "Chuva forte"}'
+```
+
+```json
+{"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+```
+
+Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; sem `-u` → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
+
 ### Criar um superusuário (acesso ao admin)
 
 Com os serviços no ar, em outro terminal dentro de `src`:
@@ -286,3 +334,9 @@ docker compose down -v
 ## Persistência
 
 PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `postgres_data` e se mantêm entre execuções até um `docker compose down -v`.
+
+## Limitações conhecidas
+
+- **Autenticação provisória:** por enquanto o login é Basic (e-mail e senha enviados em cada pedido). A AUT-03 troca por login com token (JWT).
+- **Perfis ainda sem efeito:** até a AUT-05, qualquer usuário logado vê todas as reservas e executa qualquer mudança de situação permitida, seja Gestor ou Solicitante.
+- **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.
