@@ -4,7 +4,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 ## Tecnologias
 
-- Python 3.12, Django 5.2 LTS, Django REST Framework 3.18
+- Python 3.12, Django 5.2 LTS, Django REST Framework 3.18, Simple JWT 5.5 (login com token)
 - PostgreSQL 16 (driver psycopg 3)
 - Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10
 - Docker e Docker Compose
@@ -109,9 +109,9 @@ Um id inexistente responde **404**:
 {"erro": {"codigo": "ESPACO_NAO_ENCONTRADO", "mensagem": "Espaço de código 9999 não encontrado."}}
 ```
 
-#### Solicitar uma reserva
+#### Entrar (login) e usar o token
 
-Solicitar uma reserva exige login. **Por enquanto a autenticação é Basic (e-mail e senha em cada pedido, com `-u`) e é provisória:** a AUT-03 troca por login com token (JWT). O solicitante é sempre o usuário logado; um `solicitante` enviado no corpo é ignorado.
+As reservas exigem login com token JWT. O login devolve dois tokens: o `access`, enviado em cada pedido no cabeçalho `Authorization: Bearer <access>` e válido por 30 minutos, e o `refresh`, que gera um `access` novo e vale 1 dia (os dois prazos mudam em `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` no `.env`).
 
 Primeiro crie um usuário de teste. Pode ser um superusuário (`createsuperuser`, veja a seção abaixo) ou um usuário comum pelo shell do Django:
 
@@ -119,16 +119,78 @@ Primeiro crie um usuário de teste. Pode ser um superusuário (`createsuperuser`
 docker compose exec backend python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_user('ana@exemplo.com', 'senha-de-teste-123', nome='Ana Souza', matricula='2026001')"
 ```
 
-Solicitar a reserva (`POST /api/reservas/`), com data no formato `AAAA-MM-DD` e horas em `HH:MM`, usando o id de um espaço cadastrado:
+Entrar (`POST /api/auth/login/`) com `email` e `senha`:
 
 ```bash
-curl -X POST http://localhost:8000/api/reservas/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei"}'
+curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d '{"email": "ana@exemplo.com", "senha": "senha-de-teste-123"}'
 ```
 
 No Prompt de Comando do Windows:
 
 ```bat
-curl -X POST http://localhost:8000/api/reservas/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d "{\"espaco_id\": 1, \"data\": \"2026-11-10\", \"hora_inicio\": \"10:00\", \"hora_fim\": \"11:00\", \"finalidade\": \"Treino de volei\"}"
+curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d "{\"email\": \"ana@exemplo.com\", \"senha\": \"senha-de-teste-123\"}"
+```
+
+Resposta **200** (tokens encurtados aqui):
+
+```json
+{"mensagem": "Login realizado com sucesso.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi...", "usuario": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}}
+```
+
+E-mail ou senha errados (ou usuário desativado) respondem sempre igual, **401**:
+
+```json
+{"erro": {"codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha incorretos."}}
+```
+
+Copie o valor de `access` para uma variável e use-o nos exemplos seguintes:
+
+```bash
+ACCESS="cole-aqui-o-access"
+```
+
+No Prompt de Comando do Windows (sem aspas):
+
+```bat
+set ACCESS=cole-aqui-o-access
+```
+
+Ver o usuário logado (`GET /api/auth/me/`):
+
+```bash
+curl http://localhost:8000/api/auth/me/ -H "Authorization: Bearer $ACCESS"
+```
+
+```json
+{"mensagem": "Usuário autenticado.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}
+```
+
+Quando o `access` expira, os pedidos respondem **401** `NAO_AUTENTICADO`. Gere outro com o `refresh` (`POST /api/auth/refresh/`):
+
+```bash
+curl -X POST http://localhost:8000/api/auth/refresh/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
+```
+
+```json
+{"mensagem": "Token renovado.", "dados": {"access": "eyJhbGciOi..."}}
+```
+
+Um `refresh` inválido ou expirado responde **401** `NAO_AUTENTICADO`; aí é preciso entrar de novo. Para sair, basta descartar os dois tokens.
+
+#### Solicitar uma reserva
+
+Solicitar uma reserva exige o token do login. O solicitante é sempre o usuário logado; um `solicitante` enviado no corpo é ignorado.
+
+Solicitar a reserva (`POST /api/reservas/`), com data no formato `AAAA-MM-DD` e horas em `HH:MM`, usando o id de um espaço cadastrado:
+
+```bash
+curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei"}'
+```
+
+No Prompt de Comando do Windows:
+
+```bat
+curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"espaco_id\": 1, \"data\": \"2026-11-10\", \"hora_inicio\": \"10:00\", \"hora_fim\": \"11:00\", \"finalidade\": \"Treino de volei\"}"
 ```
 
 Resposta **201**, com a reserva na situação inicial `SOLICITADA` (a resposta traz `espaco_id`; o nome do espaço vem da listagem de espaços):
@@ -143,7 +205,7 @@ Repetir o pedido no mesmo horário responde **409**:
 {"erro": {"codigo": "CONFLITO_DE_HORARIO", "mensagem": "Este espaço já tem uma reserva Solicitada em 10/11/2026 10:00–11:00. Escolha outro horário."}}
 ```
 
-Outros erros: sem `-u` → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
+Outros erros: sem token → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
 
 #### Consultar reservas
 
@@ -162,19 +224,19 @@ Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas orde
 Por um critério:
 
 ```bash
-curl "http://localhost:8000/api/reservas/?situacao=SOLICITADA" -u ana@exemplo.com:senha-de-teste-123
+curl "http://localhost:8000/api/reservas/?situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
 ```
 
 Por dois critérios combinados:
 
 ```bash
-curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -u ana@exemplo.com:senha-de-teste-123
+curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
 ```
 
 Só as reservas do usuário logado:
 
 ```bash
-curl "http://localhost:8000/api/reservas/?minhas=true" -u ana@exemplo.com:senha-de-teste-123
+curl "http://localhost:8000/api/reservas/?minhas=true" -H "Authorization: Bearer $ACCESS"
 ```
 
 Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
@@ -188,7 +250,7 @@ Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` o
 Obter uma reserva (`GET /api/reservas/{id}/`), no mesmo formato da criação:
 
 ```bash
-curl http://localhost:8000/api/reservas/1/ -u ana@exemplo.com:senha-de-teste-123
+curl http://localhost:8000/api/reservas/1/ -H "Authorization: Bearer $ACCESS"
 ```
 
 Um id inexistente responde **404**:
@@ -212,13 +274,13 @@ Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. O corpo
 Confirmar a reserva:
 
 ```bash
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
 ```
 
 No Prompt de Comando do Windows:
 
 ```bat
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d "{\"situacao\": \"CONFIRMADA\"}"
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"situacao\": \"CONFIRMADA\"}"
 ```
 
 Resposta **200**, com a reserva atualizada (a mensagem acompanha a nova situação: confirmada, recusada, cancelada ou concluída):
@@ -236,14 +298,14 @@ Uma mudança fora da tabela (por exemplo, voltar a confirmada para `SOLICITADA`)
 Cancelar com motivo (o horário fica livre para outra reserva):
 
 ```bash
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -u ana@exemplo.com:senha-de-teste-123 -H "Content-Type: application/json" -d '{"situacao": "CANCELADA", "motivo": "Chuva forte"}'
+curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CANCELADA", "motivo": "Chuva forte"}'
 ```
 
 ```json
 {"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
 ```
 
-Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; sem `-u` → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
+Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; sem token → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
 
 ### Criar um superusuário (acesso ao admin)
 
@@ -337,6 +399,6 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 
 ## Limitações conhecidas
 
-- **Autenticação provisória:** por enquanto o login é Basic (e-mail e senha enviados em cada pedido). A AUT-03 troca por login com token (JWT).
+- **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia.
 - **Perfis ainda sem efeito:** até a AUT-05, qualquer usuário logado vê todas as reservas e executa qualquer mudança de situação permitida, seja Gestor ou Solicitante.
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.
