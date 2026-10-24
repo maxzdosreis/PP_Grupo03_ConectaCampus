@@ -8,6 +8,13 @@ class LoginSerializer(serializers.Serializer):
     senha = serializers.CharField(write_only=True, trim_whitespace=False)
 
 
+class CadastroSerializer(serializers.Serializer):
+    nome = serializers.CharField(allow_blank=True)
+    matricula = serializers.CharField(allow_blank=True)
+    email = serializers.EmailField(max_length=254)
+    senha = serializers.CharField(write_only=True, trim_whitespace=False)
+
+
 class RenovacaoDeTokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 

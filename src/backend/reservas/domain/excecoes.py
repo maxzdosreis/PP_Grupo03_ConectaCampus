@@ -13,15 +13,6 @@ if TYPE_CHECKING:
 _SITUACOES_ACEITAS = ", ".join(situacao.rotulo for situacao in SituacaoReserva)
 
 
-class TextoMuitoLongo(DadosInvalidos):
-    codigo = "TEXTO_MUITO_LONGO"
-
-    def __init__(self, campo: str, rotulo: str, limite: int) -> None:
-        self.campo = campo
-        self.limite = limite
-        super().__init__(f'O campo "{rotulo}" deve ter no máximo {limite} caracteres.')
-
-
 class IdentificadorDeEspacoInvalido(DadosInvalidos):
     codigo = "IDENTIFICADOR_DE_ESPACO_INVALIDO"
     campo = "espaco_id"

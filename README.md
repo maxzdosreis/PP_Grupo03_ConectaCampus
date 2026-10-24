@@ -113,11 +113,31 @@ Um id inexistente responde **404**:
 
 As reservas exigem login com token JWT. O login devolve dois tokens: o `access`, enviado em cada pedido no cabeçalho `Authorization: Bearer <access>` e válido por 30 minutos, e o `refresh`, que gera um `access` novo e vale 1 dia (os dois prazos mudam em `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` no `.env`).
 
-Primeiro crie um usuário de teste. Pode ser um superusuário (`createsuperuser`, veja a seção abaixo) ou um usuário comum pelo shell do Django:
+Primeiro cadastre um usuário (`POST /api/auth/cadastro/`, público). O cadastro cria sempre um **Solicitante**: `perfil`, `is_staff` ou `is_superuser` enviados no corpo são ignorados. Um Gestor só nasce pelo `createsuperuser` (veja a seção abaixo) ou pelo admin. A senha precisa ter pelo menos 8 caracteres, não pode ser comum, só números nem parecida com o e-mail, o nome ou a matrícula. A matrícula tem até 20 caracteres, sem espaços.
 
 ```bash
-docker compose exec backend python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_user('ana@exemplo.com', 'senha-de-teste-123', nome='Ana Souza', matricula='2026001')"
+curl -X POST http://localhost:8000/api/auth/cadastro/ -H "Content-Type: application/json" -d '{"nome": "Ana Souza", "matricula": "2026001", "email": "ana@exemplo.com", "senha": "senha-de-teste-123"}'
 ```
+
+No Prompt de Comando do Windows:
+
+```bat
+curl -X POST http://localhost:8000/api/auth/cadastro/ -H "Content-Type: application/json" -d "{\"nome\": \"Ana Souza\", \"matricula\": \"2026001\", \"email\": \"ana@exemplo.com\", \"senha\": \"senha-de-teste-123\"}"
+```
+
+Resposta **201** (o cadastro não faz login nem devolve tokens):
+
+```json
+{"mensagem": "Cadastro realizado com sucesso. Faça login para continuar.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}
+```
+
+Cadastrar de novo o mesmo e-mail (mesmo em outra caixa, como `ANA@exemplo.com`) responde **409**:
+
+```json
+{"erro": {"codigo": "EMAIL_JA_CADASTRADO", "mensagem": "Já existe um usuário com este e-mail.", "campos": {"email": ["Já existe um usuário com este e-mail."]}}}
+```
+
+Outros erros de cadastro: matrícula repetida → **409** `MATRICULA_JA_CADASTRADA`; senha `12345678` → **400** `SENHA_FRACA` ("Esta senha é muito comum. Esta senha é inteiramente numérica."); matrícula com espaço ou com mais de 20 caracteres → **400** `MATRICULA_INVALIDA`; e-mail malformado → **400** `DADOS_INVALIDOS`; nome em branco → **400** `CAMPO_OBRIGATORIO_AUSENTE`.
 
 Entrar (`POST /api/auth/login/`) com `email` e `senha`:
 

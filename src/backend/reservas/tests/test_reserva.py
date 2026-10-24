@@ -4,14 +4,13 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from compartilhado.api.tratador_de_erros import tratar_excecao
-from compartilhado.domain.erros import CampoObrigatorioAusente
+from compartilhado.domain.erros import CampoObrigatorioAusente, TextoMuitoLongo
 from reservas.domain.excecoes import (
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
     ReservaNaoEncontrada,
     SituacaoInvalida,
-    TextoMuitoLongo,
     TransicaoDeSituacaoInvalida,
 )
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
