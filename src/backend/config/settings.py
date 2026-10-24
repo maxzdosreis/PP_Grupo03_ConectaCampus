@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -21,6 +22,18 @@ def _booleano(nome, padrao=False):
     if valor is None:
         return padrao
     return valor.strip().lower() in {"1", "true", "sim", "yes", "on"}
+
+
+def _inteiro(nome, padrao):
+    valor = os.environ.get(nome, "").strip()
+    if not valor:
+        return padrao
+    try:
+        return int(valor)
+    except ValueError:
+        raise ImproperlyConfigured(
+            f"A variável de ambiente {nome} precisa ser um número inteiro."
+        ) from None
 
 
 def _lista(nome):
@@ -121,13 +134,16 @@ if DEBUG:
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": _RENDERIZADORES,
-    # Provisório até a AUT-03, que troca por JWT. A Basic vem primeiro porque o
-    # DRF usa o WWW-Authenticate do primeiro autenticador: assim o pedido sem
-    # login sai 401 NAO_AUTENTICADO; com a Session primeiro, sairia 403.
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=_inteiro("JWT_ACCESS_MINUTES", 30)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=_inteiro("JWT_REFRESH_DAYS", 1)),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
 }

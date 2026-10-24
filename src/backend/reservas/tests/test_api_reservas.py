@@ -201,7 +201,23 @@ def test_horario_ocupado_responde_409_e_preserva_as_reservas(cliente, espaco_id)
     assert _quantidade_de_reservas() == 1
 
 
-def test_autenticacao_basic_com_email_e_senha_responde_201(usuario, espaco_id):
+def test_token_jwt_do_login_autoriza_solicitacao(usuario, espaco_id):
+    # Arrange
+    login = APIClient().post(
+        reverse("contas:login"), {"email": EMAIL, "senha": SENHA}, format="json"
+    )
+    cliente = APIClient()
+    cliente.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['dados']['access']}")
+
+    # Act
+    resposta = _solicitar(cliente, _dados_validos(espaco_id))
+
+    # Assert
+    assert resposta.status_code == 201
+    assert resposta.data["dados"]["solicitante"]["usuario_id"] == usuario.pk
+
+
+def test_autenticacao_basic_nao_e_mais_aceita(usuario, espaco_id):
     # Arrange
     credenciais = base64.b64encode(f"{EMAIL}:{SENHA}".encode()).decode()
     cliente = APIClient()
@@ -211,5 +227,6 @@ def test_autenticacao_basic_com_email_e_senha_responde_201(usuario, espaco_id):
     resposta = _solicitar(cliente, _dados_validos(espaco_id))
 
     # Assert
-    assert resposta.status_code == 201
-    assert resposta.data["dados"]["solicitante"]["usuario_id"] == usuario.pk
+    assert resposta.status_code == 401
+    assert resposta.data["erro"]["codigo"] == "NAO_AUTENTICADO"
+    assert _quantidade_de_reservas() == 0
