@@ -34,3 +34,12 @@ class CampoObrigatorioAusente(DadosInvalidos):
     def __init__(self, campo: str, rotulo: str) -> None:
         self.campo = campo
         super().__init__(f'O campo "{rotulo}" é obrigatório.')
+
+
+class TextoMuitoLongo(DadosInvalidos):
+    codigo = "TEXTO_MUITO_LONGO"
+
+    def __init__(self, campo: str, rotulo: str, limite: int) -> None:
+        self.campo = campo
+        self.limite = limite
+        super().__init__(f'O campo "{rotulo}" deve ter no máximo {limite} caracteres.')

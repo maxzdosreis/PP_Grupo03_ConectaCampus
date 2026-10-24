@@ -6,6 +6,7 @@ from compartilhado.domain.erros import (
     ConflitoDeEstado,
     DadosInvalidos,
     RecursoNaoEncontrado,
+    TextoMuitoLongo,
 )
 
 
@@ -62,3 +63,15 @@ def test_campo_obrigatorio_ausente_informa_rotulo_e_campo():
     assert erro.codigo == "CAMPO_OBRIGATORIO_AUSENTE"
     assert erro.campo == "hora_inicio"
     assert str(erro) == 'O campo "Hora de início" é obrigatório.'
+
+
+def test_texto_muito_longo_informa_rotulo_limite_e_campo():
+    # Act
+    erro = TextoMuitoLongo("finalidade", "Finalidade", 200)
+
+    # Assert
+    assert isinstance(erro, DadosInvalidos)
+    assert erro.codigo == "TEXTO_MUITO_LONGO"
+    assert erro.campo == "finalidade"
+    assert erro.limite == 200
+    assert str(erro) == 'O campo "Finalidade" deve ter no máximo 200 caracteres.'

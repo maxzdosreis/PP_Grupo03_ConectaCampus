@@ -2,11 +2,18 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.db.models.functions import Lower
 
+from contas.domain.cadastro import (
+    MATRICULA_MAXIMO_CARACTERES,
+    NOME_MAXIMO_CARACTERES,
+    normalizar_email,
+    normalizar_nome,
+)
+from contas.domain.excecoes import EmailJaCadastrado, MatriculaJaCadastrada
 from contas.domain.perfil import PerfilUsuario
 
 PERFIL_CHOICES = [(perfil.value, perfil.rotulo) for perfil in PerfilUsuario]
 
-MENSAGEM_EMAIL_REPETIDO = "Já existe um usuário com este e-mail."
+MENSAGEM_EMAIL_REPETIDO = EmailJaCadastrado.mensagem_padrao
 
 _EXIGENCIAS_DO_SUPERUSUARIO = {
     "perfil": (PerfilUsuario.GESTOR, "O superusuário precisa ter o perfil Gestor."),
@@ -25,14 +32,14 @@ def _exigir(valor, mensagem):
 class UsuarioManager(BaseUserManager):
     @classmethod
     def normalize_email(cls, email):
-        return (email or "").strip().lower()
+        return normalizar_email(email)
 
     def get_by_natural_key(self, email):
         return self.get(email=self.normalize_email(email))
 
     def create_user(self, email, senha=None, **campos):
         email = _exigir(self.normalize_email(email), "Informe o e-mail.")
-        campos["nome"] = _exigir(campos.get("nome"), "Informe o nome.")
+        campos["nome"] = _exigir(normalizar_nome(campos.get("nome")), "Informe o nome.")
         campos["matricula"] = _exigir(campos.get("matricula"), "Informe a matrícula.")
         usuario = self.model(email=email, **campos)
         usuario.set_password(senha)
@@ -52,12 +59,12 @@ class Usuario(AbstractUser):
     first_name = None
     last_name = None
 
-    nome = models.CharField("nome", max_length=150)
+    nome = models.CharField("nome", max_length=NOME_MAXIMO_CARACTERES)
     matricula = models.CharField(
         "matrícula",
-        max_length=20,
+        max_length=MATRICULA_MAXIMO_CARACTERES,
         unique=True,
-        error_messages={"unique": "Já existe um usuário com esta matrícula."},
+        error_messages={"unique": MatriculaJaCadastrada.mensagem_padrao},
     )
     email = models.EmailField(
         "e-mail",
@@ -92,7 +99,7 @@ class Usuario(AbstractUser):
 
     def clean(self):
         super().clean()
-        self.nome = self.nome.strip()
+        self.nome = normalizar_nome(self.nome)
         self.matricula = self.matricula.strip()
 
     def get_full_name(self):

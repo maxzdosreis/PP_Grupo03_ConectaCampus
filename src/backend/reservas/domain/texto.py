@@ -1,4 +1,4 @@
-from reservas.domain.excecoes import TextoMuitoLongo
+from compartilhado.domain.erros import TextoMuitoLongo
 
 
 def normalizar_espacos(texto: str | None) -> str:

@@ -8,7 +8,9 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from compartilhado.api.respostas import resposta_erro, resposta_sucesso
+from contas.api import dependencias
 from contas.api.serializers import (
+    CadastroSerializer,
     LoginSerializer,
     RenovacaoDeTokenSerializer,
     UsuarioSaidaSerializer,
@@ -23,10 +25,22 @@ class _SemAutenticacaoView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    # Sem autenticadores, o DRF rebaixa AuthenticationFailed para 403; com o
-    # cabeçalho do Bearer, um token recusado continua saindo 401.
     def get_authenticate_header(self, request):
         return _cabecalho_bearer(request)
+
+
+class CadastroView(_SemAutenticacaoView):
+    def post(self, request):
+        entrada = CadastroSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        usuario = dependencias.cadastrar_solicitante().executar(
+            **entrada.validated_data
+        )
+        return resposta_sucesso(
+            "Cadastro realizado com sucesso. Faça login para continuar.",
+            UsuarioSaidaSerializer(usuario).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(_SemAutenticacaoView):
