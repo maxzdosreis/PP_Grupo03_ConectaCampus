@@ -1,5 +1,6 @@
 import { consultarSaude, type SituacaoDaApi as DadosDaSaude } from '../api/saude.ts'
 import Carregando from '../components/estados/Carregando.tsx'
+import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
 import Aviso from '../components/mensagens/Aviso.tsx'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
@@ -35,16 +36,7 @@ function SituacaoDaApi({ estado, aoTentarNovamente }: PropriedadesDaSituacao) {
   if (estado.tipo === 'sucesso') {
     return <Aviso variante="sucesso">{estado.mensagem}</Aviso>
   }
-  return (
-    <>
-      <Aviso variante="erro">{estado.mensagem}</Aviso>
-      <div>
-        <button type="button" onClick={aoTentarNovamente}>
-          Tentar novamente
-        </button>
-      </div>
-    </>
-  )
+  return <FalhaAoCarregar mensagem={estado.mensagem} aoTentarNovamente={aoTentarNovamente} />
 }
 
 export default PaginaInicial

@@ -1,0 +1,45 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.campo :is(input, select, textarea) {
+  width: 100%;
+}
+
+.campo :is(input, select, textarea)[aria-invalid='true'] {
+  border-color: var(--cor-erro);
+  box-shadow: 0 0 0 1px var(--cor-erro);
+}
+
+.rotulo {
+  font-weight: 600;
+}
+
+.dica {
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+}
+
+.erro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  font-size: var(--fonte-pequena);
+  font-weight: 600;
+  color: var(--cor-erro);
+}
+
+.marcador {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--raio-total);
+  font-size: var(--fonte-pequena);
+  color: var(--cor-sobre-primaria);
+  background-color: var(--cor-erro);
+}

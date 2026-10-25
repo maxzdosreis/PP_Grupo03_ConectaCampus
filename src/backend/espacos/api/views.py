@@ -7,7 +7,9 @@ from espacos.api.serializers import (
     EspacoEntradaSerializer,
     EspacoSaidaSerializer,
     FiltrosEspacosSerializer,
+    TipoDeEspacoSaidaSerializer,
 )
+from espacos.domain.tipo_espaco import TipoEspaco
 
 
 class EspacosView(APIView):
@@ -42,4 +44,12 @@ class EspacoDetalheView(APIView):
         espaco = dependencias.obter_espaco().executar(espaco_id)
         return resposta_sucesso(
             "Espaço encontrado.", EspacoSaidaSerializer(espaco).data
+        )
+
+
+class TiposDeEspacoView(APIView):
+    def get(self, request):
+        return resposta_sucesso(
+            "Tipos de espaço disponíveis.",
+            TipoDeEspacoSaidaSerializer(list(TipoEspaco), many=True).data,
         )

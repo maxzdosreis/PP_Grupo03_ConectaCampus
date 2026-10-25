@@ -9,6 +9,7 @@ from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 pytestmark = pytest.mark.django_db
 
 URL_LISTA = reverse("espacos:lista")
+URL_TIPOS = reverse("espacos:tipos")
 ID_INEXISTENTE = 9999
 
 
@@ -257,3 +258,19 @@ def test_obter_espaco_inexistente_responde_404(cliente):
             "mensagem": f"Espaço de código {ID_INEXISTENTE} não encontrado.",
         }
     }
+
+
+def test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum(cliente):
+    # Act
+    resposta = cliente.get(URL_TIPOS)
+
+    # Assert
+    assert resposta.status_code == 200
+    assert resposta.data["mensagem"] == "Tipos de espaço disponíveis."
+    assert resposta.data["dados"][0] == {
+        "valor": "QUADRA_POLIESPORTIVA",
+        "rotulo": "Quadra poliesportiva",
+    }
+    assert resposta.data["dados"] == [
+        {"valor": tipo.value, "rotulo": tipo.rotulo} for tipo in TipoEspaco
+    ]

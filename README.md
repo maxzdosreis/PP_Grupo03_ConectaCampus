@@ -42,6 +42,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 3. Acesse:
    - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
+   - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
@@ -57,7 +58,15 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 Por enquanto os endpoints de espaços não exigem login; a restrição do cadastro ao perfil Gestor entra na AUT-05. Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
 
-Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`.
+Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`. A mesma lista, com os rótulos, sai de `GET /api/espacos/tipos/` (é dela que o frontend monta os seletores):
+
+```bash
+curl http://localhost:8000/api/espacos/tipos/
+```
+
+```json
+{"mensagem": "Tipos de espaço disponíveis.", "dados": [{"valor": "QUADRA_POLIESPORTIVA", "rotulo": "Quadra poliesportiva"}, {"valor": "CAMPO_DE_FUTEBOL", "rotulo": "Campo de futebol"}, {"valor": "GINASIO", "rotulo": "Ginásio"}, {"valor": "QUADRA_DE_AREIA", "rotulo": "Quadra de areia"}, {"valor": "QUADRA_DE_TENIS", "rotulo": "Quadra de tênis"}]}
+```
 
 Cadastrar um espaço (`POST /api/espacos/`):
 

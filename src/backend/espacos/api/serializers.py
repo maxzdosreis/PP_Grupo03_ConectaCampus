@@ -30,3 +30,8 @@ class EspacoSaidaSerializer(serializers.Serializer):
     tipo_rotulo = serializers.CharField(source="tipo.rotulo")
     capacidade = serializers.IntegerField()
     ativo = serializers.BooleanField()
+
+
+class TipoDeEspacoSaidaSerializer(serializers.Serializer):
+    valor = serializers.CharField(source="value")
+    rotulo = serializers.CharField()
