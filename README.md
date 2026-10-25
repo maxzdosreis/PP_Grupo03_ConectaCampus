@@ -43,6 +43,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 3. Acesse:
    - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
    - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
+   - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — solicitar uma reserva e ver o resumo com a situação "Solicitada". Enquanto o login no frontend não existir (AUT-06), o envio responde "Faça login para continuar.".
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/

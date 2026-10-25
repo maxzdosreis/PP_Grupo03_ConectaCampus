@@ -1,0 +1,29 @@
+.etiqueta {
+  display: inline-block;
+  padding: 0 var(--espaco-2);
+  border: 1px solid currentcolor;
+  border-radius: var(--raio-total);
+  font-size: var(--fonte-pequena);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sucesso {
+  color: var(--cor-sucesso);
+  background-color: var(--cor-sucesso-fundo);
+}
+
+.neutra {
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-fundo);
+}
+
+.aviso {
+  color: var(--cor-aviso);
+  background-color: var(--cor-aviso-fundo);
+}
+
+.erro {
+  color: var(--cor-erro);
+  background-color: var(--cor-erro-fundo);
+}
