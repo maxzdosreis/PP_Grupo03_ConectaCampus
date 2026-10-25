@@ -4,6 +4,7 @@ import MensagensProvider from './components/mensagens/MensagensProvider.tsx'
 import PaginaEspacos from './pages/PaginaEspacos.tsx'
 import PaginaInicial from './pages/PaginaInicial.tsx'
 import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
+import PaginaNovaReserva from './pages/PaginaNovaReserva.tsx'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route element={<Layout />}>
             <Route index element={<PaginaInicial />} />
             <Route path="espacos" element={<PaginaEspacos />} />
+            <Route path="reservas/nova" element={<PaginaNovaReserva />} />
             <Route path="*" element={<PaginaNaoEncontrada />} />
           </Route>
         </Routes>

@@ -38,22 +38,3 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-
-.etiqueta {
-  display: inline-block;
-  padding: 0 var(--espaco-2);
-  border: 1px solid currentcolor;
-  border-radius: var(--raio-total);
-  font-size: var(--fonte-pequena);
-  font-weight: 600;
-}
-
-.ativo {
-  color: var(--cor-sucesso);
-  background-color: var(--cor-sucesso-fundo);
-}
-
-.inativo {
-  color: var(--cor-texto-suave);
-  background-color: var(--cor-fundo);
-}

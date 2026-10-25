@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { cadastrarEspaco, type DadosDoEspaco, type TipoDeEspaco } from '../../api/espacos.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
+import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import type { EstadoDaConsulta } from '../../hooks/useConsulta.ts'
 import Carregando from '../estados/Carregando.tsx'
@@ -47,14 +48,7 @@ function Formulario({ tipos, aoCadastrar }: PropriedadesDosCampos) {
   const { enviar, enviando, errosDosCampos, erroGeral, limparErroDoCampo } =
     useEnvio(cadastrarEspaco)
   const { mostrarSucesso } = useMensagens()
-  const formulario = useRef<HTMLFormElement>(null)
-  const focarPrimeiroErro = useRef(false)
-
-  useEffect(() => {
-    if (!focarPrimeiroErro.current) return
-    focarPrimeiroErro.current = false
-    formulario.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
-  }, [errosDosCampos])
+  const { formulario, aviso, focarNoProximoErro } = useFocoNoErro(errosDosCampos, erroGeral)
 
   function alterar(campo: keyof DadosDoEspaco, valor: string) {
     setDados((atuais) => ({ ...atuais, [campo]: valor }))
@@ -63,7 +57,7 @@ function Formulario({ tipos, aoCadastrar }: PropriedadesDosCampos) {
 
   async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    focarPrimeiroErro.current = true
+    focarNoProximoErro()
     const resposta = await enviar(dados)
     if (!resposta) return
     mostrarSucesso(resposta.mensagem)
@@ -73,7 +67,11 @@ function Formulario({ tipos, aoCadastrar }: PropriedadesDosCampos) {
 
   return (
     <form ref={formulario} className={estilos.formulario} onSubmit={aoEnviar} noValidate>
-      {erroGeral && <Aviso variante="erro">{erroGeral}</Aviso>}
+      {erroGeral && (
+        <div ref={aviso} tabIndex={-1}>
+          <Aviso variante="erro">{erroGeral}</Aviso>
+        </div>
+      )}
       <Campo rotulo="Nome" erro={errosDosCampos.nome}>
         {(controle) => (
           <input

@@ -1,5 +1,8 @@
 import { useId } from 'react'
+import { Link } from 'react-router'
 import type { Espaco } from '../../api/espacos.ts'
+import { caminhoParaReservar } from '../../navegacao.ts'
+import Etiqueta from '../etiqueta/Etiqueta.tsx'
 import estilos from './TabelaDeEspacos.module.css'
 
 type PropriedadesDaTabela = {
@@ -23,6 +26,7 @@ function TabelaDeEspacos({ espacos, legenda }: PropriedadesDaTabela) {
               Capacidade
             </th>
             <th scope="col">Situação</th>
+            <th scope="col">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -32,21 +36,22 @@ function TabelaDeEspacos({ espacos, legenda }: PropriedadesDaTabela) {
               <td>{espaco.tipo_rotulo}</td>
               <td className={estilos.numero}>{espaco.capacidade}</td>
               <td>
-                <Situacao ativo={espaco.ativo} />
+                <Etiqueta variante={espaco.ativo ? 'sucesso' : 'neutra'}>
+                  {espaco.ativo ? 'Ativo' : 'Inativo'}
+                </Etiqueta>
+              </td>
+              <td>
+                {espaco.ativo && (
+                  <Link to={caminhoParaReservar(espaco.id)} aria-label={`Reservar ${espaco.nome}`}>
+                    Reservar
+                  </Link>
+                )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
-}
-
-function Situacao({ ativo }: { ativo: boolean }) {
-  return (
-    <span className={`${estilos.etiqueta} ${ativo ? estilos.ativo : estilos.inativo}`}>
-      {ativo ? 'Ativo' : 'Inativo'}
-    </span>
   )
 }
 

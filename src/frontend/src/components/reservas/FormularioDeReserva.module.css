@@ -1,0 +1,32 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  max-width: 32rem;
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  background-color: var(--cor-superficie);
+  box-shadow: var(--sombra-leve);
+}
+
+.formulario textarea {
+  resize: vertical;
+}
+
+.horario {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--espaco-4);
+}
+
+@media (width < 30rem) {
+  .formulario {
+    padding: var(--espaco-4);
+  }
+
+  .horario {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
