@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -7,7 +8,11 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
-    // O bind mount do Docker no Windows não propaga eventos de arquivo.
     watch: { usePolling: true },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/configuracaoDosTestes.ts'],
+    env: { VITE_API_URL: 'http://localhost:8000/api' },
   },
 })

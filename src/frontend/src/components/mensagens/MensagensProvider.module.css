@@ -1,0 +1,31 @@
+.regiao {
+  position: fixed;
+  right: var(--espaco-4);
+  bottom: var(--espaco-4);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  width: min(24rem, 100% - 2 * var(--espaco-4));
+  pointer-events: none;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.notificacao {
+  border-radius: var(--raio-medio);
+  box-shadow: var(--sombra-leve);
+  pointer-events: auto;
+  animation: entrar 0.2s ease-out;
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}

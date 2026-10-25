@@ -19,5 +19,8 @@ export default defineConfig([
       ecmaVersion: 2023,
       globals: globals.browser,
     },
+    rules: {
+      'react-hooks/exhaustive-deps': ['warn', { additionalHooks: '^useConsulta$' }],
+    },
   },
 ])
