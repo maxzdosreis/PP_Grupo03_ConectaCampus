@@ -1,0 +1,59 @@
+.rolagem {
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  background-color: var(--cor-superficie);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.legenda {
+  padding: var(--espaco-3) var(--espaco-4);
+  text-align: left;
+  color: var(--cor-texto-suave);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-2) var(--espaco-4);
+  border-top: 1px solid var(--cor-borda);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabela thead th {
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-fundo);
+}
+
+.tabela tbody th {
+  font-weight: 600;
+}
+
+.tabela .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: 0 var(--espaco-2);
+  border: 1px solid currentcolor;
+  border-radius: var(--raio-total);
+  font-size: var(--fonte-pequena);
+  font-weight: 600;
+}
+
+.ativo {
+  color: var(--cor-sucesso);
+  background-color: var(--cor-sucesso-fundo);
+}
+
+.inativo {
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-fundo);
+}

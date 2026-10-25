@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/layout/Layout.tsx'
 import MensagensProvider from './components/mensagens/MensagensProvider.tsx'
+import PaginaEspacos from './pages/PaginaEspacos.tsx'
 import PaginaInicial from './pages/PaginaInicial.tsx'
 import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
 
@@ -11,6 +12,7 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<PaginaInicial />} />
+            <Route path="espacos" element={<PaginaEspacos />} />
             <Route path="*" element={<PaginaNaoEncontrada />} />
           </Route>
         </Routes>
