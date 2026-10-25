@@ -1,32 +1,15 @@
-import { useEffect, useState } from 'react'
-import { ErroDaApi, MENSAGEM_ERRO_INESPERADO } from '../api/cliente.ts'
-import { consultarSaude } from '../api/saude.ts'
-
-type EstadoDaApi =
-  | { tipo: 'carregando' }
-  | { tipo: 'sucesso'; mensagem: string }
-  | { tipo: 'erro'; mensagem: string }
+import { consultarSaude, type SituacaoDaApi as DadosDaSaude } from '../api/saude.ts'
+import Carregando from '../components/estados/Carregando.tsx'
+import Aviso from '../components/mensagens/Aviso.tsx'
+import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
+import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 
 function PaginaInicial() {
-  const [estado, setEstado] = useState<EstadoDaApi>({ tipo: 'carregando' })
-
-  useEffect(() => {
-    let ativo = true
-    consultarSaude()
-      .then((resposta) => {
-        if (ativo) setEstado({ tipo: 'sucesso', mensagem: resposta.mensagem })
-      })
-      .catch((erro: unknown) => {
-        const mensagem = erro instanceof ErroDaApi ? erro.message : MENSAGEM_ERRO_INESPERADO
-        if (ativo) setEstado({ tipo: 'erro', mensagem })
-      })
-    return () => {
-      ativo = false
-    }
-  }, [])
+  useTituloDaPagina('Início')
+  const { estado, recarregar } = useConsulta(consultarSaude, [])
 
   return (
-    <main>
+    <>
       <h1>Conecta Campus</h1>
       <p>
         Reserva de quadras e espaços esportivos para a comunidade acadêmica: cadastre espaços,
@@ -34,24 +17,33 @@ function PaginaInicial() {
       </p>
       <section>
         <h2>Situação da API</h2>
-        <SituacaoDaApi estado={estado} />
+        <SituacaoDaApi estado={estado} aoTentarNovamente={recarregar} />
       </section>
-    </main>
+    </>
   )
 }
 
-function SituacaoDaApi({ estado }: { estado: EstadoDaApi }) {
+type PropriedadesDaSituacao = {
+  estado: EstadoDaConsulta<DadosDaSaude>
+  aoTentarNovamente: () => void
+}
+
+function SituacaoDaApi({ estado, aoTentarNovamente }: PropriedadesDaSituacao) {
   if (estado.tipo === 'carregando') {
-    return <p role="status">Verificando a conexão com a API...</p>
+    return <Carregando texto="Verificando a conexão com a API..." />
   }
-  const sucesso = estado.tipo === 'sucesso'
+  if (estado.tipo === 'sucesso') {
+    return <Aviso variante="sucesso">{estado.mensagem}</Aviso>
+  }
   return (
-    <p
-      role={sucesso ? 'status' : 'alert'}
-      style={{ color: sucesso ? 'var(--cor-sucesso)' : 'var(--cor-erro)' }}
-    >
-      {estado.mensagem}
-    </p>
+    <>
+      <Aviso variante="erro">{estado.mensagem}</Aviso>
+      <div>
+        <button type="button" onClick={aoTentarNovamente}>
+          Tentar novamente
+        </button>
+      </div>
+    </>
   )
 }
 

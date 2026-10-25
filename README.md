@@ -6,7 +6,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 - Python 3.12, Django 5.2 LTS, Django REST Framework 3.18, Simple JWT 5.5 (login com token)
 - PostgreSQL 16 (driver psycopg 3)
-- Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10
+- Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10; testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento)
 - Docker e Docker Compose
 
 ## Como executar
@@ -343,12 +343,18 @@ O comando pede **e-mail, nome, matrícula e senha**. O login no admin é feito c
 > docker compose down -v
 > ```
 
-### Frontend: lint e build
+### Frontend: lint, testes e build
 
 Com os serviços no ar, dentro de `src`:
 
 ```bash
 docker compose exec frontend npm run lint
+```
+
+Testes (Vitest e Testing Library, em jsdom):
+
+```bash
+docker compose exec frontend npm test -- --run
 ```
 
 ```bash
