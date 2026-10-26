@@ -24,6 +24,13 @@
   overflow-wrap: anywhere;
 }
 
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-3) var(--espaco-5);
+}
+
 @media (width < 30rem) {
   .resumo {
     padding: var(--espaco-4);

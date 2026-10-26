@@ -1,4 +1,5 @@
 import { requisitar } from './cliente.ts'
+import { comParametros } from './parametros.ts'
 
 export type Solicitante = {
   usuario_id: number
@@ -28,6 +29,41 @@ export type DadosDaReserva = {
   finalidade: string
 }
 
+export type FiltrosDeReservas = {
+  espaco?: string
+  situacao?: string
+  data?: string
+  solicitante?: string
+  minhas?: boolean
+}
+
+export type SituacaoDeReserva = {
+  valor: string
+  rotulo: string
+}
+
 export function solicitarReserva(dados: DadosDaReserva) {
   return requisitar<Reserva>('/reservas/', { method: 'POST', body: JSON.stringify(dados) })
+}
+
+export function listarReservas({
+  espaco,
+  situacao,
+  data,
+  solicitante,
+  minhas,
+}: FiltrosDeReservas = {}) {
+  return requisitar<Reserva[]>(
+    comParametros('/reservas/', {
+      espaco,
+      situacao,
+      data,
+      solicitante,
+      minhas: minhas ? 'true' : undefined,
+    }),
+  )
+}
+
+export function listarSituacoesDeReserva() {
+  return requisitar<SituacaoDeReserva[]>('/reservas/situacoes/')
 }

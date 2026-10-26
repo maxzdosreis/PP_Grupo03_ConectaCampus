@@ -44,6 +44,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
    - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
    - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — solicitar uma reserva e ver o resumo com a situação "Solicitada". Enquanto o login no frontend não existir (AUT-06), o envio responde "Faça login para continuar.".
+   - Tela de consulta de reservas: http://localhost:5173/reservas (ou o item "Reservas" do menu, ou o link "Ver minhas reservas" do resumo de uma reserva solicitada) — listar as reservas com filtros por espaço, situação, data, solicitante (nome ou matrícula) e "Somente minhas reservas", que se combinam. Os filtros ficam no endereço da página; por exemplo, dois critérios combinados: http://localhost:5173/reservas?espaco=1&situacao=SOLICITADA. Enquanto o login no frontend não existir (AUT-06), a lista mostra "Faça login para continuar." no lugar da tabela.
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
@@ -276,6 +277,16 @@ Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada."
 ```
 
 Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
+
+As situações aceitas no filtro, com o rótulo exibido (`GET /api/reservas/situacoes/`, não exige login):
+
+```bash
+curl http://localhost:8000/api/reservas/situacoes/
+```
+
+```json
+{"mensagem": "Situações de reserva disponíveis.", "dados": [{"valor": "SOLICITADA", "rotulo": "Solicitada"}, {"valor": "CONFIRMADA", "rotulo": "Confirmada"}, {"valor": "RECUSADA", "rotulo": "Recusada"}, {"valor": "CANCELADA", "rotulo": "Cancelada"}, {"valor": "CONCLUIDA", "rotulo": "Concluída"}]}
+```
 
 Obter uma reserva (`GET /api/reservas/{id}/`), no mesmo formato da criação:
 

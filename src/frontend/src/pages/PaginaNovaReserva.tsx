@@ -6,6 +6,7 @@ import Carregando from '../components/estados/Carregando.tsx'
 import EstadoVazio from '../components/estados/EstadoVazio.tsx'
 import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
 import FormularioDeReserva from '../components/reservas/FormularioDeReserva.tsx'
+import { mapaDeNomesDosEspacos, nomeDoEspaco } from '../components/reservas/nomeDoEspaco.ts'
 import ResumoDaReserva from '../components/reservas/ResumoDaReserva.tsx'
 import { useConsulta } from '../hooks/useConsulta.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
@@ -69,11 +70,10 @@ function Solicitacao({ espacos, espacoDaUrl }: PropriedadesDaSolicitacao) {
   }
 
   if (reservaCriada) {
-    const espaco = espacos.find(({ id }) => id === reservaCriada.espaco_id)
     return (
       <ResumoDaReserva
         reserva={reservaCriada}
-        nomeDoEspaco={espaco?.nome ?? `Espaço #${reservaCriada.espaco_id}`}
+        nomeDoEspaco={nomeDoEspaco(mapaDeNomesDosEspacos(espacos), reservaCriada.espaco_id)}
         aoSolicitarOutra={aoSolicitarOutra}
       />
     )

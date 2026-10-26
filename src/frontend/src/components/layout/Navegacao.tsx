@@ -14,7 +14,7 @@ function Navegacao({ itens }: PropriedadesDaNavegacao) {
           <li key={caminho}>
             <NavLink
               to={caminho}
-              end={caminho === '/'}
+              end
               className={({ isActive }) =>
                 isActive ? `${estilos.link} ${estilos.ativo}` : estilos.link
               }
