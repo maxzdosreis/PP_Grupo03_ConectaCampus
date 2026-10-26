@@ -6,6 +6,8 @@ import Navegacao from './Navegacao.tsx'
 const ITENS = [
   { rotulo: 'Início', caminho: '/' },
   { rotulo: 'Espaços', caminho: '/espacos' },
+  { rotulo: 'Reservas', caminho: '/reservas' },
+  { rotulo: 'Nova reserva', caminho: '/reservas/nova' },
 ]
 
 function renderizarEm(caminho: string) {
@@ -29,5 +31,14 @@ describe('Navegacao', () => {
 
     expect(screen.getByRole('link', { name: 'Início' }).getAttribute('aria-current')).toBe('page')
     expect(screen.getByRole('link', { name: 'Espaços' }).getAttribute('aria-current')).toBeNull()
+  })
+
+  it('em "/reservas/nova" marca só "Nova reserva", e não "Reservas"', () => {
+    renderizarEm('/reservas/nova')
+
+    expect(
+      screen.getByRole('link', { name: 'Nova reserva' }).getAttribute('aria-current'),
+    ).toBe('page')
+    expect(screen.getByRole('link', { name: 'Reservas' }).getAttribute('aria-current')).toBeNull()
   })
 })

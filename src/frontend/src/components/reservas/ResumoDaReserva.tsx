@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef } from 'react'
+import { Link } from 'react-router'
 import type { Reserva } from '../../api/reservas.ts'
 import { formatarIntervalo } from '../../formatacao.ts'
+import { caminhoParaMinhasReservas } from '../../navegacao.ts'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
 import estilos from './ResumoDaReserva.module.css'
 
@@ -43,11 +45,11 @@ function ResumoDaReserva({ reserva, nomeDoEspaco, aoSolicitarOutra }: Propriedad
           </dd>
         </div>
       </dl>
-      {/* FE-04: acrescentar um link "Ver minhas reservas". */}
-      <div>
+      <div className={estilos.acoes}>
         <button type="button" onClick={aoSolicitarOutra}>
           Solicitar outra reserva
         </button>
+        <Link to={caminhoParaMinhasReservas()}>Ver minhas reservas</Link>
       </div>
     </section>
   )

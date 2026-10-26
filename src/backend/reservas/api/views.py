@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
 from compartilhado.api.respostas import mensagem_de_contagem, resposta_sucesso
@@ -10,7 +10,9 @@ from reservas.api.serializers import (
     FiltrosReservasSerializer,
     ReservaEntradaSerializer,
     ReservaSaidaSerializer,
+    SituacaoDeReservaSaidaSerializer,
 )
+from reservas.domain.situacao import SituacaoReserva
 
 
 # AUT-05: SOLICITANTE só vê as próprias (lista filtrada; detalhe de outra pessoa → 404).
@@ -72,4 +74,14 @@ class ReservaSituacaoView(APIView):
         return resposta_sucesso(
             f"Reserva {reserva.situacao.rotulo.lower()} com sucesso.",
             ReservaSaidaSerializer(reserva).data,
+        )
+
+
+class SituacoesDeReservaView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return resposta_sucesso(
+            "Situações de reserva disponíveis.",
+            SituacaoDeReservaSaidaSerializer(list(SituacaoReserva), many=True).data,
         )

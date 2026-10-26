@@ -50,6 +50,11 @@ class AlteracaoDeSituacaoSerializer(serializers.Serializer):
     motivo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
+class SituacaoDeReservaSaidaSerializer(serializers.Serializer):
+    valor = serializers.CharField(source="value")
+    rotulo = serializers.CharField()
+
+
 class SolicitanteSaidaSerializer(serializers.Serializer):
     usuario_id = serializers.IntegerField()
     nome = serializers.CharField()

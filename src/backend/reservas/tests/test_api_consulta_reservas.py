@@ -15,6 +15,7 @@ pytestmark = pytest.mark.django_db
 
 URL_RESERVAS = reverse("reservas:lista")
 URL_ESPACOS = reverse("espacos:lista")
+URL_SITUACOES = reverse("reservas:situacoes")
 SENHA = "senha-de-teste-123"
 ID_INEXISTENTE = 9999
 ORDEM_POR_INICIO = ["R4", "R1", "R3", "R2"]
@@ -324,3 +325,17 @@ def test_detalhe_sem_login_responde_401(massa):
     # Assert
     assert resposta.status_code == 401
     assert resposta.data["erro"]["codigo"] == "NAO_AUTENTICADO"
+
+
+def test_situacoes_de_reserva_listam_todas_na_ordem_do_enum_sem_login():
+    # Act
+    resposta = APIClient().get(URL_SITUACOES)
+
+    # Assert
+    assert resposta.status_code == 200
+    assert resposta.data["mensagem"] == "Situações de reserva disponíveis."
+    assert resposta.data["dados"][0] == {"valor": "SOLICITADA", "rotulo": "Solicitada"}
+    assert resposta.data["dados"] == [
+        {"valor": situacao.value, "rotulo": situacao.rotulo}
+        for situacao in SituacaoReserva
+    ]
