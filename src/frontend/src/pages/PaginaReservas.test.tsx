@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
+import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
@@ -91,6 +91,7 @@ function renderizar(caminho = '/reservas') {
             <>
               <PaginaReservas />
               <BuscaAtual />
+              <Link to="/reservas">Ir para reservas</Link>
             </>
           }
         />
@@ -282,6 +283,33 @@ describe('PaginaReservas', () => {
 
     expect(busca()).toBe('')
     expect(controle('Solicitante').value).toBe('')
+  })
+
+  it('quando a URL muda por fora (menu), o campo de solicitante acompanha', async () => {
+    renderizar('/reservas?solicitante=ana')
+    await screen.findByRole('table')
+    expect(controle('Solicitante').value).toBe('ana')
+
+    await userEvent.click(screen.getByRole('link', { name: 'Ir para reservas' }))
+
+    expect(busca()).toBe('')
+    expect(controle('Solicitante').value).toBe('')
+    await waitFor(() => expect(listarReservas).toHaveBeenLastCalledWith(filtros()))
+    await esperar(ATRASO_DO_SOLICITANTE_MS + 100)
+    expect(busca()).toBe('')
+  })
+
+  it('o texto que chega à URL não apaga o que a pessoa continuou digitando', async () => {
+    renderizar()
+    await screen.findByRole('table')
+
+    await userEvent.type(controle('Solicitante'), 'ana')
+    await waitFor(() => expect(busca()).toBe('?solicitante=ana'))
+    await userEvent.type(controle('Solicitante'), ' souza')
+
+    expect(controle('Solicitante').value).toBe('ana souza')
+    await waitFor(() => expect(busca()).toBe('?solicitante=ana+souza'))
+    expect(controle('Solicitante').value).toBe('ana souza')
   })
 
   it('sem filtros e sem reservas, convida a solicitar uma reserva', async () => {

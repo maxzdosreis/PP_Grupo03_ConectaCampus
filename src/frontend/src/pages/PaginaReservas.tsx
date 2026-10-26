@@ -43,6 +43,12 @@ function PaginaReservas() {
   const temFiltros = Object.values(filtros).some(Boolean)
   const [textoDoSolicitante, setTextoDoSolicitante] = useState(solicitante)
   const solicitanteAtrasado = useValorAtrasado(textoDoSolicitante, ATRASO_DO_SOLICITANTE_MS)
+  const [solicitanteAnterior, setSolicitanteAnterior] = useState(solicitante)
+
+  if (solicitante !== solicitanteAnterior) {
+    setSolicitanteAnterior(solicitante)
+    if (solicitante !== solicitanteAtrasado.trim()) setTextoDoSolicitante(solicitante)
+  }
 
   const espacos = useConsulta(() => listarEspacos(), [])
   const situacoes = useConsulta(listarSituacoesDeReserva, [])
