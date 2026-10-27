@@ -40,7 +40,13 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
    As migrations do banco são aplicadas automaticamente quando o backend sobe.
 
-3. Acesse:
+3. Com os serviços no ar, em outro terminal dentro de `src`, carregue os dados de exemplo (usuários, espaços e reservas; veja [Dados de exemplo](#dados-de-exemplo)):
+
+   ```bash
+   docker compose exec backend python manage.py carregar_dados_exemplo
+   ```
+
+4. Acesse:
    - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
    - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
    - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — solicitar uma reserva e ver o resumo com a situação "Solicitada". Enquanto o login no frontend não existir (AUT-06), o envio responde "Faça login para continuar.".
@@ -49,6 +55,96 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
+
+### Dados de exemplo
+
+```bash
+docker compose exec backend python manage.py carregar_dados_exemplo
+```
+
+O comando cria usuários, espaços e reservas passando pelas mesmas regras do sistema (casos de uso e entidades do domínio): se um dado de exemplo violasse uma regra, o comando falharia sem gravar nada. Pode ser executado mais de uma vez: o que já existe (usuário pelo e-mail, espaço pelo nome) não é criado de novo, e as reservas só são criadas se os solicitantes de exemplo ainda não tiverem nenhuma. Ele só roda com `DJANGO_DEBUG=True` (o valor do `.env.example`), porque cria usuários com senhas conhecidas.
+
+**Usuários de exemplo.** As senhas são fictícias e servem **só para teste local**:
+
+| Nome | E-mail | Matrícula | Perfil | Senha |
+|---|---|---|---|---|
+| Carla Mendes | `carla.mendes@exemplo.com` | 2026900 | Gestor (também entra no `/admin/`) | `Apito-Dourado-48` |
+| Bruno Lima | `bruno.lima@exemplo.com` | 2026101 | Solicitante | `Rede-Alta-73` |
+| Daniela Rocha | `daniela.rocha@exemplo.com` | 2026102 | Solicitante | `Cesta-Tripla-59` |
+
+**Espaços:** Quadra Poliesportiva Central (30 pessoas), Campo de Futebol Principal (22), Ginásio Coberto (200), Quadra de Areia Norte (12), Quadra de Tênis 1 (4) — um de cada tipo — e a Quadra de Tênis 2 (4), **inativa**.
+
+**Reservas**, com datas relativas ao dia em que o comando roda:
+
+| Situação | Quando | Espaço | Solicitante |
+|---|---|---|---|
+| Solicitada | amanhã, 10:00–11:00 | Quadra Poliesportiva Central | Bruno Lima |
+| Confirmada | amanhã, 14:00–16:00 | Campo de Futebol Principal | Daniela Rocha |
+| Recusada (com motivo) | daqui a 2 dias, 19:00–21:00 | Ginásio Coberto | Bruno Lima |
+| Cancelada (com motivo) | daqui a 3 dias, 08:00–09:00 | Quadra de Areia Norte | Daniela Rocha |
+| Concluída | ontem, 18:00–19:30 | Quadra de Tênis 1 | Bruno Lima |
+
+**Horário para demonstrar o conflito:** Quadra Poliesportiva Central, **amanhã, 10:30–11:30** — sobrepõe a reserva Solicitada e responde **409** `CONFLITO_DE_HORARIO`. O próprio comando imprime esse horário com a data no fim da saída.
+
+#### Roteiro da demonstração
+
+Enquanto o login no frontend não existir (AUT-06), o roteiro é feito com `curl`. Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/espacos/` (num banco recém-criado, a Quadra Poliesportiva Central é o espaço `1`). Os comandos de Windows seguem o padrão dos [exemplos de uso da API](#exemplos-de-uso-da-api).
+
+1. Entrar como o solicitante Bruno e guardar o `access` em `ACCESS`, como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token):
+
+   ```bash
+   curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d '{"email": "bruno.lima@exemplo.com", "senha": "Rede-Alta-73"}'
+   ```
+
+2. Consultar as reservas (as cinco situações, cada uma com as suas `acoes_disponiveis`) e filtrar por dois critérios:
+
+   ```bash
+   curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
+   ```
+
+3. Entrada inválida: pedir o horário de conflito → **409** `CONFLITO_DE_HORARIO`:
+
+   ```bash
+   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "10:30", "hora_fim": "11:30", "finalidade": "Treino de futsal"}'
+   ```
+
+   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`.
+
+4. Solicitar um horário livre (amanhã, 16:00–17:00) → **201**, situação `SOLICITADA`; anote o `id` da resposta:
+
+   ```bash
+   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "16:00", "hora_fim": "17:00", "finalidade": "Treino de futsal"}'
+   ```
+
+5. Entrar como a gestora Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), guardar o novo `access` em `ACCESS` e confirmar a reserva do passo 4 (troque `ID`):
+
+   ```bash
+   curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
+   ```
+
+6. Concluir a mesma reserva → **200** `"Reserva concluída com sucesso."`, com `acoes_disponiveis` vazia:
+
+   ```bash
+   curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONCLUIDA"}'
+   ```
+
+   Tentar voltá-la para `SOLICITADA` responde **409** `TRANSICAO_DE_SITUACAO_INVALIDA`.
+
+#### Recomeçar do zero
+
+Para apagar tudo (inclusive o que foi cadastrado à mão) e carregar os dados de novo, dentro de `src`:
+
+```bash
+docker compose down -v
+```
+
+```bash
+docker compose up -d
+```
+
+```bash
+docker compose exec backend python manage.py carregar_dados_exemplo
+```
 
 ### Verificar se a API está no ar
 
@@ -399,7 +495,7 @@ Testes (pytest):
 docker compose exec backend pytest
 ```
 
-Cobertura de testes dos contextos `espacos`, `reservas` e `contas` e do pacote `compartilhado`:
+Cobertura de testes dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`:
 
 ```bash
 docker compose exec backend pytest --cov
