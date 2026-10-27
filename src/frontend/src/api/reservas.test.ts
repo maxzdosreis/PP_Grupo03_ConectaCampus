@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { requisitar } from './cliente.ts'
-import { listarReservas, listarSituacoesDeReserva, solicitarReserva } from './reservas.ts'
+import {
+  alterarSituacaoReserva,
+  listarReservas,
+  listarSituacoesDeReserva,
+  solicitarReserva,
+} from './reservas.ts'
 
 vi.mock('./cliente.ts', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('./cliente.ts')>()),
@@ -72,6 +77,26 @@ describe('api de reservas', () => {
     expect(requisitar).toHaveBeenCalledWith(
       '/reservas/?espaco=3&situacao=CANCELADA&data=2026-11-10&solicitante=2026001&minhas=true',
     )
+  })
+
+  it('alterarSituacaoReserva envia um PATCH para a situação da reserva', async () => {
+    await alterarSituacaoReserva(12, { situacao: 'CONFIRMADA' })
+
+    expect(requisitar).toHaveBeenCalledWith('/reservas/12/situacao/', {
+      method: 'PATCH',
+      body: JSON.stringify({ situacao: 'CONFIRMADA' }),
+    })
+  })
+
+  it('alterarSituacaoReserva só envia o motivo quando ele é informado', async () => {
+    await alterarSituacaoReserva(12, { situacao: 'CONFIRMADA', motivo: undefined })
+    await alterarSituacaoReserva(12, { situacao: 'RECUSADA', motivo: 'Quadra em reforma' })
+
+    const corpos = vi.mocked(requisitar).mock.calls.map(([, opcoes]) => opcoes?.body)
+    expect(corpos).toEqual([
+      '{"situacao":"CONFIRMADA"}',
+      '{"situacao":"RECUSADA","motivo":"Quadra em reforma"}',
+    ])
   })
 
   it('listarSituacoesDeReserva consulta o vocabulário de situações', async () => {

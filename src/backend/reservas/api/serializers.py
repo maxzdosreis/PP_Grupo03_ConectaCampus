@@ -1,7 +1,11 @@
 from rest_framework import serializers
 
 from reservas.application.repositorio import FiltrosDeReservas
-from reservas.domain.situacao import SituacaoReserva
+from reservas.domain.situacao import (
+    SITUACOES_QUE_EXIGEM_MOTIVO,
+    SituacaoReserva,
+    transicoes_a_partir_de,
+)
 
 _MAIOR_IDENTIFICADOR_DO_BANCO = 9_223_372_036_854_775_807
 _FORMATO_DA_HORA = "%H:%M"
@@ -55,6 +59,15 @@ class SituacaoDeReservaSaidaSerializer(serializers.Serializer):
     rotulo = serializers.CharField()
 
 
+class AcaoDisponivelSaidaSerializer(serializers.Serializer):
+    situacao = serializers.CharField(source="value")
+    rotulo = serializers.CharField(source="rotulo_da_acao")
+    exige_motivo = serializers.SerializerMethodField()
+
+    def get_exige_motivo(self, situacao):
+        return situacao in SITUACOES_QUE_EXIGEM_MOTIVO
+
+
 class SolicitanteSaidaSerializer(serializers.Serializer):
     usuario_id = serializers.IntegerField()
     nome = serializers.CharField()
@@ -77,3 +90,9 @@ class ReservaSaidaSerializer(serializers.Serializer):
     situacao_rotulo = serializers.CharField(source="situacao.rotulo")
     motivo_da_situacao = serializers.CharField(allow_null=True)
     criada_em = serializers.DateTimeField()
+    acoes_disponiveis = serializers.SerializerMethodField()
+
+    def get_acoes_disponiveis(self, reserva):
+        destinos = transicoes_a_partir_de(reserva.situacao)
+        # AUT-05: filtrar `destinos` aqui pelo perfil de quem vê; o formato não muda.
+        return AcaoDisponivelSaidaSerializer(destinos, many=True).data

@@ -5,11 +5,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
 import {
+  alterarSituacaoReserva,
   listarReservas,
   listarSituacoesDeReserva,
   type FiltrosDeReservas,
   type Reserva,
 } from '../api/reservas.ts'
+import type { RespostaSucesso } from '../api/tipos.ts'
+import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
 import PaginaReservas, { ATRASO_DO_SOLICITANTE_MS } from './PaginaReservas.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -17,6 +20,7 @@ vi.mock('../api/espacos.ts', () => ({
 }))
 
 vi.mock('../api/reservas.ts', () => ({
+  alterarSituacaoReserva: vi.fn(),
   listarReservas: vi.fn(),
   listarSituacoesDeReserva: vi.fn(),
 }))
@@ -57,6 +61,11 @@ const SOLICITADA: Reserva = {
   situacao_rotulo: 'Solicitada',
   motivo_da_situacao: null,
   criada_em: '2026-10-25T10:00:00-03:00',
+  acoes_disponiveis: [
+    { situacao: 'CONFIRMADA', rotulo: 'Confirmar', exige_motivo: false },
+    { situacao: 'RECUSADA', rotulo: 'Recusar', exige_motivo: true },
+    { situacao: 'CANCELADA', rotulo: 'Cancelar', exige_motivo: true },
+  ],
 }
 
 const CANCELADA: Reserva = {
@@ -71,6 +80,7 @@ const CANCELADA: Reserva = {
   situacao: 'CANCELADA',
   situacao_rotulo: 'Cancelada',
   motivo_da_situacao: 'Chuva forte',
+  acoes_disponiveis: [],
 }
 
 function filtros(sobrescritas: FiltrosDeReservas = {}): Required<FiltrosDeReservas> {
@@ -83,20 +93,22 @@ function BuscaAtual() {
 
 function renderizar(caminho = '/reservas') {
   render(
-    <MemoryRouter initialEntries={[caminho]}>
-      <Routes>
-        <Route
-          path="/reservas"
-          element={
-            <>
-              <PaginaReservas />
-              <BuscaAtual />
-              <Link to="/reservas">Ir para reservas</Link>
-            </>
-          }
-        />
-      </Routes>
-    </MemoryRouter>,
+    <MensagensProvider>
+      <MemoryRouter initialEntries={[caminho]}>
+        <Routes>
+          <Route
+            path="/reservas"
+            element={
+              <>
+                <PaginaReservas />
+                <BuscaAtual />
+                <Link to="/reservas">Ir para reservas</Link>
+              </>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    </MensagensProvider>,
   )
 }
 
@@ -381,5 +393,178 @@ describe('PaginaReservas', () => {
     expect(screen.getByText(/Não foi possível carregar os espaços/)).toBeTruthy()
     expect(controle<HTMLSelectElement>('Espaço').disabled).toBe(true)
     expect((await seletorCarregado('Situação')).disabled).toBe(false)
+  })
+})
+
+describe('PaginaReservas — ações de situação', () => {
+  const RESERVA_ALTERADA: RespostaSucesso<Reserva> = {
+    mensagem: 'Reserva recusada com sucesso.',
+    dados: { ...SOLICITADA, situacao: 'RECUSADA', situacao_rotulo: 'Recusada' },
+  }
+
+  beforeEach(() => {
+    vi.mocked(listarEspacos).mockReset()
+    vi.mocked(listarSituacoesDeReserva).mockReset()
+    vi.mocked(listarReservas).mockReset()
+    vi.mocked(alterarSituacaoReserva).mockReset()
+    vi.mocked(listarEspacos).mockResolvedValue({
+      mensagem: '2 espaços encontrados.',
+      dados: [GINASIO, QUADRA],
+    })
+    vi.mocked(listarSituacoesDeReserva).mockResolvedValue({
+      mensagem: 'Situações de reserva disponíveis.',
+      dados: SITUACOES,
+    })
+    vi.mocked(listarReservas).mockResolvedValue({
+      mensagem: '2 reservas encontradas.',
+      dados: [SOLICITADA, CANCELADA],
+    })
+    vi.mocked(alterarSituacaoReserva).mockResolvedValue(RESERVA_ALTERADA)
+  })
+
+  async function abrir(rotulo: string) {
+    renderizar()
+    const botao = await screen.findByRole('button', {
+      name: `${rotulo} a reserva de 10/11/2026, 10:00–11:00 em Ginásio A`,
+    })
+    await userEvent.click(botao)
+    return { botao, dialogo: screen.getByRole('dialog', { name: `${rotulo} reserva` }) }
+  }
+
+  function botaoNoDialogo(dialogo: HTMLElement, nome: string) {
+    return within(dialogo).getByRole('button', { name: nome }) as HTMLButtonElement
+  }
+
+  it('"Confirmar" abre o diálogo com o resumo e sem campo de motivo', async () => {
+    const { dialogo } = await abrir('Confirmar')
+
+    expect((dialogo as HTMLDialogElement).open).toBe(true)
+    expect(dialogo.textContent).toContain('Ginásio A')
+    expect(dialogo.textContent).toContain('10/11/2026, 10:00–11:00')
+    expect(dialogo.textContent).toContain('Ana Souza (2026001)')
+    expect(within(dialogo).queryByLabelText('Motivo')).toBeNull()
+    expect(document.activeElement).toBe(botaoNoDialogo(dialogo, 'Voltar'))
+  })
+
+  it('"Recusar" abre o diálogo com o campo de motivo em foco', async () => {
+    const { dialogo } = await abrir('Recusar')
+
+    expect(document.activeElement).toBe(within(dialogo).getByLabelText('Motivo'))
+    expect(dialogo.textContent).toContain('Explique ao solicitante o motivo.')
+  })
+
+  it('enviar recusa com o motivo, mostra a mensagem da API, fecha e recarrega', async () => {
+    const { dialogo } = await abrir('Recusar')
+
+    await userEvent.type(within(dialogo).getByLabelText('Motivo'), 'Quadra em reforma')
+    await userEvent.click(botaoNoDialogo(dialogo, 'Recusar reserva'))
+
+    expect(alterarSituacaoReserva).toHaveBeenCalledWith(10, {
+      situacao: 'RECUSADA',
+      motivo: 'Quadra em reforma',
+    })
+    expect(await screen.findByText('Reserva recusada com sucesso.')).toBeTruthy()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => expect(listarReservas).toHaveBeenCalledTimes(2))
+    const regiao = await screen.findByRole('region', { name: '2 reservas encontradas.' })
+    await waitFor(() => expect(document.activeElement).toBe(regiao))
+  })
+
+  it('confirmar envia só a situação, sem motivo', async () => {
+    const { dialogo } = await abrir('Confirmar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Confirmar reserva'))
+
+    expect(alterarSituacaoReserva).toHaveBeenCalledWith(10, { situacao: 'CONFIRMADA' })
+  })
+
+  it('erro no motivo aparece embaixo do campo, que recebe o foco', async () => {
+    vi.mocked(alterarSituacaoReserva).mockRejectedValue(
+      new ErroDaApi(400, 'MOTIVO_OBRIGATORIO', 'Informe o motivo.', {
+        motivo: ['Informe o motivo para recusar a reserva.'],
+      }),
+    )
+    const { dialogo } = await abrir('Recusar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Recusar reserva'))
+
+    const motivo = within(dialogo).getByLabelText('Motivo')
+    await waitFor(() => expect(motivo.getAttribute('aria-invalid')).toBe('true'))
+    expect(dialogo.textContent).toContain('Informe o motivo para recusar a reserva.')
+    expect(document.activeElement).toBe(motivo)
+    expect(within(dialogo).queryByRole('alert')).toBeNull()
+    expect(listarReservas).toHaveBeenCalledTimes(1)
+  })
+
+  it('409 mostra o aviso no diálogo com "Atualizar lista", que fecha e recarrega', async () => {
+    vi.mocked(alterarSituacaoReserva).mockRejectedValue(
+      new ErroDaApi(
+        409,
+        'TRANSICAO_DE_SITUACAO_INVALIDA',
+        'Não é possível alterar uma reserva Confirmada para Confirmada.',
+      ),
+    )
+    const { dialogo } = await abrir('Confirmar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Confirmar reserva'))
+
+    const aviso = await within(dialogo).findByRole('alert')
+    expect(aviso.textContent).toContain('Não é possível alterar uma reserva Confirmada')
+    await userEvent.click(botaoNoDialogo(dialogo, 'Atualizar lista'))
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await waitFor(() => expect(listarReservas).toHaveBeenCalledTimes(2))
+    expect(alterarSituacaoReserva).toHaveBeenCalledTimes(1)
+  })
+
+  it('401 mostra o aviso no diálogo sem "Atualizar lista"', async () => {
+    vi.mocked(alterarSituacaoReserva).mockRejectedValue(
+      new ErroDaApi(401, 'NAO_AUTENTICADO', 'Faça login para continuar.'),
+    )
+    const { dialogo } = await abrir('Confirmar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Confirmar reserva'))
+
+    const aviso = await within(dialogo).findByRole('alert')
+    expect(aviso.textContent).toContain('Faça login para continuar.')
+    expect(within(dialogo).queryByRole('button', { name: 'Atualizar lista' })).toBeNull()
+  })
+
+  it('"Voltar" fecha sem chamar a API e devolve o foco ao botão da linha', async () => {
+    const { botao, dialogo } = await abrir('Cancelar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Voltar'))
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(alterarSituacaoReserva).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(botao)
+  })
+
+  it('Esc fecha sem chamar a API e devolve o foco ao botão da linha', async () => {
+    const { botao } = await abrir('Recusar')
+
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(alterarSituacaoReserva).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(botao)
+  })
+
+  it('os botões ficam desabilitados, com "Enviando...", enquanto envia', async () => {
+    let resolver!: (resposta: RespostaSucesso<Reserva>) => void
+    vi.mocked(alterarSituacaoReserva).mockReturnValue(
+      new Promise((resolve) => {
+        resolver = resolve
+      }),
+    )
+    const { dialogo } = await abrir('Confirmar')
+
+    await userEvent.click(botaoNoDialogo(dialogo, 'Confirmar reserva'))
+
+    expect(botaoNoDialogo(dialogo, 'Enviando...').disabled).toBe(true)
+    expect(botaoNoDialogo(dialogo, 'Voltar').disabled).toBe(true)
+    resolver({ ...RESERVA_ALTERADA, mensagem: 'Reserva confirmada com sucesso.' })
+    expect(await screen.findByText('Reserva confirmada com sucesso.')).toBeTruthy()
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 })

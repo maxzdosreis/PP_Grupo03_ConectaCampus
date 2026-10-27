@@ -1,0 +1,49 @@
+.dialogo {
+  width: min(32rem, calc(100% - 2 * var(--espaco-4)));
+  max-width: none;
+  max-height: calc(100% - 2 * var(--espaco-4));
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  box-shadow: var(--sombra-leve);
+}
+
+.dialogo::backdrop {
+  background-color: rgb(15 23 42 / 0.5);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  margin-bottom: var(--espaco-4);
+}
+
+.titulo {
+  margin: 0;
+  font-size: var(--fonte-media);
+  overflow-wrap: anywhere;
+}
+
+.fechar {
+  flex-shrink: 0;
+  padding: 0 var(--espaco-2);
+  font-size: var(--fonte-media);
+  line-height: 1.5;
+  border-color: var(--cor-borda-forte);
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+}
+
+.fechar:hover {
+  background-color: var(--cor-fundo);
+}
+
+@media (width < 30rem) {
+  .dialogo {
+    padding: var(--espaco-4);
+  }
+}

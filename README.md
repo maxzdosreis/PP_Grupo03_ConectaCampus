@@ -45,6 +45,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
    - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — solicitar uma reserva e ver o resumo com a situação "Solicitada". Enquanto o login no frontend não existir (AUT-06), o envio responde "Faça login para continuar.".
    - Tela de consulta de reservas: http://localhost:5173/reservas (ou o item "Reservas" do menu, ou o link "Ver minhas reservas" do resumo de uma reserva solicitada) — listar as reservas com filtros por espaço, situação, data, solicitante (nome ou matrícula) e "Somente minhas reservas", que se combinam. Os filtros ficam no endereço da página; por exemplo, dois critérios combinados: http://localhost:5173/reservas?espaco=1&situacao=SOLICITADA. Enquanto o login no frontend não existir (AUT-06), a lista mostra "Faça login para continuar." no lugar da tabela.
+   - Alterar a situação de uma reserva, na mesma tela: cada linha tem um botão para cada mudança permitida a partir da situação atual (uma solicitada mostra "Confirmar", "Recusar" e "Cancelar"; uma confirmada, "Cancelar" e "Concluir"; as concluídas, recusadas e canceladas não têm ações). O botão abre um diálogo com o resumo da reserva; para recusar ou cancelar, ele pede o motivo, que o solicitante verá. Confirme no botão do diálogo (ex.: "Recusar reserva") ou feche com "Voltar" ou Esc sem alterar nada. Depois da mudança, a mensagem aparece no canto da tela e a lista é recarregada. Se outra pessoa já tiver mudado a reserva, o diálogo explica o motivo e oferece "Atualizar lista". As ações disponíveis vêm da API (`acoes_disponiveis` em cada reserva). Enquanto o login no frontend não existir (AUT-06), a lista não carrega e os botões não aparecem.
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
@@ -227,7 +228,7 @@ curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer %ACCE
 Resposta **201**, com a reserva na situação inicial `SOLICITADA` (a resposta traz `espaco_id`; o nome do espaço vem da listagem de espaços):
 
 ```json
-{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": false}, {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": true}, {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}}
 ```
 
 Repetir o pedido no mesmo horário responde **409**:
@@ -273,7 +274,7 @@ curl "http://localhost:8000/api/reservas/?minhas=true" -H "Authorization: Bearer
 Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
 
 ```json
-{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}]}
+{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": false}, {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": true}, {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
 ```
 
 Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
@@ -302,7 +303,7 @@ Um id inexistente responde **404**:
 
 #### Alterar a situação de uma reserva
 
-Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. O corpo leva `situacao` e, para recusar ou cancelar, um `motivo`. Só estas mudanças são aceitas:
+Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. Cada reserva devolvida pela API traz `acoes_disponiveis`, com as mudanças aceitas a partir da situação atual, o texto do botão e se exigem motivo. O corpo leva `situacao` e, para recusar ou cancelar, um `motivo`. Só estas mudanças são aceitas:
 
 | Situação atual | Pode ir para |
 |---|---|
@@ -327,7 +328,7 @@ curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: 
 Resposta **200**, com a reserva atualizada (a mensagem acompanha a nova situação: confirmada, recusada, cancelada ou concluída):
 
 ```json
-{"mensagem": "Reserva confirmada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CONFIRMADA", "situacao_rotulo": "Confirmada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+{"mensagem": "Reserva confirmada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CONFIRMADA", "situacao_rotulo": "Confirmada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}, {"situacao": "CONCLUIDA", "rotulo": "Concluir", "exige_motivo": false}]}}
 ```
 
 Uma mudança fora da tabela (por exemplo, voltar a confirmada para `SOLICITADA`) responde **409** e a reserva fica como estava:
@@ -343,7 +344,7 @@ curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: 
 ```
 
 ```json
-{"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00"}}
+{"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": []}}
 ```
 
 Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; sem token → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.

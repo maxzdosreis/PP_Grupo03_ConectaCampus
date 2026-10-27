@@ -13,6 +13,10 @@ class SituacaoReserva(StrEnum):
         return _ROTULOS[self]
 
     @property
+    def rotulo_da_acao(self) -> str:
+        return _ROTULOS_DAS_ACOES[self]
+
+    @property
     def eh_final(self) -> bool:
         return not TRANSICOES_PERMITIDAS[self]
 
@@ -27,6 +31,13 @@ _ROTULOS = {
     SituacaoReserva.RECUSADA: "Recusada",
     SituacaoReserva.CANCELADA: "Cancelada",
     SituacaoReserva.CONCLUIDA: "Concluída",
+}
+
+_ROTULOS_DAS_ACOES = {
+    SituacaoReserva.CONFIRMADA: "Confirmar",
+    SituacaoReserva.RECUSADA: "Recusar",
+    SituacaoReserva.CANCELADA: "Cancelar",
+    SituacaoReserva.CONCLUIDA: "Concluir",
 }
 
 TRANSICOES_PERMITIDAS: dict[SituacaoReserva, frozenset[SituacaoReserva]] = {
@@ -56,3 +67,7 @@ SITUACOES_QUE_OCUPAM_HORARIO = frozenset(
 
 def transicao_permitida(atual: SituacaoReserva, nova: SituacaoReserva) -> bool:
     return nova in TRANSICOES_PERMITIDAS[atual]
+
+
+def transicoes_a_partir_de(situacao: SituacaoReserva) -> list[SituacaoReserva]:
+    return [nova for nova in SituacaoReserva if transicao_permitida(situacao, nova)]

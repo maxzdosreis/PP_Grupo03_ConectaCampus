@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ErroDaApi } from '../api/cliente.ts'
 import { errosDosCampos as extrairErrosDosCampos, mensagemDoErro } from '../api/erros.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
 
@@ -7,6 +8,7 @@ export type Envio<E, R> = {
   enviando: boolean
   errosDosCampos: Record<string, string>
   erroGeral: string | null
+  statusDoErro: number | null
   limparErroDoCampo: (campo: string) => void
 }
 
@@ -16,6 +18,7 @@ export function useEnvio<E, R>(
   const [enviando, setEnviando] = useState(false)
   const [errosDosCampos, setErrosDosCampos] = useState<Record<string, string>>({})
   const [erroGeral, setErroGeral] = useState<string | null>(null)
+  const [statusDoErro, setStatusDoErro] = useState<number | null>(null)
   const montado = useRef(false)
 
   useEffect(() => {
@@ -30,6 +33,7 @@ export function useEnvio<E, R>(
     const temCampos = Object.keys(campos).length > 0
     setErrosDosCampos(campos)
     setErroGeral(temCampos ? null : mensagemDoErro(erro))
+    setStatusDoErro(erro instanceof ErroDaApi ? erro.status : null)
   }, [])
 
   const enviar = useCallback(
@@ -40,6 +44,7 @@ export function useEnvio<E, R>(
         if (!montado.current) return null
         setErrosDosCampos({})
         setErroGeral(null)
+        setStatusDoErro(null)
         return resposta
       } catch (erro) {
         if (montado.current) registrarErro(erro)
@@ -59,5 +64,5 @@ export function useEnvio<E, R>(
     )
   }, [])
 
-  return { enviar, enviando, errosDosCampos, erroGeral, limparErroDoCampo }
+  return { enviar, enviando, errosDosCampos, erroGeral, statusDoErro, limparErroDoCampo }
 }

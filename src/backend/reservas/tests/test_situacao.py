@@ -5,8 +5,10 @@ import pytest
 from reservas.domain.situacao import (
     SITUACOES_QUE_EXIGEM_MOTIVO,
     SITUACOES_QUE_OCUPAM_HORARIO,
+    TRANSICOES_PERMITIDAS,
     SituacaoReserva,
     transicao_permitida,
+    transicoes_a_partir_de,
 )
 
 S = SituacaoReserva
@@ -61,6 +63,56 @@ def test_estados_intermediarios_nao_sao_finais(situacao):
 def test_rotulo_em_portugues(situacao, rotulo):
     # Assert
     assert situacao.rotulo == rotulo
+
+
+@pytest.mark.parametrize(
+    ("situacao", "rotulo"),
+    [
+        (S.CONFIRMADA, "Confirmar"),
+        (S.RECUSADA, "Recusar"),
+        (S.CANCELADA, "Cancelar"),
+        (S.CONCLUIDA, "Concluir"),
+    ],
+)
+def test_rotulo_da_acao_em_portugues(situacao, rotulo):
+    # Assert
+    assert situacao.rotulo_da_acao == rotulo
+
+
+@pytest.mark.parametrize(
+    "destino", sorted(set().union(*TRANSICOES_PERMITIDAS.values()))
+)
+def test_toda_situacao_de_destino_tem_rotulo_da_acao(destino):
+    # Assert
+    assert destino.rotulo_da_acao
+
+
+@pytest.mark.parametrize("situacao", list(SituacaoReserva))
+def test_transicoes_a_partir_de_segue_a_tabela_na_ordem_do_enum(situacao):
+    # Arrange
+    esperadas = [nova for nova in SituacaoReserva if (situacao, nova) in TABELA]
+
+    # Act
+    transicoes = transicoes_a_partir_de(situacao)
+
+    # Assert
+    assert transicoes == esperadas
+
+
+def test_transicoes_a_partir_de_solicitada_e_confirmada():
+    # Assert
+    assert transicoes_a_partir_de(S.SOLICITADA) == [
+        S.CONFIRMADA,
+        S.RECUSADA,
+        S.CANCELADA,
+    ]
+    assert transicoes_a_partir_de(S.CONFIRMADA) == [S.CANCELADA, S.CONCLUIDA]
+
+
+@pytest.mark.parametrize("situacao", [S.CONCLUIDA, S.RECUSADA, S.CANCELADA])
+def test_estados_finais_nao_tem_transicoes(situacao):
+    # Assert
+    assert transicoes_a_partir_de(situacao) == []
 
 
 def test_recusar_e_cancelar_exigem_motivo():

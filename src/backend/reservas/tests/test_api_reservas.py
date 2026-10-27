@@ -100,6 +100,11 @@ def test_solicitacao_valida_responde_201_com_a_reserva(cliente, usuario, espaco_
         "situacao_rotulo": "Solicitada",
         "motivo_da_situacao": None,
         "criada_em": dados["criada_em"],
+        "acoes_disponiveis": [
+            {"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": False},
+            {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": True},
+            {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": True},
+        ],
     }
     assert _quantidade_de_reservas() == 1
 

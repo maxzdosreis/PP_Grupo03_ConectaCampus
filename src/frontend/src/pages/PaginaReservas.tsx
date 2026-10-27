@@ -1,15 +1,25 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type Ref } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { listarEspacos } from '../api/espacos.ts'
-import { listarReservas, listarSituacoesDeReserva, type Reserva } from '../api/reservas.ts'
+import {
+  listarReservas,
+  listarSituacoesDeReserva,
+  type AcaoDisponivel,
+  type Reserva,
+} from '../api/reservas.ts'
 import Carregando from '../components/estados/Carregando.tsx'
 import EstadoVazio from '../components/estados/EstadoVazio.tsx'
 import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
 import Aviso from '../components/mensagens/Aviso.tsx'
+import DialogoDeSituacao from '../components/reservas/DialogoDeSituacao.tsx'
 import FiltrosDeReservas, {
   type ValoresDosFiltros,
 } from '../components/reservas/FiltrosDeReservas.tsx'
-import { mapaDeNomesDosEspacos, type NomesDosEspacos } from '../components/reservas/nomeDoEspaco.ts'
+import {
+  mapaDeNomesDosEspacos,
+  nomeDoEspaco,
+  type NomesDosEspacos,
+} from '../components/reservas/nomeDoEspaco.ts'
 import TabelaDeReservas from '../components/reservas/TabelaDeReservas.tsx'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
@@ -19,6 +29,11 @@ import { CAMINHO_DA_NOVA_RESERVA } from '../navegacao.ts'
 export const ATRASO_DO_SOLICITANTE_MS = 400
 
 const SEM_ESPACOS: NomesDosEspacos = new Map()
+
+type AlteracaoEmAndamento = {
+  reserva: Reserva
+  acao: AcaoDisponivel
+}
 
 function lerFiltros(parametros: URLSearchParams): ValoresDosFiltros {
   return {
@@ -61,6 +76,23 @@ function PaginaReservas() {
       espacos.estado.tipo === 'sucesso' ? mapaDeNomesDosEspacos(espacos.estado.dados) : SEM_ESPACOS,
     [espacos.estado],
   )
+  const [emAlteracao, setEmAlteracao] = useState<AlteracaoEmAndamento | null>(null)
+  const titulo = useRef<HTMLHeadingElement>(null)
+  const regiaoDaTabela = useRef<HTMLDivElement>(null)
+  const focarNaListaAoCarregar = useRef(false)
+  const listaCarregando = estado.tipo === 'carregando' || espacos.estado.tipo === 'carregando'
+
+  useEffect(() => {
+    if (!focarNaListaAoCarregar.current || listaCarregando) return
+    focarNaListaAoCarregar.current = false
+    ;(regiaoDaTabela.current ?? titulo.current)?.focus()
+  }, [listaCarregando])
+
+  function atualizarLista() {
+    setEmAlteracao(null)
+    focarNaListaAoCarregar.current = true
+    recarregar()
+  }
 
   function alterarFiltro<Filtro extends keyof ValoresDosFiltros>(
     filtro: Filtro,
@@ -94,7 +126,9 @@ function PaginaReservas() {
 
   return (
     <>
-      <h1>Reservas</h1>
+      <h1 ref={titulo} tabIndex={-1}>
+        Reservas
+      </h1>
       <FiltrosDeReservas
         espacos={espacos.estado.tipo === 'sucesso' ? espacos.estado.dados : null}
         situacoes={situacoes.estado.tipo === 'sucesso' ? situacoes.estado.dados : null}
@@ -121,9 +155,22 @@ function PaginaReservas() {
         carregandoEspacos={espacos.estado.tipo === 'carregando'}
         nomesDosEspacos={nomesDosEspacos}
         temFiltros={temFiltros}
+        regiaoDaTabela={regiaoDaTabela}
         aoTentarNovamente={recarregar}
         aoLimparFiltros={limparFiltros}
+        aoEscolherAcao={(reserva, acao) => setEmAlteracao({ reserva, acao })}
       />
+      {emAlteracao && (
+        <DialogoDeSituacao
+          key={`${emAlteracao.reserva.id}-${emAlteracao.acao.situacao}`}
+          reserva={emAlteracao.reserva}
+          acao={emAlteracao.acao}
+          nomeDoEspaco={nomeDoEspaco(nomesDosEspacos, emAlteracao.reserva.espaco_id)}
+          alvoAoFechar={titulo}
+          aoFechar={() => setEmAlteracao(null)}
+          aoAtualizarLista={atualizarLista}
+        />
+      )}
     </>
   )
 }
@@ -133,8 +180,10 @@ type PropriedadesDoResultado = {
   carregandoEspacos: boolean
   nomesDosEspacos: NomesDosEspacos
   temFiltros: boolean
+  regiaoDaTabela: Ref<HTMLDivElement>
   aoTentarNovamente: () => void
   aoLimparFiltros: () => void
+  aoEscolherAcao: (reserva: Reserva, acao: AcaoDisponivel) => void
 }
 
 function ResultadoDaLista({
@@ -142,8 +191,10 @@ function ResultadoDaLista({
   carregandoEspacos,
   nomesDosEspacos,
   temFiltros,
+  regiaoDaTabela,
   aoTentarNovamente,
   aoLimparFiltros,
+  aoEscolherAcao,
 }: PropriedadesDoResultado) {
   const botaoLimparFiltros = (
     <button type="button" onClick={aoLimparFiltros}>
@@ -164,9 +215,11 @@ function ResultadoDaLista({
   if (estado.dados.length > 0) {
     return (
       <TabelaDeReservas
+        ref={regiaoDaTabela}
         reservas={estado.dados}
         legenda={estado.mensagem}
         nomesDosEspacos={nomesDosEspacos}
+        aoEscolherAcao={aoEscolherAcao}
       />
     )
   }

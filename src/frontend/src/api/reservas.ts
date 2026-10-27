@@ -7,6 +7,12 @@ export type Solicitante = {
   matricula: string
 }
 
+export type AcaoDisponivel = {
+  situacao: string
+  rotulo: string
+  exige_motivo: boolean
+}
+
 export type Reserva = {
   id: number
   espaco_id: number
@@ -19,6 +25,12 @@ export type Reserva = {
   situacao_rotulo: string
   motivo_da_situacao: string | null
   criada_em: string
+  acoes_disponiveis: AcaoDisponivel[]
+}
+
+export type AlteracaoDeSituacao = {
+  situacao: string
+  motivo?: string
 }
 
 export type DadosDaReserva = {
@@ -62,6 +74,13 @@ export function listarReservas({
       minhas: minhas ? 'true' : undefined,
     }),
   )
+}
+
+export function alterarSituacaoReserva(id: number, dados: AlteracaoDeSituacao) {
+  return requisitar<Reserva>(`/reservas/${id}/situacao/`, {
+    method: 'PATCH',
+    body: JSON.stringify(dados),
+  })
 }
 
 export function listarSituacoesDeReserva() {
