@@ -18,19 +18,19 @@ ignore = ["N818"]
 "config/settings.py" = ["E501"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["config", "compartilhado", "espacos", "reservas", "contas"]
+known-first-party = ["config", "compartilhado", "espacos", "reservas", "contas", "exemplos"]
 
 [tool.ruff.format]
 quote-style = "double"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
-testpaths = ["compartilhado", "espacos", "reservas", "contas"]
+testpaths = ["compartilhado", "espacos", "reservas", "contas", "exemplos"]
 python_files = ["test_*.py"]
 addopts = "-ra --strict-markers"
 
 [tool.coverage.run]
-source = ["compartilhado", "espacos", "reservas", "contas"]
+source = ["compartilhado", "espacos", "reservas", "contas", "exemplos"]
 branch = true
 omit = [
     "*/migrations/*",
@@ -45,7 +45,14 @@ omit = [
 show_missing = true
 
 [tool.importlinter]
-root_packages = ["config", "compartilhado", "espacos", "reservas", "contas"]
+root_packages = [
+    "config",
+    "compartilhado",
+    "espacos",
+    "reservas",
+    "contas",
+    "exemplos",
+]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
@@ -122,3 +129,9 @@ name = "Domínio e aplicação de reservas não conhecem espacos"
 type = "forbidden"
 source_modules = ["reservas.domain", "reservas.application"]
 forbidden_modules = ["espacos"]
+
+[[tool.importlinter.contracts]]
+name = "Nenhum contexto depende dos dados de exemplo"
+type = "forbidden"
+source_modules = ["compartilhado", "espacos", "reservas", "contas"]
+forbidden_modules = ["exemplos"]

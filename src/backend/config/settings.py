@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "espacos",
     "reservas",
     "contas",
+    "exemplos",
 ]
 
 MIDDLEWARE = [
