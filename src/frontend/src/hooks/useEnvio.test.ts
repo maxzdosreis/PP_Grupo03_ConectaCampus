@@ -72,6 +72,26 @@ describe('useEnvio', () => {
     expect(result.current.errosDosCampos).toEqual({})
   })
 
+  it('guarda o status HTTP do erro e o limpa no sucesso', async () => {
+    const conflito = new ErroDaApi(409, 'TRANSICAO_DE_SITUACAO_INVALIDA', 'Já foi alterada.')
+    const enviar = vi
+      .fn<(dados: Dados) => Promise<RespostaSucesso<number>>>()
+      .mockRejectedValueOnce(conflito)
+      .mockRejectedValueOnce(new Error('falha qualquer'))
+      .mockResolvedValueOnce(RESPOSTA)
+    const { result } = renderizar(enviar)
+
+    await act(() => result.current.enviar({ nome: 'Ginásio' }))
+    expect(result.current.statusDoErro).toBe(409)
+
+    await act(() => result.current.enviar({ nome: 'Ginásio' }))
+    expect(result.current.statusDoErro).toBeNull()
+
+    await act(() => result.current.enviar({ nome: 'Ginásio' }))
+    expect(result.current.statusDoErro).toBeNull()
+    expect(result.current.erroGeral).toBeNull()
+  })
+
   it('limparErroDoCampo remove só o erro daquele campo', async () => {
     const { result } = renderizar(() => Promise.reject(ERRO_COM_CAMPOS))
     await act(() => result.current.enviar({ nome: '' }))

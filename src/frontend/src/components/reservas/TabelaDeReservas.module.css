@@ -41,6 +41,22 @@
   overflow-wrap: anywhere;
 }
 
+.acoes {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.acao {
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--fonte-pequena);
+  color: var(--cor-primaria);
+  background-color: var(--cor-superficie);
+}
+
+.acao:hover {
+  color: var(--cor-sobre-primaria);
+}
+
 .secundario {
   display: block;
   margin-top: var(--espaco-1);

@@ -301,6 +301,7 @@ def test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao(cliente, bruno, m
         "situacao_rotulo": "Cancelada",
         "motivo_da_situacao": "Chuva forte",
         "criada_em": dados["criada_em"],
+        "acoes_disponiveis": [],
     }
 
 

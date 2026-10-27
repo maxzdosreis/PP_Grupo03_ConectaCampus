@@ -125,6 +125,45 @@ def test_fluxo_da_demonstracao_ate_concluida(cliente, reserva_id):
     assert detalhe["situacao_rotulo"] == "Concluída"
 
 
+def _acao(situacao, rotulo, exige_motivo=False):
+    return {"situacao": situacao, "rotulo": rotulo, "exige_motivo": exige_motivo}
+
+
+def test_reserva_solicitada_traz_confirmar_recusar_e_cancelar(cliente, reserva_id):
+    # Act
+    acoes = _detalhe(cliente, reserva_id)["acoes_disponiveis"]
+
+    # Assert
+    assert acoes == [
+        _acao("CONFIRMADA", "Confirmar"),
+        _acao("RECUSADA", "Recusar", exige_motivo=True),
+        _acao("CANCELADA", "Cancelar", exige_motivo=True),
+    ]
+
+
+def test_reserva_confirmada_traz_cancelar_e_concluir(cliente, reserva_id):
+    # Act
+    resposta = _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+
+    # Assert
+    assert resposta.data["dados"]["acoes_disponiveis"] == [
+        _acao("CANCELADA", "Cancelar", exige_motivo=True),
+        _acao("CONCLUIDA", "Concluir"),
+    ]
+
+
+def test_reserva_concluida_nao_traz_acoes(cliente, reserva_id):
+    # Arrange
+    _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+
+    # Act
+    resposta = _alterar(cliente, reserva_id, {"situacao": "CONCLUIDA"})
+
+    # Assert
+    assert resposta.data["dados"]["acoes_disponiveis"] == []
+    assert _detalhe(cliente, reserva_id)["acoes_disponiveis"] == []
+
+
 def test_transicao_proibida_responde_409_e_preserva_a_reserva(cliente, reserva_id):
     # Arrange
     antes = _detalhe(cliente, reserva_id)

@@ -1,0 +1,47 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.formulario textarea {
+  resize: vertical;
+}
+
+.erro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+.detalhes dt {
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+}
+
+.detalhes dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.secundario {
+  color: var(--cor-primaria);
+  background-color: var(--cor-superficie);
+}
+
+.secundario:hover {
+  color: var(--cor-sobre-primaria);
+}

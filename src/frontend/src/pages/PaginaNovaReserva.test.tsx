@@ -55,6 +55,7 @@ const RESERVA: Reserva = {
   situacao_rotulo: 'Solicitada',
   motivo_da_situacao: null,
   criada_em: '2026-10-24T09:00:00-03:00',
+  acoes_disponiveis: [],
 }
 
 const MENSAGEM_DE_SUCESSO = 'Reserva solicitada com sucesso. Aguarde a confirmação do gestor.'

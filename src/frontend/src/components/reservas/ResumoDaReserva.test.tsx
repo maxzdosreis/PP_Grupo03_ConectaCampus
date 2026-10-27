@@ -16,6 +16,7 @@ const RESERVA: Reserva = {
   situacao_rotulo: 'Solicitada',
   motivo_da_situacao: null,
   criada_em: '2026-10-25T10:00:00-03:00',
+  acoes_disponiveis: [],
 }
 
 describe('ResumoDaReserva', () => {
