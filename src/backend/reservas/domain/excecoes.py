@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from compartilhado.domain.erros import (
+    AcaoNaoPermitida,
     ConflitoDeEstado,
     DadosInvalidos,
     RecursoNaoEncontrado,
@@ -51,6 +52,16 @@ class TransicaoDeSituacaoInvalida(ConflitoDeEstado):
         self.nova = nova
         super().__init__(
             f"Não é possível alterar uma reserva {atual.rotulo} para {nova.rotulo}."
+        )
+
+
+class AlteracaoDeSituacaoNaoPermitida(AcaoNaoPermitida):
+    codigo = "ACAO_NAO_PERMITIDA"
+
+    def __init__(self, nova: SituacaoReserva) -> None:
+        self.nova = nova
+        super().__init__(
+            f"Somente o gestor pode {nova.rotulo_da_acao.lower()} reservas."
         )
 
 

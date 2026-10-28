@@ -21,6 +21,7 @@ from exemplos.dados import (
 )
 from reservas.api.dependencias import consultar_reservas
 from reservas.application.repositorio import FiltrosDeReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.situacao import SituacaoReserva
 
@@ -31,6 +32,7 @@ URL_RESERVAS = reverse("reservas:lista")
 COMANDO = "carregar_dados_exemplo"
 EMAIL_DO_README = "ana@exemplo.com"
 MATRICULA_DO_README = "2026001"
+QUALQUER_GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
 
 
 @pytest.fixture(autouse=True)
@@ -45,7 +47,7 @@ def _carregar():
 
 
 def _reservas():
-    return consultar_reservas().executar(FiltrosDeReservas())
+    return consultar_reservas().executar(FiltrosDeReservas(), ator=QUALQUER_GESTOR)
 
 
 def _espacos():

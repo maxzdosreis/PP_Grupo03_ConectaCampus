@@ -1,10 +1,10 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from compartilhado.api.respostas import mensagem_de_contagem, resposta_sucesso
 from reservas.api import dependencias
-from reservas.api.autenticacao import solicitante_autenticado
+from reservas.api.autenticacao import ator_autenticado, solicitante_autenticado
 from reservas.api.serializers import (
     AlteracaoDeSituacaoSerializer,
     FiltrosReservasSerializer,
@@ -15,15 +15,13 @@ from reservas.api.serializers import (
 from reservas.domain.situacao import SituacaoReserva
 
 
-# AUT-05: SOLICITANTE só vê as próprias (lista filtrada; detalhe de outra pessoa → 404).
 class ReservasView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
+        ator = ator_autenticado(request)
         filtros = FiltrosReservasSerializer(data=request.query_params)
         filtros.is_valid(raise_exception=True)
         reservas = dependencias.consultar_reservas().executar(
-            filtros.para_filtros(request.user.pk)
+            filtros.para_filtros(ator.usuario_id), ator=ator
         )
         return resposta_sucesso(
             mensagem_de_contagem(
@@ -32,7 +30,7 @@ class ReservasView(APIView):
                 um="1 reserva encontrada.",
                 varios="{total} reservas encontradas.",
             ),
-            ReservaSaidaSerializer(reservas, many=True).data,
+            _saida(reservas, ator, many=True),
         )
 
     def post(self, request):
@@ -43,37 +41,32 @@ class ReservasView(APIView):
         )
         return resposta_sucesso(
             "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.",
-            ReservaSaidaSerializer(reserva).data,
+            _saida(reserva, ator_autenticado(request)),
             status=status.HTTP_201_CREATED,
         )
 
 
-# AUT-05: SOLICITANTE só vê as próprias (lista filtrada; detalhe de outra pessoa → 404).
 class ReservaDetalheView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, reserva_id):
-        reserva = dependencias.obter_reserva().executar(reserva_id)
-        return resposta_sucesso(
-            "Reserva encontrada.", ReservaSaidaSerializer(reserva).data
-        )
+        ator = ator_autenticado(request)
+        reserva = dependencias.obter_reserva().executar(reserva_id, ator=ator)
+        return resposta_sucesso("Reserva encontrada.", _saida(reserva, ator))
 
 
-# AUT-05: GESTOR confirma, recusa, conclui e cancela; SOLICITANTE só cancela as próprias
 class ReservaSituacaoView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def patch(self, request, reserva_id):
+        ator = ator_autenticado(request)
         entrada = AlteracaoDeSituacaoSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
         reserva = dependencias.alterar_situacao_reserva().executar(
             reserva_id=reserva_id,
             nova_situacao=entrada.validated_data["situacao"],
             motivo=entrada.validated_data.get("motivo"),
+            ator=ator,
         )
         return resposta_sucesso(
             f"Reserva {reserva.situacao.rotulo.lower()} com sucesso.",
-            ReservaSaidaSerializer(reserva).data,
+            _saida(reserva, ator),
         )
 
 
@@ -85,3 +78,7 @@ class SituacoesDeReservaView(APIView):
             "Situações de reserva disponíveis.",
             SituacaoDeReservaSaidaSerializer(list(SituacaoReserva), many=True).data,
         )
+
+
+def _saida(reservas, ator, *, many=False):
+    return ReservaSaidaSerializer(reservas, many=many, context={"ator": ator}).data

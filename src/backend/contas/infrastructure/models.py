@@ -102,6 +102,10 @@ class Usuario(AbstractUser):
         self.nome = normalizar_nome(self.nome)
         self.matricula = self.matricula.strip()
 
+    @property
+    def eh_gestor(self) -> bool:
+        return self.perfil == PerfilUsuario.GESTOR
+
     def get_full_name(self):
         return self.nome
 

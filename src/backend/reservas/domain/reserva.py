@@ -1,18 +1,24 @@
 from datetime import date, datetime, time
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
+    AlteracaoDeSituacaoNaoPermitida,
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
+    ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
 )
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.situacao import (
+    DESTINOS_DE_TRANSICAO,
     SITUACOES_QUE_EXIGEM_MOTIVO,
     SituacaoReserva,
+    papel_pode_levar_a,
     transicao_permitida,
+    transicoes_a_partir_de,
 )
 from reservas.domain.solicitante import Solicitante
 from reservas.domain.texto import exigir_tamanho_maximo, normalizar_espacos
@@ -72,10 +78,27 @@ class Reserva:
             criada_em=agora,
         )
 
+    def visivel_para(self, ator: Ator) -> bool:
+        if ator.papel is PapelDoAtor.GESTOR:
+            return True
+        return self.solicitante.usuario_id == ator.usuario_id
+
+    def acoes_permitidas_para(self, ator: Ator) -> list[SituacaoReserva]:
+        if not self.visivel_para(ator):
+            return []
+        return [
+            nova
+            for nova in transicoes_a_partir_de(self.situacao)
+            if papel_pode_levar_a(ator.papel, nova)
+        ]
+
     def alterar_situacao(
-        self, nova: SituacaoReserva | str, *, motivo: str | None = None
+        self, nova: SituacaoReserva | str, *, motivo: str | None = None, ator: Ator
     ) -> None:
+        if not self.visivel_para(ator):
+            raise ReservaNaoEncontrada(self.id)
         nova = _converter_situacao(nova)
+        _exigir_permissao(ator.papel, nova)
         if not transicao_permitida(self.situacao, nova):
             raise TransicaoDeSituacaoInvalida(self.situacao, nova)
         motivo_normalizado = _normalizar_motivo(motivo)
@@ -152,6 +175,11 @@ def _normalizar_motivo(motivo: str | None) -> str | None:
 def _exigir_motivo_se_necessario(situacao: SituacaoReserva, motivo: str | None) -> None:
     if situacao in SITUACOES_QUE_EXIGEM_MOTIVO and motivo is None:
         raise MotivoObrigatorio()
+
+
+def _exigir_permissao(papel: PapelDoAtor, nova: SituacaoReserva) -> None:
+    if nova in DESTINOS_DE_TRANSICAO and not papel_pode_levar_a(papel, nova):
+        raise AlteracaoDeSituacaoNaoPermitida(nova)
 
 
 def _converter_situacao(situacao: SituacaoReserva | str | None) -> SituacaoReserva:

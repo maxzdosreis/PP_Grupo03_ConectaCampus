@@ -96,7 +96,7 @@ Enquanto o login no frontend não existir (AUT-06), o roteiro é feito com `curl
    curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d '{"email": "bruno.lima@exemplo.com", "senha": "Rede-Alta-73"}'
    ```
 
-2. Consultar as reservas (as cinco situações, cada uma com as suas `acoes_disponiveis`) e filtrar por dois critérios:
+2. Consultar as reservas e filtrar por dois critérios. Como Solicitante, o Bruno só vê as próprias (Solicitada, Recusada e Concluída), e `acoes_disponiveis` só traz "Cancelar" na Solicitada:
 
    ```bash
    curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
@@ -116,13 +116,15 @@ Enquanto o login no frontend não existir (AUT-06), o roteiro é feito com `curl
    curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "16:00", "hora_fim": "17:00", "finalidade": "Treino de futsal"}'
    ```
 
-5. Entrar como a gestora Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), guardar o novo `access` em `ACCESS` e confirmar a reserva do passo 4 (troque `ID`):
+5. Ação sem permissão: ainda como Bruno, tentar confirmar a reserva do passo 4 (troque `ID`) → **403** `ACAO_NAO_PERMITIDA`, `"Somente o gestor pode confirmar reservas."`, e a reserva continua Solicitada:
 
    ```bash
    curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
    ```
 
-6. Concluir a mesma reserva → **200** `"Reserva concluída com sucesso."`, com `acoes_disponiveis` vazia:
+6. Entrar como a gestora Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), guardar o novo `access` em `ACCESS` e repetir o mesmo comando → **200** `"Reserva confirmada com sucesso."`. A gestora vê as reservas de todos.
+
+7. Concluir a mesma reserva → **200** `"Reserva concluída com sucesso."`, com `acoes_disponiveis` vazia:
 
    ```bash
    curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONCLUIDA"}'
@@ -155,7 +157,7 @@ docker compose exec backend python manage.py carregar_dados_exemplo
 
 ### Exemplos de uso da API
 
-Por enquanto os endpoints de espaços não exigem login; a restrição do cadastro ao perfil Gestor entra na AUT-05. Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
+Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/` e `GET /api/reservas/situacoes/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Para os exemplos de espaços, entre como a gestora de exemplo Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), porque só o Gestor cadastra espaços, e guarde o `access` em `ACCESS` como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token). Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
 
 Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`. A mesma lista, com os rótulos, sai de `GET /api/espacos/tipos/` (é dela que o frontend monta os seletores):
 
@@ -167,16 +169,16 @@ curl http://localhost:8000/api/espacos/tipos/
 {"mensagem": "Tipos de espaço disponíveis.", "dados": [{"valor": "QUADRA_POLIESPORTIVA", "rotulo": "Quadra poliesportiva"}, {"valor": "CAMPO_DE_FUTEBOL", "rotulo": "Campo de futebol"}, {"valor": "GINASIO", "rotulo": "Ginásio"}, {"valor": "QUADRA_DE_AREIA", "rotulo": "Quadra de areia"}, {"valor": "QUADRA_DE_TENIS", "rotulo": "Quadra de tênis"}]}
 ```
 
-Cadastrar um espaço (`POST /api/espacos/`):
+Cadastrar um espaço (`POST /api/espacos/`, só Gestor):
 
 ```bash
-curl -X POST http://localhost:8000/api/espacos/ -H "Content-Type: application/json" -d '{"nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20}'
+curl -X POST http://localhost:8000/api/espacos/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20}'
 ```
 
 No Prompt de Comando do Windows, as aspas internas são escapadas:
 
 ```bat
-curl -X POST http://localhost:8000/api/espacos/ -H "Content-Type: application/json" -d "{\"nome\": \"Quadra Central\", \"tipo\": \"QUADRA_POLIESPORTIVA\", \"capacidade\": 20}"
+curl -X POST http://localhost:8000/api/espacos/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"nome\": \"Quadra Central\", \"tipo\": \"QUADRA_POLIESPORTIVA\", \"capacidade\": 20}"
 ```
 
 Resposta **201**:
@@ -191,14 +193,18 @@ Repetir o mesmo cadastro responde **409**:
 {"erro": {"codigo": "NOME_DE_ESPACO_JA_CADASTRADO", "mensagem": "Já existe um espaço com este nome.", "campos": {"nome": ["Já existe um espaço com este nome."]}}}
 ```
 
-Outros erros de cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; tipo fora da lista → **400** `TIPO_DE_ESPACO_INVALIDO`; nome vazio → **400** `CAMPO_OBRIGATORIO_AUSENTE`.
+Outros erros de cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; tipo fora da lista → **400** `TIPO_DE_ESPACO_INVALIDO`; nome vazio → **400** `CAMPO_OBRIGATORIO_AUSENTE`; token de um Solicitante → **403**:
+
+```json
+{"erro": {"codigo": "ACAO_NAO_PERMITIDA", "mensagem": "Você não tem permissão para realizar esta ação."}}
+```
 
 > No Windows, nomes com acento passados direto no `-d` podem chegar fora de UTF-8 e a API responde `JSON_INVALIDO`. Nesse caso, salve o corpo num arquivo UTF-8 e envie com `--data-binary @espaco.json`.
 
-Listar os espaços (`GET /api/espacos/`), ordenados por nome. Filtros opcionais: `apenas_ativos=true` e `tipo=<TIPO>`, combináveis:
+Listar os espaços (`GET /api/espacos/`, qualquer usuário logado), ordenados por nome. Filtros opcionais: `apenas_ativos=true` e `tipo=<TIPO>`, combináveis:
 
 ```bash
-curl "http://localhost:8000/api/espacos/?tipo=QUADRA_POLIESPORTIVA&apenas_ativos=true"
+curl "http://localhost:8000/api/espacos/?tipo=QUADRA_POLIESPORTIVA&apenas_ativos=true" -H "Authorization: Bearer $ACCESS"
 ```
 
 ```json
@@ -208,7 +214,7 @@ curl "http://localhost:8000/api/espacos/?tipo=QUADRA_POLIESPORTIVA&apenas_ativos
 Obter um espaço (`GET /api/espacos/{id}/`):
 
 ```bash
-curl http://localhost:8000/api/espacos/1/
+curl http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer $ACCESS"
 ```
 
 Um id inexistente responde **404**:
@@ -324,8 +330,10 @@ curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer %ACCE
 Resposta **201**, com a reserva na situação inicial `SOLICITADA` (a resposta traz `espaco_id`; o nome do espaço vem da listagem de espaços):
 
 ```json
-{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": false}, {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": true}, {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}}
+{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}}
 ```
+
+`acoes_disponiveis` depende de quem pergunta: a Ana é Solicitante e, na própria reserva Solicitada, só pode cancelar. A mesma reserva vista por um Gestor traz Confirmar, Recusar e Cancelar.
 
 Repetir o pedido no mesmo horário responde **409**:
 
@@ -347,7 +355,7 @@ Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas orde
 | `solicitante` | `solicitante=souza` | trecho do nome ou da matrícula, sem diferenciar maiúsculas |
 | `minhas` | `minhas=true` | só as reservas do usuário logado |
 
-> Por enquanto, qualquer usuário logado vê todas as reservas. A restrição do perfil Solicitante às próprias reservas entra na AUT-05.
+> O Solicitante só vê as próprias reservas, qualquer que seja o filtro (inclusive `minhas=false` ou `solicitante=` com o nome de outra pessoa). O Gestor vê todas e pode filtrar por solicitante.
 
 Por um critério:
 
@@ -370,7 +378,7 @@ curl "http://localhost:8000/api/reservas/?minhas=true" -H "Authorization: Bearer
 Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
 
 ```json
-{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": false}, {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": true}, {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
+{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
 ```
 
 Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
@@ -397,6 +405,16 @@ Um id inexistente responde **404**:
 {"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 9999 não encontrada."}}
 ```
 
+Para um Solicitante, a reserva de outra pessoa também responde **404**, e não 403, para não revelar que ela existe. Com os dados de exemplo, logado como Bruno, pedir a reserva Confirmada da Daniela (troque `ID_DA_DANIELA` pelo id que a gestora vê em `GET /api/reservas/`):
+
+```bash
+curl http://localhost:8000/api/reservas/ID_DA_DANIELA/ -H "Authorization: Bearer $ACCESS"
+```
+
+```json
+{"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 2 não encontrada."}}
+```
+
 #### Alterar a situação de uma reserva
 
 Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. Cada reserva devolvida pela API traz `acoes_disponiveis`, com as mudanças aceitas a partir da situação atual, o texto do botão e se exigem motivo. O corpo leva `situacao` e, para recusar ou cancelar, um `motivo`. Só estas mudanças são aceitas:
@@ -407,9 +425,22 @@ Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. Cada re
 | `CONFIRMADA` | `CONCLUIDA`, `CANCELADA` (com motivo) |
 | `CONCLUIDA`, `RECUSADA`, `CANCELADA` | nenhuma (situações finais) |
 
-> Por enquanto, qualquer usuário logado executa qualquer mudança permitida. A restrição por perfil (Gestor confirma, recusa, conclui e cancela; Solicitante só cancela as próprias) entra na AUT-05.
+Quem pode fazer cada mudança:
 
-Confirmar a reserva:
+| Perfil | Pode levar para |
+|---|---|
+| Gestor | `CONFIRMADA`, `RECUSADA`, `CONCLUIDA`, `CANCELADA`, em qualquer reserva |
+| Solicitante | só `CANCELADA`, e só nas próprias reservas |
+
+Um Solicitante que tenta confirmar, recusar ou concluir recebe **403**, mesmo que a mudança fosse inválida pela tabela de situações, e a reserva fica como estava. Com o token do Bruno, confirmar a própria reserva:
+
+```json
+{"erro": {"codigo": "ACAO_NAO_PERMITIDA", "mensagem": "Somente o gestor pode confirmar reservas."}}
+```
+
+Mudar a situação da reserva de outra pessoa responde **404** `RESERVA_NAO_ENCONTRADA`, como no detalhe.
+
+Confirmar a reserva (com o token de um Gestor):
 
 ```bash
 curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
@@ -544,5 +575,4 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 ## Limitações conhecidas
 
 - **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia.
-- **Perfis ainda sem efeito:** até a AUT-05, qualquer usuário logado vê todas as reservas e executa qualquer mudança de situação permitida, seja Gestor ou Solicitante.
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.

@@ -12,6 +12,7 @@ from espacos.api.dependencias import cadastrar_espaco, listar_espacos
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 from exemplos.dados import (
     ESPACOS,
+    GESTOR,
     RESERVAS,
     SOLICITANTES,
     USUARIOS,
@@ -25,6 +26,7 @@ from reservas.api.dependencias import (
     criar_reserva,
 )
 from reservas.application.repositorio import FiltrosDeReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
@@ -55,8 +57,9 @@ def garantir_espacos() -> ResultadoDaEtapa:
 
 
 def garantir_reservas(hoje: date, agora: datetime) -> ResultadoDaEtapa:
+    gestor = _ator_do_gestor()
     solicitantes = _solicitantes_de_exemplo()
-    ja_existentes = _contar_reservas_de(solicitantes.values())
+    ja_existentes = _contar_reservas_de(solicitantes.values(), gestor)
     if ja_existentes:
         return ResultadoDaEtapa(criados=0, existentes=ja_existentes)
     ids_dos_espacos = _ids_dos_espacos()
@@ -67,6 +70,7 @@ def garantir_reservas(hoje: date, agora: datetime) -> ResultadoDaEtapa:
             espaco_id=ids_dos_espacos[_chave(exemplo.espaco)],
             data=hoje + timedelta(days=exemplo.dias_a_partir_de_hoje),
             agora=agora,
+            gestor=gestor,
         )
     return ResultadoDaEtapa(criados=len(RESERVAS), existentes=0)
 
@@ -112,15 +116,20 @@ def _criar_reserva(
     espaco_id: int,
     data: date,
     agora: datetime,
+    gestor: Ator,
 ) -> None:
     if exemplo.no_passado:
         _reconstituir_reserva_passada(exemplo, solicitante, espaco_id, data, agora)
     else:
-        _solicitar_reserva(exemplo, solicitante, espaco_id, data)
+        _solicitar_reserva(exemplo, solicitante, espaco_id, data, gestor)
 
 
 def _solicitar_reserva(
-    exemplo: ReservaDeExemplo, solicitante: Solicitante, espaco_id: int, data: date
+    exemplo: ReservaDeExemplo,
+    solicitante: Solicitante,
+    espaco_id: int,
+    data: date,
+    gestor: Ator,
 ) -> None:
     reserva = criar_reserva().executar(
         espaco_id=espaco_id,
@@ -135,6 +144,7 @@ def _solicitar_reserva(
             reserva_id=reserva.id,
             nova_situacao=exemplo.situacao,
             motivo=exemplo.motivo,
+            ator=gestor,
         )
 
 
@@ -170,10 +180,19 @@ def _solicitante_de(email: str) -> Solicitante:
     )
 
 
-def _contar_reservas_de(solicitantes: Iterable[Solicitante]) -> int:
+def _ator_do_gestor() -> Ator:
+    usuario = Usuario.objects.get_by_natural_key(GESTOR.email)
+    return Ator(usuario_id=usuario.pk, papel=PapelDoAtor.GESTOR)
+
+
+def _contar_reservas_de(solicitantes: Iterable[Solicitante], gestor: Ator) -> int:
     consulta = consultar_reservas()
     return sum(
-        len(consulta.executar(FiltrosDeReservas(solicitante_usuario_id=s.usuario_id)))
+        len(
+            consulta.executar(
+                FiltrosDeReservas(solicitante_usuario_id=s.usuario_id), ator=gestor
+            )
+        )
         for s in solicitantes
     )
 
