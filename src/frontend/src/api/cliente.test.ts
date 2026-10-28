@@ -13,7 +13,17 @@ function resposta(status: number, corpo: unknown): Response {
   return { ok: status >= 200 && status < 300, status, json: async () => corpo } as Response
 }
 
-const SUCESSO = resposta(200, { mensagem: 'ok', dados: [] })
+function respostaSemJson(status: number): Response {
+  return {
+    ok: false,
+    status,
+    json: async () => {
+      throw new SyntaxError('Unexpected token <')
+    },
+  } as unknown as Response
+}
+
+const SUCESSO =resposta(200, { mensagem: 'ok', dados: [] })
 const NAO_AUTENTICADO = resposta(401, {
   erro: { codigo: 'NAO_AUTENTICADO', mensagem: 'Faça login para continuar.' },
 })
@@ -174,16 +184,68 @@ describe('cliente da API', () => {
     expect(lerSessao()).toBeNull()
   })
 
-  it('sem conexão na renovação, mantém a sessão e lança SEM_CONEXAO', async () => {
-    apiQueAceitaSo('access-2', () => {
-      throw new TypeError('Failed to fetch')
-    })
+  it('refresh vazio recusado com 400 também encerra a sessão', async () => {
+    apiQueAceitaSo('access-2', () =>
+      resposta(400, {
+        erro: {
+          codigo: 'DADOS_INVALIDOS',
+          mensagem: 'Verifique os dados informados.',
+          campos: { refresh: ['Este campo não pode ser em branco.'] },
+        },
+      }),
+    )
 
     const erro = await erroDe(requisitar('/reservas/'))
 
-    expect(erro.codigo).toBe('SEM_CONEXAO')
-    expect(lerSessao()?.access).toBe('access-1')
+    expect(erro.codigo).toBe('SESSAO_EXPIRADA')
+    expect(lerSessao()).toBeNull()
   })
+
+  const FALHAS_PASSAGEIRAS: [string, () => Response, string][] = [
+    [
+      'sem conexão',
+      () => {
+        throw new TypeError('Failed to fetch')
+      },
+      'SEM_CONEXAO',
+    ],
+    [
+      '429',
+      () =>
+        resposta(429, {
+          erro: { codigo: 'MUITAS_REQUISICOES', mensagem: 'Muitas requisições. Tente de novo.' },
+        }),
+      'MUITAS_REQUISICOES',
+    ],
+    [
+      '500',
+      () => resposta(500, { erro: { codigo: 'ERRO_INTERNO', mensagem: 'Erro interno.' } }),
+      'ERRO_INTERNO',
+    ],
+    ['503 sem JSON', () => respostaSemJson(503), 'ERRO_INESPERADO'],
+  ]
+
+  it.each(FALHAS_PASSAGEIRAS)(
+    'refresh com falha passageira (%s) mantém a sessão, lança o erro e deixa tentar de novo',
+    async (_, falhar, codigo) => {
+      let recuperada = false
+      apiQueAceitaSo('access-2', () => (recuperada ? renovado('access-2') : falhar()))
+      const ouvinte = vi.fn()
+      const cancelar = aoMudarSessao(ouvinte)
+
+      const erro = await erroDe(requisitar('/reservas/'))
+      cancelar()
+
+      expect(erro.codigo).toBe(codigo)
+      expect(lerSessao()?.access).toBe('access-1')
+      expect(ouvinte).not.toHaveBeenCalled()
+
+      recuperada = true
+      await expect(requisitar('/reservas/')).resolves.toEqual({ mensagem: 'ok', dados: [] })
+      expect(chamadasDeRenovacao()).toHaveLength(2)
+      expect(lerSessao()?.access).toBe('access-2')
+    },
+  )
 
   it('401 CREDENCIAIS_INVALIDAS no login não dispara renovação', async () => {
     fetchFalso.mockResolvedValue(

@@ -114,6 +114,10 @@ function tokenRecusado({ resposta, corpo }: Retorno): boolean {
   )
 }
 
+function refreshRecusado(erro: unknown): boolean {
+  return erro instanceof ErroDaApi && (erro.status === 400 || erro.status === 401)
+}
+
 let renovacaoEmAndamento: Promise<string | null> | null = null
 
 async function renovar(): Promise<string | null> {
@@ -128,8 +132,8 @@ async function renovar(): Promise<string | null> {
     atualizarAccess(dados.access)
     return dados.access
   } catch (erro) {
-    if (erro instanceof ErroDaApi && erro.status === 0) throw erro
-    return null
+    if (refreshRecusado(erro)) return null
+    throw erro
   }
 }
 
