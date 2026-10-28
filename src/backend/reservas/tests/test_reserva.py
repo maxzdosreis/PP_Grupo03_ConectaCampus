@@ -5,6 +5,7 @@ import pytest
 
 from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import CampoObrigatorioAusente, TextoMuitoLongo
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
@@ -26,6 +27,7 @@ S = SituacaoReserva
 SAO_PAULO = ZoneInfo("America/Sao_Paulo")
 AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 SOLICITANTE = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
+GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
 
 TRANSICOES_PERMITIDAS = [
     (S.SOLICITADA, S.CONFIRMADA),
@@ -268,7 +270,7 @@ def test_transicao_permitida_altera_a_situacao(atual, nova):
     reserva = _reconstituir(situacao=atual)
 
     # Act
-    reserva.alterar_situacao(nova, motivo=_motivo_para(nova))
+    reserva.alterar_situacao(nova, motivo=_motivo_para(nova), ator=GESTOR)
 
     # Assert
     assert reserva.situacao is nova
@@ -283,7 +285,7 @@ def test_transicao_proibida_e_recusada_e_preserva_a_situacao(atual, nova):
 
     # Act
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        reserva.alterar_situacao(nova, motivo="Outro motivo")
+        reserva.alterar_situacao(nova, motivo="Outro motivo", ator=GESTOR)
 
     # Assert
     assert reserva.situacao is atual
@@ -297,7 +299,7 @@ def test_transicao_proibida_tem_mensagem_com_os_rotulos():
 
     # Act
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        reserva.alterar_situacao(S.CANCELADA, motivo="Desistência")
+        reserva.alterar_situacao(S.CANCELADA, motivo="Desistência", ator=GESTOR)
 
     # Assert
     assert erro.value.mensagem == (
@@ -313,7 +315,7 @@ def test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda(nova, motivo):
 
     # Act
     with pytest.raises(MotivoObrigatorio) as erro:
-        reserva.alterar_situacao(nova, motivo=motivo)
+        reserva.alterar_situacao(nova, motivo=motivo, ator=GESTOR)
 
     # Assert
     assert erro.value.campo == "motivo"
@@ -328,7 +330,7 @@ def test_motivo_acima_do_limite_e_recusado_e_nada_muda():
     # Act
     with pytest.raises(TextoMuitoLongo) as erro:
         reserva.alterar_situacao(
-            S.RECUSADA, motivo="A" * (MOTIVO_MAXIMO_CARACTERES + 1)
+            S.RECUSADA, motivo="A" * (MOTIVO_MAXIMO_CARACTERES + 1), ator=GESTOR
         )
 
     # Assert
@@ -341,7 +343,9 @@ def test_motivo_opcional_ao_confirmar_e_guardado_normalizado():
     reserva = _reconstituir(situacao=S.SOLICITADA)
 
     # Act
-    reserva.alterar_situacao(S.CONFIRMADA, motivo="  Liberada   pela gestão ")
+    reserva.alterar_situacao(
+        S.CONFIRMADA, motivo="  Liberada   pela gestão ", ator=GESTOR
+    )
 
     # Assert
     assert reserva.motivo_da_situacao == "Liberada pela gestão"
@@ -352,7 +356,7 @@ def test_nova_situacao_limpa_o_motivo_da_anterior():
     reserva = _reconstituir(situacao=S.CONFIRMADA, motivo_da_situacao="Liberada")
 
     # Act
-    reserva.alterar_situacao(S.CONCLUIDA)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR)
 
     # Assert
     assert reserva.motivo_da_situacao is None
@@ -363,7 +367,7 @@ def test_situacao_como_texto_e_aceita():
     reserva = _reconstituir(situacao=S.SOLICITADA)
 
     # Act
-    reserva.alterar_situacao("CONFIRMADA")
+    reserva.alterar_situacao("CONFIRMADA", ator=GESTOR)
 
     # Assert
     assert reserva.situacao is S.CONFIRMADA
@@ -375,7 +379,7 @@ def test_situacao_desconhecida_e_recusada_e_nada_muda():
 
     # Act
     with pytest.raises(SituacaoInvalida) as erro:
-        reserva.alterar_situacao("PENDENTE")
+        reserva.alterar_situacao("PENDENTE", ator=GESTOR)
 
     # Assert
     assert erro.value.campo == "situacao"

@@ -1,6 +1,5 @@
 import pytest
 from django.urls import reverse
-from rest_framework.test import APIClient
 
 from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
@@ -10,8 +9,8 @@ from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFach
 ID_INEXISTENTE = 9999
 
 
-def _cadastrar_espaco_pela_api(nome):
-    resposta = APIClient().post(
+def _cadastrar_espaco_pela_api(cliente, nome):
+    resposta = cliente.post(
         reverse("espacos:lista"),
         {"nome": nome, "tipo": "GINASIO", "capacidade": 30},
         format="json",
@@ -21,9 +20,9 @@ def _cadastrar_espaco_pela_api(nome):
 
 
 @pytest.mark.django_db
-def test_espaco_ativo_cadastrado_pela_api_vira_espaco_reservavel():
+def test_espaco_ativo_cadastrado_pela_api_vira_espaco_reservavel(cliente_gestor):
     # Arrange
-    cadastrado = _cadastrar_espaco_pela_api("Ginásio Central")
+    cadastrado = _cadastrar_espaco_pela_api(cliente_gestor, "Ginásio Central")
 
     # Act
     espaco = ConsultaDeEspacosViaFachada().obter_espaco_reservavel(cadastrado["id"])

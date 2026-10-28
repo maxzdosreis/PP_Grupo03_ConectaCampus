@@ -1,11 +1,7 @@
 from rest_framework import serializers
 
 from reservas.application.repositorio import FiltrosDeReservas
-from reservas.domain.situacao import (
-    SITUACOES_QUE_EXIGEM_MOTIVO,
-    SituacaoReserva,
-    transicoes_a_partir_de,
-)
+from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserva
 
 _MAIOR_IDENTIFICADOR_DO_BANCO = 9_223_372_036_854_775_807
 _FORMATO_DA_HORA = "%H:%M"
@@ -93,6 +89,5 @@ class ReservaSaidaSerializer(serializers.Serializer):
     acoes_disponiveis = serializers.SerializerMethodField()
 
     def get_acoes_disponiveis(self, reserva):
-        destinos = transicoes_a_partir_de(reserva.situacao)
-        # AUT-05: filtrar `destinos` aqui pelo perfil de quem vê; o formato não muda.
+        destinos = reserva.acoes_permitidas_para(self.context["ator"])
         return AcaoDisponivelSaidaSerializer(destinos, many=True).data

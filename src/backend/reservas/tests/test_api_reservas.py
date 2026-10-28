@@ -2,7 +2,6 @@ import base64
 from datetime import timedelta
 
 import pytest
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -13,34 +12,19 @@ from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 pytestmark = pytest.mark.django_db
 
 URL_RESERVAS = reverse("reservas:lista")
-URL_ESPACOS = reverse("espacos:lista")
 EMAIL = "ana@exemplo.com"
 SENHA = "senha-de-teste-123"
 ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
-def usuario():
-    return get_user_model().objects.create_user(
-        EMAIL, SENHA, nome="Ana Souza", matricula="2026001"
-    )
+def usuario(usuario_solicitante):
+    return usuario_solicitante
 
 
 @pytest.fixture
-def cliente(usuario):
-    cliente = APIClient()
-    cliente.force_authenticate(user=usuario)
-    return cliente
-
-
-@pytest.fixture
-def espaco_id(cliente):
-    resposta = cliente.post(
-        URL_ESPACOS,
-        {"nome": "Quadra Coberta", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20},
-        format="json",
-    )
-    return resposta.data["dados"]["id"]
+def cliente(cliente_solicitante):
+    return cliente_solicitante
 
 
 def _amanha():
@@ -101,8 +85,6 @@ def test_solicitacao_valida_responde_201_com_a_reserva(cliente, usuario, espaco_
         "motivo_da_situacao": None,
         "criada_em": dados["criada_em"],
         "acoes_disponiveis": [
-            {"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": False},
-            {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": True},
             {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": True},
         ],
     }

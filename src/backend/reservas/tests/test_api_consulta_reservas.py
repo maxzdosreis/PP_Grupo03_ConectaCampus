@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 from reservas.api.serializers import ReservaSaidaSerializer
 from reservas.application.repositorio import FiltrosDeReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
@@ -19,6 +20,7 @@ URL_SITUACOES = reverse("reservas:situacoes")
 SENHA = "senha-de-teste-123"
 ID_INEXISTENTE = 9999
 ORDEM_POR_INICIO = ["R4", "R1", "R3", "R2"]
+ATOR_GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
 
 
 def _url_detalhe(reserva_id):
@@ -31,6 +33,12 @@ def _dia(deslocamento):
 
 def _criar_usuario(email, nome, matricula):
     return get_user_model().objects.create_user(
+        email, SENHA, nome=nome, matricula=matricula
+    )
+
+
+def _criar_gestor(email, nome, matricula):
+    return get_user_model().objects.create_superuser(
         email, SENHA, nome=nome, matricula=matricula
     )
 
@@ -66,13 +74,13 @@ def _solicitar(cliente, espaco_id, dia, hora_inicio, hora_fim):
 def _alterar_situacao(reserva_id, situacao, motivo=None):
     repositorio = RepositorioReservasDjango()
     reserva = repositorio.obter_por_id(reserva_id)
-    reserva.alterar_situacao(situacao, motivo=motivo)
+    reserva.alterar_situacao(situacao, motivo=motivo, ator=ATOR_GESTOR)
     repositorio.salvar(reserva)
 
 
 @pytest.fixture
 def ana():
-    return _criar_usuario("ana@exemplo.com", "Ana Souza", "2026001")
+    return _criar_gestor("ana@exemplo.com", "Ana Souza", "2026001")
 
 
 @pytest.fixture
@@ -115,7 +123,9 @@ def _ids_esperados(massa, nomes):
 
 def _retrato_das_reservas():
     reservas = RepositorioReservasDjango().listar(FiltrosDeReservas())
-    return ReservaSaidaSerializer(reservas, many=True).data
+    return ReservaSaidaSerializer(
+        reservas, many=True, context={"ator": ATOR_GESTOR}
+    ).data
 
 
 def test_consulta_sem_login_responde_401(massa):

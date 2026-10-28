@@ -14,8 +14,8 @@ ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
-def cliente():
-    return APIClient()
+def cliente(cliente_gestor):
+    return cliente_gestor
 
 
 def _url_detalhe(espaco_id):
@@ -274,3 +274,58 @@ def test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum(cliente):
     assert resposta.data["dados"] == [
         {"valor": tipo.value, "rotulo": tipo.rotulo} for tipo in TipoEspaco
     ]
+
+
+@pytest.mark.parametrize(
+    "url", [URL_LISTA, reverse("espacos:detalhe", args=[1])], ids=["lista", "detalhe"]
+)
+def test_consultar_espacos_sem_login_responde_401(url):
+    # Act
+    resposta = APIClient().get(url)
+
+    # Assert
+    assert resposta.status_code == 401
+    assert resposta.data["erro"]["codigo"] == "NAO_AUTENTICADO"
+
+
+def test_tipos_de_espaco_nao_exigem_login():
+    # Act
+    resposta = APIClient().get(URL_TIPOS)
+
+    # Assert
+    assert resposta.status_code == 200
+
+
+def test_cadastrar_sem_login_responde_401():
+    # Act
+    resposta = _cadastrar(APIClient())
+
+    # Assert
+    assert resposta.status_code == 401
+    assert resposta.data["erro"]["codigo"] == "NAO_AUTENTICADO"
+
+
+def test_solicitante_nao_cadastra_espaco_e_nada_e_gravado(cliente_solicitante, cliente):
+    # Act
+    resposta = _cadastrar(cliente_solicitante)
+
+    # Assert
+    assert resposta.status_code == 403
+    assert resposta.data == {
+        "erro": {
+            "codigo": "ACAO_NAO_PERMITIDA",
+            "mensagem": "Você não tem permissão para realizar esta ação.",
+        }
+    }
+    assert _nomes(_listar(cliente)) == []
+
+
+def test_solicitante_lista_e_obtem_espacos(cliente_solicitante, espaco_id):
+    # Act
+    lista = _listar(cliente_solicitante)
+    detalhe = cliente_solicitante.get(_url_detalhe(espaco_id))
+
+    # Assert
+    assert lista.status_code == 200
+    assert _nomes(lista) == ["Quadra Coberta"]
+    assert detalhe.status_code == 200

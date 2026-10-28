@@ -1,8 +1,10 @@
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import date, datetime, time
 
 from reservas.application.portas import ConsultaDeEspacos
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.reserva import Reserva
@@ -52,16 +54,16 @@ class ConsultarReservas:
     def __init__(self, repositorio: RepositorioReservas) -> None:
         self._repositorio = repositorio
 
-    def executar(self, filtros: FiltrosDeReservas) -> list[Reserva]:
-        return self._repositorio.listar(filtros)
+    def executar(self, filtros: FiltrosDeReservas, *, ator: Ator) -> list[Reserva]:
+        return self._repositorio.listar(_restringir_ao_ator(filtros, ator))
 
 
 class ObterReserva:
     def __init__(self, repositorio: RepositorioReservas) -> None:
         self._repositorio = repositorio
 
-    def executar(self, reserva_id: int) -> Reserva:
-        return _obter_ou_falhar(self._repositorio, reserva_id)
+    def executar(self, reserva_id: int, *, ator: Ator) -> Reserva:
+        return _obter_ou_falhar(self._repositorio, reserva_id, ator)
 
 
 class AlterarSituacaoReserva:
@@ -74,14 +76,23 @@ class AlterarSituacaoReserva:
         reserva_id: int,
         nova_situacao: SituacaoReserva | str,
         motivo: str | None = None,
+        ator: Ator,
     ) -> Reserva:
-        reserva = _obter_ou_falhar(self._repositorio, reserva_id)
-        reserva.alterar_situacao(nova_situacao, motivo=motivo)
+        reserva = _obter_ou_falhar(self._repositorio, reserva_id, ator)
+        reserva.alterar_situacao(nova_situacao, motivo=motivo, ator=ator)
         return self._repositorio.salvar(reserva)
 
 
-def _obter_ou_falhar(repositorio: RepositorioReservas, reserva_id: int) -> Reserva:
+def _restringir_ao_ator(filtros: FiltrosDeReservas, ator: Ator) -> FiltrosDeReservas:
+    if ator.papel is PapelDoAtor.GESTOR:
+        return filtros
+    return replace(filtros, solicitante_usuario_id=ator.usuario_id)
+
+
+def _obter_ou_falhar(
+    repositorio: RepositorioReservas, reserva_id: int, ator: Ator
+) -> Reserva:
     reserva = repositorio.obter_por_id(reserva_id)
-    if reserva is None:
+    if reserva is None or not reserva.visivel_para(ator):
         raise ReservaNaoEncontrada(reserva_id)
     return reserva

@@ -120,3 +120,28 @@ def test_senha_nao_e_gravada_em_texto_puro():
     # Assert
     assert SENHA not in usuario.password
     assert usuario.check_password(SENHA)
+
+
+@pytest.mark.parametrize(
+    ("perfil", "eh_gestor"),
+    [(PerfilUsuario.GESTOR, True), (PerfilUsuario.SOLICITANTE, False)],
+)
+def test_eh_gestor_deriva_do_perfil(perfil, eh_gestor):
+    # Arrange
+    usuario = Usuario(perfil=perfil.value, **_dados())
+
+    # Assert
+    assert usuario.eh_gestor is eh_gestor
+
+
+@pytest.mark.django_db
+def test_superusuario_e_gestor_e_usuario_comum_nao():
+    # Act
+    gestor = Usuario.objects.create_superuser(password=SENHA, **_dados())
+    comum = Usuario.objects.create_user(
+        senha=SENHA, **_dados(email="bia@x.com", matricula="2026009")
+    )
+
+    # Assert
+    assert gestor.eh_gestor
+    assert not comum.eh_gestor

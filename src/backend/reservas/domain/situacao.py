@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from reservas.domain.ator import PapelDoAtor
+
 
 class SituacaoReserva(StrEnum):
     SOLICITADA = "SOLICITADA"
@@ -56,6 +58,20 @@ TRANSICOES_PERMITIDAS: dict[SituacaoReserva, frozenset[SituacaoReserva]] = {
     SituacaoReserva.CANCELADA: frozenset(),
 }
 
+DESTINOS_DE_TRANSICAO = frozenset().union(*TRANSICOES_PERMITIDAS.values())
+
+DESTINOS_POR_PAPEL: dict[PapelDoAtor, frozenset[SituacaoReserva]] = {
+    PapelDoAtor.GESTOR: frozenset(
+        {
+            SituacaoReserva.CONFIRMADA,
+            SituacaoReserva.RECUSADA,
+            SituacaoReserva.CONCLUIDA,
+            SituacaoReserva.CANCELADA,
+        }
+    ),
+    PapelDoAtor.SOLICITANTE: frozenset({SituacaoReserva.CANCELADA}),
+}
+
 SITUACOES_QUE_EXIGEM_MOTIVO = frozenset(
     {SituacaoReserva.RECUSADA, SituacaoReserva.CANCELADA}
 )
@@ -71,3 +87,7 @@ def transicao_permitida(atual: SituacaoReserva, nova: SituacaoReserva) -> bool:
 
 def transicoes_a_partir_de(situacao: SituacaoReserva) -> list[SituacaoReserva]:
     return [nova for nova in SituacaoReserva if transicao_permitida(situacao, nova)]
+
+
+def papel_pode_levar_a(papel: PapelDoAtor, nova: SituacaoReserva) -> bool:
+    return nova in DESTINOS_POR_PAPEL[papel]

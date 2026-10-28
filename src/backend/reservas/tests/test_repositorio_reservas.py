@@ -5,6 +5,7 @@ import pytest
 from django.db import IntegrityError
 
 from reservas.application.repositorio import FiltrosDeReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import ConflitoDeHorario, ReservaNaoEncontrada
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.reserva import Reserva
@@ -21,6 +22,7 @@ DATA = AGORA.date() + timedelta(days=4)
 DIA_SEGUINTE = DATA + timedelta(days=1)
 ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
 BRUNO = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
+GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
 ID_INEXISTENTE = 9999
 
 
@@ -53,7 +55,7 @@ def _solicitar(**sobrescritas):
 def _salvar_na_situacao(repositorio, situacao, motivo=None, **sobrescritas):
     reserva = _solicitar(**sobrescritas)
     if situacao is not S.SOLICITADA:
-        reserva.alterar_situacao(situacao, motivo=motivo)
+        reserva.alterar_situacao(situacao, motivo=motivo, ator=GESTOR)
     return repositorio.salvar(reserva)
 
 
@@ -128,7 +130,7 @@ def test_salvar_reserva_existente_persiste_situacao_e_motivo(
 ):
     # Arrange
     salva = repositorio.salvar(_solicitar())
-    salva.alterar_situacao(situacao, motivo=motivo)
+    salva.alterar_situacao(situacao, motivo=motivo, ator=GESTOR)
 
     # Act
     atualizada = repositorio.salvar(salva)

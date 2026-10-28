@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 import pytest
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -9,8 +8,6 @@ from rest_framework.test import APIClient
 pytestmark = pytest.mark.django_db
 
 URL_RESERVAS = reverse("reservas:lista")
-URL_ESPACOS = reverse("espacos:lista")
-SENHA = "senha-de-teste-123"
 ID_INEXISTENTE = 9999
 MOTIVO = "Chuva forte"
 
@@ -34,28 +31,15 @@ def _corpo_da_reserva(espaco_id):
 
 
 @pytest.fixture
-def cliente():
-    usuario = get_user_model().objects.create_user(
-        "ana@exemplo.com", SENHA, nome="Ana Souza", matricula="2026001"
-    )
-    cliente = APIClient()
-    cliente.force_authenticate(user=usuario)
-    return cliente
+def cliente(cliente_gestor):
+    return cliente_gestor
 
 
 @pytest.fixture
-def espaco_id(cliente):
-    resposta = cliente.post(
-        URL_ESPACOS,
-        {"nome": "Quadra Coberta", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20},
-        format="json",
+def reserva_id(cliente_solicitante, espaco_id):
+    resposta = cliente_solicitante.post(
+        URL_RESERVAS, _corpo_da_reserva(espaco_id), format="json"
     )
-    return resposta.data["dados"]["id"]
-
-
-@pytest.fixture
-def reserva_id(cliente, espaco_id):
-    resposta = cliente.post(URL_RESERVAS, _corpo_da_reserva(espaco_id), format="json")
     return resposta.data["dados"]["id"]
 
 
