@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest'
 import Navegacao from './Navegacao.tsx'
 
 const ITENS = [
-  { rotulo: 'Início', caminho: '/' },
-  { rotulo: 'Espaços', caminho: '/espacos' },
-  { rotulo: 'Reservas', caminho: '/reservas' },
-  { rotulo: 'Nova reserva', caminho: '/reservas/nova' },
+  { rotulo: 'Início', caminho: '/', exigeLogin: false },
+  { rotulo: 'Espaços', caminho: '/espacos', exigeLogin: true },
+  { rotulo: 'Reservas', caminho: '/reservas', exigeLogin: true },
+  { rotulo: 'Nova reserva', caminho: '/reservas/nova', exigeLogin: true },
 ]
 
 function renderizarEm(caminho: string) {

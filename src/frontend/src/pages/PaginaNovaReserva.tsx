@@ -9,11 +9,13 @@ import FormularioDeReserva from '../components/reservas/FormularioDeReserva.tsx'
 import { mapaDeNomesDosEspacos, nomeDoEspaco } from '../components/reservas/nomeDoEspaco.ts'
 import ResumoDaReserva from '../components/reservas/ResumoDaReserva.tsx'
 import { useConsulta } from '../hooks/useConsulta.ts'
+import { useSessao } from '../hooks/useSessao.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { PARAMETRO_DO_ESPACO } from '../navegacao.ts'
 
 function PaginaNovaReserva() {
   useTituloDaPagina('Nova reserva')
+  const { usuario } = useSessao()
   const [parametros] = useSearchParams()
   const espacoDaUrl = parametros.get(PARAMETRO_DO_ESPACO) ?? ''
   const { estado, recarregar } = useConsulta(() => listarEspacos({ apenasAtivos: true }), [])
@@ -41,7 +43,11 @@ function PaginaNovaReserva() {
   return (
     <>
       <h1>Nova reserva</h1>
-      {/* AUT-06: mostrar quem está solicitando (nome e matrícula do usuário logado). */}
+      {usuario && (
+        <p>
+          Solicitante: <strong>{usuario.nome}</strong> ({usuario.matricula})
+        </p>
+      )}
       {conteudo()}
     </>
   )

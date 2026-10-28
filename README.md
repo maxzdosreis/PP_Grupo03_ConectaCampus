@@ -47,11 +47,13 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    ```
 
 4. Acesse:
-   - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.")
-   - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — cadastrar um espaço e listar os cadastrados, com filtro por tipo e "Somente ativos". Os filtros ficam no endereço da página, então recarregar mantém o filtro.
-   - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — solicitar uma reserva e ver o resumo com a situação "Solicitada". Enquanto o login no frontend não existir (AUT-06), o envio responde "Faça login para continuar.".
-   - Tela de consulta de reservas: http://localhost:5173/reservas (ou o item "Reservas" do menu, ou o link "Ver minhas reservas" do resumo de uma reserva solicitada) — listar as reservas com filtros por espaço, situação, data, solicitante (nome ou matrícula) e "Somente minhas reservas", que se combinam. Os filtros ficam no endereço da página; por exemplo, dois critérios combinados: http://localhost:5173/reservas?espaco=1&situacao=SOLICITADA. Enquanto o login no frontend não existir (AUT-06), a lista mostra "Faça login para continuar." no lugar da tabela.
-   - Alterar a situação de uma reserva, na mesma tela: cada linha tem um botão para cada mudança permitida a partir da situação atual (uma solicitada mostra "Confirmar", "Recusar" e "Cancelar"; uma confirmada, "Cancelar" e "Concluir"; as concluídas, recusadas e canceladas não têm ações). O botão abre um diálogo com o resumo da reserva; para recusar ou cancelar, ele pede o motivo, que o solicitante verá. Confirme no botão do diálogo (ex.: "Recusar reserva") ou feche com "Voltar" ou Esc sem alterar nada. Depois da mudança, a mensagem aparece no canto da tela e a lista é recarregada. Se outra pessoa já tiver mudado a reserva, o diálogo explica o motivo e oferece "Atualizar lista". As ações disponíveis vêm da API (`acoes_disponiveis` em cada reserva). Enquanto o login no frontend não existir (AUT-06), a lista não carrega e os botões não aparecem.
+   - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.") e os atalhos "Entrar" e "Criar conta" (ou "Ir para minhas reservas", com login).
+   - Entrar: http://localhost:5173/entrar (ou "Entrar" no cabeçalho) — com o e-mail e a senha de um dos [usuários de exemplo](#dados-de-exemplo). Espaços e reservas exigem login: quem abre uma dessas telas sem login vai para a tela de entrar e volta para ela depois. O login continua valendo ao recarregar a página e em abas novas, e o token é renovado sozinho enquanto o refresh for válido (1 dia). O cabeçalho mostra quem está logado ("Nome · Perfil") e o botão "Sair".
+   - Criar conta: http://localhost:5173/cadastro (ou "Cadastre-se" no cabeçalho) — cadastrar um solicitante com nome, matrícula, e-mail e senha; a conta já entra sozinha e abre a tela de nova reserva.
+   - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — listar os espaços, com filtro por tipo e "Somente ativos"; o formulário de cadastro aparece só para o Gestor. Os filtros ficam no endereço da página, então recarregar mantém o filtro.
+   - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — mostra quem está solicitando (nome e matrícula), solicitar uma reserva e ver o resumo com a situação "Solicitada".
+   - Tela de consulta de reservas: http://localhost:5173/reservas (ou o item "Reservas" do menu, ou o link "Ver minhas reservas" do resumo de uma reserva solicitada) — listar as reservas com filtros por espaço, situação, data, solicitante (nome ou matrícula) e "Somente minhas reservas", que se combinam. O Solicitante vê só as próprias; o Gestor vê todas. Os filtros ficam no endereço da página; por exemplo, dois critérios combinados: http://localhost:5173/reservas?espaco=1&situacao=SOLICITADA.
+   - Alterar a situação de uma reserva, na mesma tela: cada linha tem um botão para cada mudança permitida a partir da situação atual e ao perfil de quem está logado (para o Gestor, uma solicitada mostra "Confirmar", "Recusar" e "Cancelar" e uma confirmada, "Cancelar" e "Concluir"; o Solicitante só vê "Cancelar" nas próprias; as concluídas, recusadas e canceladas não têm ações). O botão abre um diálogo com o resumo da reserva; para recusar ou cancelar, ele pede o motivo, que o solicitante verá. Confirme no botão do diálogo (ex.: "Recusar reserva") ou feche com "Voltar" ou Esc sem alterar nada. Depois da mudança, a mensagem aparece no canto da tela e a lista é recarregada. Se outra pessoa já tiver mudado a reserva, o diálogo explica o motivo e oferece "Atualizar lista". As ações disponíveis vêm da API (`acoes_disponiveis` em cada reserva).
    - API: http://localhost:8000
    - Saúde da API: http://localhost:8000/api/health/
    - Admin do Django: http://localhost:8000/admin/
@@ -88,7 +90,22 @@ O comando cria usuários, espaços e reservas passando pelas mesmas regras do si
 
 #### Roteiro da demonstração
 
-Enquanto o login no frontend não existir (AUT-06), o roteiro é feito com `curl`. Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/espacos/` (num banco recém-criado, a Quadra Poliesportiva Central é o espaço `1`). Os comandos de Windows seguem o padrão dos [exemplos de uso da API](#exemplos-de-uso-da-api).
+Pela tela, em http://localhost:5173, com os usuários de exemplo:
+
+1. **Entrar como solicitante.** Abrir http://localhost:5173/reservas sem login: a aplicação leva para a tela de entrar. Entrar como Bruno (`bruno.lima@exemplo.com`, `Rede-Alta-73`); depois do login, ela volta para as reservas. O cabeçalho mostra "Bruno Lima · Solicitante".
+2. **Consultar.** Bruno vê só as próprias reservas (Solicitada, Recusada e Concluída). Filtrar por espaço "Quadra Poliesportiva Central" e situação "Solicitada" (dois critérios combinados). Só a Solicitada tem ação, e só "Cancelar".
+3. **Entrada inválida.** Em "Nova reserva", que mostra "Solicitante: Bruno Lima (2026101)", pedir a Quadra Poliesportiva Central **amanhã, 10:30–11:30**, com qualquer finalidade: o aviso no topo do formulário explica o conflito de horário (**409** `CONFLITO_DE_HORARIO`) e os valores continuam preenchidos. Outras entradas inválidas prontas: uma data de ontem, explicada embaixo do campo Data, e um término antes do início.
+4. **Solicitar.** Trocar o horário para **16:00–17:00** e enviar: a mensagem de sucesso aparece e o resumo mostra a situação "Solicitada". "Ver minhas reservas" leva à lista com a nova reserva.
+5. **Cancelar.** Na lista, cancelar a reserva Solicitada de amanhã às 10:00 (a dos dados de exemplo): o diálogo pede o motivo, e sem motivo o erro aparece embaixo do campo. Com o motivo, a reserva passa a "Cancelada".
+6. **Sem permissão.** Em "Espaços", Bruno vê a lista e o aviso "Somente o gestor cadastra espaços.", sem o formulário. Sair (botão "Sair" no cabeçalho).
+7. **Entrar como gestora** Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`). Em "Espaços", cadastrar um espaço (ex.: "Quadra Coberta Sul", Quadra poliesportiva, 20 pessoas); um nome repetido ou uma capacidade 0 mostra o erro embaixo do campo.
+8. **Confirmar e concluir.** Em "Reservas", Carla vê as reservas de todos. Confirmar a reserva das 16:00 do Bruno e depois concluí-la: cada mudança mostra a mensagem da API ("Reserva confirmada com sucesso.", "Reserva concluída com sucesso."), e a reserva concluída fica sem ações.
+
+O mesmo roteiro com `curl`, na seção a seguir, mostra também o **403** de um solicitante tentando confirmar, que a tela não oferece.
+
+#### Roteiro alternativo com `curl`
+
+Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/espacos/` (num banco recém-criado, a Quadra Poliesportiva Central é o espaço `1`). Os comandos de Windows seguem o padrão dos [exemplos de uso da API](#exemplos-de-uso-da-api).
 
 1. Entrar como o solicitante Bruno e guardar o `access` em `ACCESS`, como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token):
 
@@ -242,7 +259,7 @@ curl -X POST http://localhost:8000/api/auth/cadastro/ -H "Content-Type: applicat
 Resposta **201** (o cadastro não faz login nem devolve tokens):
 
 ```json
-{"mensagem": "Cadastro realizado com sucesso. Faça login para continuar.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}
+{"mensagem": "Cadastro realizado com sucesso. Faça login para continuar.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}
 ```
 
 Cadastrar de novo o mesmo e-mail (mesmo em outra caixa, como `ANA@exemplo.com`) responde **409**:
@@ -268,7 +285,7 @@ curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application
 Resposta **200** (tokens encurtados aqui):
 
 ```json
-{"mensagem": "Login realizado com sucesso.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi...", "usuario": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}}
+{"mensagem": "Login realizado com sucesso.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi...", "usuario": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}}
 ```
 
 E-mail ou senha errados (ou usuário desativado) respondem sempre igual, **401**:
@@ -296,7 +313,7 @@ curl http://localhost:8000/api/auth/me/ -H "Authorization: Bearer $ACCESS"
 ```
 
 ```json
-{"mensagem": "Usuário autenticado.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante"}}
+{"mensagem": "Usuário autenticado.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}
 ```
 
 Quando o `access` expira, os pedidos respondem **401** `NAO_AUTENTICADO`. Gere outro com o `refresh` (`POST /api/auth/refresh/`):
@@ -575,4 +592,6 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 ## Limitações conhecidas
 
 - **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia.
+- **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
+- **Perfil na interface:** esconder o formulário de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.

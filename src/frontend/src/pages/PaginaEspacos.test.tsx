@@ -1,11 +1,12 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { cadastrarEspaco, listarEspacos, listarTiposDeEspaco, type Espaco } from '../api/espacos.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
-import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
+import { renderizarComProvedores, valorDaSessao } from '../testes/renderizar.tsx'
+import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import PaginaEspacos from './PaginaEspacos.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -53,23 +54,20 @@ function BuscaAtual() {
   return <output data-testid="busca">{useLocation().search}</output>
 }
 
-function renderizar(caminho = '/espacos') {
-  render(
-    <MensagensProvider>
-      <MemoryRouter initialEntries={[caminho]}>
-        <Routes>
-          <Route
-            path="/espacos"
-            element={
-              <>
-                <PaginaEspacos />
-                <BuscaAtual />
-              </>
-            }
-          />
-        </Routes>
-      </MemoryRouter>
-    </MensagensProvider>,
+function renderizar(caminho = '/espacos', usuario = USUARIO_GESTOR) {
+  renderizarComProvedores(
+    <Routes>
+      <Route
+        path="/espacos"
+        element={
+          <>
+            <PaginaEspacos />
+            <BuscaAtual />
+          </>
+        }
+      />
+    </Routes>,
+    { caminho, sessao: valorDaSessao({ usuario }) },
   )
 }
 
@@ -273,5 +271,17 @@ describe('PaginaEspacos', () => {
     )
 
     expect(await secaoDoCadastro().findByLabelText('Nome')).toBeTruthy()
+  })
+
+  it('para o solicitante, troca o formulário por um aviso e lista os espaços', async () => {
+    vi.mocked(listarEspacos).mockResolvedValue(lista([], 'Nenhum espaço encontrado.'))
+
+    renderizar('/espacos', USUARIO_SOLICITANTE)
+
+    expect(screen.getByText('Somente o gestor cadastra espaços.')).toBeTruthy()
+    expect(screen.queryByRole('region', { name: 'Cadastrar espaço' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Cadastrar espaço' })).toBeNull()
+    expect(await secaoDaLista().findByText('Nenhum espaço cadastrado')).toBeTruthy()
+    expect(secaoDaLista().queryByText('Use o formulário acima para cadastrar o primeiro.')).toBeNull()
   })
 })

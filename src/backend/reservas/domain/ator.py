@@ -9,6 +9,5 @@ class PapelDoAtor(StrEnum):
 
 @dataclass(frozen=True)
 class Ator:
-
     usuario_id: int
     papel: PapelDoAtor

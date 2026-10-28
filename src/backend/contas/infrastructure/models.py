@@ -104,7 +104,7 @@ class Usuario(AbstractUser):
 
     @property
     def eh_gestor(self) -> bool:
-        return self.perfil == PerfilUsuario.GESTOR
+        return PerfilUsuario(self.perfil).eh_gestor
 
     def get_full_name(self):
         return self.nome
