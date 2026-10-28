@@ -1,0 +1,25 @@
+.area {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2) var(--espaco-4);
+}
+
+.usuario {
+  font-size: var(--fonte-pequena);
+  overflow-wrap: anywhere;
+}
+
+.link {
+  color: var(--cor-sobre-primaria);
+}
+
+.sair {
+  padding: var(--espaco-1) var(--espaco-3);
+  border-color: var(--cor-sobre-primaria);
+  background-color: transparent;
+}
+
+.sair:hover {
+  background-color: rgb(255 255 255 / 0.15);
+}

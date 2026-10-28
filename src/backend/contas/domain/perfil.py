@@ -9,6 +9,10 @@ class PerfilUsuario(StrEnum):
     def rotulo(self) -> str:
         return _ROTULOS[self]
 
+    @property
+    def eh_gestor(self) -> bool:
+        return self is PerfilUsuario.GESTOR
+
 
 _ROTULOS = {
     PerfilUsuario.SOLICITANTE: "Solicitante",

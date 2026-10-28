@@ -26,6 +26,10 @@ class UsuarioSaidaSerializer(serializers.Serializer):
     matricula = serializers.CharField()
     perfil = serializers.CharField()
     perfil_rotulo = serializers.SerializerMethodField()
+    eh_gestor = serializers.SerializerMethodField()
 
     def get_perfil_rotulo(self, usuario):
         return PerfilUsuario(usuario.perfil).rotulo
+
+    def get_eh_gestor(self, usuario):
+        return PerfilUsuario(usuario.perfil).eh_gestor

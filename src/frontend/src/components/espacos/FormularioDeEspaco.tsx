@@ -18,7 +18,6 @@ type PropriedadesDoFormulario = {
   aoCadastrar: () => void
 }
 
-// AUT-06: mostrar só para GESTOR.
 function FormularioDeEspaco({
   tipos,
   aoTentarCarregarOsTiposDeNovo,

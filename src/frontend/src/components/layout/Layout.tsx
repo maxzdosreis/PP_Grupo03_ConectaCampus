@@ -1,9 +1,13 @@
 import { Link, Outlet } from 'react-router'
-import { ITENS_DE_NAVEGACAO } from '../../navegacao.ts'
+import { useSessao } from '../../hooks/useSessao.ts'
+import { itensVisiveis } from '../../navegacao.ts'
+import AreaDoUsuario from './AreaDoUsuario.tsx'
 import estilos from './Layout.module.css'
 import Navegacao from './Navegacao.tsx'
 
 function Layout() {
+  const { autenticado } = useSessao()
+
   return (
     <div className={estilos.pagina}>
       <a className={estilos.pularParaConteudo} href="#conteudo">
@@ -14,7 +18,8 @@ function Layout() {
           <Link to="/" className={estilos.marca}>
             Conecta Campus
           </Link>
-          <Navegacao itens={ITENS_DE_NAVEGACAO} />
+          <Navegacao itens={itensVisiveis(autenticado)} />
+          <AreaDoUsuario />
         </div>
       </header>
       <main id="conteudo" tabIndex={-1} className={estilos.conteudo}>

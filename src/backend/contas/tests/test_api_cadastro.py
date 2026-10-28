@@ -53,6 +53,7 @@ def test_cadastro_valido_responde_201_com_solicitante_sem_senha():
         "matricula": "2026001",
         "perfil": "SOLICITANTE",
         "perfil_rotulo": "Solicitante",
+        "eh_gestor": False,
     }
 
 

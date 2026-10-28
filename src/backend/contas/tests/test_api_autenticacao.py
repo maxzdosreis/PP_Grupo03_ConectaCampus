@@ -65,6 +65,7 @@ def test_login_valido_devolve_tokens_e_usuario_sem_senha(usuario):
         "matricula": "2026001",
         "perfil": "SOLICITANTE",
         "perfil_rotulo": "Solicitante",
+        "eh_gestor": False,
     }
     assert usuario.password not in str(resposta.data)
 
@@ -140,6 +141,7 @@ def test_me_com_bearer_valido_devolve_usuario_com_perfil(usuario):
     assert resposta.data["mensagem"] == "Usuário autenticado."
     assert resposta.data["dados"]["perfil"] == "GESTOR"
     assert resposta.data["dados"]["perfil_rotulo"] == "Gestor"
+    assert resposta.data["dados"]["eh_gestor"] is True
 
 
 def test_me_sem_token_responde_401_com_cabecalho_bearer():

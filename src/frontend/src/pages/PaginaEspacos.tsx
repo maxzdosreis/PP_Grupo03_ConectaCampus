@@ -7,7 +7,9 @@ import TabelaDeEspacos from '../components/espacos/TabelaDeEspacos.tsx'
 import Carregando from '../components/estados/Carregando.tsx'
 import EstadoVazio from '../components/estados/EstadoVazio.tsx'
 import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
+import Aviso from '../components/mensagens/Aviso.tsx'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
+import { useSessao } from '../hooks/useSessao.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 
 const PARAMETRO_TIPO = 'tipo'
@@ -17,6 +19,7 @@ function PaginaEspacos() {
   useTituloDaPagina('Espaços')
   const idDoCadastro = useId()
   const idDaLista = useId()
+  const { ehGestor } = useSessao()
   const tipos = useConsulta(listarTiposDeEspaco, [])
   const [parametros, setParametros] = useSearchParams()
   const tipo = parametros.get(PARAMETRO_TIPO) ?? ''
@@ -43,14 +46,18 @@ function PaginaEspacos() {
   return (
     <>
       <h1>Espaços</h1>
-      <section aria-labelledby={idDoCadastro}>
-        <h2 id={idDoCadastro}>Cadastrar espaço</h2>
-        <FormularioDeEspaco
-          tipos={tipos.estado}
-          aoTentarCarregarOsTiposDeNovo={tipos.recarregar}
-          aoCadastrar={recarregar}
-        />
-      </section>
+      {ehGestor ? (
+        <section aria-labelledby={idDoCadastro}>
+          <h2 id={idDoCadastro}>Cadastrar espaço</h2>
+          <FormularioDeEspaco
+            tipos={tipos.estado}
+            aoTentarCarregarOsTiposDeNovo={tipos.recarregar}
+            aoCadastrar={recarregar}
+          />
+        </section>
+      ) : (
+        <Aviso variante="informacao">Somente o gestor cadastra espaços.</Aviso>
+      )}
       <section aria-labelledby={idDaLista}>
         <h2 id={idDaLista}>Espaços cadastrados</h2>
         <FiltrosDeEspacos
@@ -65,6 +72,7 @@ function PaginaEspacos() {
         <ResultadoDaLista
           estado={estado}
           temFiltros={tipo !== '' || apenasAtivos}
+          podeCadastrar={ehGestor}
           aoTentarNovamente={recarregar}
           aoLimparFiltros={limparFiltros}
         />
@@ -76,6 +84,7 @@ function PaginaEspacos() {
 type PropriedadesDoResultado = {
   estado: EstadoDaConsulta<Espaco[]>
   temFiltros: boolean
+  podeCadastrar: boolean
   aoTentarNovamente: () => void
   aoLimparFiltros: () => void
 }
@@ -83,6 +92,7 @@ type PropriedadesDoResultado = {
 function ResultadoDaLista({
   estado,
   temFiltros,
+  podeCadastrar,
   aoTentarNovamente,
   aoLimparFiltros,
 }: PropriedadesDoResultado) {
@@ -111,7 +121,7 @@ function ResultadoDaLista({
   return (
     <EstadoVazio
       titulo="Nenhum espaço cadastrado"
-      descricao="Use o formulário acima para cadastrar o primeiro."
+      descricao={podeCadastrar ? 'Use o formulário acima para cadastrar o primeiro.' : undefined}
     />
   )
 }

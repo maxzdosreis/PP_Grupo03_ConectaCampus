@@ -1,12 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router'
+import { Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
 import { solicitarReserva, type Reserva } from '../api/reservas.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
-import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
+import { renderizarComProvedores, valorDaSessao } from '../testes/renderizar.tsx'
+import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import PaginaNovaReserva from './PaginaNovaReserva.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -69,14 +70,11 @@ function promessaControlada<T>() {
 }
 
 function renderizar(caminho = '/reservas/nova') {
-  render(
-    <MensagensProvider>
-      <MemoryRouter initialEntries={[caminho]}>
-        <Routes>
-          <Route path="/reservas/nova" element={<PaginaNovaReserva />} />
-        </Routes>
-      </MemoryRouter>
-    </MensagensProvider>,
+  renderizarComProvedores(
+    <Routes>
+      <Route path="/reservas/nova" element={<PaginaNovaReserva />} />
+    </Routes>,
+    { caminho, sessao: valorDaSessao({ usuario: USUARIO_SOLICITANTE }) },
   )
 }
 
@@ -105,6 +103,13 @@ describe('PaginaNovaReserva', () => {
       mensagem: '2 espaços encontrados.',
       dados: [GINASIO, QUADRA],
     })
+  })
+
+  it('mostra quem está solicitando, com o nome e a matrícula do usuário logado', async () => {
+    renderizar()
+
+    await screen.findByLabelText('Espaço')
+    expect(screen.getByText(/^Solicitante:/).textContent).toBe('Solicitante: Bruno Lima (2026101)')
   })
 
   it('pede só os espaços ativos e mostra "Nome (Tipo)" no seletor', async () => {
