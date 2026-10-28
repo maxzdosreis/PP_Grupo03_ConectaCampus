@@ -25,7 +25,7 @@ from reservas.tests.fakes import RepositorioReservasEmMemoria
 SAO_PAULO = ZoneInfo("America/Sao_Paulo")
 AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
+GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
 INTERVALO = IntervaloDeHorario(
     data=date(2026, 10, 25), hora_inicio=time(10, 0), hora_fim=time(11, 0)
 )
@@ -48,6 +48,10 @@ TRANSICOES_QUE_EXIGEM_MOTIVO = [
     for atual, nova in TRANSICOES_VALIDAS
     if nova in SITUACOES_QUE_EXIGEM_MOTIVO
 ]
+
+
+def relogio_fixo():
+    return AGORA
 
 
 def _nomes(transicoes):
@@ -89,7 +93,7 @@ def test_transicao_permitida_e_persistida(repositorio, atual, nova):
     reserva = _salvar_em(repositorio, atual)
 
     # Act
-    alterada = AlterarSituacaoReserva(repositorio).executar(
+    alterada = AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         ator=GESTOR,
         reserva_id=reserva.id,
         nova_situacao=nova,
@@ -111,7 +115,7 @@ def test_transicao_proibida_lanca_erro_e_preserva_a_reserva(repositorio, atual, 
 
     # Act / Assert
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             ator=GESTOR,
             reserva_id=reserva.id,
             nova_situacao=nova,
@@ -137,7 +141,7 @@ def test_recusar_ou_cancelar_sem_motivo_lanca_erro_e_preserva_a_reserva(
 
     # Act / Assert
     with pytest.raises(MotivoObrigatorio):
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             ator=GESTOR, reserva_id=reserva.id, nova_situacao=nova, motivo=motivo
         )
 
@@ -149,7 +153,7 @@ def test_cancelar_guarda_o_motivo_normalizado(repositorio):
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
 
     # Act
-    AlterarSituacaoReserva(repositorio).executar(
+    AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         ator=GESTOR,
         reserva_id=reserva.id,
         nova_situacao=SituacaoReserva.CANCELADA,
@@ -165,7 +169,7 @@ def test_confirmar_sem_motivo_deixa_o_motivo_vazio(repositorio):
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
 
     # Act
-    AlterarSituacaoReserva(repositorio).executar(
+    AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         ator=GESTOR, reserva_id=reserva.id, nova_situacao=SituacaoReserva.CONFIRMADA
     )
 
@@ -178,7 +182,7 @@ def test_situacao_como_texto_e_aceita(repositorio):
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
 
     # Act
-    alterada = AlterarSituacaoReserva(repositorio).executar(
+    alterada = AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         ator=GESTOR, reserva_id=reserva.id, nova_situacao="CONFIRMADA"
     )
 
@@ -192,7 +196,7 @@ def test_situacao_desconhecida_lanca_erro_e_preserva_a_reserva(repositorio):
 
     # Act / Assert
     with pytest.raises(SituacaoInvalida):
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             ator=GESTOR, reserva_id=reserva.id, nova_situacao="PENDENTE"
         )
 
@@ -202,7 +206,7 @@ def test_situacao_desconhecida_lanca_erro_e_preserva_a_reserva(repositorio):
 def test_reserva_inexistente_lanca_reserva_nao_encontrada(repositorio):
     # Act / Assert
     with pytest.raises(ReservaNaoEncontrada) as erro:
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             ator=GESTOR,
             reserva_id=ID_INEXISTENTE,
             nova_situacao=SituacaoReserva.CONFIRMADA,
@@ -214,7 +218,7 @@ def test_reserva_inexistente_lanca_reserva_nao_encontrada(repositorio):
 def test_ciclo_solicitada_confirmada_concluida(repositorio):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    alterar = AlterarSituacaoReserva(repositorio)
+    alterar = AlterarSituacaoReserva(repositorio, relogio_fixo)
 
     # Act
     alterar.executar(
@@ -233,10 +237,10 @@ def test_ciclo_solicitada_confirmada_concluida(repositorio):
 def test_solicitante_cancela_a_propria_reserva(repositorio):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    dona = Ator(usuario_id=ANA.usuario_id, papel=PapelDoAtor.SOLICITANTE)
+    dona = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 
     # Act
-    AlterarSituacaoReserva(repositorio).executar(
+    AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         reserva_id=reserva.id,
         nova_situacao=SituacaoReserva.CANCELADA,
         motivo=MOTIVO,
@@ -252,11 +256,11 @@ def test_solicitante_confirmando_a_propria_lanca_nao_permitida_e_preserva(
 ):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    dona = Ator(usuario_id=ANA.usuario_id, papel=PapelDoAtor.SOLICITANTE)
+    dona = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 
     # Act / Assert
     with pytest.raises(AlteracaoDeSituacaoNaoPermitida):
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             reserva_id=reserva.id,
             nova_situacao=SituacaoReserva.CONFIRMADA,
             ator=dona,
@@ -270,11 +274,13 @@ def test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada(
 ):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    outra_pessoa = Ator(usuario_id=99, papel=PapelDoAtor.SOLICITANTE)
+    outra_pessoa = Ator(
+        usuario_id=99, nome="Solicitante de Teste", papel=PapelDoAtor.SOLICITANTE
+    )
 
     # Act / Assert
     with pytest.raises(ReservaNaoEncontrada) as erro:
-        AlterarSituacaoReserva(repositorio).executar(
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             reserva_id=reserva.id,
             nova_situacao=SituacaoReserva.CANCELADA,
             motivo=MOTIVO,
@@ -283,3 +289,40 @@ def test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada(
 
     assert erro.value.reserva_id == reserva.id
     assert _retrato(repositorio, reserva.id) == (SituacaoReserva.SOLICITADA, None)
+
+
+def test_registro_da_mudanca_usa_o_relogio_injetado_e_o_ator(repositorio):
+    # Arrange
+    reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
+
+    # Act
+    AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
+        ator=GESTOR,
+        reserva_id=reserva.id,
+        nova_situacao=SituacaoReserva.CANCELADA,
+        motivo=MOTIVO,
+    )
+
+    # Assert
+    (registro,) = repositorio.listar_historico(reserva.id)
+    assert registro.registrado_em == AGORA
+    assert (registro.autor_usuario_id, registro.autor_nome) == (1, GESTOR.nome)
+    assert (registro.situacao_anterior, registro.situacao_nova, registro.motivo) == (
+        SituacaoReserva.SOLICITADA,
+        SituacaoReserva.CANCELADA,
+        MOTIVO,
+    )
+
+
+def test_alteracao_recusada_nao_registra_no_historico(repositorio):
+    # Arrange
+    reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
+
+    # Act
+    with pytest.raises(MotivoObrigatorio):
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
+            ator=GESTOR, reserva_id=reserva.id, nova_situacao=SituacaoReserva.RECUSADA
+        )
+
+    # Assert
+    assert repositorio.listar_historico(reserva.id) == []

@@ -1,7 +1,11 @@
+from collections.abc import Callable
+from datetime import datetime
+
 from django.utils import timezone
 
 from reservas.application.casos_de_uso import (
     AlterarSituacaoReserva,
+    ConsultarHistoricoDaReserva,
     ConsultarReservas,
     CriarReserva,
     ObterReserva,
@@ -10,9 +14,9 @@ from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFach
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
 
-def criar_reserva() -> CriarReserva:
+def criar_reserva(relogio: Callable[[], datetime] = timezone.now) -> CriarReserva:
     return CriarReserva(
-        RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), timezone.now
+        RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), relogio
     )
 
 
@@ -24,5 +28,11 @@ def obter_reserva() -> ObterReserva:
     return ObterReserva(RepositorioReservasDjango())
 
 
-def alterar_situacao_reserva() -> AlterarSituacaoReserva:
-    return AlterarSituacaoReserva(RepositorioReservasDjango())
+def alterar_situacao_reserva(
+    relogio: Callable[[], datetime] = timezone.now,
+) -> AlterarSituacaoReserva:
+    return AlterarSituacaoReserva(RepositorioReservasDjango(), relogio)
+
+
+def consultar_historico_da_reserva() -> ConsultarHistoricoDaReserva:
+    return ConsultarHistoricoDaReserva(RepositorioReservasDjango())

@@ -17,8 +17,8 @@ AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 DIA = date(2026, 10, 25)
 ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
 BRUNO = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
-GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
-ATOR_ANA = Ator(usuario_id=ANA.usuario_id, papel=PapelDoAtor.SOLICITANTE)
+GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
+ATOR_ANA = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 QUADRA = 1
 CAMPO = 2
 ID_INEXISTENTE = 9999

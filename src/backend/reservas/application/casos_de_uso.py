@@ -7,6 +7,7 @@ from reservas.application.repositorio import FiltrosDeReservas, RepositorioReser
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
@@ -67,8 +68,11 @@ class ObterReserva:
 
 
 class AlterarSituacaoReserva:
-    def __init__(self, repositorio: RepositorioReservas) -> None:
+    def __init__(
+        self, repositorio: RepositorioReservas, relogio: Callable[[], datetime]
+    ) -> None:
         self._repositorio = repositorio
+        self._relogio = relogio
 
     def executar(
         self,
@@ -79,8 +83,19 @@ class AlterarSituacaoReserva:
         ator: Ator,
     ) -> Reserva:
         reserva = _obter_ou_falhar(self._repositorio, reserva_id, ator)
-        reserva.alterar_situacao(nova_situacao, motivo=motivo, ator=ator)
+        reserva.alterar_situacao(
+            nova_situacao, motivo=motivo, ator=ator, agora=self._relogio()
+        )
         return self._repositorio.salvar(reserva)
+
+
+class ConsultarHistoricoDaReserva:
+    def __init__(self, repositorio: RepositorioReservas) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, reserva_id: int, *, ator: Ator) -> list[RegistroDeSituacao]:
+        _obter_ou_falhar(self._repositorio, reserva_id, ator)
+        return self._repositorio.listar_historico(reserva_id)
 
 
 def _restringir_ao_ator(filtros: FiltrosDeReservas, ator: Ator) -> FiltrosDeReservas:

@@ -6,6 +6,7 @@ from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 
 
@@ -33,6 +34,7 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
 class RepositorioReservasEmMemoria(RepositorioReservas):
     def __init__(self) -> None:
         self._reservas: dict[int, Reserva] = {}
+        self._historico: dict[int, list[RegistroDeSituacao]] = {}
         self._proximo_id = 1
 
     def salvar(self, reserva: Reserva) -> Reserva:
@@ -42,7 +44,13 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
             garantir_horario_livre(reserva, self._reservas.values())
         reserva_id = reserva.id if reserva.id is not None else self._gerar_id()
         self._reservas[reserva_id] = _copiar(reserva, reserva_id)
+        self._historico.setdefault(reserva_id, []).extend(reserva.registros_pendentes)
+        reserva.marcar_registros_como_gravados()
         return _copiar(reserva, reserva_id)
+
+    def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
+        registros = self._historico.get(reserva_id, [])
+        return sorted(registros, key=lambda registro: registro.registrado_em)
 
     def obter_por_id(self, reserva_id: int) -> Reserva | None:
         reserva = self._reservas.get(reserva_id)

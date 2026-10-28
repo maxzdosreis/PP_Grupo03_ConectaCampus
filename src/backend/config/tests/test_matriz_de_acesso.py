@@ -38,6 +38,7 @@ class Regra(NamedTuple):
     gestor: int | str
 
 
+# fmt: off
 _TABELA = [
     ("health",             "GET",    None,                  200,   200,   200,   200),
     ("contas:login",       "POST",   "credenciais",         LIVRE, LIVRE, LIVRE, LIVRE),
@@ -56,6 +57,8 @@ _TABELA = [
     ("reservas:detalhe",   "DELETE", None,                  401,   405,   405,   405),
     ("reservas:situacao",  "PATCH",  "confirmar",           401,   403,   404,   200),
     ("reservas:situacao",  "PATCH",  "cancelar_com_motivo", 401,   200,   404,   200),
+    ("reservas:historico", "GET",    None,                  401,   200,   404,   200),
+    ("reservas:historico", "DELETE", None,                  401,   405,   405,   405),
 ]
 # fmt: on
 MATRIZ = [Regra(*linha) for linha in _TABELA]

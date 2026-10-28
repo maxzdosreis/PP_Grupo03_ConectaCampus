@@ -73,7 +73,11 @@ def _id_do_caso(caso):
 
 
 def _ator(papel, dono):
-    return Ator(usuario_id=DONA_ID if dono else OUTRO_ID, papel=papel)
+    return Ator(
+        usuario_id=DONA_ID if dono else OUTRO_ID,
+        nome="Solicitante de Teste",
+        papel=papel,
+    )
 
 
 def _reserva_em(situacao):
@@ -92,7 +96,7 @@ def _reserva_em(situacao):
 
 
 def _retrato(reserva):
-    return reserva.situacao, reserva.motivo_da_situacao
+    return reserva.situacao, reserva.motivo_da_situacao, reserva.registros_pendentes
 
 
 def test_destinos_por_papel_sao_os_da_tabela_do_claude_md():
@@ -131,11 +135,16 @@ def test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros(
 
     # Act / Assert
     if esperado == SUCESSO:
-        reserva.alterar_situacao(nova, motivo=MOTIVO, ator=_ator(papel, dono))
+        reserva.alterar_situacao(
+            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=AGORA
+        )
         assert reserva.situacao is nova
+        assert len(reserva.registros_pendentes) == 1
         return
     with pytest.raises(_EXCECAO_ESPERADA[esperado]):
-        reserva.alterar_situacao(nova, motivo=MOTIVO, ator=_ator(papel, dono))
+        reserva.alterar_situacao(
+            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=AGORA
+        )
     assert _retrato(reserva) == antes
 
 
@@ -177,7 +186,9 @@ def test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409():
 
     # Act / Assert
     with pytest.raises(AlteracaoDeSituacaoNaoPermitida) as erro:
-        reserva.alterar_situacao(S.CONCLUIDA, ator=_ator(P.SOLICITANTE, dono=True))
+        reserva.alterar_situacao(
+            S.CONCLUIDA, ator=_ator(P.SOLICITANTE, dono=True), agora=AGORA
+        )
 
     assert erro.value.mensagem == "Somente o gestor pode concluir reservas."
     assert reserva.situacao is S.SOLICITADA
@@ -190,7 +201,9 @@ def test_solicitada_como_destino_e_transicao_invalida_para_os_dois_papeis(papel)
 
     # Act / Assert
     with pytest.raises(TransicaoDeSituacaoInvalida):
-        reserva.alterar_situacao(S.SOLICITADA, ator=_ator(papel, dono=True))
+        reserva.alterar_situacao(
+            S.SOLICITADA, ator=_ator(papel, dono=True), agora=AGORA
+        )
 
 
 @pytest.mark.parametrize(

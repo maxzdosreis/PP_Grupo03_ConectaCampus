@@ -24,6 +24,13 @@ class EspacoDeExemplo:
 
 
 @dataclass(frozen=True)
+class MudancaDeExemplo:
+    situacao: SituacaoReserva
+    motivo: str | None = None
+    ha_dias: int = 0
+
+
+@dataclass(frozen=True)
 class ReservaDeExemplo:
     espaco: str
     solicitante_email: str
@@ -31,13 +38,8 @@ class ReservaDeExemplo:
     hora_inicio: time
     hora_fim: time
     finalidade: str
-    situacao: SituacaoReserva
-    motivo: str | None = None
-    criada_ha_dias: int = 0
-
-    @property
-    def no_passado(self) -> bool:
-        return self.dias_a_partir_de_hoje < 0
+    mudancas: tuple[MudancaDeExemplo, ...] = ()
+    solicitada_ha_dias: int = 0
 
 
 @dataclass(frozen=True)
@@ -98,7 +100,6 @@ RESERVAS = (
         hora_inicio=time(10, 0),
         hora_fim=time(11, 0),
         finalidade="Treino de vôlei do time da Computação",
-        situacao=SituacaoReserva.SOLICITADA,
     ),
     ReservaDeExemplo(
         espaco=CAMPO_PRINCIPAL,
@@ -107,7 +108,8 @@ RESERVAS = (
         hora_inicio=time(14, 0),
         hora_fim=time(16, 0),
         finalidade="Partida do campeonato intercursos",
-        situacao=SituacaoReserva.CONFIRMADA,
+        solicitada_ha_dias=1,
+        mudancas=(MudancaDeExemplo(SituacaoReserva.CONFIRMADA),),
     ),
     ReservaDeExemplo(
         espaco=GINASIO_COBERTO,
@@ -116,8 +118,13 @@ RESERVAS = (
         hora_inicio=time(19, 0),
         hora_fim=time(21, 0),
         finalidade="Festival de basquete",
-        situacao=SituacaoReserva.RECUSADA,
-        motivo="O ginásio estará fechado para um evento institucional.",
+        solicitada_ha_dias=1,
+        mudancas=(
+            MudancaDeExemplo(
+                SituacaoReserva.RECUSADA,
+                motivo="O ginásio estará fechado para um evento institucional.",
+            ),
+        ),
     ),
     ReservaDeExemplo(
         espaco=QUADRA_DE_AREIA,
@@ -126,8 +133,12 @@ RESERVAS = (
         hora_inicio=time(8, 0),
         hora_fim=time(9, 0),
         finalidade="Treino de beach tennis",
-        situacao=SituacaoReserva.CANCELADA,
-        motivo="Previsão de chuva forte.",
+        solicitada_ha_dias=1,
+        mudancas=(
+            MudancaDeExemplo(
+                SituacaoReserva.CANCELADA, motivo="Previsão de chuva forte."
+            ),
+        ),
     ),
     ReservaDeExemplo(
         espaco=QUADRA_DE_TENIS,
@@ -136,8 +147,11 @@ RESERVAS = (
         hora_inicio=time(18, 0),
         hora_fim=time(19, 30),
         finalidade="Aula de tênis",
-        situacao=SituacaoReserva.CONCLUIDA,
-        criada_ha_dias=3,
+        solicitada_ha_dias=3,
+        mudancas=(
+            MudancaDeExemplo(SituacaoReserva.CONFIRMADA, ha_dias=2),
+            MudancaDeExemplo(SituacaoReserva.CONCLUIDA),
+        ),
     ),
 )
 

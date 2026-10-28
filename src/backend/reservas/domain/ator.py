@@ -10,4 +10,5 @@ class PapelDoAtor(StrEnum):
 @dataclass(frozen=True)
 class Ator:
     usuario_id: int
+    nome: str
     papel: PapelDoAtor

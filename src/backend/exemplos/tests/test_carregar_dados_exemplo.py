@@ -14,6 +14,7 @@ from espacos.domain.tipo_espaco import TipoEspaco
 from exemplos.dados import (
     CONFLITO_PARA_DEMONSTRACAO,
     ESPACOS,
+    GESTOR,
     RESERVAS,
     SOLICITANTES,
     USUARIOS,
@@ -24,6 +25,8 @@ from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.situacao import SituacaoReserva
+from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+from reservas.tests.historico import verificar_historico_coerente
 
 pytestmark = pytest.mark.django_db
 
@@ -32,7 +35,7 @@ URL_RESERVAS = reverse("reservas:lista")
 COMANDO = "carregar_dados_exemplo"
 EMAIL_DO_README = "ana@exemplo.com"
 MATRICULA_DO_README = "2026001"
-QUALQUER_GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
+QUALQUER_GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
 
 
 @pytest.fixture(autouse=True)
@@ -196,6 +199,39 @@ def test_reservas_em_aberto_sao_futuras_e_a_concluida_e_passada():
             assert reserva.intervalo.data < hoje
         else:
             assert reserva.intervalo.data > hoje
+
+
+def test_todas_as_reservas_de_exemplo_tem_historico_coerente():
+    # Act
+    _carregar()
+
+    # Assert
+    repositorio = RepositorioReservasDjango()
+    for reserva in _reservas():
+        historico = repositorio.listar_historico(reserva.id)
+        verificar_historico_coerente(historico, reserva.situacao)
+        assert historico[0].registrado_em == reserva.criada_em
+
+
+def test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes():
+    # Arrange
+    agora = timezone.now()
+
+    # Act
+    _carregar()
+
+    # Assert
+    concluida = next(r for r in _reservas() if r.situacao is SituacaoReserva.CONCLUIDA)
+    historico = RepositorioReservasDjango().listar_historico(concluida.id)
+    assert [r.situacao_nova for r in historico] == [
+        SituacaoReserva.SOLICITADA,
+        SituacaoReserva.CONFIRMADA,
+        SituacaoReserva.CONCLUIDA,
+    ]
+    solicitada, confirmada, concluida_em = (r.registrado_em for r in historico)
+    assert solicitada < confirmada < concluida.intervalo.inicio() < concluida_em
+    assert abs(agora - timedelta(days=3) - solicitada) < timedelta(minutes=1)
+    assert historico[-1].autor_nome == GESTOR.nome
 
 
 def test_reservas_que_ocupam_horario_nao_se_sobrepoem():

@@ -20,7 +20,7 @@ URL_SITUACOES = reverse("reservas:situacoes")
 SENHA = "senha-de-teste-123"
 ID_INEXISTENTE = 9999
 ORDEM_POR_INICIO = ["R4", "R1", "R3", "R2"]
-ATOR_GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
+ATOR_GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
 
 
 def _url_detalhe(reserva_id):
@@ -74,7 +74,9 @@ def _solicitar(cliente, espaco_id, dia, hora_inicio, hora_fim):
 def _alterar_situacao(reserva_id, situacao, motivo=None):
     repositorio = RepositorioReservasDjango()
     reserva = repositorio.obter_por_id(reserva_id)
-    reserva.alterar_situacao(situacao, motivo=motivo, ator=ATOR_GESTOR)
+    reserva.alterar_situacao(
+        situacao, motivo=motivo, ator=ATOR_GESTOR, agora=timezone.now()
+    )
     repositorio.salvar(reserva)
 
 

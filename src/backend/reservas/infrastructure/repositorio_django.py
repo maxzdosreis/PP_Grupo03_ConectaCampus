@@ -7,10 +7,15 @@ from reservas.application.repositorio import FiltrosDeReservas, RepositorioReser
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
-from reservas.domain.situacao import SITUACOES_QUE_OCUPAM_HORARIO
+from reservas.domain.situacao import SITUACOES_QUE_OCUPAM_HORARIO, SituacaoReserva
 from reservas.domain.solicitante import Solicitante
-from reservas.infrastructure.models import CONSTRAINT_SEM_SOBREPOSICAO, ReservaModel
+from reservas.infrastructure.models import (
+    CONSTRAINT_SEM_SOBREPOSICAO,
+    RegistroDeSituacaoModel,
+    ReservaModel,
+)
 
 
 class RepositorioReservasDjango(RepositorioReservas):
@@ -20,11 +25,18 @@ class RepositorioReservasDjango(RepositorioReservas):
                 model = _obter_model_para_salvar(reserva)
                 _aplicar_no_model(reserva, model)
                 model.save()
+                RegistroDeSituacaoModel.objects.bulk_create(
+                    [
+                        _registro_para_model(registro, model)
+                        for registro in reserva.registros_pendentes
+                    ]
+                )
         except IntegrityError as erro:
             if CONSTRAINT_SEM_SOBREPOSICAO not in str(erro):
                 raise
             self._lancar_conflito_de_horario(reserva)
             raise
+        reserva.marcar_registros_como_gravados()
         return _para_entidade(model)
 
     def obter_por_id(self, reserva_id: int) -> Reserva | None:
@@ -44,6 +56,12 @@ class RepositorioReservasDjango(RepositorioReservas):
             situacao__in=SITUACOES_QUE_OCUPAM_HORARIO,
         ).order_by("inicio", "id")
         return [_para_entidade(model) for model in consulta]
+
+    def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
+        consulta = RegistroDeSituacaoModel.objects.filter(
+            reserva_id=reserva_id
+        ).order_by("registrado_em", "id")
+        return [_para_registro(model) for model in consulta]
 
     def _lancar_conflito_de_horario(self, reserva: Reserva) -> None:
         existentes = self.listar_que_ocupam_horario(
@@ -145,3 +163,31 @@ def _aplicar_no_model(entidade: Reserva, model: ReservaModel) -> None:
     model.situacao = entidade.situacao.value
     model.motivo_da_situacao = entidade.motivo_da_situacao or ""
     model.criada_em = entidade.criada_em
+
+
+def _para_registro(model: RegistroDeSituacaoModel) -> RegistroDeSituacao:
+    return RegistroDeSituacao(
+        situacao_anterior=SituacaoReserva(model.situacao_anterior)
+        if model.situacao_anterior
+        else None,
+        situacao_nova=SituacaoReserva(model.situacao_nova),
+        motivo=model.motivo or None,
+        autor_usuario_id=model.autor_usuario_id,
+        autor_nome=model.autor_nome,
+        registrado_em=model.registrado_em.astimezone(FUSO_HORARIO),
+    )
+
+
+def _registro_para_model(
+    registro: RegistroDeSituacao, reserva: ReservaModel
+) -> RegistroDeSituacaoModel:
+    anterior = registro.situacao_anterior
+    return RegistroDeSituacaoModel(
+        reserva=reserva,
+        situacao_anterior=anterior.value if anterior else "",
+        situacao_nova=registro.situacao_nova.value,
+        motivo=registro.motivo or "",
+        autor_usuario_id=registro.autor_usuario_id,
+        autor_nome=registro.autor_nome,
+        registrado_em=registro.registrado_em,
+    )

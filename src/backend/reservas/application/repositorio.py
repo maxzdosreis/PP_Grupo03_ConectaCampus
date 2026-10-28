@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Protocol
 
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 
@@ -18,6 +19,11 @@ class FiltrosDeReservas:
 class RepositorioReservas(Protocol):
     def salvar(self, reserva: Reserva) -> Reserva:
         """Insere quando o id é None e atualiza quando já existe.
+
+        Grava também os registros_pendentes da reserva no histórico, na mesma
+        transação: se a gravação falhar, nem a reserva nem os registros ficam
+        gravados. Depois do sucesso, a entidade recebida fica sem pendentes, para
+        salvar de novo não duplicar o histórico.
 
         Devolve a entidade com id. Atualizar um id inexistente lança
         ReservaNaoEncontrada; ocupar o horário de outra reserva do mesmo espaço
@@ -36,3 +42,8 @@ class RepositorioReservas(Protocol):
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         """Lista as reservas Solicitadas ou Confirmadas do espaço naquele dia."""
+
+    def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
+        """Lista o histórico da reserva por registrado_em e, no empate, na ordem
+        em que os registros foram gravados. Id inexistente devolve lista vazia.
+        """

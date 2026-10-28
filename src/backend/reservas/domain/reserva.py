@@ -12,6 +12,8 @@ from reservas.domain.excecoes import (
     TransicaoDeSituacaoInvalida,
 )
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
+from reservas.domain.momento import exigir_fuso
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.situacao import (
     DESTINOS_DE_TRANSICAO,
     SITUACOES_QUE_EXIGEM_MOTIVO,
@@ -48,8 +50,9 @@ class Reserva:
         self.situacao = _converter_situacao(situacao)
         self.motivo_da_situacao = _normalizar_motivo(motivo_da_situacao)
         _exigir_motivo_se_necessario(self.situacao, self.motivo_da_situacao)
-        _exigir_fuso(criada_em, "criada_em")
+        exigir_fuso(criada_em, "criada_em")
         self.criada_em = criada_em
+        self._registros_pendentes: list[RegistroDeSituacao] = []
 
     @classmethod
     def solicitar(
@@ -63,13 +66,13 @@ class Reserva:
         finalidade: str,
         agora: datetime,
     ) -> "Reserva":
-        _exigir_fuso(agora, "agora")
+        exigir_fuso(agora, "agora")
         intervalo = IntervaloDeHorario(
             data=data, hora_inicio=hora_inicio, hora_fim=hora_fim
         )
         if intervalo.inicio() <= agora:
             raise DataRetroativa()
-        return cls(
+        reserva = cls(
             espaco_id=espaco_id,
             solicitante=solicitante,
             intervalo=intervalo,
@@ -77,6 +80,24 @@ class Reserva:
             situacao=SituacaoReserva.SOLICITADA,
             criada_em=agora,
         )
+        reserva._registros_pendentes.append(
+            RegistroDeSituacao(
+                situacao_anterior=None,
+                situacao_nova=SituacaoReserva.SOLICITADA,
+                motivo=None,
+                autor_usuario_id=solicitante.usuario_id,
+                autor_nome=solicitante.nome,
+                registrado_em=agora,
+            )
+        )
+        return reserva
+
+    @property
+    def registros_pendentes(self) -> tuple[RegistroDeSituacao, ...]:
+        return tuple(self._registros_pendentes)
+
+    def marcar_registros_como_gravados(self) -> None:
+        self._registros_pendentes.clear()
 
     def visivel_para(self, ator: Ator) -> bool:
         if ator.papel is PapelDoAtor.GESTOR:
@@ -93,8 +114,14 @@ class Reserva:
         ]
 
     def alterar_situacao(
-        self, nova: SituacaoReserva | str, *, motivo: str | None = None, ator: Ator
+        self,
+        nova: SituacaoReserva | str,
+        *,
+        motivo: str | None = None,
+        ator: Ator,
+        agora: datetime,
     ) -> None:
+        exigir_fuso(agora, "agora")
         if not self.visivel_para(ator):
             raise ReservaNaoEncontrada(self.id)
         nova = _converter_situacao(nova)
@@ -103,8 +130,17 @@ class Reserva:
             raise TransicaoDeSituacaoInvalida(self.situacao, nova)
         motivo_normalizado = _normalizar_motivo(motivo)
         _exigir_motivo_se_necessario(nova, motivo_normalizado)
+        registro = RegistroDeSituacao(
+            situacao_anterior=self.situacao,
+            situacao_nova=nova,
+            motivo=motivo_normalizado,
+            autor_usuario_id=ator.usuario_id,
+            autor_nome=ator.nome,
+            registrado_em=agora,
+        )
         self.situacao = nova
         self.motivo_da_situacao = motivo_normalizado
+        self._registros_pendentes.append(registro)
 
     def __eq__(self, outra: object) -> bool:
         if not isinstance(outra, Reserva):
@@ -189,8 +225,3 @@ def _converter_situacao(situacao: SituacaoReserva | str | None) -> SituacaoReser
         return SituacaoReserva(situacao)
     except ValueError:
         raise SituacaoInvalida() from None
-
-
-def _exigir_fuso(momento: datetime, nome: str) -> None:
-    if not isinstance(momento, datetime) or momento.utcoffset() is None:
-        raise TypeError(f"{nome} deve ser um datetime com fuso horário.")
