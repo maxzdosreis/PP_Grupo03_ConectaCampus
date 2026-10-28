@@ -549,6 +549,12 @@ Cobertura de testes dos contextos `espacos`, `reservas` e `contas`, do pacote `c
 docker compose exec backend pytest --cov
 ```
 
+Só a matriz de acesso (quem pode chamar cada rota da API, com login JWT de verdade, em `src/backend/config/tests/test_matriz_de_acesso.py`) e os outros testes de segurança de `config/`:
+
+```bash
+docker compose exec backend pytest config/tests -v
+```
+
 Linter e formatação (ruff):
 
 ```bash
@@ -591,7 +597,8 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 
 ## Limitações conhecidas
 
-- **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia.
+- **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia. A exceção é desativar ou excluir o usuário: a partir daí, nem o `access` nem o `refresh` dele são aceitos (401).
+- **Sem limite de tentativas de login:** `POST /api/auth/login/` não limita tentativas, então não há proteção contra força bruta de senhas. A evolução natural é o throttling do DRF (`ScopedRateThrottle` com um escopo próprio para o login, ou `AnonRateThrottle`), que responde 429 depois de N tentativas por minuto.
 - **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
 - **Perfil na interface:** esconder o formulário de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.

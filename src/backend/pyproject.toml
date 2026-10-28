@@ -25,7 +25,7 @@ quote-style = "double"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
-testpaths = ["compartilhado", "espacos", "reservas", "contas", "exemplos"]
+testpaths = ["config", "compartilhado", "espacos", "reservas", "contas", "exemplos"]
 python_files = ["test_*.py"]
 addopts = "-ra --strict-markers"
 

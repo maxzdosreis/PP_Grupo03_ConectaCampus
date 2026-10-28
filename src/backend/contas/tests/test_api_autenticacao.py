@@ -1,8 +1,11 @@
+import base64
+import json
 from datetime import timedelta
 
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import AccessToken
 
 from contas.domain.perfil import PerfilUsuario
@@ -46,6 +49,40 @@ def _assert_nao_autenticado(resposta):
     assert resposta.status_code == 401
     assert resposta.data["erro"]["codigo"] == "NAO_AUTENTICADO"
     assert resposta["WWW-Authenticate"].startswith("Bearer")
+
+
+def _me_com_cabecalho(cabecalho):
+    cliente = APIClient()
+    cliente.credentials(HTTP_AUTHORIZATION=cabecalho)
+    return cliente.get(URL_ME)
+
+
+def _base64url(valor):
+    return base64.urlsafe_b64encode(valor).rstrip(b"=").decode()
+
+
+def _decodificar_base64url(trecho):
+    return base64.urlsafe_b64decode(trecho + "=" * (-len(trecho) % 4))
+
+
+def _payload(token):
+    return json.loads(_decodificar_base64url(token.split(".")[1]))
+
+
+def _com_payload_trocado(token, **alteracoes):
+    cabecalho, _, assinatura = token.split(".")
+    payload = {**_payload(token), **alteracoes}
+    return f"{cabecalho}.{_base64url(json.dumps(payload).encode())}.{assinatura}"
+
+
+def _assinado_com_outra_chave(token):
+    outra = TokenBackend("HS256", signing_key="outra-chave-com-mais-de-32-caracteres")
+    return outra.encode(_payload(token))
+
+
+def _sem_assinatura(token):
+    cabecalho = _base64url(json.dumps({"alg": "none", "typ": "JWT"}).encode())
+    return f"{cabecalho}.{token.split('.')[1]}."
 
 
 def test_login_valido_devolve_tokens_e_usuario_sem_senha(usuario):
@@ -183,6 +220,86 @@ def test_access_dura_o_tempo_configurado(usuario):
     assert token["exp"] - token["iat"] == timedelta(minutes=30).total_seconds()
 
 
+def test_refresh_dura_o_tempo_configurado(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+
+    # Act
+    token = _payload(refresh)
+
+    # Assert
+    assert token["exp"] - token["iat"] == timedelta(days=1).total_seconds()
+
+
+def test_access_de_usuario_desativado_depois_do_login_responde_401(usuario):
+    # Arrange
+    access, _ = _tokens(_login())
+    usuario.is_active = False
+    usuario.save()
+
+    # Act
+    resposta = _me(access)
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+
+
+def test_access_de_usuario_excluido_responde_401(usuario):
+    # Arrange
+    access, _ = _tokens(_login())
+    usuario.delete()
+
+    # Act
+    resposta = _me(access)
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+
+
+@pytest.mark.parametrize(
+    "adulterar",
+    [
+        lambda access, refresh, outro_id: _com_payload_trocado(
+            access, user_id=outro_id
+        ),
+        lambda access, refresh, outro_id: _assinado_com_outra_chave(access),
+        lambda access, refresh, outro_id: _sem_assinatura(access),
+        lambda access, refresh, outro_id: refresh,
+    ],
+    ids=["payload-trocado", "outra-chave", "alg-none", "refresh-como-access"],
+)
+def test_token_adulterado_responde_401(usuario, adulterar):
+    # Arrange
+    outro = Usuario.objects.create_user(
+        "bruno@x.com", SENHA, nome="Bruno Lima", matricula="2026002"
+    )
+    access, refresh = _tokens(_login())
+
+    # Act
+    resposta = _me(adulterar(access, refresh, str(outro.pk)))
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+
+
+@pytest.mark.parametrize(
+    "cabecalho",
+    ["Bearer", "Token {access}", "bearer {access}"],
+    ids=["bearer-sem-token", "tipo-token", "bearer-minusculo"],
+)
+def test_cabecalho_authorization_fora_do_padrao_responde_401(usuario, cabecalho):
+    # Arrange
+    access, _ = _tokens(_login())
+
+    # Act
+    resposta = _me_com_cabecalho(cabecalho.format(access=access))
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+    assert set(resposta.data) == {"erro"}
+    assert set(resposta.data["erro"]) == {"codigo", "mensagem"}
+
+
 def test_refresh_valido_devolve_access_novo_que_funciona_no_me(usuario):
     # Arrange
     _, refresh = _tokens(_login())
@@ -214,6 +331,34 @@ def test_access_usado_como_refresh_responde_401(usuario):
 
     # Act
     resposta = _renovar(access)
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+
+
+def test_refresh_de_usuario_inativo_responde_401(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+    usuario.is_active = False
+    usuario.save()
+
+    # Act
+    resposta = _renovar(refresh)
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+    assert resposta.data == {
+        "erro": {"codigo": "NAO_AUTENTICADO", "mensagem": "Faça login para continuar."}
+    }
+
+
+def test_refresh_de_usuario_excluido_responde_401(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+    usuario.delete()
+
+    # Act
+    resposta = _renovar(refresh)
 
     # Assert
     _assert_nao_autenticado(resposta)
