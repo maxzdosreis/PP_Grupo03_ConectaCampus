@@ -221,6 +221,36 @@ def test_reserva_inexistente_responde_404(cliente):
     assert resposta.data["erro"]["codigo"] == "RESERVA_NAO_ENCONTRADA"
 
 
+def test_campos_extras_no_corpo_nao_alteram_a_reserva(cliente, reserva_id):
+    # Arrange
+    antes = _detalhe(cliente, reserva_id)
+    corpo = {
+        "situacao": "CANCELADA",
+        "motivo": MOTIVO,
+        "espaco_id": 9999,
+        "solicitante": {"usuario_id": 999, "nome": "Outra", "matricula": "0000000"},
+        "data": "2030-01-01",
+        "hora_inicio": "20:00",
+        "finalidade": "Outra coisa",
+    }
+
+    # Act
+    resposta = _alterar(cliente, reserva_id, corpo)
+
+    # Assert
+    assert resposta.status_code == 200
+    depois = _detalhe(cliente, reserva_id)
+    mudaram = {campo for campo in antes if antes[campo] != depois[campo]}
+    assert mudaram == {
+        "situacao",
+        "situacao_rotulo",
+        "motivo_da_situacao",
+        "acoes_disponiveis",
+    }
+    assert depois["situacao"] == "CANCELADA"
+    assert depois["motivo_da_situacao"] == MOTIVO
+
+
 @pytest.mark.parametrize("metodo", ["put", "post"])
 def test_outros_metodos_respondem_405(cliente, reserva_id, metodo):
     # Act

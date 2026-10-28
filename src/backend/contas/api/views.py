@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from compartilhado.api.respostas import resposta_erro, resposta_sucesso
@@ -82,13 +83,27 @@ class RenovarTokenView(_SemAutenticacaoView):
     def post(self, request):
         entrada = RenovacaoDeTokenSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
-        try:
-            refresh = RefreshToken(entrada.validated_data["refresh"])
-        except TokenError as erro:
-            raise InvalidToken(erro.args[0]) from erro
+        refresh = _refresh_de_usuario_ativo(entrada.validated_data["refresh"])
         return resposta_sucesso(
             "Token renovado.", {"access": str(refresh.access_token)}
         )
+
+
+def _refresh_de_usuario_ativo(token):
+    try:
+        refresh = RefreshToken(token)
+    except TokenError as erro:
+        raise InvalidToken(erro.args[0]) from erro
+    usuario = (
+        get_user_model()
+        .objects.filter(
+            **{api_settings.USER_ID_FIELD: refresh.get(api_settings.USER_ID_CLAIM)}
+        )
+        .first()
+    )
+    if not api_settings.USER_AUTHENTICATION_RULE(usuario):
+        raise InvalidToken("Usuário inativo ou inexistente.")
+    return refresh
 
 
 class UsuarioAtualView(APIView):

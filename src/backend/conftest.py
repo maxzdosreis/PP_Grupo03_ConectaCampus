@@ -44,6 +44,32 @@ def cliente_solicitante(usuario_solicitante):
 
 
 @pytest.fixture
+def tokens_de(db):
+    def _tokens_de(usuario):
+        resposta = APIClient().post(
+            reverse("contas:login"),
+            {"email": usuario.email, "senha": SENHA_DE_TESTE},
+            format="json",
+        )
+        assert resposta.status_code == 200
+        dados = resposta.data["dados"]
+        return {"access": dados["access"], "refresh": dados["refresh"]}
+
+    return _tokens_de
+
+
+@pytest.fixture
+def cliente_com_token(tokens_de):
+    def _cliente_com_token(usuario):
+        cliente = APIClient()
+        access = tokens_de(usuario)["access"]
+        cliente.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+        return cliente
+
+    return _cliente_com_token
+
+
+@pytest.fixture
 def espaco_id(cliente_gestor):
     resposta = cliente_gestor.post(
         reverse("espacos:lista"),
