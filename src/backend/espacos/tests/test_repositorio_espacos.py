@@ -1,8 +1,13 @@
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
+from django.test.utils import CaptureQueriesContext
 
 from espacos.domain.espaco_esportivo import EspacoEsportivo
-from espacos.domain.excecoes import EspacoNaoEncontrado, NomeDeEspacoJaCadastrado
+from espacos.domain.excecoes import (
+    EspacoDesatualizado,
+    EspacoNaoEncontrado,
+    NomeDeEspacoJaCadastrado,
+)
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.models import EspacoEsportivoModel
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
@@ -65,9 +70,9 @@ def test_salvar_espaco_novo_atribui_id_e_permite_obter_igual(repositorio):
 def test_salvar_espaco_existente_atualiza_sem_criar_outro(repositorio):
     # Arrange
     salvo = repositorio.salvar(_novo_espaco())
-    alterado = _novo_espaco(
-        id=salvo.id, nome="Quadra Reformada", capacidade=30, ativo=False
-    )
+    alterado = repositorio.obter_por_id(salvo.id)
+    alterado.alterar_dados(nome="Quadra Reformada", capacidade=30)
+    alterado.desativar()
 
     # Act
     atualizado = repositorio.salvar(alterado)
@@ -86,9 +91,11 @@ def test_salvar_espaco_existente_atualiza_sem_criar_outro(repositorio):
 def test_salvar_espaco_existente_mantendo_o_proprio_nome_nao_conflita(repositorio):
     # Arrange
     salvo = repositorio.salvar(_novo_espaco())
+    alterado = repositorio.obter_por_id(salvo.id)
+    alterado.alterar_dados(nome="Quadra Central", capacidade=40)
 
     # Act
-    atualizado = repositorio.salvar(_novo_espaco(id=salvo.id, capacidade=40))
+    atualizado = repositorio.salvar(alterado)
 
     # Assert
     assert atualizado.capacidade == 40
@@ -131,13 +138,87 @@ def test_renomear_para_o_nome_de_outro_espaco_lanca_nome_ja_cadastrado(repositor
     # Arrange
     repositorio.salvar(_novo_espaco(nome="Ginásio A"))
     outro = repositorio.salvar(_novo_espaco(nome="Ginásio B"))
+    renomeado = repositorio.obter_por_id(outro.id)
+    renomeado.alterar_dados(nome="GINÁSIO A")
 
     # Act
     with pytest.raises(NomeDeEspacoJaCadastrado):
-        repositorio.salvar(_novo_espaco(id=outro.id, nome="GINÁSIO A"))
+        repositorio.salvar(renomeado)
 
     # Assert
     assert repositorio.obter_por_id(outro.id).nome == "Ginásio B"
+
+
+def _duas_leituras(repositorio):
+    espaco_id = repositorio.salvar(_novo_espaco()).id
+    return repositorio.obter_por_id(espaco_id), repositorio.obter_por_id(espaco_id)
+
+
+def test_edicao_sobre_leitura_anterior_a_uma_desativacao_e_recusada(repositorio):
+    # Arrange
+    desativacao, edicao = _duas_leituras(repositorio)
+    desativacao.desativar()
+    repositorio.salvar(desativacao)
+    edicao.alterar_dados(capacidade=99)
+
+    # Act
+    with pytest.raises(EspacoDesatualizado):
+        repositorio.salvar(edicao)
+
+    # Assert
+    guardado = repositorio.obter_por_id(edicao.id)
+    assert (guardado.capacidade, guardado.ativo) == (20, False)
+
+
+def test_edicao_de_outro_campo_sobre_leitura_desatualizada_nao_apaga_a_primeira(
+    repositorio,
+):
+    # Arrange
+    primeira, segunda = _duas_leituras(repositorio)
+    primeira.alterar_dados(nome="Quadra Reformada")
+    repositorio.salvar(primeira)
+    segunda.alterar_dados(capacidade=99)
+
+    # Act
+    with pytest.raises(EspacoDesatualizado):
+        repositorio.salvar(segunda)
+
+    # Assert
+    guardado = repositorio.obter_por_id(primeira.id)
+    assert (guardado.nome, guardado.capacidade) == ("Quadra Reformada", 20)
+
+
+def test_salvar_de_novo_o_mesmo_objeto_nao_acusa_desatualizado(repositorio):
+    # Arrange
+    espaco = repositorio.obter_por_id(repositorio.salvar(_novo_espaco()).id)
+    espaco.alterar_dados(capacidade=30)
+    repositorio.salvar(espaco)
+    espaco.alterar_dados(capacidade=40)
+
+    # Act
+    repositorio.salvar(espaco)
+
+    # Assert
+    assert repositorio.obter_por_id(espaco.id).capacidade == 40
+
+
+@pytest.mark.django_db
+def test_salvar_espaco_existente_bloqueia_a_linha():
+    # Arrange
+    repositorio = RepositorioEspacosDjango()
+    espaco = repositorio.obter_por_id(repositorio.salvar(_novo_espaco()).id)
+    espaco.alterar_dados(capacidade=30)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.salvar(espaco)
+
+    # Assert
+    assert any(
+        'FROM "espacos_espaco_esportivo"' in consulta["sql"]
+        and "FOR UPDATE" in consulta["sql"]
+        for consulta in consultas.captured_queries
+    )
 
 
 def test_listar_ordena_por_nome(repositorio):
@@ -182,9 +263,9 @@ def test_alterar_entidade_devolvida_nao_altera_o_repositorio(repositorio):
     salvo = repositorio.salvar(_novo_espaco())
 
     # Act
-    repositorio.obter_por_id(salvo.id).capacidade = 99
-    repositorio.listar()[0].ativo = False
-    salvo.nome = "Nome alterado fora do repositório"
+    repositorio.obter_por_id(salvo.id).alterar_dados(capacidade=99)
+    repositorio.listar()[0].desativar()
+    salvo.alterar_dados(nome="Nome alterado fora do repositório")
 
     # Assert
     guardado = repositorio.obter_por_id(salvo.id)
@@ -237,7 +318,7 @@ def test_banco_recusa_dados_que_a_entidade_nao_aceitaria(campos, constraint):
 def test_salvar_repassa_integrity_error_que_nao_e_de_nome_repetido():
     # Arrange
     espaco = _novo_espaco()
-    espaco.capacidade = 0
+    espaco._capacidade = 0
 
     # Act / Assert
     with pytest.raises(IntegrityError, match="capacidade_minima"):

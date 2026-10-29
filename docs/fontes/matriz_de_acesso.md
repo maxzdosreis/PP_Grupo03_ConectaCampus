@@ -7,7 +7,7 @@
 ## Como a matriz é testada
 
 - **Personas:** anônimo (sem token); **dono** (solicitante dono da reserva do cenário); **outro** (outro solicitante); **gestor**. Exceto o anônimo, cada uma faz login de verdade em `POST /api/auth/login/` e usa `Authorization: Bearer <access>`, sem `force_authenticate`.
-- **Cenário de cada caso:** um espaço cadastrado pelo gestor e uma reserva do dono (amanhã, 10:00–11:00). Cada caso roda isolado, com o banco desfeito ao final.
+- **Cenário de cada caso:** um espaço ativo e um espaço inativo, os dois cadastrados pelo gestor (o inativo é desativado pela API e é o alvo de `espacos:ativar`), e uma reserva do dono no espaço ativo (amanhã, 10:00–11:00). Cada caso roda isolado, com o banco desfeito ao final.
 - **Livre:** "não exige login". O anônimo (e qualquer persona) não recebe 401 nem 403.
 - Além do status, o código do erro é conferido: 401 `NAO_AUTENTICADO`, 403 `ACAO_NAO_PERMITIDA`, 405 `METODO_NAO_PERMITIDO`.
 
@@ -24,7 +24,12 @@
 | `espacos:lista` | `/api/espacos/` | POST | novo espaço | 401 | 403 | 403 | 201 |
 | `espacos:tipos` | `/api/espacos/tipos/` | GET | — | 200 | 200 | 200 | 200 |
 | `espacos:detalhe` | `/api/espacos/{id}/` | GET | — | 401 | 200 | 200 | 200 |
+| `espacos:detalhe` | `/api/espacos/{id}/` | PATCH | `{"capacidade": 40}` | 401 | 403 | 403 | 200 |
 | `espacos:detalhe` | `/api/espacos/{id}/` | DELETE | — | 401 | 405 | 405 | 405 |
+| `espacos:desativar` | `/api/espacos/{id}/desativar/` | POST | — | 401 | 403 | 403 | 200 |
+| `espacos:desativar` | `/api/espacos/{id}/desativar/` | GET | — | 401 | 405 | 405 | 405 |
+| `espacos:ativar` | `/api/espacos/{id}/ativar/` | POST | — (espaço inativo do cenário) | 401 | 403 | 403 | 200 |
+| `espacos:ativar` | `/api/espacos/{id}/ativar/` | GET | — | 401 | 405 | 405 | 405 |
 | `reservas:lista` | `/api/reservas/` | GET | — | 401 | 200 | 200 | 200 |
 | `reservas:lista` | `/api/reservas/` | POST | nova reserva (14:00–15:00) | 401 | 201 | 201 | 201 |
 | `reservas:situacoes` | `/api/reservas/situacoes/` | GET | — | 200 | 200 | 200 | 200 |
@@ -40,6 +45,7 @@
 - **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`) e login, refresh e cadastro.
 - **403 x 404:** o solicitante recebe 403 quando a ação é proibida ao perfil numa reserva que ele vê (confirmar a própria), e 404 numa reserva de outra pessoa, para não revelar que ela existe.
 - **Sem exclusão:** `DELETE` não existe em espaços, em reservas nem no histórico (405 para quem está logado; o anônimo recebe 401 antes, porque a autenticação vem primeiro). Espaço é desativado, reserva muda de situação e o histórico só recebe registros novos (RES-07); nada é excluído.
+- **Gestão de espaços (ESP-04):** cadastrar, editar (`PATCH`), desativar e reativar são só do gestor; os dois solicitantes recebem 403. As rotas de ação só aceitam `POST`: um `GET` nelas responde 405 a quem está logado, porque a restrição ao gestor vale só para o método implementado.
 - **Histórico:** segue a visibilidade do detalhe. O dono e o gestor leem; outro solicitante recebe 404, como no detalhe.
 
 ## Outros testes de segurança (fora da matriz)

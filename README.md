@@ -99,8 +99,9 @@ Pela tela, em http://localhost:5173, com os usuários de exemplo:
 4. **Solicitar.** Trocar o horário para **16:00–17:00** e enviar: a mensagem de sucesso aparece e o resumo mostra a situação "Solicitada". "Ver minhas reservas" leva à lista com a nova reserva.
 5. **Cancelar.** Em "Minhas reservas", abrir a reserva Solicitada de amanhã às 10:00 (a dos dados de exemplo) e cancelá-la pelo detalhe: o diálogo pede o motivo, e sem motivo o erro aparece embaixo do campo. Com o motivo, a reserva passa a "Cancelada" e a linha do tempo ganha o item "Cancelada por Bruno Lima" com o motivo.
 6. **Sem permissão.** Em "Espaços", Bruno vê a lista e o aviso "Somente o gestor cadastra espaços.", sem o formulário. Sair (botão "Sair" no cabeçalho).
-7. **Entrar como gestora** Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`). Em "Espaços", cadastrar um espaço (ex.: "Quadra Coberta Sul", Quadra poliesportiva, 20 pessoas); um nome repetido ou uma capacidade 0 mostra o erro embaixo do campo.
+7. **Entrar como gestora** Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`). Em "Espaços", cadastrar um espaço (ex.: "Quadra Coberta Sul", Quadra poliesportiva, 20 pessoas); um nome repetido ou uma capacidade 0 mostra o erro embaixo do campo. Na tabela, "Editar" na Quadra de Areia Norte abre o diálogo já preenchido: trocar a capacidade para 16 e salvar mostra "Espaço atualizado com sucesso."; trocar o nome para "Ginásio Coberto" (já usado) ou a capacidade para 0 mostra o erro embaixo do campo, e salvar sem mudar nada mostra "Informe ao menos um campo para alterar.".
 8. **Confirmar e concluir.** Em "Reservas", Carla vê as reservas de todos. Filtrar por situação "Solicitada", abrir a reserva das 16:00 do Bruno pela data, confirmá-la e depois concluí-la no próprio detalhe: cada mudança mostra a mensagem da API ("Reserva confirmada com sucesso.", "Reserva concluída com sucesso."), a linha do tempo ganha um item para cada uma, e a reserva concluída fica sem ações. "Voltar para as reservas" volta à lista ainda filtrada por "Solicitada".
+9. **Desativar um espaço (operação inválida bloqueada).** Numa janela anônima ou em outro navegador (a sessão fica no navegador, então cada janela precisa da sua), entrar como Bruno, abrir "Nova reserva" e preencher o Campo de Futebol Principal, amanhã, 10:00–11:00. Na janela da Carla, em "Espaços", clicar em "Desativar" no Campo de Futebol Principal: o diálogo avisa que novas reservas ficarão bloqueadas e que as existentes continuam valendo. Confirmar. De volta à janela do Bruno, enviar o pedido: o aviso no topo do formulário mostra **409** "Este espaço está inativo e não aceita reservas.". Ao recarregar a página, o espaço nem aparece mais entre as opções. Em "Reservas", a Carla ainda vê a reserva Confirmada da Daniela nesse espaço, com "Concluir" e "Cancelar". Por fim, "Reativar" o espaço em "Espaços": o pedido do Bruno volta a ser aceito.
 
 O mesmo roteiro com `curl`, na seção a seguir, mostra também o **403** de um solicitante tentando confirmar, que a tela não oferece.
 
@@ -149,6 +150,20 @@ Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/
    ```
 
    Tentar voltá-la para `SOLICITADA` responde **409** `TRANSICAO_DE_SITUACAO_INVALIDA`.
+
+8. Ainda como Carla, desativar o Campo de Futebol Principal (espaço `2` num banco recém-criado) → **200**; repetir o comando responde **409** `ESPACO_JA_INATIVO`:
+
+   ```bash
+   curl -X POST http://localhost:8000/api/espacos/2/desativar/ -H "Authorization: Bearer $ACCESS"
+   ```
+
+9. Entrar de novo como Bruno e pedir esse espaço → **409** `ESPACO_INATIVO`, "Este espaço está inativo e não aceita reservas.". A reserva Confirmada da Daniela nesse espaço continua valendo:
+
+   ```bash
+   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 2, "data": "AAAA-MM-DD", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de futebol"}'
+   ```
+
+10. Como Carla, reativar o espaço (`POST /api/espacos/2/ativar/`) → **200** `"Espaço reativado."`; o pedido do passo 9 passa a ser aceito (**201**).
 
 #### Recomeçar do zero
 
@@ -240,6 +255,44 @@ Um id inexistente responde **404**:
 ```json
 {"erro": {"codigo": "ESPACO_NAO_ENCONTRADO", "mensagem": "Espaço de código 9999 não encontrado."}}
 ```
+
+Editar um espaço (`PATCH /api/espacos/{id}/`, só Gestor). Aceita qualquer combinação de `nome`, `tipo` e `capacidade`, mas pelo menos um; `ativo` no corpo é ignorado, porque ativar e desativar têm rotas próprias:
+
+```bash
+curl -X PATCH http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"capacidade": 25}'
+```
+
+```bat
+curl -X PATCH http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"capacidade\": 25}"
+```
+
+```json
+{"mensagem": "Espaço atualizado com sucesso.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": true}}
+```
+
+Corpo vazio (`{}`) → **400** `NENHUMA_ALTERACAO_INFORMADA` ("Informe ao menos um campo para alterar."). Os outros erros são os do cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; nome de outro espaço → **409** `NOME_DE_ESPACO_JA_CADASTRADO`, sempre com o campo em `campos`. Espaço alterado por outra pessoa depois que você o leu → **409** `ESPACO_DESATUALIZADO` (nada é gravado; atualize a lista e tente de novo).
+
+Desativar e reativar (`POST /api/espacos/{id}/desativar/` e `POST /api/espacos/{id}/ativar/`, só Gestor, sem corpo). Espaço nunca é excluído: desativar só bloqueia **novas** reservas, e as já existentes continuam valendo (o gestor cancela alguma pela tela de reservas, se precisar):
+
+```bash
+curl -X POST http://localhost:8000/api/espacos/1/desativar/ -H "Authorization: Bearer $ACCESS"
+```
+
+```bat
+curl -X POST http://localhost:8000/api/espacos/1/desativar/ -H "Authorization: Bearer %ACCESS%"
+```
+
+```json
+{"mensagem": "Espaço desativado. Novas reservas ficam bloqueadas; as existentes continuam valendo.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": false}}
+```
+
+Desativar de novo responde **409** `ESPACO_JA_INATIVO` (ou `ESPACO_DESATUALIZADO`, se outra pessoa o alterou ao mesmo tempo), e pedir uma reserva nesse espaço responde **409** `ESPACO_INATIVO`. Para reativar:
+
+```bash
+curl -X POST http://localhost:8000/api/espacos/1/ativar/ -H "Authorization: Bearer $ACCESS"
+```
+
+A resposta é **200** `"Espaço reativado."`; ativar um espaço já ativo responde **409** `ESPACO_JA_ATIVO`. Com o token de um Solicitante, editar, desativar e ativar respondem **403** `ACAO_NAO_PERMITIDA`, e nada muda.
 
 #### Entrar (login) e usar o token
 
@@ -627,6 +680,7 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 - **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia. A exceção é desativar ou excluir o usuário: a partir daí, nem o `access` nem o `refresh` dele são aceitos (401).
 - **Sem limite de tentativas de login:** `POST /api/auth/login/` não limita tentativas, então não há proteção contra força bruta de senhas. A evolução natural é o throttling do DRF (`ScopedRateThrottle` com um escopo próprio para o login, ou `AnonRateThrottle`), que responde 429 depois de N tentativas por minuto.
 - **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
-- **Perfil na interface:** esconder o formulário de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
+- **Perfil na interface:** esconder o formulário de espaços e os botões de editar, desativar e reativar de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, só a primeira é gravada; a segunda recebe 409 `RESERVA_DESATUALIZADA` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
+- **Alterações simultâneas no mesmo espaço:** se dois gestores editarem, desativarem ou reativarem o mesmo espaço ao mesmo tempo, só a primeira alteração é gravada; a segunda recebe 409 `ESPACO_DESATUALIZADO` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
 - **Histórico só das mudanças aceitas:** o histórico da reserva registra a criação e cada mudança de situação efetiva. Tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas em nenhum lugar, nem na linha do tempo do detalhe da reserva.

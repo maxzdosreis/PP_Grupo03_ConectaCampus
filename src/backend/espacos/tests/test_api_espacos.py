@@ -2,9 +2,7 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.tipo_espaco import TipoEspaco
-from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 
 pytestmark = pytest.mark.django_db
 
@@ -44,12 +42,8 @@ def _cadastrar_espacos_para_listagem(cliente):
     _cadastrar(cliente, nome="Quadra Coberta", tipo="QUADRA_POLIESPORTIVA")
     _cadastrar(cliente, nome="Ginásio Novo", tipo="GINASIO")
     _cadastrar(cliente, nome="Campo Norte", tipo="CAMPO_DE_FUTEBOL")
-    # Ainda não há endpoint para desativar (ESP-04): o inativo vai pelo repositório.
-    RepositorioEspacosDjango().salvar(
-        EspacoEsportivo(
-            nome="Ginásio Antigo", tipo=TipoEspaco.GINASIO, capacidade=10, ativo=False
-        )
-    )
+    antigo = _cadastrar(cliente, nome="Ginásio Antigo", capacidade=10).data["dados"]
+    cliente.post(reverse("espacos:desativar", args=[antigo["id"]]))
 
 
 def test_cadastrar_espaco_valido_responde_201_com_o_espaco(cliente):

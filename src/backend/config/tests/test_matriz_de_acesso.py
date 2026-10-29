@@ -49,7 +49,12 @@ _TABELA = [
     ("espacos:lista",      "POST",   "novo_espaco",         401,   403,   403,   201),
     ("espacos:tipos",      "GET",    None,                  200,   200,   200,   200),
     ("espacos:detalhe",    "GET",    None,                  401,   200,   200,   200),
+    ("espacos:detalhe",    "PATCH",  "editar_espaco",       401,   403,   403,   200),
     ("espacos:detalhe",    "DELETE", None,                  401,   405,   405,   405),
+    ("espacos:desativar",  "POST",   None,                  401,   403,   403,   200),
+    ("espacos:desativar",  "GET",    None,                  401,   405,   405,   405),
+    ("espacos:ativar",     "POST",   None,                  401,   403,   403,   200),
+    ("espacos:ativar",     "GET",    None,                  401,   405,   405,   405),
     ("reservas:lista",     "GET",    None,                  401,   200,   200,   200),
     ("reservas:lista",     "POST",   "nova_reserva",        401,   201,   201,   201),
     ("reservas:situacoes", "GET",    None,                  200,   200,   200,   200),
@@ -66,8 +71,12 @@ MATRIZ = [Regra(*linha) for linha in _TABELA]
 
 class Cenario(NamedTuple):
     espaco_id: int
+    espaco_inativo_id: int
     reserva_id: int
     refresh: str
+
+
+_PARAMETROS_DO_CENARIO = {"espacos:ativar": {"espaco_id": "espaco_inativo_id"}}
 
 
 def _amanha():
@@ -98,6 +107,7 @@ CORPOS = {
         "tipo": "GINASIO",
         "capacidade": 30,
     },
+    "editar_espaco": lambda cenario: {"capacidade": 40},
     "nova_reserva": lambda cenario: _reserva(cenario.espaco_id, "14:00", "15:00"),
     "confirmar": lambda cenario: {"situacao": "CONFIRMADA"},
     "cancelar_com_motivo": lambda cenario: {
@@ -132,8 +142,12 @@ def _metodos_implementados(view):
 def _url(nome_da_rota, cenario):
     caminho = _rotas_da_api()[nome_da_rota].caminho
     parametros = re.findall(r"<(?:\w+:)?(\w+)>", caminho)
+    atributos = _PARAMETROS_DO_CENARIO.get(nome_da_rota, {})
     return reverse(
-        nome_da_rota, kwargs={nome: getattr(cenario, nome) for nome in parametros}
+        nome_da_rota,
+        kwargs={
+            nome: getattr(cenario, atributos.get(nome, nome)) for nome in parametros
+        },
     )
 
 
@@ -151,15 +165,18 @@ def _hash_de_senha_rapido(settings):
 
 @pytest.fixture
 def cenario(cliente_com_token, tokens_de, usuario_gestor, usuario_solicitante):
-    espaco_id = (
-        cliente_com_token(usuario_gestor)
-        .post(
+    gestor = cliente_com_token(usuario_gestor)
+
+    def cadastrar_espaco(nome):
+        return gestor.post(
             reverse("espacos:lista"),
-            {"nome": "Quadra Coberta", "tipo": "GINASIO", "capacidade": 20},
+            {"nome": nome, "tipo": "GINASIO", "capacidade": 20},
             format="json",
-        )
-        .data["dados"]["id"]
-    )
+        ).data["dados"]["id"]
+
+    espaco_id = cadastrar_espaco("Quadra Coberta")
+    espaco_inativo_id = cadastrar_espaco("Ginásio Fechado")
+    gestor.post(reverse("espacos:desativar", args=[espaco_inativo_id]))
     reserva_id = (
         cliente_com_token(usuario_solicitante)
         .post(
@@ -172,7 +189,12 @@ def cenario(cliente_com_token, tokens_de, usuario_gestor, usuario_solicitante):
     get_user_model().objects.create_user(
         EMAIL_DE_LOGIN, SENHA, nome="Carla Dias", matricula="2026010"
     )
-    return Cenario(espaco_id, reserva_id, tokens_de(usuario_solicitante)["refresh"])
+    return Cenario(
+        espaco_id,
+        espaco_inativo_id,
+        reserva_id,
+        tokens_de(usuario_solicitante)["refresh"],
+    )
 
 
 @pytest.fixture

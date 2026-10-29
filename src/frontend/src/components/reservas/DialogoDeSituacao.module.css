@@ -8,12 +8,6 @@
   resize: vertical;
 }
 
-.erro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-2);
-}
-
 .detalhes {
   display: flex;
   flex-direction: column;

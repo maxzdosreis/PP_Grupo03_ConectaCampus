@@ -6,8 +6,8 @@ import { useMensagens } from '../../hooks/useMensagens.ts'
 import type { EstadoDaConsulta } from '../../hooks/useConsulta.ts'
 import Carregando from '../estados/Carregando.tsx'
 import FalhaAoCarregar from '../estados/FalhaAoCarregar.tsx'
-import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
+import CamposDoEspaco from './CamposDoEspaco.tsx'
 import estilos from './FormularioDeEspaco.module.css'
 
 const FORMULARIO_VAZIO: DadosDoEspaco = { nome: '', tipo: '', capacidade: '' }
@@ -37,12 +37,12 @@ function FormularioDeEspaco({
   return <Formulario tipos={tipos.dados} aoCadastrar={aoCadastrar} />
 }
 
-type PropriedadesDosCampos = {
+type PropriedadesDoCadastro = {
   tipos: TipoDeEspaco[]
   aoCadastrar: () => void
 }
 
-function Formulario({ tipos, aoCadastrar }: PropriedadesDosCampos) {
+function Formulario({ tipos, aoCadastrar }: PropriedadesDoCadastro) {
   const [dados, setDados] = useState(FORMULARIO_VAZIO)
   const { enviar, enviando, errosDosCampos, erroGeral, limparErroDoCampo } =
     useEnvio(cadastrarEspaco)
@@ -71,51 +71,12 @@ function Formulario({ tipos, aoCadastrar }: PropriedadesDosCampos) {
           <Aviso variante="erro">{erroGeral}</Aviso>
         </div>
       )}
-      <Campo rotulo="Nome" erro={errosDosCampos.nome}>
-        {(controle) => (
-          <input
-            {...controle}
-            type="text"
-            name="nome"
-            autoComplete="off"
-            value={dados.nome}
-            onChange={(evento) => alterar('nome', evento.target.value)}
-          />
-        )}
-      </Campo>
-      <Campo rotulo="Tipo" erro={errosDosCampos.tipo}>
-        {(controle) => (
-          <select
-            {...controle}
-            name="tipo"
-            value={dados.tipo}
-            onChange={(evento) => alterar('tipo', evento.target.value)}
-          >
-            <option value="">Selecione o tipo</option>
-            {tipos.map(({ valor, rotulo }) => (
-              <option key={valor} value={valor}>
-                {rotulo}
-              </option>
-            ))}
-          </select>
-        )}
-      </Campo>
-      <Campo
-        rotulo="Capacidade"
-        dica="Número máximo de pessoas."
-        erro={errosDosCampos.capacidade}
-      >
-        {(controle) => (
-          <input
-            {...controle}
-            type="number"
-            inputMode="numeric"
-            name="capacidade"
-            value={dados.capacidade}
-            onChange={(evento) => alterar('capacidade', evento.target.value)}
-          />
-        )}
-      </Campo>
+      <CamposDoEspaco
+        dados={dados}
+        tipos={tipos}
+        errosDosCampos={errosDosCampos}
+        aoAlterar={alterar}
+      />
       <div>
         <button type="submit" disabled={enviando}>
           {enviando ? 'Cadastrando...' : 'Cadastrar espaço'}

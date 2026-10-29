@@ -1,4 +1,11 @@
-from espacos.application.casos_de_uso import CadastrarEspaco, ListarEspacos, ObterEspaco
+from espacos.application.casos_de_uso import (
+    AtivarEspaco,
+    CadastrarEspaco,
+    DesativarEspaco,
+    EditarEspaco,
+    ListarEspacos,
+    ObterEspaco,
+)
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 
 
@@ -12,3 +19,15 @@ def listar_espacos() -> ListarEspacos:
 
 def obter_espaco() -> ObterEspaco:
     return ObterEspaco(RepositorioEspacosDjango())
+
+
+def editar_espaco() -> EditarEspaco:
+    return EditarEspaco(RepositorioEspacosDjango())
+
+
+def desativar_espaco() -> DesativarEspaco:
+    return DesativarEspaco(RepositorioEspacosDjango())
+
+
+def ativar_espaco() -> AtivarEspaco:
+    return AtivarEspaco(RepositorioEspacosDjango())

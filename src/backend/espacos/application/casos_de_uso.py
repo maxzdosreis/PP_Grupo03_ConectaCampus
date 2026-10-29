@@ -32,10 +32,7 @@ class ObterEspaco:
         self._repositorio = repositorio
 
     def executar(self, espaco_id: int) -> EspacoEsportivo:
-        espaco = self._repositorio.obter_por_id(espaco_id)
-        if espaco is None:
-            raise EspacoNaoEncontrado(espaco_id)
-        return espaco
+        return _obter_ou_falhar(self._repositorio, espaco_id)
 
 
 class VerificarEspacoDisponivel:
@@ -43,6 +40,57 @@ class VerificarEspacoDisponivel:
         self._repositorio = repositorio
 
     def executar(self, espaco_id: int) -> EspacoEsportivo:
-        espaco = ObterEspaco(self._repositorio).executar(espaco_id)
+        espaco = _obter_ou_falhar(self._repositorio, espaco_id)
         espaco.garantir_que_esta_ativo()
         return espaco
+
+
+class EditarEspaco:
+    def __init__(self, repositorio: RepositorioEspacos) -> None:
+        self._repositorio = repositorio
+
+    def executar(
+        self,
+        espaco_id: int,
+        *,
+        nome: str | None = None,
+        tipo: TipoEspaco | str | None = None,
+        capacidade: int | None = None,
+    ) -> EspacoEsportivo:
+        espaco = _obter_ou_falhar(self._repositorio, espaco_id)
+        nome_anterior = espaco.nome
+        espaco.alterar_dados(nome=nome, tipo=tipo, capacidade=capacidade)
+        if espaco.nome != nome_anterior and self._repositorio.existe_com_nome(
+            espaco.nome, ignorar_id=espaco_id
+        ):
+            raise NomeDeEspacoJaCadastrado()
+        return self._repositorio.salvar(espaco)
+
+
+class DesativarEspaco:
+    def __init__(self, repositorio: RepositorioEspacos) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, espaco_id: int) -> EspacoEsportivo:
+        espaco = _obter_ou_falhar(self._repositorio, espaco_id)
+        espaco.desativar()
+        return self._repositorio.salvar(espaco)
+
+
+class AtivarEspaco:
+    def __init__(self, repositorio: RepositorioEspacos) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, espaco_id: int) -> EspacoEsportivo:
+        espaco = _obter_ou_falhar(self._repositorio, espaco_id)
+        espaco.ativar()
+        return self._repositorio.salvar(espaco)
+
+
+def _obter_ou_falhar(
+    repositorio: RepositorioEspacos, espaco_id: int
+) -> EspacoEsportivo:
+    espaco = repositorio.obter_por_id(espaco_id)
+    if espaco is None:
+        raise EspacoNaoEncontrado(espaco_id)
+    return espaco

@@ -2,7 +2,11 @@ from django.db import IntegrityError, transaction
 
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
-from espacos.domain.excecoes import EspacoNaoEncontrado, NomeDeEspacoJaCadastrado
+from espacos.domain.excecoes import (
+    EspacoDesatualizado,
+    EspacoNaoEncontrado,
+    NomeDeEspacoJaCadastrado,
+)
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.models import CONSTRAINT_NOME_UNICO, EspacoEsportivoModel
 
@@ -12,12 +16,14 @@ class RepositorioEspacosDjango(RepositorioEspacos):
         try:
             with transaction.atomic():
                 model = _obter_model_para_salvar(espaco)
+                _exigir_estado_de_origem(espaco, model)
                 _aplicar_no_model(espaco, model)
                 model.save()
         except IntegrityError as erro:
             if CONSTRAINT_NOME_UNICO in str(erro):
                 raise NomeDeEspacoJaCadastrado() from erro
             raise
+        espaco.marcar_como_gravado()
         return _para_entidade(model)
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
@@ -45,9 +51,16 @@ def _obter_model_para_salvar(espaco: EspacoEsportivo) -> EspacoEsportivoModel:
     if espaco.id is None:
         return EspacoEsportivoModel()
     try:
-        return EspacoEsportivoModel.objects.get(pk=espaco.id)
+        return EspacoEsportivoModel.objects.select_for_update().get(pk=espaco.id)
     except EspacoEsportivoModel.DoesNotExist:
         raise EspacoNaoEncontrado(espaco.id) from None
+
+
+def _exigir_estado_de_origem(
+    espaco: EspacoEsportivo, model: EspacoEsportivoModel
+) -> None:
+    if model.pk is not None and _para_entidade(model).estado != espaco.estado_de_origem:
+        raise EspacoDesatualizado()
 
 
 def _para_entidade(model: EspacoEsportivoModel) -> EspacoEsportivo:

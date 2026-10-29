@@ -1,6 +1,10 @@
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
-from espacos.domain.excecoes import EspacoNaoEncontrado, NomeDeEspacoJaCadastrado
+from espacos.domain.excecoes import (
+    EspacoDesatualizado,
+    EspacoNaoEncontrado,
+    NomeDeEspacoJaCadastrado,
+)
 from espacos.domain.tipo_espaco import TipoEspaco
 
 
@@ -12,10 +16,16 @@ class RepositorioEspacosEmMemoria(RepositorioEspacos):
     def salvar(self, espaco: EspacoEsportivo) -> EspacoEsportivo:
         if espaco.id is not None and espaco.id not in self._espacos:
             raise EspacoNaoEncontrado(espaco.id)
+        if (
+            espaco.id is not None
+            and self._espacos[espaco.id].estado != espaco.estado_de_origem
+        ):
+            raise EspacoDesatualizado()
         if self.existe_com_nome(espaco.nome, ignorar_id=espaco.id):
             raise NomeDeEspacoJaCadastrado()
         espaco_id = espaco.id if espaco.id is not None else self._gerar_id()
         self._espacos[espaco_id] = _copiar(espaco, espaco_id)
+        espaco.marcar_como_gravado()
         return _copiar(espaco, espaco_id)
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:

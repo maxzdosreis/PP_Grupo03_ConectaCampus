@@ -10,6 +10,10 @@ class RepositorioEspacos(Protocol):
 
         Devolve a entidade com id. Atualizar um id inexistente lança
         EspacoNaoEncontrado; nome repetido lança NomeDeEspacoJaCadastrado.
+        Atualizar exige que o estado gravado seja o estado_de_origem da entidade:
+        se outra operação alterou o espaço depois da leitura, lança
+        EspacoDesatualizado sem gravar. Depois de gravar, marca a entidade como
+        gravada.
         """
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
