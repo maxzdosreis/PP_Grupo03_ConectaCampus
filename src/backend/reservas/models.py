@@ -1,3 +1,3 @@
-from reservas.infrastructure.models import ReservaModel
+from reservas.infrastructure.models import RegistroDeSituacaoModel, ReservaModel
 
-__all__ = ["ReservaModel"]
+__all__ = ["RegistroDeSituacaoModel", "ReservaModel"]

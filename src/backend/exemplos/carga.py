@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
@@ -27,11 +27,7 @@ from reservas.api.dependencias import (
 )
 from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.ator import Ator, PapelDoAtor
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.reserva import Reserva
-from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
-from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
 
 @dataclass(frozen=True)
@@ -118,20 +114,8 @@ def _criar_reserva(
     agora: datetime,
     gestor: Ator,
 ) -> None:
-    if exemplo.no_passado:
-        _reconstituir_reserva_passada(exemplo, solicitante, espaco_id, data, agora)
-    else:
-        _solicitar_reserva(exemplo, solicitante, espaco_id, data, gestor)
-
-
-def _solicitar_reserva(
-    exemplo: ReservaDeExemplo,
-    solicitante: Solicitante,
-    espaco_id: int,
-    data: date,
-    gestor: Ator,
-) -> None:
-    reserva = criar_reserva().executar(
+    solicitada_em = agora - timedelta(days=exemplo.solicitada_ha_dias)
+    reserva = criar_reserva(relogio=_relogio_em(solicitada_em)).executar(
         espaco_id=espaco_id,
         solicitante=solicitante,
         data=data,
@@ -139,34 +123,18 @@ def _solicitar_reserva(
         hora_fim=exemplo.hora_fim,
         finalidade=exemplo.finalidade,
     )
-    if exemplo.situacao != SituacaoReserva.SOLICITADA:
-        alterar_situacao_reserva().executar(
+    for mudanca in exemplo.mudancas:
+        alterada_em = agora - timedelta(days=mudanca.ha_dias)
+        alterar_situacao_reserva(relogio=_relogio_em(alterada_em)).executar(
             reserva_id=reserva.id,
-            nova_situacao=exemplo.situacao,
-            motivo=exemplo.motivo,
+            nova_situacao=mudanca.situacao,
+            motivo=mudanca.motivo,
             ator=gestor,
         )
 
 
-def _reconstituir_reserva_passada(
-    exemplo: ReservaDeExemplo,
-    solicitante: Solicitante,
-    espaco_id: int,
-    data: date,
-    agora: datetime,
-) -> None:
-    reserva = Reserva(
-        espaco_id=espaco_id,
-        solicitante=solicitante,
-        intervalo=IntervaloDeHorario(
-            data=data, hora_inicio=exemplo.hora_inicio, hora_fim=exemplo.hora_fim
-        ),
-        finalidade=exemplo.finalidade,
-        situacao=exemplo.situacao,
-        motivo_da_situacao=exemplo.motivo,
-        criada_em=agora - timedelta(days=exemplo.criada_ha_dias),
-    )
-    RepositorioReservasDjango().salvar(reserva)
+def _relogio_em(momento: datetime) -> Callable[[], datetime]:
+    return lambda: momento
 
 
 def _solicitantes_de_exemplo() -> dict[str, Solicitante]:
@@ -182,7 +150,7 @@ def _solicitante_de(email: str) -> Solicitante:
 
 def _ator_do_gestor() -> Ator:
     usuario = Usuario.objects.get_by_natural_key(GESTOR.email)
-    return Ator(usuario_id=usuario.pk, papel=PapelDoAtor.GESTOR)
+    return Ator(usuario_id=usuario.pk, nome=usuario.nome, papel=PapelDoAtor.GESTOR)
 
 
 def _contar_reservas_de(solicitantes: Iterable[Solicitante], gestor: Ator) -> int:

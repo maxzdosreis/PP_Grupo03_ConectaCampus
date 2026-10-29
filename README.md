@@ -151,7 +151,7 @@ Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/
 
 #### Recomeçar do zero
 
-Para apagar tudo (inclusive o que foi cadastrado à mão) e carregar os dados de novo, dentro de `src`:
+Para apagar tudo (inclusive o que foi cadastrado à mão) e carregar os dados de novo, dentro de `src`. Faça isso também se o seu banco foi criado antes do histórico de situação (RES-07): as reservas antigas não têm histórico, porque a migration não reconstrói o passado.
 
 ```bash
 docker compose down -v
@@ -491,7 +491,33 @@ curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: 
 {"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": []}}
 ```
 
-Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; sem token → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
+Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; reserva alterada por outra pessoa enquanto você decidia → **409** `RESERVA_DESATUALIZADA` (nada é gravado; atualize a lista e decida de novo); sem token → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
+
+#### Histórico de uma reserva
+
+`GET /api/reservas/{id}/historico/` exige login e lista a criação e cada mudança de situação aceita, da mais antiga para a mais recente: data e hora, quem fez, situação anterior (`null` na criação), situação nova e motivo. Tentativas recusadas (403, 409, 400) não entram, porque não mudaram nada. O histórico só recebe registros novos: não há como alterá-lo nem excluí-lo.
+
+Com os dados de exemplo e o token da Carla (gestora), o histórico da reserva Concluída, que é a de id 5 num banco recém-criado (confira em `GET /api/reservas/`):
+
+```bash
+curl http://localhost:8000/api/reservas/5/historico/ -H "Authorization: Bearer $ACCESS"
+```
+
+No Prompt de Comando do Windows:
+
+```bat
+curl http://localhost:8000/api/reservas/5/historico/ -H "Authorization: Bearer %ACCESS%"
+```
+
+Resposta **200**:
+
+```json
+{"mensagem": "Histórico da reserva.", "dados": [{"situacao_anterior": null, "situacao_anterior_rotulo": null, "situacao_nova": "SOLICITADA", "situacao_nova_rotulo": "Solicitada", "motivo": null, "autor": {"nome": "Bruno Lima"}, "registrado_em": "2026-10-25T17:28:21.892426-03:00"}, {"situacao_anterior": "SOLICITADA", "situacao_anterior_rotulo": "Solicitada", "situacao_nova": "CONFIRMADA", "situacao_nova_rotulo": "Confirmada", "motivo": null, "autor": {"nome": "Carla Mendes"}, "registrado_em": "2026-10-26T17:28:21.892426-03:00"}, {"situacao_anterior": "CONFIRMADA", "situacao_anterior_rotulo": "Confirmada", "situacao_nova": "CONCLUIDA", "situacao_nova_rotulo": "Concluída", "motivo": null, "autor": {"nome": "Carla Mendes"}, "registrado_em": "2026-10-28T17:28:21.892426-03:00"}]}
+```
+
+Num cancelamento ou numa recusa, o registro traz o motivo (`"motivo": "Previsão de chuva forte."`). Para um Solicitante, o histórico da reserva de outra pessoa responde **404** `RESERVA_NAO_ENCONTRADA`, como no detalhe; sem token, **401** `NAO_AUTENTICADO`; outro método além de `GET` → **405** `METODO_NAO_PERMITIDO`.
+
+Se o banco foi criado antes desta versão, as reservas antigas aparecem com o histórico vazio. Recrie o banco como em [Recomeçar do zero](#recomeçar-do-zero).
 
 ### Criar um superusuário (acesso ao admin)
 
@@ -601,4 +627,5 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 - **Sem limite de tentativas de login:** `POST /api/auth/login/` não limita tentativas, então não há proteção contra força bruta de senhas. A evolução natural é o throttling do DRF (`ScopedRateThrottle` com um escopo próprio para o login, ou `AnonRateThrottle`), que responde 429 depois de N tentativas por minuto.
 - **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
 - **Perfil na interface:** esconder o formulário de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
-- **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, vale a última gravada (não há bloqueio otimista). Para o porte do projeto, isso é aceitável.
+- **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, só a primeira é gravada; a segunda recebe 409 `RESERVA_DESATUALIZADA` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
+- **Histórico só das mudanças aceitas:** o histórico da reserva registra a criação e cada mudança de situação efetiva. Tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas em nenhum lugar. O histórico também não aparece na tela ainda (FE-06).

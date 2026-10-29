@@ -19,6 +19,7 @@ from reservas.domain.situacao import (
 )
 
 SITUACAO_CHOICES = [(situacao.value, situacao.rotulo) for situacao in SituacaoReserva]
+_VALORES_DAS_SITUACOES = [situacao.value for situacao in SituacaoReserva]
 
 _SITUACAO_MAXIMO_CARACTERES = max(len(situacao.value) for situacao in SituacaoReserva)
 
@@ -79,9 +80,7 @@ class ReservaModel(models.Model):
                 name="reservas_reserva_fim_apos_inicio",
             ),
             models.CheckConstraint(
-                condition=models.Q(
-                    situacao__in=[situacao.value for situacao in SituacaoReserva]
-                ),
+                condition=models.Q(situacao__in=_VALORES_DAS_SITUACOES),
                 name="reservas_reserva_situacao_valida",
             ),
             models.CheckConstraint(
@@ -108,3 +107,65 @@ class ReservaModel(models.Model):
 
     def __str__(self):
         return f"Reserva #{self.pk} ({self.get_situacao_display()})"
+
+
+class RegistroDeSituacaoModel(models.Model):
+    reserva = models.ForeignKey(
+        ReservaModel,
+        on_delete=models.PROTECT,
+        related_name="registros_de_situacao",
+        verbose_name="reserva",
+        db_index=False,
+    )
+    situacao_anterior = models.CharField(
+        "situação anterior",
+        max_length=_SITUACAO_MAXIMO_CARACTERES,
+        choices=SITUACAO_CHOICES,
+        blank=True,
+        default="",
+    )
+    situacao_nova = models.CharField(
+        "situação nova",
+        max_length=_SITUACAO_MAXIMO_CARACTERES,
+        choices=SITUACAO_CHOICES,
+    )
+    motivo = models.CharField(
+        "motivo", max_length=MOTIVO_MAXIMO_CARACTERES, blank=True, default=""
+    )
+    autor_usuario_id = models.BigIntegerField("usuário autor")
+    autor_nome = models.CharField(
+        "nome do autor", max_length=SOLICITANTE_NOME_MAXIMO_CARACTERES
+    )
+    registrado_em = models.DateTimeField("registrado em")
+
+    class Meta:
+        db_table = "reservas_registro_de_situacao"
+        ordering = ("registrado_em", "id")
+        verbose_name = "registro de situação"
+        verbose_name_plural = "registros de situação"
+        indexes = (
+            models.Index(
+                fields=("reserva", "registrado_em"), name="reservas_historico_idx"
+            ),
+        )
+        constraints = (
+            models.CheckConstraint(
+                condition=models.Q(situacao_nova__in=_VALORES_DAS_SITUACOES)
+                & (
+                    models.Q(situacao_anterior="")
+                    | models.Q(situacao_anterior__in=_VALORES_DAS_SITUACOES)
+                ),
+                name="reservas_registro_de_situacao_situacoes_validas",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(situacao_anterior=models.F("situacao_nova")),
+                name="reservas_registro_de_situacao_anterior_diferente_da_nova",
+            ),
+        )
+
+    def __str__(self):
+        nova = self.get_situacao_nova_display()
+        if not self.situacao_anterior:
+            return f"Reserva #{self.reserva_id}: criada como {nova}"
+        anterior = self.get_situacao_anterior_display()
+        return f"Reserva #{self.reserva_id}: {anterior} → {nova}"

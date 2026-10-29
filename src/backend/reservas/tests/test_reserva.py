@@ -7,14 +7,17 @@ from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import CampoObrigatorioAusente, TextoMuitoLongo
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
+    AlteracaoDeSituacaoNaoPermitida,
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
+    ReservaDesatualizada,
     ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
 )
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
+from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import (
     FINALIDADE_MAXIMO_CARACTERES,
     MOTIVO_MAXIMO_CARACTERES,
@@ -22,12 +25,13 @@ from reservas.domain.reserva import (
 )
 from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
+from reservas.tests.historico import verificar_historico_coerente
 
 S = SituacaoReserva
 SAO_PAULO = ZoneInfo("America/Sao_Paulo")
 AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 SOLICITANTE = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-GESTOR = Ator(usuario_id=1, papel=PapelDoAtor.GESTOR)
+GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
 
 TRANSICOES_PERMITIDAS = [
     (S.SOLICITADA, S.CONFIRMADA),
@@ -270,7 +274,7 @@ def test_transicao_permitida_altera_a_situacao(atual, nova):
     reserva = _reconstituir(situacao=atual)
 
     # Act
-    reserva.alterar_situacao(nova, motivo=_motivo_para(nova), ator=GESTOR)
+    reserva.alterar_situacao(nova, motivo=_motivo_para(nova), ator=GESTOR, agora=AGORA)
 
     # Assert
     assert reserva.situacao is nova
@@ -285,7 +289,7 @@ def test_transicao_proibida_e_recusada_e_preserva_a_situacao(atual, nova):
 
     # Act
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        reserva.alterar_situacao(nova, motivo="Outro motivo", ator=GESTOR)
+        reserva.alterar_situacao(nova, motivo="Outro motivo", ator=GESTOR, agora=AGORA)
 
     # Assert
     assert reserva.situacao is atual
@@ -299,7 +303,9 @@ def test_transicao_proibida_tem_mensagem_com_os_rotulos():
 
     # Act
     with pytest.raises(TransicaoDeSituacaoInvalida) as erro:
-        reserva.alterar_situacao(S.CANCELADA, motivo="Desistência", ator=GESTOR)
+        reserva.alterar_situacao(
+            S.CANCELADA, motivo="Desistência", ator=GESTOR, agora=AGORA
+        )
 
     # Assert
     assert erro.value.mensagem == (
@@ -315,7 +321,7 @@ def test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda(nova, motivo):
 
     # Act
     with pytest.raises(MotivoObrigatorio) as erro:
-        reserva.alterar_situacao(nova, motivo=motivo, ator=GESTOR)
+        reserva.alterar_situacao(nova, motivo=motivo, ator=GESTOR, agora=AGORA)
 
     # Assert
     assert erro.value.campo == "motivo"
@@ -330,7 +336,10 @@ def test_motivo_acima_do_limite_e_recusado_e_nada_muda():
     # Act
     with pytest.raises(TextoMuitoLongo) as erro:
         reserva.alterar_situacao(
-            S.RECUSADA, motivo="A" * (MOTIVO_MAXIMO_CARACTERES + 1), ator=GESTOR
+            S.RECUSADA,
+            motivo="A" * (MOTIVO_MAXIMO_CARACTERES + 1),
+            ator=GESTOR,
+            agora=AGORA,
         )
 
     # Assert
@@ -344,7 +353,10 @@ def test_motivo_opcional_ao_confirmar_e_guardado_normalizado():
 
     # Act
     reserva.alterar_situacao(
-        S.CONFIRMADA, motivo="  Liberada   pela gestão ", ator=GESTOR
+        S.CONFIRMADA,
+        motivo="  Liberada   pela gestão ",
+        ator=GESTOR,
+        agora=AGORA,
     )
 
     # Assert
@@ -356,7 +368,7 @@ def test_nova_situacao_limpa_o_motivo_da_anterior():
     reserva = _reconstituir(situacao=S.CONFIRMADA, motivo_da_situacao="Liberada")
 
     # Act
-    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=AGORA)
 
     # Assert
     assert reserva.motivo_da_situacao is None
@@ -367,7 +379,7 @@ def test_situacao_como_texto_e_aceita():
     reserva = _reconstituir(situacao=S.SOLICITADA)
 
     # Act
-    reserva.alterar_situacao("CONFIRMADA", ator=GESTOR)
+    reserva.alterar_situacao("CONFIRMADA", ator=GESTOR, agora=AGORA)
 
     # Assert
     assert reserva.situacao is S.CONFIRMADA
@@ -379,7 +391,7 @@ def test_situacao_desconhecida_e_recusada_e_nada_muda():
 
     # Act
     with pytest.raises(SituacaoInvalida) as erro:
-        reserva.alterar_situacao("PENDENTE", ator=GESTOR)
+        reserva.alterar_situacao("PENDENTE", ator=GESTOR, agora=AGORA)
 
     # Assert
     assert erro.value.campo == "situacao"
@@ -495,5 +507,180 @@ def test_reserva_nao_encontrada_vira_404():
         "erro": {
             "codigo": "RESERVA_NAO_ENCONTRADA",
             "mensagem": "Reserva de código 99 não encontrada.",
+        }
+    }
+
+
+ATOR_SOLICITANTE = Ator(
+    usuario_id=SOLICITANTE.usuario_id,
+    nome=SOLICITANTE.nome,
+    papel=PapelDoAtor.SOLICITANTE,
+)
+OUTRO_SOLICITANTE = Ator(
+    usuario_id=99, nome="Outra Pessoa", papel=PapelDoAtor.SOLICITANTE
+)
+DEPOIS = AGORA + timedelta(hours=2)
+
+
+def test_solicitar_gera_o_registro_de_criacao_pendente():
+    # Act
+    reserva = _solicitar()
+
+    # Assert
+    assert reserva.registros_pendentes == (
+        RegistroDeSituacao(
+            situacao_anterior=None,
+            situacao_nova=S.SOLICITADA,
+            motivo=None,
+            autor_usuario_id=SOLICITANTE.usuario_id,
+            autor_nome=SOLICITANTE.nome,
+            registrado_em=AGORA,
+        ),
+    )
+
+
+def test_reconstituir_comeca_sem_registros_pendentes():
+    # Assert
+    assert _reconstituir().registros_pendentes == ()
+
+
+@pytest.mark.parametrize(("atual", "nova"), TRANSICOES_PERMITIDAS)
+def test_transicao_permitida_gera_o_registro_da_mudanca(atual, nova):
+    # Arrange
+    reserva = _reconstituir(situacao=atual)
+
+    # Act
+    reserva.alterar_situacao(
+        nova, motivo=f"  {_motivo_para(nova) or ''} ", ator=GESTOR, agora=DEPOIS
+    )
+
+    # Assert
+    assert reserva.registros_pendentes == (
+        RegistroDeSituacao(
+            situacao_anterior=atual,
+            situacao_nova=nova,
+            motivo=_motivo_para(nova),
+            autor_usuario_id=GESTOR.usuario_id,
+            autor_nome=GESTOR.nome,
+            registrado_em=DEPOIS,
+        ),
+    )
+
+
+def test_cada_mudanca_acrescenta_um_registro_na_ordem():
+    # Arrange
+    reserva = _solicitar()
+
+    # Act
+    reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS)
+
+    # Assert
+    verificar_historico_coerente(reserva.registros_pendentes, reserva.situacao)
+    assert len(reserva.registros_pendentes) == 3
+
+
+def test_solicitante_cancelando_a_propria_aparece_como_autor():
+    # Arrange
+    reserva = _reconstituir()
+
+    # Act
+    reserva.alterar_situacao(
+        S.CANCELADA, motivo="Desistência", ator=ATOR_SOLICITANTE, agora=DEPOIS
+    )
+
+    # Assert
+    (registro,) = reserva.registros_pendentes
+    assert (registro.autor_usuario_id, registro.autor_nome) == (7, "Ana Souza")
+    assert registro.motivo == "Desistência"
+
+
+@pytest.mark.parametrize(
+    ("nova", "motivo", "ator", "erro"),
+    [
+        (S.CONFIRMADA, None, ATOR_SOLICITANTE, AlteracaoDeSituacaoNaoPermitida),
+        (S.SOLICITADA, None, GESTOR, TransicaoDeSituacaoInvalida),
+        (S.RECUSADA, None, GESTOR, MotivoObrigatorio),
+        ("PENDENTE", None, GESTOR, SituacaoInvalida),
+        (S.CANCELADA, "Desistência", OUTRO_SOLICITANTE, ReservaNaoEncontrada),
+    ],
+    ids=["403", "409", "motivo-ausente", "situacao-invalida", "nao-visivel"],
+)
+def test_alteracao_recusada_nao_muda_nada_nem_registra(nova, motivo, ator, erro):
+    # Arrange
+    reserva = _solicitar()
+    antes = (reserva.situacao, reserva.motivo_da_situacao, reserva.registros_pendentes)
+
+    # Act
+    with pytest.raises(erro):
+        reserva.alterar_situacao(nova, motivo=motivo, ator=ator, agora=DEPOIS)
+
+    # Assert
+    depois = (reserva.situacao, reserva.motivo_da_situacao, reserva.registros_pendentes)
+    assert depois == antes
+
+
+@pytest.mark.parametrize(
+    "agora", [None, datetime(2026, 10, 21, 14, 0)], ids=["ausente", "sem-fuso"]
+)
+def test_alterar_situacao_sem_agora_com_fuso_e_erro_de_programacao(agora):
+    # Arrange
+    reserva = _reconstituir()
+
+    # Act / Assert
+    with pytest.raises(TypeError, match="agora"):
+        reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=agora)
+    assert reserva.situacao is S.SOLICITADA
+    assert reserva.registros_pendentes == ()
+
+
+def test_marcar_registros_como_gravados_esvazia_os_pendentes():
+    # Arrange
+    reserva = _solicitar()
+
+    # Act
+    reserva.marcar_registros_como_gravados()
+
+    # Assert
+    assert reserva.registros_pendentes == ()
+
+
+def test_situacao_de_origem_sem_mudancas_e_a_situacao_atual():
+    # Assert
+    assert _reconstituir(situacao=S.CONFIRMADA).situacao_de_origem is S.CONFIRMADA
+
+
+def test_situacao_de_origem_e_a_anterior_a_primeira_mudanca_pendente():
+    # Arrange
+    reserva = _reconstituir()
+
+    # Act
+    reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+    depois_de_uma = reserva.situacao_de_origem
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS)
+
+    # Assert
+    assert depois_de_uma is S.SOLICITADA
+    assert reserva.situacao_de_origem is S.SOLICITADA
+
+
+def test_situacao_de_origem_de_reserva_nova_e_none():
+    # Assert
+    assert _solicitar().situacao_de_origem is None
+
+
+def test_reserva_desatualizada_vira_409_com_a_situacao_atual():
+    # Act
+    resposta = tratar_excecao(ReservaDesatualizada(S.CONFIRMADA), {})
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data == {
+        "erro": {
+            "codigo": "RESERVA_DESATUALIZADA",
+            "mensagem": (
+                "Esta reserva já está Confirmada: ela foi alterada enquanto você "
+                "decidia. Atualize a lista e tente de novo."
+            ),
         }
     }

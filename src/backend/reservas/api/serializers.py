@@ -91,3 +91,25 @@ class ReservaSaidaSerializer(serializers.Serializer):
     def get_acoes_disponiveis(self, reserva):
         destinos = reserva.acoes_permitidas_para(self.context["ator"])
         return AcaoDisponivelSaidaSerializer(destinos, many=True).data
+
+
+class AutorDoRegistroSaidaSerializer(serializers.Serializer):
+    nome = serializers.CharField(source="autor_nome")
+
+
+class RegistroDeSituacaoSaidaSerializer(serializers.Serializer):
+    situacao_anterior = serializers.SerializerMethodField()
+    situacao_anterior_rotulo = serializers.SerializerMethodField()
+    situacao_nova = serializers.CharField(source="situacao_nova.value")
+    situacao_nova_rotulo = serializers.CharField(source="situacao_nova.rotulo")
+    motivo = serializers.CharField(allow_null=True)
+    autor = AutorDoRegistroSaidaSerializer(source="*")
+    registrado_em = serializers.DateTimeField()
+
+    def get_situacao_anterior(self, registro):
+        anterior = registro.situacao_anterior
+        return anterior.value if anterior else None
+
+    def get_situacao_anterior_rotulo(self, registro):
+        anterior = registro.situacao_anterior
+        return anterior.rotulo if anterior else None

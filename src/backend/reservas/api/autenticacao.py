@@ -12,4 +12,4 @@ def solicitante_autenticado(request) -> Solicitante:
 def ator_autenticado(request) -> Ator:
     usuario = request.user
     papel = PapelDoAtor.GESTOR if usuario.eh_gestor else PapelDoAtor.SOLICITANTE
-    return Ator(usuario_id=usuario.pk, papel=papel)
+    return Ator(usuario_id=usuario.pk, nome=usuario.nome, papel=papel)

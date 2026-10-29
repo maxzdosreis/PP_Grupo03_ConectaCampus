@@ -8,6 +8,7 @@ from reservas.api.autenticacao import ator_autenticado, solicitante_autenticado
 from reservas.api.serializers import (
     AlteracaoDeSituacaoSerializer,
     FiltrosReservasSerializer,
+    RegistroDeSituacaoSaidaSerializer,
     ReservaEntradaSerializer,
     ReservaSaidaSerializer,
     SituacaoDeReservaSaidaSerializer,
@@ -67,6 +68,17 @@ class ReservaSituacaoView(APIView):
         return resposta_sucesso(
             f"Reserva {reserva.situacao.rotulo.lower()} com sucesso.",
             _saida(reserva, ator),
+        )
+
+
+class HistoricoDaReservaView(APIView):
+    def get(self, request, reserva_id):
+        registros = dependencias.consultar_historico_da_reserva().executar(
+            reserva_id, ator=ator_autenticado(request)
+        )
+        return resposta_sucesso(
+            "Histórico da reserva.",
+            RegistroDeSituacaoSaidaSerializer(registros, many=True).data,
         )
 
 
