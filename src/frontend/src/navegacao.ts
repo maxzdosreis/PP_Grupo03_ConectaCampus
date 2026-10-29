@@ -11,15 +11,44 @@ export const CAMINHO_DO_CADASTRO = '/cadastro'
 export const PARAMETRO_DO_ESPACO = 'espaco'
 export const PARAMETRO_DO_PROXIMO = 'proximo'
 
-export const ITENS_DE_NAVEGACAO: ItemDeNavegacao[] = [
+type DefinicaoDoItem = Omit<ItemDeNavegacao, 'rotulo'> & {
+  rotulo: string | ((ehGestor: boolean) => string)
+}
+
+export type OrigemDaReserva = {
+  voltarPara: string
+}
+
+export function rotuloDasReservas(ehGestor: boolean): string {
+  return ehGestor ? 'Reservas' : 'Minhas reservas'
+}
+
+export const ITENS_DE_NAVEGACAO: DefinicaoDoItem[] = [
   { rotulo: 'Início', caminho: '/', exigeLogin: false },
   { rotulo: 'Espaços', caminho: '/espacos', exigeLogin: true },
-  { rotulo: 'Reservas', caminho: CAMINHO_DAS_RESERVAS, exigeLogin: true },
+  { rotulo: rotuloDasReservas, caminho: CAMINHO_DAS_RESERVAS, exigeLogin: true },
   { rotulo: 'Nova reserva', caminho: CAMINHO_DA_NOVA_RESERVA, exigeLogin: true },
 ]
 
-export function itensVisiveis(autenticado: boolean): ItemDeNavegacao[] {
-  return ITENS_DE_NAVEGACAO.filter(({ exigeLogin }) => autenticado || !exigeLogin)
+export function itensVisiveis(autenticado: boolean, ehGestor: boolean): ItemDeNavegacao[] {
+  return ITENS_DE_NAVEGACAO.filter(({ exigeLogin }) => autenticado || !exigeLogin).map(
+    ({ rotulo, ...item }) => ({
+      ...item,
+      rotulo: typeof rotulo === 'string' ? rotulo : rotulo(ehGestor),
+    }),
+  )
+}
+
+export function caminhoDaReserva(reservaId: number): string {
+  return `${CAMINHO_DAS_RESERVAS}/${reservaId}`
+}
+
+export function caminhoDeVolta(estado: unknown): string {
+  const voltarPara =
+    typeof estado === 'object' && estado !== null && 'voltarPara' in estado
+      ? estado.voltarPara
+      : null
+  return proximoSeguro(typeof voltarPara === 'string' ? voltarPara : null)
 }
 
 export function caminhoParaReservar(espacoId: number): string {

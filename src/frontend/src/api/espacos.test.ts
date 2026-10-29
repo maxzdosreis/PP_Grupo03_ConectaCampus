@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { requisitar } from './cliente.ts'
-import { cadastrarEspaco, listarEspacos, listarTiposDeEspaco } from './espacos.ts'
+import { cadastrarEspaco, listarEspacos, listarTiposDeEspaco, obterEspaco } from './espacos.ts'
 
 vi.mock('./cliente.ts', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('./cliente.ts')>()),
@@ -23,6 +23,12 @@ describe('api de espaços', () => {
     await listarEspacos(filtros)
 
     expect(requisitar).toHaveBeenCalledWith(caminho)
+  })
+
+  it('obterEspaco pede o espaço pelo id', async () => {
+    await obterEspaco(3)
+
+    expect(requisitar).toHaveBeenCalledWith('/espacos/3/')
   })
 
   it('listarTiposDeEspaco pede os tipos', async () => {

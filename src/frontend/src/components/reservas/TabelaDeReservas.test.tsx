@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import type { Reserva } from '../../api/reservas.ts'
 import TabelaDeReservas from './TabelaDeReservas.tsx'
@@ -35,14 +36,29 @@ const CONCLUIDA: Reserva = {
 
 const NOMES = new Map([[1, 'Ginásio A']])
 
+function DestinoDoLink() {
+  const { pathname, state } = useLocation()
+  return <output data-testid="destino">{`${pathname} ${JSON.stringify(state)}`}</output>
+}
+
 function renderizar(reservas: Reserva[], aoEscolherAcao = vi.fn()) {
   render(
-    <TabelaDeReservas
-      reservas={reservas}
-      legenda={`${reservas.length} reservas encontradas.`}
-      nomesDosEspacos={NOMES}
-      aoEscolherAcao={aoEscolherAcao}
-    />,
+    <MemoryRouter initialEntries={['/reservas?situacao=SOLICITADA&data=2026-10-25']}>
+      <Routes>
+        <Route
+          path="/reservas"
+          element={
+            <TabelaDeReservas
+              reservas={reservas}
+              legenda={`${reservas.length} reservas encontradas.`}
+              nomesDosEspacos={NOMES}
+              aoEscolherAcao={aoEscolherAcao}
+            />
+          }
+        />
+        <Route path="/reservas/:reservaId" element={<DestinoDoLink />} />
+      </Routes>
+    </MemoryRouter>,
   )
   return aoEscolherAcao
 }
@@ -96,6 +112,31 @@ describe('TabelaDeReservas', () => {
         name: 'Recusar a reserva de 25/10/2026, 14:00–15:00 em Espaço #9',
       }),
     ).toBeTruthy()
+  })
+
+  it('a data de cada linha é um link para o detalhe, com nome acessível com contexto', () => {
+    renderizar([SOLICITADA, CONCLUIDA])
+
+    const link = screen.getByRole('link', {
+      name: '25/10/2026, 10:00–11:00 em Ginásio A — ver detalhes',
+    })
+    expect(link.textContent).toBe('25/10/2026, 10:00–11:00')
+    expect(link.getAttribute('href')).toBe('/reservas/10')
+    expect(
+      screen
+        .getByRole('link', { name: '25/10/2026, 14:00–15:00 em Espaço #9 — ver detalhes' })
+        .getAttribute('href'),
+    ).toBe('/reservas/11')
+  })
+
+  it('o link leva no state a URL da lista com os filtros, para o "Voltar"', async () => {
+    renderizar([SOLICITADA])
+
+    await userEvent.click(screen.getByRole('link', { name: /^25\/10\/2026, 10:00–11:00/ }))
+
+    expect(screen.getByTestId('destino').textContent).toBe(
+      '/reservas/10 {"voltarPara":"/reservas?situacao=SOLICITADA&data=2026-10-25"}',
+    )
   })
 
   it('o clique entrega a reserva e a ação escolhidas', async () => {

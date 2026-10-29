@@ -1,6 +1,9 @@
 import { useId, type Ref } from 'react'
+import { Link, useLocation } from 'react-router'
 import type { AcaoDisponivel, Reserva } from '../../api/reservas.ts'
 import { formatarIntervalo } from '../../formatacao.ts'
+import { caminhoDaReserva, type OrigemDaReserva } from '../../navegacao.ts'
+import AcoesDaReserva from './AcoesDaReserva.tsx'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
 import { nomeDoEspaco, type NomesDosEspacos } from './nomeDoEspaco.ts'
 import estilos from './TabelaDeReservas.module.css'
@@ -13,35 +16,12 @@ type PropriedadesDaTabela = {
   ref?: Ref<HTMLDivElement>
 }
 
-type PropriedadesDasAcoes = {
-  reserva: Reserva
-  descricao: string
-  aoEscolherAcao: PropriedadesDaTabela['aoEscolherAcao']
-}
-
-function AcoesDaReserva({ reserva, descricao, aoEscolherAcao }: PropriedadesDasAcoes) {
-  if (reserva.acoes_disponiveis.length === 0) {
-    return (
-      <>
-        <span aria-hidden="true">—</span>
-        <span className="somente-leitor-de-tela">Nenhuma ação disponível</span>
-      </>
-    )
-  }
+function SemAcoes() {
   return (
-    <div className={estilos.acoes}>
-      {reserva.acoes_disponiveis.map((acao) => (
-        <button
-          key={acao.situacao}
-          type="button"
-          className={estilos.acao}
-          aria-label={`${acao.rotulo} a reserva de ${descricao}`}
-          onClick={() => aoEscolherAcao(reserva, acao)}
-        >
-          {acao.rotulo}
-        </button>
-      ))}
-    </div>
+    <>
+      <span aria-hidden="true">—</span>
+      <span className="somente-leitor-de-tela">Nenhuma ação disponível</span>
+    </>
   )
 }
 
@@ -53,6 +33,8 @@ function TabelaDeReservas({
   ref,
 }: PropriedadesDaTabela) {
   const idDaLegenda = useId()
+  const { pathname, search } = useLocation()
+  const origem: OrigemDaReserva = { voltarPara: `${pathname}${search}` }
   return (
     <div
       ref={ref}
@@ -79,9 +61,18 @@ function TabelaDeReservas({
           {reservas.map((reserva) => {
             const intervalo = formatarIntervalo(reserva.data, reserva.hora_inicio, reserva.hora_fim)
             const espaco = nomeDoEspaco(nomesDosEspacos, reserva.espaco_id)
+            const descricao = `${intervalo} em ${espaco}`
             return (
               <tr key={reserva.id}>
-                <th scope="row">{intervalo}</th>
+                <th scope="row">
+                  <Link
+                    to={caminhoDaReserva(reserva.id)}
+                    state={origem}
+                    aria-label={`${descricao} — ver detalhes`}
+                  >
+                    {intervalo}
+                  </Link>
+                </th>
                 <td>{espaco}</td>
                 <td>
                   {reserva.solicitante.nome}
@@ -100,11 +91,15 @@ function TabelaDeReservas({
                   )}
                 </td>
                 <td>
-                  <AcoesDaReserva
-                    reserva={reserva}
-                    descricao={`${intervalo} em ${espaco}`}
-                    aoEscolherAcao={aoEscolherAcao}
-                  />
+                  {reserva.acoes_disponiveis.length > 0 ? (
+                    <AcoesDaReserva
+                      reserva={reserva}
+                      descricao={descricao}
+                      aoEscolherAcao={aoEscolherAcao}
+                    />
+                  ) : (
+                    <SemAcoes />
+                  )}
                 </td>
               </tr>
             )

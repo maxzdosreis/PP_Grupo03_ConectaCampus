@@ -1,0 +1,48 @@
+.linha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding-left: var(--espaco-5);
+  overflow-wrap: anywhere;
+}
+
+.item::before {
+  content: '';
+  position: absolute;
+  top: 0.4rem;
+  left: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--cor-primaria);
+  border-radius: var(--raio-total);
+  background-color: var(--cor-superficie);
+}
+
+.item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 1.25rem;
+  bottom: calc(-1 * var(--espaco-4));
+  left: calc(0.375rem - 1px);
+  width: 2px;
+  background-color: var(--cor-borda);
+}
+
+.momento {
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+}
+
+.motivo {
+  color: var(--cor-texto-suave);
+}

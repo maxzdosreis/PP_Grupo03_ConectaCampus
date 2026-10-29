@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, type MemoryRouterProps } from 'react-router'
 import { vi } from 'vitest'
 import type { Usuario } from '../api/autenticacao.ts'
 import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
@@ -27,8 +27,10 @@ export function valorDaSessao({
   }
 }
 
+export type EntradaDaRota = NonNullable<MemoryRouterProps['initialEntries']>[number]
+
 type OpcoesDeRenderizacao = {
-  caminho?: string
+  caminho?: EntradaDaRota
   sessao?: ValorDaSessao
 }
 

@@ -6,7 +6,7 @@ import estilos from './Layout.module.css'
 import Navegacao from './Navegacao.tsx'
 
 function Layout() {
-  const { autenticado } = useSessao()
+  const { autenticado, ehGestor } = useSessao()
 
   return (
     <div className={estilos.pagina}>
@@ -18,7 +18,7 @@ function Layout() {
           <Link to="/" className={estilos.marca}>
             Conecta Campus
           </Link>
-          <Navegacao itens={itensVisiveis(autenticado)} />
+          <Navegacao itens={itensVisiveis(autenticado, ehGestor)} />
           <AreaDoUsuario />
         </div>
       </header>

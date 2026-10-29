@@ -32,6 +32,10 @@ export function listarEspacos({ tipo, apenasAtivos }: FiltrosDeEspacos = {}) {
   )
 }
 
+export function obterEspaco(id: number) {
+  return requisitar<Espaco>(`/espacos/${id}/`)
+}
+
 export function listarTiposDeEspaco() {
   return requisitar<TipoDeEspaco[]>('/espacos/tipos/')
 }

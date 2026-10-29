@@ -13,6 +13,9 @@ import {
 } from '../api/reservas.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
 import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
+import { ContextoDeSessao } from '../components/sessao/contextoDeSessao.ts'
+import { valorDaSessao } from '../testes/renderizar.tsx'
+import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import PaginaReservas, { ATRASO_DO_SOLICITANTE_MS } from './PaginaReservas.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -91,22 +94,24 @@ function BuscaAtual() {
   return <output data-testid="busca">{useLocation().search}</output>
 }
 
-function renderizar(caminho = '/reservas') {
+function renderizar(caminho = '/reservas', usuario = USUARIO_GESTOR) {
   render(
     <MensagensProvider>
       <MemoryRouter initialEntries={[caminho]}>
-        <Routes>
-          <Route
-            path="/reservas"
-            element={
-              <>
-                <PaginaReservas />
-                <BuscaAtual />
-                <Link to="/reservas">Ir para reservas</Link>
-              </>
-            }
-          />
-        </Routes>
+        <ContextoDeSessao.Provider value={valorDaSessao({ usuario })}>
+          <Routes>
+            <Route
+              path="/reservas"
+              element={
+                <>
+                  <PaginaReservas />
+                  <BuscaAtual />
+                  <Link to="/reservas">Ir para reservas</Link>
+                </>
+              }
+            />
+          </Routes>
+        </ContextoDeSessao.Provider>
       </MemoryRouter>
     </MensagensProvider>,
   )
@@ -393,6 +398,77 @@ describe('PaginaReservas', () => {
     expect(screen.getByText(/Não foi possível carregar os espaços/)).toBeTruthy()
     expect(controle<HTMLSelectElement>('Espaço').disabled).toBe(true)
     expect((await seletorCarregado('Situação')).disabled).toBe(false)
+  })
+
+  it('para o gestor, o título é "Reservas" e há os filtros de solicitante', async () => {
+    renderizar()
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Reservas' })).toBeTruthy()
+    expect(document.title).toBe('Reservas · Conecta Campus')
+    expect(controle('Solicitante')).toBeTruthy()
+    expect(controle('Somente minhas reservas')).toBeTruthy()
+  })
+})
+
+describe('PaginaReservas — visão do solicitante', () => {
+  beforeEach(() => {
+    vi.mocked(listarEspacos).mockReset()
+    vi.mocked(listarSituacoesDeReserva).mockReset()
+    vi.mocked(listarReservas).mockReset()
+    vi.mocked(listarEspacos).mockResolvedValue({
+      mensagem: '2 espaços encontrados.',
+      dados: [GINASIO, QUADRA],
+    })
+    vi.mocked(listarSituacoesDeReserva).mockResolvedValue({
+      mensagem: 'Situações de reserva disponíveis.',
+      dados: SITUACOES,
+    })
+    vi.mocked(listarReservas).mockResolvedValue({
+      mensagem: '1 reserva encontrada.',
+      dados: [CANCELADA],
+    })
+  })
+
+  it('o título é "Minhas reservas" e não há os filtros de solicitante', async () => {
+    renderizar('/reservas', USUARIO_SOLICITANTE)
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Minhas reservas' }),
+    ).toBeTruthy()
+    expect(document.title).toBe('Minhas reservas · Conecta Campus')
+    await screen.findByRole('table')
+    expect(screen.queryByLabelText('Solicitante')).toBeNull()
+    expect(screen.queryByLabelText('Somente minhas reservas')).toBeNull()
+    expect(screen.getByLabelText('Espaço')).toBeTruthy()
+  })
+
+  it('ignora solicitante e minhas vindos da URL', async () => {
+    renderizar('/reservas?solicitante=ana&minhas=true', USUARIO_SOLICITANTE)
+
+    await screen.findByRole('table')
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros())
+    expect(screen.queryByRole('button', { name: 'Limpar filtros' })).toBeNull()
+  })
+
+  it('os outros filtros continuam valendo', async () => {
+    renderizar('/reservas?situacao=CANCELADA&minhas=true', USUARIO_SOLICITANTE)
+
+    await screen.findByRole('table')
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros({ situacao: 'CANCELADA' }))
+  })
+
+  it('sem filtros e sem reservas, mostra "Você ainda não tem reservas"', async () => {
+    vi.mocked(listarReservas).mockResolvedValue({
+      mensagem: 'Nenhuma reserva encontrada.',
+      dados: [],
+    })
+
+    renderizar('/reservas', USUARIO_SOLICITANTE)
+
+    expect(await screen.findByText('Você ainda não tem reservas')).toBeTruthy()
+    expect(
+      screen.getByRole('link', { name: 'Solicitar reserva' }).getAttribute('href'),
+    ).toBe('/reservas/nova')
   })
 })
 
