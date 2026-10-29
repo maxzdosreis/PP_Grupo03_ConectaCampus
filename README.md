@@ -270,7 +270,7 @@ curl -X PATCH http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer %AC
 {"mensagem": "Espaço atualizado com sucesso.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": true}}
 ```
 
-Corpo vazio (`{}`) → **400** `NENHUMA_ALTERACAO_INFORMADA` ("Informe ao menos um campo para alterar."). Os outros erros são os do cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; nome de outro espaço → **409** `NOME_DE_ESPACO_JA_CADASTRADO`, sempre com o campo em `campos`.
+Corpo vazio (`{}`) → **400** `NENHUMA_ALTERACAO_INFORMADA` ("Informe ao menos um campo para alterar."). Os outros erros são os do cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; nome de outro espaço → **409** `NOME_DE_ESPACO_JA_CADASTRADO`, sempre com o campo em `campos`. Espaço alterado por outra pessoa depois que você o leu → **409** `ESPACO_DESATUALIZADO` (nada é gravado; atualize a lista e tente de novo).
 
 Desativar e reativar (`POST /api/espacos/{id}/desativar/` e `POST /api/espacos/{id}/ativar/`, só Gestor, sem corpo). Espaço nunca é excluído: desativar só bloqueia **novas** reservas, e as já existentes continuam valendo (o gestor cancela alguma pela tela de reservas, se precisar):
 
@@ -286,7 +286,7 @@ curl -X POST http://localhost:8000/api/espacos/1/desativar/ -H "Authorization: B
 {"mensagem": "Espaço desativado. Novas reservas ficam bloqueadas; as existentes continuam valendo.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": false}}
 ```
 
-Desativar de novo responde **409** `ESPACO_JA_INATIVO`, e pedir uma reserva nesse espaço responde **409** `ESPACO_INATIVO`. Para reativar:
+Desativar de novo responde **409** `ESPACO_JA_INATIVO` (ou `ESPACO_DESATUALIZADO`, se outra pessoa o alterou ao mesmo tempo), e pedir uma reserva nesse espaço responde **409** `ESPACO_INATIVO`. Para reativar:
 
 ```bash
 curl -X POST http://localhost:8000/api/espacos/1/ativar/ -H "Authorization: Bearer $ACCESS"
@@ -682,5 +682,5 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 - **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
 - **Perfil na interface:** esconder o formulário de espaços e os botões de editar, desativar e reativar de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, só a primeira é gravada; a segunda recebe 409 `RESERVA_DESATUALIZADA` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
-- **Edições simultâneas do mesmo espaço:** o espaço não tem controle de versão. Se dois gestores o editarem ao mesmo tempo, a última gravação prevalece inteira, e a primeira se perde.
+- **Alterações simultâneas no mesmo espaço:** se dois gestores editarem, desativarem ou reativarem o mesmo espaço ao mesmo tempo, só a primeira alteração é gravada; a segunda recebe 409 `ESPACO_DESATUALIZADO` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
 - **Histórico só das mudanças aceitas:** o histórico da reserva registra a criação e cada mudança de situação efetiva. Tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas em nenhum lugar, nem na linha do tempo do detalhe da reserva.

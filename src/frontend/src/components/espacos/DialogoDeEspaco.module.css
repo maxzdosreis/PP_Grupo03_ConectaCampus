@@ -4,12 +4,6 @@
   gap: var(--espaco-4);
 }
 
-.erro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-2);
-}
-
 .texto {
   margin: 0;
   overflow-wrap: anywhere;

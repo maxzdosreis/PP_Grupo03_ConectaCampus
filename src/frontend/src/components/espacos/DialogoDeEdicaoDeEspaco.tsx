@@ -9,7 +9,7 @@ import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import Dialogo from '../dialogo/Dialogo.tsx'
-import Aviso from '../mensagens/Aviso.tsx'
+import ErroDoDialogo from '../dialogo/ErroDoDialogo.tsx'
 import CamposDoEspaco from './CamposDoEspaco.tsx'
 import estilos from './DialogoDeEspaco.module.css'
 
@@ -51,7 +51,8 @@ function DialogoDeEdicaoDeEspaco({
     (alteracoes: Partial<DadosDoEspaco>) => editarEspaco(espaco.id, alteracoes),
     [espaco.id],
   )
-  const { enviar, enviando, errosDosCampos, erroGeral, limparErroDoCampo } = useEnvio(editar)
+  const { enviar, enviando, errosDosCampos, erroGeral, statusDoErro, limparErroDoCampo } =
+    useEnvio(editar)
   const { mostrarSucesso } = useMensagens()
   const { formulario, aviso, focarNoProximoErro } = useFocoNoErro(errosDosCampos, erroGeral)
 
@@ -76,11 +77,12 @@ function DialogoDeEdicaoDeEspaco({
   return (
     <Dialogo titulo="Editar espaço" aoFechar={fechar} alvoAoFechar={alvoAoFechar}>
       <form ref={formulario} className={estilos.formulario} onSubmit={aoEnviar} noValidate>
-        {erroGeral && (
-          <div ref={aviso} tabIndex={-1}>
-            <Aviso variante="erro">{erroGeral}</Aviso>
-          </div>
-        )}
+        <ErroDoDialogo
+          ref={aviso}
+          mensagem={erroGeral}
+          statusDoErro={statusDoErro}
+          aoAtualizar={aoAtualizarLista}
+        />
         <CamposDoEspaco
           dados={dados}
           tipos={tiposComOAtual(tipos, espaco)}

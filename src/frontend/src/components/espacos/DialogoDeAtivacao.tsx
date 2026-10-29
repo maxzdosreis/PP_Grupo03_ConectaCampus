@@ -4,10 +4,8 @@ import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import Dialogo from '../dialogo/Dialogo.tsx'
-import Aviso from '../mensagens/Aviso.tsx'
+import ErroDoDialogo from '../dialogo/ErroDoDialogo.tsx'
 import estilos from './DialogoDeEspaco.module.css'
-
-const STATUS_DE_LISTA_DESATUALIZADA = [404, 409]
 
 const TEXTOS = {
   desativar: {
@@ -46,8 +44,6 @@ function DialogoDeAtivacao({
   const { mostrarSucesso } = useMensagens()
   const { formulario, aviso, focarNoProximoErro } = useFocoNoErro(errosDosCampos, erroGeral)
   const botaoVoltar = useRef<HTMLButtonElement>(null)
-  const listaDesatualizada =
-    statusDoErro !== null && STATUS_DE_LISTA_DESATUALIZADA.includes(statusDoErro)
 
   function fechar() {
     if (!enviando) aoFechar()
@@ -70,18 +66,12 @@ function DialogoDeAtivacao({
       alvoAoFechar={alvoAoFechar}
     >
       <form ref={formulario} className={estilos.formulario} onSubmit={aoEnviar} noValidate>
-        {erroGeral && (
-          <div ref={aviso} tabIndex={-1} className={estilos.erro}>
-            <Aviso variante="erro">{erroGeral}</Aviso>
-            {listaDesatualizada && (
-              <div>
-                <button type="button" onClick={aoAtualizarLista}>
-                  Atualizar lista
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        <ErroDoDialogo
+          ref={aviso}
+          mensagem={erroGeral}
+          statusDoErro={statusDoErro}
+          aoAtualizar={aoAtualizarLista}
+        />
         <p className={estilos.texto}>
           <strong>{espaco.nome}</strong> ({espaco.tipo_rotulo})
         </p>

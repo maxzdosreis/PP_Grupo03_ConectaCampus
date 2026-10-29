@@ -2,9 +2,14 @@ import pytest
 
 from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import CampoObrigatorioAusente
-from espacos.domain.espaco_esportivo import NOME_MAXIMO_CARACTERES, EspacoEsportivo
+from espacos.domain.espaco_esportivo import (
+    NOME_MAXIMO_CARACTERES,
+    EspacoEsportivo,
+    EstadoDoEspaco,
+)
 from espacos.domain.excecoes import (
     CapacidadeInvalida,
+    EspacoDesatualizado,
     EspacoInativo,
     EspacoJaAtivo,
     EspacoJaInativo,
@@ -424,5 +429,51 @@ def test_capacidade_invalida_vira_400_marcando_o_campo():
             "codigo": "CAPACIDADE_INVALIDA",
             "mensagem": mensagem,
             "campos": {"capacidade": [mensagem]},
+        }
+    }
+
+
+def test_estado_de_origem_guarda_o_que_foi_lido_enquanto_o_estado_muda():
+    # Arrange
+    espaco = _criar_espaco(nome="  Quadra   Central ")
+    lido = EstadoDoEspaco("Quadra Central", TipoEspaco.GINASIO, 20, True)
+
+    # Act
+    espaco.alterar_dados(capacidade=35)
+    espaco.desativar()
+
+    # Assert
+    assert espaco.estado_de_origem == lido
+    assert espaco.estado == EstadoDoEspaco(
+        "Quadra Central", TipoEspaco.GINASIO, 35, False
+    )
+
+
+def test_marcar_como_gravado_faz_o_estado_atual_virar_a_origem():
+    # Arrange
+    espaco = _criar_espaco(ativo=False)
+    espaco.ativar()
+
+    # Act
+    espaco.marcar_como_gravado()
+
+    # Assert
+    assert espaco.estado_de_origem == espaco.estado
+    assert espaco.estado_de_origem.ativo is True
+
+
+def test_espaco_desatualizado_vira_409_sem_campo():
+    # Act
+    resposta = tratar_excecao(EspacoDesatualizado(), {})
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data == {
+        "erro": {
+            "codigo": "ESPACO_DESATUALIZADO",
+            "mensagem": (
+                "Este espaço foi alterado por outra pessoa enquanto você decidia. "
+                "Atualize a lista e tente de novo."
+            ),
         }
     }

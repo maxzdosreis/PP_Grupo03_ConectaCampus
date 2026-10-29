@@ -10,11 +10,9 @@ import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import Dialogo from '../dialogo/Dialogo.tsx'
+import ErroDoDialogo from '../dialogo/ErroDoDialogo.tsx'
 import Campo from '../formulario/Campo.tsx'
-import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './DialogoDeSituacao.module.css'
-
-const STATUS_DE_LISTA_DESATUALIZADA = [404, 409]
 
 type PropriedadesDoDialogoDeSituacao = {
   reserva: Reserva
@@ -47,8 +45,6 @@ function DialogoDeSituacao({
   const campoDoMotivo = useRef<HTMLTextAreaElement>(null)
   const botaoVoltar = useRef<HTMLButtonElement>(null)
   const textoDaAcao = `${acao.rotulo} reserva`
-  const listaDesatualizada =
-    statusDoErro !== null && STATUS_DE_LISTA_DESATUALIZADA.includes(statusDoErro)
 
   function fechar() {
     if (!enviando) aoFechar()
@@ -73,18 +69,13 @@ function DialogoDeSituacao({
       alvoAoFechar={alvoAoFechar}
     >
       <form ref={formulario} className={estilos.formulario} onSubmit={aoEnviar} noValidate>
-        {erroGeral && (
-          <div ref={aviso} tabIndex={-1} className={estilos.erro}>
-            <Aviso variante="erro">{erroGeral}</Aviso>
-            {listaDesatualizada && (
-              <div>
-                <button type="button" onClick={aoAtualizarLista}>
-                  {rotuloDaAtualizacao}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        <ErroDoDialogo
+          ref={aviso}
+          mensagem={erroGeral}
+          statusDoErro={statusDoErro}
+          aoAtualizar={aoAtualizarLista}
+          rotuloDaAtualizacao={rotuloDaAtualizacao}
+        />
         <dl className={estilos.detalhes}>
           <div>
             <dt>Espaço</dt>

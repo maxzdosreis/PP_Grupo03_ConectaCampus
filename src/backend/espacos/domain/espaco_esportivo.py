@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from espacos.domain.excecoes import (
     CapacidadeInvalida,
@@ -12,6 +14,14 @@ from espacos.domain.tipo_espaco import TipoEspaco
 
 NOME_MAXIMO_CARACTERES = 100
 CAPACIDADE_MINIMA = 1
+
+
+@dataclass(frozen=True)
+class EstadoDoEspaco:
+    nome: str
+    tipo: TipoEspaco
+    capacidade: int
+    ativo: bool
 
 
 class EspacoEsportivo:
@@ -29,6 +39,7 @@ class EspacoEsportivo:
         self._tipo = _converter_tipo(tipo)
         self._capacidade = _validar_capacidade(capacidade)
         self._ativo = ativo
+        self._estado_de_origem = self.estado
 
     @property
     def nome(self) -> str:
@@ -45,6 +56,17 @@ class EspacoEsportivo:
     @property
     def ativo(self) -> bool:
         return self._ativo
+
+    @property
+    def estado(self) -> EstadoDoEspaco:
+        return EstadoDoEspaco(self._nome, self._tipo, self._capacidade, self._ativo)
+
+    @property
+    def estado_de_origem(self) -> EstadoDoEspaco:
+        return self._estado_de_origem
+
+    def marcar_como_gravado(self) -> None:
+        self._estado_de_origem = self.estado
 
     def alterar_dados(
         self,

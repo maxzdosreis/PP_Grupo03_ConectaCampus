@@ -61,3 +61,11 @@ class EspacoJaInativo(ConflitoDeEstado):
 class EspacoJaAtivo(ConflitoDeEstado):
     codigo = "ESPACO_JA_ATIVO"
     mensagem_padrao = "Este espaço já está ativo."
+
+
+class EspacoDesatualizado(ConflitoDeEstado):
+    codigo = "ESPACO_DESATUALIZADO"
+    mensagem_padrao = (
+        "Este espaço foi alterado por outra pessoa enquanto você decidia. "
+        "Atualize a lista e tente de novo."
+    )

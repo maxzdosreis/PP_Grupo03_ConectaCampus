@@ -401,6 +401,29 @@ describe('PaginaEspacos', () => {
       const aviso = await dialogo.findByRole('alert')
       expect(aviso.textContent).toContain('Informe ao menos um campo para alterar.')
       expect(screen.getByRole('dialog', { name: 'Editar espaço' })).toBeTruthy()
+      expect(dialogo.queryByRole('button', { name: 'Atualizar lista' })).toBeNull()
+    })
+
+    it('se outra pessoa alterou o espaço, mostra o aviso e "Atualizar lista", que recarrega', async () => {
+      const mensagem =
+        'Este espaço foi alterado por outra pessoa enquanto você decidia. ' +
+        'Atualize a lista e tente de novo.'
+      vi.mocked(editarEspaco).mockRejectedValue(
+        new ErroDaApi(409, 'ESPACO_DESATUALIZADO', mensagem),
+      )
+      renderizar()
+      const dialogo = await abrirDialogo('Editar o espaço Ginásio A', 'Editar espaço')
+      await userEvent.clear(dialogo.getByLabelText('Capacidade'))
+      await userEvent.type(dialogo.getByLabelText('Capacidade'), '60')
+
+      await userEvent.click(dialogo.getByRole('button', { name: 'Salvar alterações' }))
+
+      const aviso = await dialogo.findByRole('alert')
+      expect(aviso.textContent).toContain(mensagem)
+      await userEvent.click(dialogo.getByRole('button', { name: 'Atualizar lista' }))
+
+      expect(screen.queryByRole('dialog')).toBeNull()
+      await waitFor(() => expect(listarEspacos).toHaveBeenCalledTimes(2))
     })
   })
 
@@ -437,17 +460,22 @@ describe('PaginaEspacos', () => {
       await waitFor(() => expect(listarEspacos).toHaveBeenCalledTimes(2))
     })
 
-    it('com 409, mostra o aviso e "Atualizar lista", que fecha e recarrega', async () => {
-      vi.mocked(desativarEspaco).mockRejectedValue(
-        new ErroDaApi(409, 'ESPACO_JA_INATIVO', 'Este espaço já está inativo.'),
-      )
+    it.each([
+      ['ESPACO_JA_INATIVO', 'Este espaço já está inativo.'],
+      [
+        'ESPACO_DESATUALIZADO',
+        'Este espaço foi alterado por outra pessoa enquanto você decidia. ' +
+          'Atualize a lista e tente de novo.',
+      ],
+    ])('com 409 %s, mostra o aviso e "Atualizar lista", que fecha e recarrega', async (codigo, mensagem) => {
+      vi.mocked(desativarEspaco).mockRejectedValue(new ErroDaApi(409, codigo, mensagem))
       renderizar()
       const dialogo = await abrirDialogo('Desativar o espaço Ginásio A', 'Desativar espaço')
 
       await userEvent.click(dialogo.getByRole('button', { name: 'Desativar espaço' }))
 
       const aviso = await dialogo.findByRole('alert')
-      expect(aviso.textContent).toContain('Este espaço já está inativo.')
+      expect(aviso.textContent).toContain(mensagem)
       await userEvent.click(dialogo.getByRole('button', { name: 'Atualizar lista' }))
 
       expect(screen.queryByRole('dialog')).toBeNull()
