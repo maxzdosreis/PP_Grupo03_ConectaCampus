@@ -11,6 +11,11 @@ class EspacoEntradaSerializer(serializers.Serializer):
     capacidade = serializers.IntegerField(max_value=_MAIOR_INTEIRO_DO_BANCO)
 
 
+class EspacoEdicaoSerializer(EspacoEntradaSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, partial=True, **kwargs)
+
+
 class FiltrosEspacosSerializer(serializers.Serializer):
     apenas_ativos = serializers.BooleanField(default=False)
     tipo = serializers.ChoiceField(

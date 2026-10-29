@@ -1,0 +1,31 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.erro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.texto {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.secundario {
+  color: var(--cor-primaria);
+  background-color: var(--cor-superficie);
+}
+
+.secundario:hover {
+  color: var(--cor-sobre-primaria);
+}

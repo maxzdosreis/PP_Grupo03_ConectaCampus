@@ -182,9 +182,9 @@ def test_alterar_entidade_devolvida_nao_altera_o_repositorio(repositorio):
     salvo = repositorio.salvar(_novo_espaco())
 
     # Act
-    repositorio.obter_por_id(salvo.id).capacidade = 99
-    repositorio.listar()[0].ativo = False
-    salvo.nome = "Nome alterado fora do repositório"
+    repositorio.obter_por_id(salvo.id).alterar_dados(capacidade=99)
+    repositorio.listar()[0].desativar()
+    salvo.alterar_dados(nome="Nome alterado fora do repositório")
 
     # Assert
     guardado = repositorio.obter_por_id(salvo.id)
@@ -237,7 +237,7 @@ def test_banco_recusa_dados_que_a_entidade_nao_aceitaria(campos, constraint):
 def test_salvar_repassa_integrity_error_que_nao_e_de_nome_repetido():
     # Arrange
     espaco = _novo_espaco()
-    espaco.capacidade = 0
+    espaco._capacidade = 0
 
     # Act / Assert
     with pytest.raises(IntegrityError, match="capacidade_minima"):

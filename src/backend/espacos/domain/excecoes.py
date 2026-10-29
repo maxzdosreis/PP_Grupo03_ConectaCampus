@@ -46,3 +46,18 @@ class EspacoNaoEncontrado(RecursoNaoEncontrado):
 class EspacoInativo(ConflitoDeEstado):
     codigo = "ESPACO_INATIVO"
     mensagem_padrao = "Este espaço está inativo e não aceita reservas."
+
+
+class NenhumaAlteracaoInformada(DadosInvalidos):
+    codigo = "NENHUMA_ALTERACAO_INFORMADA"
+    mensagem_padrao = "Informe ao menos um campo para alterar."
+
+
+class EspacoJaInativo(ConflitoDeEstado):
+    codigo = "ESPACO_JA_INATIVO"
+    mensagem_padrao = "Este espaço já está inativo."
+
+
+class EspacoJaAtivo(ConflitoDeEstado):
+    codigo = "ESPACO_JA_ATIVO"
+    mensagem_padrao = "Este espaço já está ativo."

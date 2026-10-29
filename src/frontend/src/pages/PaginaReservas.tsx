@@ -22,6 +22,7 @@ import {
 } from '../components/reservas/nomeDoEspaco.ts'
 import TabelaDeReservas from '../components/reservas/TabelaDeReservas.tsx'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
+import { useFocoAoRecarregar } from '../hooks/useFocoAoRecarregar.ts'
 import { useSessao } from '../hooks/useSessao.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { useValorAtrasado } from '../hooks/useValorAtrasado.ts'
@@ -82,18 +83,15 @@ function PaginaReservas() {
   const [emAlteracao, setEmAlteracao] = useState<AlteracaoEmAndamento | null>(null)
   const titulo = useRef<HTMLHeadingElement>(null)
   const regiaoDaTabela = useRef<HTMLDivElement>(null)
-  const focarNaListaAoCarregar = useRef(false)
   const listaCarregando = estado.tipo === 'carregando' || espacos.estado.tipo === 'carregando'
-
-  useEffect(() => {
-    if (!focarNaListaAoCarregar.current || listaCarregando) return
-    focarNaListaAoCarregar.current = false
-    ;(regiaoDaTabela.current ?? titulo.current)?.focus()
-  }, [listaCarregando])
+  const focarNaListaAoCarregar = useFocoAoRecarregar(
+    listaCarregando,
+    () => regiaoDaTabela.current ?? titulo.current,
+  )
 
   function atualizarLista() {
     setEmAlteracao(null)
-    focarNaListaAoCarregar.current = true
+    focarNaListaAoCarregar()
     recarregar()
   }
 

@@ -43,3 +43,15 @@ export function listarTiposDeEspaco() {
 export function cadastrarEspaco(dados: DadosDoEspaco) {
   return requisitar<Espaco>('/espacos/', { method: 'POST', body: JSON.stringify(dados) })
 }
+
+export function editarEspaco(id: number, dados: Partial<DadosDoEspaco>) {
+  return requisitar<Espaco>(`/espacos/${id}/`, { method: 'PATCH', body: JSON.stringify(dados) })
+}
+
+export function desativarEspaco(id: number) {
+  return requisitar<Espaco>(`/espacos/${id}/desativar/`, { method: 'POST' })
+}
+
+export function ativarEspaco(id: number) {
+  return requisitar<Espaco>(`/espacos/${id}/ativar/`, { method: 'POST' })
+}

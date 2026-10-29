@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type RefObject } from 'react'
+import { useId, useRef, useState, type RefObject } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { obterEspaco } from '../api/espacos.ts'
 import {
@@ -17,6 +17,7 @@ import DialogoDeSituacao from '../components/reservas/DialogoDeSituacao.tsx'
 import LinhaDoTempo from '../components/reservas/LinhaDoTempo.tsx'
 import { rotuloDoEspacoDesconhecido } from '../components/reservas/nomeDoEspaco.ts'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
+import { useFocoAoRecarregar } from '../hooks/useFocoAoRecarregar.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { formatarData, formatarIntervalo } from '../formatacao.ts'
 import { caminhoDeVolta } from '../navegacao.ts'
@@ -67,8 +68,8 @@ function DetalheDaReserva({ id }: { id: number }) {
   const reserva = useConsulta(() => obterReserva(id), [id])
   const historico = useConsulta(() => listarHistoricoDaReserva(id), [id])
   const titulo = useRef<HTMLHeadingElement>(null)
-  const focarNoTituloAoCarregar = useRef(false)
   const reservaCarregando = reserva.estado.tipo === 'carregando'
+  const focarNoTituloAoCarregar = useFocoAoRecarregar(reservaCarregando, () => titulo.current)
   const naoEncontrada =
     reserva.estado.tipo === 'erro' && reserva.estado.status === STATUS_NAO_ENCONTRADA
   const textoDoTitulo =
@@ -77,19 +78,13 @@ function DetalheDaReserva({ id }: { id: number }) {
       : TITULO_PADRAO
   useTituloDaPagina(naoEncontrada ? TITULO_NAO_ENCONTRADA : textoDoTitulo)
 
-  useEffect(() => {
-    if (!focarNoTituloAoCarregar.current || reservaCarregando) return
-    focarNoTituloAoCarregar.current = false
-    titulo.current?.focus()
-  }, [reservaCarregando])
-
   function recarregarTudo() {
     reserva.recarregar()
     historico.recarregar()
   }
 
   function aoAlterarSituacao() {
-    focarNoTituloAoCarregar.current = true
+    focarNoTituloAoCarregar()
     recarregarTudo()
   }
 

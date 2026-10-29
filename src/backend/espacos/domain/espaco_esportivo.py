@@ -2,6 +2,9 @@ from compartilhado.domain.erros import CampoObrigatorioAusente
 from espacos.domain.excecoes import (
     CapacidadeInvalida,
     EspacoInativo,
+    EspacoJaAtivo,
+    EspacoJaInativo,
+    NenhumaAlteracaoInformada,
     NomeDeEspacoMuitoLongo,
     TipoDeEspacoInvalido,
 )
@@ -22,13 +25,55 @@ class EspacoEsportivo:
         id: int | None = None,
     ) -> None:
         self.id = id
-        self.nome = _normalizar_nome(nome)
-        self.tipo = _converter_tipo(tipo)
-        self.capacidade = _validar_capacidade(capacidade)
-        self.ativo = ativo
+        self._nome = _normalizar_nome(nome)
+        self._tipo = _converter_tipo(tipo)
+        self._capacidade = _validar_capacidade(capacidade)
+        self._ativo = ativo
+
+    @property
+    def nome(self) -> str:
+        return self._nome
+
+    @property
+    def tipo(self) -> TipoEspaco:
+        return self._tipo
+
+    @property
+    def capacidade(self) -> int:
+        return self._capacidade
+
+    @property
+    def ativo(self) -> bool:
+        return self._ativo
+
+    def alterar_dados(
+        self,
+        *,
+        nome: str | None = None,
+        tipo: TipoEspaco | str | None = None,
+        capacidade: int | None = None,
+    ) -> None:
+        if nome is None and tipo is None and capacidade is None:
+            raise NenhumaAlteracaoInformada()
+        novo_nome = self._nome if nome is None else _normalizar_nome(nome)
+        novo_tipo = self._tipo if tipo is None else _converter_tipo(tipo)
+        nova_capacidade = (
+            self._capacidade if capacidade is None else _validar_capacidade(capacidade)
+        )
+        self._nome, self._tipo, self._capacidade = novo_nome, novo_tipo, nova_capacidade
+
+    def desativar(self) -> None:
+        if not self._ativo:
+            raise EspacoJaInativo()
+        self._ativo = False
+
+    def ativar(self) -> None:
+        if self._ativo:
+            raise EspacoJaAtivo()
+        self._ativo = True
 
     def garantir_que_esta_ativo(self) -> None:
-        if not self.ativo:
+        if not self._ativo:
             raise EspacoInativo()
 
     def __eq__(self, outro: object) -> bool:

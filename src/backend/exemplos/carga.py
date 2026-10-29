@@ -8,8 +8,11 @@ from contas.domain.perfil import PerfilUsuario
 from contas.infrastructure.models import Usuario
 from contas.infrastructure.politica_de_senha import PoliticaDeSenhaDjango
 from contas.infrastructure.repositorio_django import RepositorioUsuariosDjango
-from espacos.api.dependencias import cadastrar_espaco, listar_espacos
-from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
+from espacos.api.dependencias import (
+    cadastrar_espaco,
+    desativar_espaco,
+    listar_espacos,
+)
 from exemplos.dados import (
     ESPACOS,
     GESTOR,
@@ -101,8 +104,7 @@ def _criar_espaco(exemplo: EspacoDeExemplo) -> None:
         nome=exemplo.nome, tipo=exemplo.tipo, capacidade=exemplo.capacidade
     )
     if not exemplo.ativo:
-        espaco.ativo = False
-        RepositorioEspacosDjango().salvar(espaco)
+        desativar_espaco().executar(espaco.id)
 
 
 def _criar_reserva(

@@ -6,7 +6,10 @@ from espacos.domain.espaco_esportivo import NOME_MAXIMO_CARACTERES, EspacoEsport
 from espacos.domain.excecoes import (
     CapacidadeInvalida,
     EspacoInativo,
+    EspacoJaAtivo,
+    EspacoJaInativo,
     EspacoNaoEncontrado,
+    NenhumaAlteracaoInformada,
     NomeDeEspacoJaCadastrado,
     NomeDeEspacoMuitoLongo,
     TipoDeEspacoInvalido,
@@ -142,6 +145,184 @@ def test_garantir_que_esta_ativo_recusa_espaco_inativo():
     # Act / Assert
     with pytest.raises(EspacoInativo):
         espaco.garantir_que_esta_ativo()
+
+
+def _dados(espaco):
+    return (espaco.nome, espaco.tipo, espaco.capacidade, espaco.ativo)
+
+
+@pytest.mark.parametrize(
+    ("alteracao", "esperado"),
+    [
+        (
+            {"nome": "  Ginásio   Reformado "},
+            ("Ginásio Reformado", TipoEspaco.GINASIO, 20, True),
+        ),
+        (
+            {"tipo": "QUADRA_DE_AREIA"},
+            ("Quadra Central", TipoEspaco.QUADRA_DE_AREIA, 20, True),
+        ),
+        ({"capacidade": 35}, ("Quadra Central", TipoEspaco.GINASIO, 35, True)),
+        (
+            {"nome": "Quadra Nova", "capacidade": 8},
+            ("Quadra Nova", TipoEspaco.GINASIO, 8, True),
+        ),
+        (
+            {
+                "nome": "Quadra Nova",
+                "tipo": TipoEspaco.QUADRA_DE_TENIS,
+                "capacidade": 4,
+            },
+            ("Quadra Nova", TipoEspaco.QUADRA_DE_TENIS, 4, True),
+        ),
+    ],
+    ids=["nome", "tipo", "capacidade", "nome-e-capacidade", "todos"],
+)
+def test_alterar_dados_muda_so_os_campos_informados(alteracao, esperado):
+    # Arrange
+    espaco = _criar_espaco()
+
+    # Act
+    espaco.alterar_dados(**alteracao)
+
+    # Assert
+    assert _dados(espaco) == esperado
+
+
+@pytest.mark.parametrize(
+    ("alteracao", "excecao"),
+    [
+        ({"nome": "   "}, CampoObrigatorioAusente),
+        ({"nome": "A" * (NOME_MAXIMO_CARACTERES + 1)}, NomeDeEspacoMuitoLongo),
+        ({"tipo": ""}, CampoObrigatorioAusente),
+        ({"tipo": "PISCINA"}, TipoDeEspacoInvalido),
+        ({"capacidade": 0}, CapacidadeInvalida),
+        ({"capacidade": True}, CapacidadeInvalida),
+        ({"nome": "Quadra Nova", "capacidade": 0}, CapacidadeInvalida),
+    ],
+    ids=[
+        "nome-vazio",
+        "nome-longo",
+        "tipo-vazio",
+        "tipo-desconhecido",
+        "capacidade-zero",
+        "capacidade-bool",
+        "nome-valido-e-capacidade-invalida",
+    ],
+)
+def test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada(
+    alteracao, excecao
+):
+    # Arrange
+    espaco = _criar_espaco()
+    antes = _dados(espaco)
+
+    # Act
+    with pytest.raises(excecao):
+        espaco.alterar_dados(**alteracao)
+
+    # Assert
+    assert _dados(espaco) == antes
+
+
+def test_alterar_dados_sem_nenhum_campo_e_recusado():
+    # Arrange
+    espaco = _criar_espaco()
+
+    # Act
+    with pytest.raises(NenhumaAlteracaoInformada) as erro:
+        espaco.alterar_dados()
+
+    # Assert
+    assert erro.value.mensagem == "Informe ao menos um campo para alterar."
+    assert erro.value.campo is None
+
+
+def test_desativar_espaco_ativo_o_deixa_inativo():
+    # Arrange
+    espaco = _criar_espaco()
+
+    # Act
+    espaco.desativar()
+
+    # Assert
+    assert espaco.ativo is False
+
+
+def test_desativar_espaco_ja_inativo_e_recusado():
+    # Arrange
+    espaco = _criar_espaco(ativo=False)
+
+    # Act / Assert
+    with pytest.raises(EspacoJaInativo):
+        espaco.desativar()
+    assert espaco.ativo is False
+
+
+def test_ativar_espaco_inativo_o_deixa_ativo():
+    # Arrange
+    espaco = _criar_espaco(ativo=False)
+
+    # Act
+    espaco.ativar()
+
+    # Assert
+    assert espaco.ativo is True
+
+
+def test_ativar_espaco_ja_ativo_e_recusado():
+    # Arrange
+    espaco = _criar_espaco()
+
+    # Act / Assert
+    with pytest.raises(EspacoJaAtivo):
+        espaco.ativar()
+    assert espaco.ativo is True
+
+
+@pytest.mark.parametrize(
+    ("campo", "valor"),
+    [
+        ("nome", "Outro"),
+        ("tipo", TipoEspaco.QUADRA_DE_AREIA),
+        ("capacidade", 99),
+        ("ativo", False),
+    ],
+)
+def test_dados_do_espaco_nao_aceitam_atribuicao_direta(campo, valor):
+    # Arrange
+    espaco = _criar_espaco()
+
+    # Act / Assert
+    with pytest.raises(AttributeError):
+        setattr(espaco, campo, valor)
+
+
+@pytest.mark.parametrize(
+    ("excecao", "codigo"),
+    [(EspacoJaInativo, "ESPACO_JA_INATIVO"), (EspacoJaAtivo, "ESPACO_JA_ATIVO")],
+)
+def test_ativacao_repetida_vira_409(excecao, codigo):
+    # Act
+    resposta = tratar_excecao(excecao(), {})
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data["erro"]["codigo"] == codigo
+
+
+def test_nenhuma_alteracao_informada_vira_400_sem_campo():
+    # Act
+    resposta = tratar_excecao(NenhumaAlteracaoInformada(), {})
+
+    # Assert
+    assert resposta.status_code == 400
+    assert resposta.data == {
+        "erro": {
+            "codigo": "NENHUMA_ALTERACAO_INFORMADA",
+            "mensagem": "Informe ao menos um campo para alterar.",
+        }
+    }
 
 
 def test_espacos_com_o_mesmo_id_sao_iguais():

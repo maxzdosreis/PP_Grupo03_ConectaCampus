@@ -2,7 +2,10 @@ import pytest
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from espacos.application.casos_de_uso import (
+    AtivarEspaco,
     CadastrarEspaco,
+    DesativarEspaco,
+    EditarEspaco,
     ListarEspacos,
     ObterEspaco,
     VerificarEspacoDisponivel,
@@ -152,6 +155,88 @@ def test_verificar_espaco_disponivel_inativo_lanca_espaco_inativo(repositorio):
     # Act / Assert
     with pytest.raises(EspacoInativo):
         VerificarEspacoDisponivel(repositorio).executar(salvo.id)
+
+
+@pytest.mark.parametrize("nome", ["Ginásio A", "  GINÁSIO   a "])
+def test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade(repositorio, nome):
+    # Arrange
+    cadastrado = CadastrarEspaco(repositorio).executar(**_dados_validos())
+
+    # Act
+    editado = EditarEspaco(repositorio).executar(
+        cadastrado.id, nome=nome, capacidade=80
+    )
+
+    # Assert
+    assert editado.capacidade == 80
+    assert repositorio.obter_por_id(cadastrado.id).capacidade == 80
+
+
+def test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar(repositorio):
+    # Arrange
+    cadastrar = CadastrarEspaco(repositorio)
+    cadastrar.executar(**_dados_validos(nome="Ginásio A"))
+    outro = cadastrar.executar(**_dados_validos(nome="Ginásio B"))
+
+    # Act
+    with pytest.raises(NomeDeEspacoJaCadastrado):
+        EditarEspaco(repositorio).executar(outro.id, nome="ginásio a", capacidade=5)
+
+    # Assert
+    guardado = repositorio.obter_por_id(outro.id)
+    assert (guardado.nome, guardado.capacidade) == ("Ginásio B", 50)
+
+
+def test_editar_com_dado_invalido_nao_grava(repositorio):
+    # Arrange
+    cadastrado = CadastrarEspaco(repositorio).executar(**_dados_validos())
+
+    # Act
+    with pytest.raises(CapacidadeInvalida):
+        EditarEspaco(repositorio).executar(
+            cadastrado.id, nome="Ginásio Novo", capacidade=0
+        )
+
+    # Assert
+    assert _nomes(repositorio.listar()) == ["Ginásio A"]
+
+
+def test_desativar_e_ativar_gravam_a_situacao_do_espaco(repositorio):
+    # Arrange
+    cadastrado = CadastrarEspaco(repositorio).executar(**_dados_validos())
+
+    # Act
+    desativado = DesativarEspaco(repositorio).executar(cadastrado.id)
+    inativo_guardado = repositorio.obter_por_id(cadastrado.id).ativo
+    reativado = AtivarEspaco(repositorio).executar(cadastrado.id)
+
+    # Assert
+    assert desativado.ativo is False
+    assert inativo_guardado is False
+    assert reativado.ativo is True
+    assert repositorio.obter_por_id(cadastrado.id).ativo is True
+
+
+@pytest.mark.parametrize(
+    "executar",
+    [
+        lambda repositorio: EditarEspaco(repositorio).executar(
+            ID_INEXISTENTE, capacidade=10
+        ),
+        lambda repositorio: DesativarEspaco(repositorio).executar(ID_INEXISTENTE),
+        lambda repositorio: AtivarEspaco(repositorio).executar(ID_INEXISTENTE),
+    ],
+    ids=["editar", "desativar", "ativar"],
+)
+def test_acoes_em_espaco_inexistente_lancam_espaco_nao_encontrado(
+    repositorio, executar
+):
+    # Act
+    with pytest.raises(EspacoNaoEncontrado) as erro:
+        executar(repositorio)
+
+    # Assert
+    assert erro.value.espaco_id == ID_INEXISTENTE
 
 
 def test_verificar_espaco_disponivel_inexistente_lanca_espaco_nao_encontrado(

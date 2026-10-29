@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { requisitar } from './cliente.ts'
-import { cadastrarEspaco, listarEspacos, listarTiposDeEspaco, obterEspaco } from './espacos.ts'
+import {
+  ativarEspaco,
+  cadastrarEspaco,
+  desativarEspaco,
+  editarEspaco,
+  listarEspacos,
+  listarTiposDeEspaco,
+  obterEspaco,
+} from './espacos.ts'
 
 vi.mock('./cliente.ts', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('./cliente.ts')>()),
@@ -44,5 +52,23 @@ describe('api de espaços', () => {
       method: 'POST',
       body: JSON.stringify({ nome: 'Ginásio A', tipo: 'GINASIO', capacidade: '50' }),
     })
+  })
+
+  it('editarEspaco envia um PATCH só com os campos informados', async () => {
+    await editarEspaco(4, { capacidade: '30', nome: undefined })
+
+    expect(requisitar).toHaveBeenCalledWith('/espacos/4/', {
+      method: 'PATCH',
+      body: '{"capacidade":"30"}',
+    })
+  })
+
+  it.each([
+    [desativarEspaco, '/espacos/4/desativar/'],
+    [ativarEspaco, '/espacos/4/ativar/'],
+  ])('%o envia um POST sem corpo para %s', async (acao, caminho) => {
+    await acao(4)
+
+    expect(requisitar).toHaveBeenCalledWith(caminho, { method: 'POST' })
   })
 })

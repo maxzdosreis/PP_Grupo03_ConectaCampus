@@ -34,6 +34,23 @@
   font-weight: 600;
 }
 
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.acao {
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--fonte-pequena);
+  color: var(--cor-primaria);
+  background-color: var(--cor-superficie);
+}
+
+.acao:hover {
+  color: var(--cor-sobre-primaria);
+}
+
 .tabela .numero {
   text-align: right;
   font-variant-numeric: tabular-nums;
