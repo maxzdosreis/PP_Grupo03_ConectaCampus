@@ -19,13 +19,25 @@ const RESERVA: Reserva = {
   acoes_disponiveis: [],
 }
 
+function renderizar() {
+  render(
+    <MemoryRouter>
+      <ResumoDaReserva reserva={RESERVA} nomeDoEspaco="Ginásio A" aoSolicitarOutra={vi.fn()} />
+    </MemoryRouter>,
+  )
+}
+
 describe('ResumoDaReserva', () => {
-  it('tem o link "Ver minhas reservas" para a consulta filtrada', () => {
-    render(
-      <MemoryRouter>
-        <ResumoDaReserva reserva={RESERVA} nomeDoEspaco="Ginásio A" aoSolicitarOutra={vi.fn()} />
-      </MemoryRouter>,
+  it('tem o link "Ver reserva" para o detalhe da reserva criada', () => {
+    renderizar()
+
+    expect(screen.getByRole('link', { name: 'Ver reserva' }).getAttribute('href')).toBe(
+      '/reservas/12',
     )
+  })
+
+  it('tem o link "Ver minhas reservas" para a consulta filtrada', () => {
+    renderizar()
 
     expect(
       screen.getByRole('link', { name: 'Ver minhas reservas' }).getAttribute('href'),

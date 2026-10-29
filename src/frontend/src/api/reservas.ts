@@ -54,6 +54,16 @@ export type SituacaoDeReserva = {
   rotulo: string
 }
 
+export type RegistroDeSituacao = {
+  situacao_anterior: string | null
+  situacao_anterior_rotulo: string | null
+  situacao_nova: string
+  situacao_nova_rotulo: string
+  motivo: string | null
+  autor: { nome: string }
+  registrado_em: string
+}
+
 export function solicitarReserva(dados: DadosDaReserva) {
   return requisitar<Reserva>('/reservas/', { method: 'POST', body: JSON.stringify(dados) })
 }
@@ -74,6 +84,14 @@ export function listarReservas({
       minhas: minhas ? 'true' : undefined,
     }),
   )
+}
+
+export function obterReserva(id: number) {
+  return requisitar<Reserva>(`/reservas/${id}/`)
+}
+
+export function listarHistoricoDaReserva(id: number) {
+  return requisitar<RegistroDeSituacao[]>(`/reservas/${id}/historico/`)
 }
 
 export function alterarSituacaoReserva(id: number, dados: AlteracaoDeSituacao) {

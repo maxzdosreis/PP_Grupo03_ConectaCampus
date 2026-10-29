@@ -32,8 +32,8 @@ describe('useConsulta', () => {
     )
   })
 
-  it('passa de carregando para erro com a mensagem da API', async () => {
-    const erro = new ErroDaApi(0, 'SEM_CONEXAO', 'Não foi possível conectar ao servidor.')
+  it('passa de carregando para erro com a mensagem e o status da API', async () => {
+    const erro = new ErroDaApi(404, 'RESERVA_NAO_ENCONTRADA', 'Reserva não encontrada.')
 
     const { result } = renderHook(() => useConsulta(() => Promise.reject(erro), []))
 
@@ -41,18 +41,23 @@ describe('useConsulta', () => {
     await waitFor(() =>
       expect(result.current.estado).toEqual({
         tipo: 'erro',
-        mensagem: 'Não foi possível conectar ao servidor.',
+        mensagem: 'Reserva não encontrada.',
+        status: 404,
       }),
     )
   })
 
-  it('usa a mensagem de erro inesperado para um erro que não é da API', async () => {
+  it('usa a mensagem de erro inesperado e status nulo para um erro que não é da API', async () => {
     const { result } = renderHook(() =>
       useConsulta(() => Promise.reject(new Error('falhou')), []),
     )
 
     await waitFor(() =>
-      expect(result.current.estado).toEqual({ tipo: 'erro', mensagem: MENSAGEM_ERRO_INESPERADO }),
+      expect(result.current.estado).toEqual({
+        tipo: 'erro',
+        mensagem: MENSAGEM_ERRO_INESPERADO,
+        status: null,
+      }),
     )
   })
 

@@ -9,6 +9,7 @@ import PaginaEspacos from './pages/PaginaEspacos.tsx'
 import PaginaInicial from './pages/PaginaInicial.tsx'
 import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
 import PaginaNovaReserva from './pages/PaginaNovaReserva.tsx'
+import PaginaReserva from './pages/PaginaReserva.tsx'
 import PaginaReservas from './pages/PaginaReservas.tsx'
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                 <Route path="espacos" element={<PaginaEspacos />} />
                 <Route path="reservas" element={<PaginaReservas />} />
                 <Route path="reservas/nova" element={<PaginaNovaReserva />} />
+                <Route path="reservas/:reservaId" element={<PaginaReserva />} />
               </Route>
               <Route path="*" element={<PaginaNaoEncontrada />} />
             </Route>

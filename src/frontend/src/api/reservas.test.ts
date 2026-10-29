@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { requisitar } from './cliente.ts'
 import {
   alterarSituacaoReserva,
+  listarHistoricoDaReserva,
   listarReservas,
   listarSituacoesDeReserva,
+  obterReserva,
   solicitarReserva,
 } from './reservas.ts'
 
@@ -77,6 +79,18 @@ describe('api de reservas', () => {
     expect(requisitar).toHaveBeenCalledWith(
       '/reservas/?espaco=3&situacao=CANCELADA&data=2026-11-10&solicitante=2026001&minhas=true',
     )
+  })
+
+  it('obterReserva pede a reserva pelo id', async () => {
+    await obterReserva(12)
+
+    expect(requisitar).toHaveBeenCalledWith('/reservas/12/')
+  })
+
+  it('listarHistoricoDaReserva pede o histórico da reserva', async () => {
+    await listarHistoricoDaReserva(12)
+
+    expect(requisitar).toHaveBeenCalledWith('/reservas/12/historico/')
   })
 
   it('alterarSituacaoReserva envia um PATCH para a situação da reserva', async () => {

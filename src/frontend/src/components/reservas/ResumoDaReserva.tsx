@@ -2,7 +2,7 @@ import { useEffect, useId, useRef } from 'react'
 import { Link } from 'react-router'
 import type { Reserva } from '../../api/reservas.ts'
 import { formatarIntervalo } from '../../formatacao.ts'
-import { caminhoParaMinhasReservas } from '../../navegacao.ts'
+import { caminhoDaReserva, caminhoParaMinhasReservas } from '../../navegacao.ts'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
 import estilos from './ResumoDaReserva.module.css'
 
@@ -49,6 +49,7 @@ function ResumoDaReserva({ reserva, nomeDoEspaco, aoSolicitarOutra }: Propriedad
         <button type="button" onClick={aoSolicitarOutra}>
           Solicitar outra reserva
         </button>
+        <Link to={caminhoDaReserva(reserva.id)}>Ver reserva</Link>
         <Link to={caminhoParaMinhasReservas()}>Ver minhas reservas</Link>
       </div>
     </section>

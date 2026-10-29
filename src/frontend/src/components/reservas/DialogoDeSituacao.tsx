@@ -23,6 +23,7 @@ type PropriedadesDoDialogoDeSituacao = {
   alvoAoFechar: RefObject<HTMLElement | null>
   aoFechar: () => void
   aoAtualizarLista: () => void
+  rotuloDaAtualizacao?: string
 }
 
 function DialogoDeSituacao({
@@ -32,6 +33,7 @@ function DialogoDeSituacao({
   alvoAoFechar,
   aoFechar,
   aoAtualizarLista,
+  rotuloDaAtualizacao = 'Atualizar lista',
 }: PropriedadesDoDialogoDeSituacao) {
   const [motivo, setMotivo] = useState('')
   const alterar = useCallback(
@@ -77,7 +79,7 @@ function DialogoDeSituacao({
             {listaDesatualizada && (
               <div>
                 <button type="button" onClick={aoAtualizarLista}>
-                  Atualizar lista
+                  {rotuloDaAtualizacao}
                 </button>
               </div>
             )}

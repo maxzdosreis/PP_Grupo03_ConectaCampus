@@ -16,6 +16,7 @@ type Opcao = {
 type PropriedadesDosFiltros = {
   espacos: Espaco[] | null
   situacoes: SituacaoDeReserva[] | null
+  filtrarPorSolicitante: boolean
   valores: ValoresDosFiltros
   textoDoSolicitante: string
   temFiltros: boolean
@@ -34,6 +35,7 @@ function opcaoDoEspaco({ id, nome, ativo }: Espaco): Opcao {
 function FiltrosDeReservas({
   espacos,
   situacoes,
+  filtrarPorSolicitante,
   valores,
   textoDoSolicitante,
   temFiltros,
@@ -71,26 +73,30 @@ function FiltrosDeReservas({
             />
           )}
         </Campo>
-        <Campo rotulo="Solicitante" dica="Nome ou matrícula">
-          {(controle) => (
-            <input
-              {...controle}
-              type="text"
-              value={textoDoSolicitante}
-              onChange={(evento) => aoDigitarSolicitante(evento.target.value)}
-            />
-          )}
-        </Campo>
+        {filtrarPorSolicitante && (
+          <Campo rotulo="Solicitante" dica="Nome ou matrícula">
+            {(controle) => (
+              <input
+                {...controle}
+                type="text"
+                value={textoDoSolicitante}
+                onChange={(evento) => aoDigitarSolicitante(evento.target.value)}
+              />
+            )}
+          </Campo>
+        )}
       </div>
       <div className={estilos.rodape}>
-        <label className={estilos.marcavel}>
-          <input
-            type="checkbox"
-            checked={valores.minhas}
-            onChange={(evento) => aoMudar('minhas', evento.target.checked)}
-          />
-          Somente minhas reservas
-        </label>
+        {filtrarPorSolicitante && (
+          <label className={estilos.marcavel}>
+            <input
+              type="checkbox"
+              checked={valores.minhas}
+              onChange={(evento) => aoMudar('minhas', evento.target.checked)}
+            />
+            Somente minhas reservas
+          </label>
+        )}
         {temFiltros && (
           <button type="button" onClick={aoLimpar}>
             Limpar filtros

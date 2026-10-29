@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, type DependencyList } from 'react'
+import { ErroDaApi } from '../api/cliente.ts'
 import { mensagemDoErro } from '../api/erros.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
 
 export type EstadoDaConsulta<T> =
   | { tipo: 'carregando' }
   | { tipo: 'sucesso'; dados: T; mensagem: string }
-  | { tipo: 'erro'; mensagem: string }
+  | { tipo: 'erro'; mensagem: string; status: number | null }
 
 type Resultado<T> = {
   dependencias: DependencyList
@@ -36,7 +37,13 @@ export function useConsulta<T>(
     }
     buscar()
       .then(({ dados, mensagem }) => concluir({ tipo: 'sucesso', dados, mensagem }))
-      .catch((erro: unknown) => concluir({ tipo: 'erro', mensagem: mensagemDoErro(erro) }))
+      .catch((erro: unknown) =>
+        concluir({
+          tipo: 'erro',
+          mensagem: mensagemDoErro(erro),
+          status: erro instanceof ErroDaApi ? erro.status : null,
+        }),
+      )
     return () => {
       ativo = false
     }

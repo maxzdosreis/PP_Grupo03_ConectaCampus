@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { renderizarComProvedores, valorDaSessao } from '../../testes/renderizar.tsx'
-import { USUARIO_GESTOR } from '../../testes/usuarios.ts'
+import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../../testes/usuarios.ts'
 import Layout from './Layout.tsx'
 
 function renderizar(sessao = valorDaSessao()) {
@@ -36,6 +36,12 @@ describe('Layout', () => {
     await userEvent.click(within(cabecalho).getByRole('button', { name: 'Sair' }))
 
     expect(sessao.sair).toHaveBeenCalledTimes(1)
+  })
+
+  it('logado como solicitante, o item das reservas se chama "Minhas reservas"', () => {
+    renderizar(valorDaSessao({ usuario: USUARIO_SOLICITANTE }))
+
+    expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Minhas reservas', 'Nova reserva'])
   })
 
   it('deslogado, mostra Entrar e Cadastre-se e esconde os itens que exigem login', () => {

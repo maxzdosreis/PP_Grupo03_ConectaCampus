@@ -22,9 +22,10 @@ import {
 } from '../components/reservas/nomeDoEspaco.ts'
 import TabelaDeReservas from '../components/reservas/TabelaDeReservas.tsx'
 import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
+import { useSessao } from '../hooks/useSessao.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { useValorAtrasado } from '../hooks/useValorAtrasado.ts'
-import { CAMINHO_DA_NOVA_RESERVA } from '../navegacao.ts'
+import { CAMINHO_DA_NOVA_RESERVA, rotuloDasReservas } from '../navegacao.ts'
 
 export const ATRASO_DO_SOLICITANTE_MS = 400
 
@@ -35,13 +36,13 @@ type AlteracaoEmAndamento = {
   acao: AcaoDisponivel
 }
 
-function lerFiltros(parametros: URLSearchParams): ValoresDosFiltros {
+function lerFiltros(parametros: URLSearchParams, ehGestor: boolean): ValoresDosFiltros {
   return {
     espaco: parametros.get('espaco') ?? '',
     situacao: parametros.get('situacao') ?? '',
     data: parametros.get('data') ?? '',
-    solicitante: parametros.get('solicitante') ?? '',
-    minhas: parametros.get('minhas') === 'true',
+    solicitante: ehGestor ? (parametros.get('solicitante') ?? '') : '',
+    minhas: ehGestor && parametros.get('minhas') === 'true',
   }
 }
 
@@ -51,9 +52,11 @@ function textoDoParametro(valor: string | boolean): string {
 }
 
 function PaginaReservas() {
-  useTituloDaPagina('Reservas')
+  const { ehGestor } = useSessao()
+  const tituloDaPagina = rotuloDasReservas(ehGestor)
+  useTituloDaPagina(tituloDaPagina)
   const [parametros, setParametros] = useSearchParams()
-  const filtros = lerFiltros(parametros)
+  const filtros = lerFiltros(parametros, ehGestor)
   const { espaco, situacao, data, solicitante, minhas } = filtros
   const temFiltros = Object.values(filtros).some(Boolean)
   const [textoDoSolicitante, setTextoDoSolicitante] = useState(solicitante)
@@ -127,11 +130,12 @@ function PaginaReservas() {
   return (
     <>
       <h1 ref={titulo} tabIndex={-1}>
-        Reservas
+        {tituloDaPagina}
       </h1>
       <FiltrosDeReservas
         espacos={espacos.estado.tipo === 'sucesso' ? espacos.estado.dados : null}
         situacoes={situacoes.estado.tipo === 'sucesso' ? situacoes.estado.dados : null}
+        filtrarPorSolicitante={ehGestor}
         valores={filtros}
         textoDoSolicitante={textoDoSolicitante}
         temFiltros={temFiltros}
@@ -155,6 +159,9 @@ function PaginaReservas() {
         carregandoEspacos={espacos.estado.tipo === 'carregando'}
         nomesDosEspacos={nomesDosEspacos}
         temFiltros={temFiltros}
+        tituloSemReservas={
+          ehGestor ? 'Nenhuma reserva registrada' : 'Você ainda não tem reservas'
+        }
         regiaoDaTabela={regiaoDaTabela}
         aoTentarNovamente={recarregar}
         aoLimparFiltros={limparFiltros}
@@ -180,6 +187,7 @@ type PropriedadesDoResultado = {
   carregandoEspacos: boolean
   nomesDosEspacos: NomesDosEspacos
   temFiltros: boolean
+  tituloSemReservas: string
   regiaoDaTabela: Ref<HTMLDivElement>
   aoTentarNovamente: () => void
   aoLimparFiltros: () => void
@@ -191,6 +199,7 @@ function ResultadoDaLista({
   carregandoEspacos,
   nomesDosEspacos,
   temFiltros,
+  tituloSemReservas,
   regiaoDaTabela,
   aoTentarNovamente,
   aoLimparFiltros,
@@ -227,7 +236,7 @@ function ResultadoDaLista({
     return <EstadoVazio titulo="Nenhuma reserva encontrada">{botaoLimparFiltros}</EstadoVazio>
   }
   return (
-    <EstadoVazio titulo="Nenhuma reserva registrada">
+    <EstadoVazio titulo={tituloSemReservas}>
       <Link to={CAMINHO_DA_NOVA_RESERVA}>Solicitar reserva</Link>
     </EstadoVazio>
   )

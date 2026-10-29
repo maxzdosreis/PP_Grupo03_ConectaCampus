@@ -1,0 +1,16 @@
+.historico {
+  padding: var(--espaco-5);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  background-color: var(--cor-superficie);
+}
+
+.semHistorico {
+  color: var(--cor-texto-suave);
+}
+
+@media (width < 30rem) {
+  .historico {
+    padding: var(--espaco-4);
+  }
+}
