@@ -5,7 +5,7 @@ from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
 from reservas.domain.conflito_de_horario import garantir_horario_livre
-from reservas.domain.excecoes import ReservaNaoEncontrada
+from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 
@@ -40,6 +40,10 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
     def salvar(self, reserva: Reserva) -> Reserva:
         if reserva.id is not None and reserva.id not in self._reservas:
             raise ReservaNaoEncontrada(reserva.id)
+        if reserva.id is not None:
+            gravada = self._reservas[reserva.id].situacao
+            if gravada is not reserva.situacao_de_origem:
+                raise ReservaDesatualizada(gravada)
         if reserva.situacao.ocupa_horario:
             garantir_horario_livre(reserva, self._reservas.values())
         reserva_id = reserva.id if reserva.id is not None else self._gerar_id()

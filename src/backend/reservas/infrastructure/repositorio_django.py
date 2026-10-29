@@ -5,7 +5,7 @@ from django.db.models import Q, QuerySet
 
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
 from reservas.domain.conflito_de_horario import garantir_horario_livre
-from reservas.domain.excecoes import ReservaNaoEncontrada
+from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
@@ -23,6 +23,7 @@ class RepositorioReservasDjango(RepositorioReservas):
         try:
             with transaction.atomic():
                 model = _obter_model_para_salvar(reserva)
+                _exigir_situacao_de_origem(reserva, model)
                 _aplicar_no_model(reserva, model)
                 model.save()
                 RegistroDeSituacaoModel.objects.bulk_create(
@@ -118,9 +119,20 @@ def _obter_model_para_salvar(reserva: Reserva) -> ReservaModel:
     if reserva.id is None:
         return ReservaModel()
     try:
-        return ReservaModel.objects.get(pk=reserva.id)
+        # O bloqueio da linha faz uma alteração simultânea esperar esta terminar
+        # e, ao continuar, ler a situação já gravada (ver _exigir_situacao_de_origem).
+        return ReservaModel.objects.select_for_update().get(pk=reserva.id)
     except ReservaModel.DoesNotExist:
         raise ReservaNaoEncontrada(reserva.id) from None
+
+
+def _exigir_situacao_de_origem(reserva: Reserva, model: ReservaModel) -> None:
+    # As transições não voltam a uma situação anterior, então a situação gravada
+    # diferente da de origem só acontece se outra operação alterou a reserva.
+    if model.pk is None:
+        return
+    if model.situacao != reserva.situacao_de_origem:
+        raise ReservaDesatualizada(SituacaoReserva(model.situacao))
 
 
 def _para_entidade(model: ReservaModel) -> Reserva:

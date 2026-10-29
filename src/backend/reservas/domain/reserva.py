@@ -96,6 +96,12 @@ class Reserva:
     def registros_pendentes(self) -> tuple[RegistroDeSituacao, ...]:
         return tuple(self._registros_pendentes)
 
+    @property
+    def situacao_de_origem(self) -> SituacaoReserva | None:
+        if self._registros_pendentes:
+            return self._registros_pendentes[0].situacao_anterior
+        return self.situacao
+
     def marcar_registros_como_gravados(self) -> None:
         self._registros_pendentes.clear()
 

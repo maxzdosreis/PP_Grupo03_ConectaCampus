@@ -11,6 +11,7 @@ from reservas.domain.excecoes import (
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
+    ReservaDesatualizada,
     ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
@@ -642,3 +643,44 @@ def test_marcar_registros_como_gravados_esvazia_os_pendentes():
 
     # Assert
     assert reserva.registros_pendentes == ()
+
+
+def test_situacao_de_origem_sem_mudancas_e_a_situacao_atual():
+    # Assert
+    assert _reconstituir(situacao=S.CONFIRMADA).situacao_de_origem is S.CONFIRMADA
+
+
+def test_situacao_de_origem_e_a_anterior_a_primeira_mudanca_pendente():
+    # Arrange
+    reserva = _reconstituir()
+
+    # Act
+    reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+    depois_de_uma = reserva.situacao_de_origem
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS)
+
+    # Assert
+    assert depois_de_uma is S.SOLICITADA
+    assert reserva.situacao_de_origem is S.SOLICITADA
+
+
+def test_situacao_de_origem_de_reserva_nova_e_none():
+    # Assert
+    assert _solicitar().situacao_de_origem is None
+
+
+def test_reserva_desatualizada_vira_409_com_a_situacao_atual():
+    # Act
+    resposta = tratar_excecao(ReservaDesatualizada(S.CONFIRMADA), {})
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data == {
+        "erro": {
+            "codigo": "RESERVA_DESATUALIZADA",
+            "mensagem": (
+                "Esta reserva já está Confirmada: ela foi alterada enquanto você "
+                "decidia. Atualize a lista e tente de novo."
+            ),
+        }
+    }

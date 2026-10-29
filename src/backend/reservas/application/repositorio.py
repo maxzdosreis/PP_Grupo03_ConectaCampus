@@ -25,6 +25,10 @@ class RepositorioReservas(Protocol):
         gravados. Depois do sucesso, a entidade recebida fica sem pendentes, para
         salvar de novo não duplicar o histórico.
 
+        Atualizar uma reserva cuja situação gravada não é mais a
+        situacao_de_origem (alterada por outra operação depois da leitura) lança
+        ReservaDesatualizada, sem gravar nada.
+
         Devolve a entidade com id. Atualizar um id inexistente lança
         ReservaNaoEncontrada; ocupar o horário de outra reserva do mesmo espaço
         lança ConflitoDeHorario.

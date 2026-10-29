@@ -2,12 +2,17 @@ from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.db.models import ProtectedError
+from django.test.utils import CaptureQueriesContext
 
 from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.ator import Ator, PapelDoAtor
-from reservas.domain.excecoes import ConflitoDeHorario, ReservaNaoEncontrada
+from reservas.domain.excecoes import (
+    ConflitoDeHorario,
+    ReservaDesatualizada,
+    ReservaNaoEncontrada,
+)
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
@@ -667,3 +672,60 @@ def test_registro_model_mostra_a_reserva_e_as_situacoes(anterior, texto):
 
     # Assert
     assert resultado == texto
+
+
+def test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar(repositorio):
+    # Arrange
+    reserva_id = repositorio.salvar(_solicitar()).id
+    primeira = repositorio.obter_por_id(reserva_id)
+    segunda = repositorio.obter_por_id(reserva_id)
+    primeira.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+    segunda.alterar_situacao(S.CANCELADA, motivo="Chuva", ator=GESTOR, agora=DEPOIS)
+    repositorio.salvar(primeira)
+
+    # Act
+    with pytest.raises(ReservaDesatualizada) as erro:
+        repositorio.salvar(segunda)
+
+    # Assert
+    assert erro.value.situacao_atual is S.CONFIRMADA
+    assert repositorio.obter_por_id(reserva_id).situacao is S.CONFIRMADA
+    historico = repositorio.listar_historico(reserva_id)
+    assert len(historico) == 2
+    verificar_historico_coerente(historico, S.CONFIRMADA)
+    assert len(segunda.registros_pendentes) == 1
+
+
+def test_salvar_entidade_que_ficou_para_tras_nao_regride_a_situacao(repositorio):
+    # Arrange
+    reserva_id = repositorio.salvar(_solicitar()).id
+    antiga = repositorio.obter_por_id(reserva_id)
+    atual = repositorio.obter_por_id(reserva_id)
+    atual.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+    repositorio.salvar(atual)
+
+    # Act
+    with pytest.raises(ReservaDesatualizada):
+        repositorio.salvar(antiga)
+
+    # Assert
+    assert repositorio.obter_por_id(reserva_id).situacao is S.CONFIRMADA
+    assert len(repositorio.listar_historico(reserva_id)) == 2
+
+
+@pytest.mark.django_db
+def test_salvar_reserva_existente_bloqueia_a_linha():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    salva = repositorio.salvar(_solicitar())
+    salva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.salvar(salva)
+
+    # Assert
+    assert any(
+        'FROM "reservas_reserva"' in consulta["sql"] and "FOR UPDATE" in consulta["sql"]
+        for consulta in consultas.captured_queries
+    )

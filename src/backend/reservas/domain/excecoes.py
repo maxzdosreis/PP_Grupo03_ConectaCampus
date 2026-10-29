@@ -55,6 +55,17 @@ class TransicaoDeSituacaoInvalida(ConflitoDeEstado):
         )
 
 
+class ReservaDesatualizada(ConflitoDeEstado):
+    codigo = "RESERVA_DESATUALIZADA"
+
+    def __init__(self, situacao_atual: SituacaoReserva) -> None:
+        self.situacao_atual = situacao_atual
+        super().__init__(
+            f"Esta reserva já está {situacao_atual.rotulo}: ela foi alterada "
+            "enquanto você decidia. Atualize a lista e tente de novo."
+        )
+
+
 class AlteracaoDeSituacaoNaoPermitida(AcaoNaoPermitida):
     codigo = "ACAO_NAO_PERMITIDA"
 
