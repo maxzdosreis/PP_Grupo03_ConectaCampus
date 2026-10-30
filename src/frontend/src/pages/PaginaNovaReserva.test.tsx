@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
 import {
+  obterOcupacaoDoDia,
   obterRegrasDeAgenda,
   solicitarReserva,
+  type OcupacaoDoDia,
   type RegrasDeAgenda,
   type Reserva,
 } from '../api/reservas.ts'
@@ -22,9 +24,9 @@ vi.mock('../api/espacos.ts', () => ({
 vi.mock('../api/reservas.ts', () => ({
   solicitarReserva: vi.fn(),
   obterRegrasDeAgenda: vi.fn(),
+  obterOcupacaoDoDia: vi.fn(),
 }))
 
-// Valores fictícios de propósito: os limites reais só existem no backend.
 const REGRAS: RegrasDeAgenda = {
   horario_de_abertura: '08:00',
   horario_de_fechamento: '20:00',
@@ -79,6 +81,21 @@ const RESERVA: Reserva = {
 
 const MENSAGEM_DE_SUCESSO = 'Reserva solicitada com sucesso. Aguarde a confirmação do gestor.'
 
+const OCUPACAO: OcupacaoDoDia = {
+  data: '2026-10-25',
+  horario_de_abertura: '08:00',
+  horario_de_fechamento: '20:00',
+  reservavel: true,
+  motivo_indisponivel: null,
+  ocupados: [
+    { hora_inicio: '10:00', hora_fim: '11:00', situacao: 'CONFIRMADA', situacao_rotulo: 'Confirmada' },
+  ],
+  livres: [
+    { hora_inicio: '08:00', hora_fim: '10:00' },
+    { hora_inicio: '11:00', hora_fim: '20:00' },
+  ],
+}
+
 function promessaControlada<T>() {
   let resolver!: (valor: T) => void
   const promessa = new Promise<T>((resolve) => {
@@ -118,11 +135,97 @@ describe('PaginaNovaReserva', () => {
     vi.mocked(listarEspacos).mockReset()
     vi.mocked(solicitarReserva).mockReset()
     vi.mocked(obterRegrasDeAgenda).mockReset()
+    vi.mocked(obterOcupacaoDoDia).mockReset()
     vi.mocked(listarEspacos).mockResolvedValue({
       mensagem: '2 espaços encontrados.',
       dados: [GINASIO, QUADRA],
     })
     vi.mocked(obterRegrasDeAgenda).mockResolvedValue({ mensagem: 'Regras de agenda.', dados: REGRAS })
+    vi.mocked(obterOcupacaoDoDia).mockResolvedValue({
+      mensagem: '1 horário ocupado neste dia.',
+      dados: OCUPACAO,
+    })
+  })
+
+  it('sem espaço e data, a agenda só orienta e não consulta', async () => {
+    renderizar()
+
+    await screen.findByLabelText('Espaço')
+    expect(
+      screen.getByText('Escolha o espaço e a data para ver os horários ocupados.'),
+    ).toBeTruthy()
+    expect(obterOcupacaoDoDia).not.toHaveBeenCalled()
+  })
+
+  it('escolher espaço e data consulta a agenda uma vez e mostra ocupados e livres', async () => {
+    renderizar()
+
+    await preencherFormulario({ espaco_id: '1', data: '2026-10-25' })
+
+    const ocupados = await screen.findByRole('list', { name: 'Ocupados' })
+    expect(obterOcupacaoDoDia).toHaveBeenCalledTimes(1)
+    expect(obterOcupacaoDoDia).toHaveBeenCalledWith('1', '2026-10-25')
+    expect(ocupados.textContent).toContain('10:00–11:00')
+    expect(screen.getByRole('list', { name: 'Livres' }).textContent).toContain('11:00–20:00')
+  })
+
+  it('"Usar este horário" preenche Início e Término, limitado pela duração máxima, e foca Término', async () => {
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', data: '2026-10-25' })
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Usar este horário, 11:00–20:00' }),
+    )
+
+    expect(controle('Início').value).toBe('11:00')
+    expect(controle('Término').value).toBe('12:30')
+    expect(document.activeElement).toBe(controle('Término'))
+  })
+
+  it('com a agenda falhando, o formulário continua enviando', async () => {
+    vi.mocked(obterOcupacaoDoDia).mockRejectedValue(
+      new ErroDaApi(0, 'SEM_CONEXAO', 'Não foi possível conectar ao servidor.'),
+    )
+    vi.mocked(solicitarReserva).mockResolvedValue({ mensagem: MENSAGEM_DE_SUCESSO, dados: RESERVA })
+    renderizar()
+    await preencherFormulario()
+
+    expect(
+      await screen.findByText(
+        'Não foi possível carregar a agenda. Você ainda pode solicitar normalmente.',
+      ),
+    ).toBeTruthy()
+    await enviarFormulario()
+
+    expect(await screen.findByRole('region', { name: 'Reserva solicitada' })).toBeTruthy()
+  })
+
+  it('depois de um 409 de conflito, a agenda é recarregada', async () => {
+    vi.mocked(solicitarReserva).mockRejectedValue(
+      new ErroDaApi(409, 'CONFLITO_DE_HORARIO', 'Este espaço já tem uma reserva Confirmada.'),
+    )
+    renderizar()
+    await preencherFormulario()
+    await screen.findByRole('list', { name: 'Ocupados' })
+
+    await enviarFormulario()
+
+    await screen.findByRole('alert')
+    await waitFor(() => expect(obterOcupacaoDoDia).toHaveBeenCalledTimes(2))
+  })
+
+  it('outros erros de envio não recarregam a agenda', async () => {
+    vi.mocked(solicitarReserva).mockRejectedValue(
+      new ErroDaApi(401, 'NAO_AUTENTICADO', 'Faça login para continuar.'),
+    )
+    renderizar()
+    await preencherFormulario()
+    await screen.findByRole('list', { name: 'Ocupados' })
+
+    await enviarFormulario()
+
+    await screen.findByRole('alert')
+    expect(obterOcupacaoDoDia).toHaveBeenCalledTimes(1)
   })
 
   it('mostra a dica da agenda com os valores vindos da API, sem limites nos campos', async () => {

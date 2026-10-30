@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { ErroDaApi } from '../../api/cliente.ts'
 import type { Espaco } from '../../api/espacos.ts'
 import {
   solicitarReserva,
   type DadosDaReserva,
+  type HorarioLivre,
   type RegrasDeAgenda,
   type Reserva,
 } from '../../api/reservas.ts'
@@ -11,8 +13,12 @@ import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
+import AgendaDoDia from './AgendaDoDia.tsx'
+import { horarioSugerido } from './agendaDoDia.ts'
 import { descreverRegrasDeAgenda } from './dicaDaAgenda.ts'
 import estilos from './FormularioDeReserva.module.css'
+
+const CODIGO_DO_CONFLITO_DE_HORARIO = 'CONFLITO_DE_HORARIO'
 
 type PropriedadesDoFormulario = {
   espacos: Espaco[]
@@ -36,11 +42,23 @@ function FormularioDeReserva({
     hora_fim: '',
     finalidade: '',
   })
+  const [recargasDaAgenda, setRecargasDaAgenda] = useState(0)
+  const solicitarEAtualizarAgenda = useCallback(async (dadosDaReserva: DadosDaReserva) => {
+    try {
+      return await solicitarReserva(dadosDaReserva)
+    } catch (erro) {
+      if (erro instanceof ErroDaApi && erro.codigo === CODIGO_DO_CONFLITO_DE_HORARIO) {
+        setRecargasDaAgenda((anteriores) => anteriores + 1)
+      }
+      throw erro
+    }
+  }, [])
   const { enviar, enviando, errosDosCampos, erroGeral, limparErroDoCampo } =
-    useEnvio(solicitarReserva)
+    useEnvio(solicitarEAtualizarAgenda)
   const { mostrarSucesso } = useMensagens()
   const { formulario, aviso, focarNoProximoErro } = useFocoNoErro(errosDosCampos, erroGeral)
   const seletorDeEspaco = useRef<HTMLSelectElement>(null)
+  const campoDeTermino = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (focarAoAbrir) seletorDeEspaco.current?.focus()
@@ -49,6 +67,16 @@ function FormularioDeReserva({
   function alterar(campo: keyof DadosDaReserva, valor: string) {
     setDados((atuais) => ({ ...atuais, [campo]: valor }))
     limparErroDoCampo(campo)
+  }
+
+  function usarHorario(livre: HorarioLivre) {
+    const { hora_inicio, hora_fim } = horarioSugerido(
+      livre,
+      regras?.duracao_maxima_em_minutos ?? null,
+    )
+    alterar('hora_inicio', hora_inicio)
+    alterar('hora_fim', hora_fim)
+    campoDeTermino.current?.focus()
   }
 
   async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
@@ -97,6 +125,12 @@ function FormularioDeReserva({
           />
         )}
       </Campo>
+      <AgendaDoDia
+        espacoId={dados.espaco_id}
+        data={dados.data}
+        recargas={recargasDaAgenda}
+        aoUsarHorario={usarHorario}
+      />
       <div className={estilos.horario}>
         <Campo rotulo="Início" erro={errosDosCampos.hora_inicio}>
           {(controle) => (
@@ -113,6 +147,7 @@ function FormularioDeReserva({
           {(controle) => (
             <input
               {...controle}
+              ref={campoDeTermino}
               type="time"
               name="hora_fim"
               value={dados.hora_fim}

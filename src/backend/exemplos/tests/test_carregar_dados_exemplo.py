@@ -274,6 +274,32 @@ def test_horario_de_conflito_documentado_responde_409():
     assert resposta.data["erro"]["codigo"] == "CONFLITO_DE_HORARIO"
 
 
+def test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia():
+    # Arrange
+    _carregar()
+    conflito = CONFLITO_PARA_DEMONSTRACAO
+    espaco = next(e for e in _espacos() if e.nome == conflito.espaco)
+    data = timezone.localdate() + timedelta(days=conflito.dias_a_partir_de_hoje)
+    dono = next(r for r in _reservas() if r.espaco_id == espaco.id).solicitante
+    outro = next(s for s in SOLICITANTES if s.matricula != dono.matricula)
+    cliente = APIClient()
+    cliente.force_authenticate(user=Usuario.objects.get_by_natural_key(outro.email))
+
+    # Act
+    resposta = cliente.get(
+        reverse("reservas:ocupacao"), {"espaco": espaco.id, "data": data.isoformat()}
+    )
+
+    # Assert
+    assert resposta.status_code == 200
+    ocupados = resposta.data["dados"]["ocupados"]
+    assert [(o["hora_inicio"], o["hora_fim"]) for o in ocupados] == [("10:00", "11:00")]
+    inicio, fim = (f"{conflito.hora_inicio:%H:%M}", f"{conflito.hora_fim:%H:%M}")
+    assert ocupados[0]["hora_inicio"] < fim
+    assert inicio < ocupados[0]["hora_fim"]
+    assert dono.nome not in str(resposta.data)
+
+
 def test_nenhum_dado_de_exemplo_usa_o_usuario_do_readme():
     # Act
     _carregar()

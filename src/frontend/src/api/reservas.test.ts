@@ -5,6 +5,7 @@ import {
   listarHistoricoDaReserva,
   listarReservas,
   listarSituacoesDeReserva,
+  obterOcupacaoDoDia,
   obterReserva,
   solicitarReserva,
 } from './reservas.ts'
@@ -117,5 +118,11 @@ describe('api de reservas', () => {
     await listarSituacoesDeReserva()
 
     expect(requisitar).toHaveBeenCalledWith('/reservas/situacoes/')
+  })
+
+  it('obterOcupacaoDoDia consulta a ocupação do espaço na data', async () => {
+    await obterOcupacaoDoDia('3', '2026-11-10')
+
+    expect(requisitar).toHaveBeenCalledWith('/reservas/ocupacao/?espaco=3&data=2026-11-10')
   })
 })
