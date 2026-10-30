@@ -8,7 +8,9 @@ from reservas.api import dependencias
 from reservas.api.autenticacao import ator_autenticado, solicitante_autenticado
 from reservas.api.serializers import (
     AlteracaoDeSituacaoSerializer,
+    FiltrosDeOcupacaoSerializer,
     FiltrosReservasSerializer,
+    OcupacaoDoDiaSaidaSerializer,
     RegistroDeSituacaoSaidaSerializer,
     RegrasDeAgendaSaidaSerializer,
     ReservaEntradaSerializer,
@@ -81,6 +83,25 @@ class HistoricoDaReservaView(APIView):
         return resposta_sucesso(
             "Histórico da reserva.",
             RegistroDeSituacaoSaidaSerializer(registros, many=True).data,
+        )
+
+
+class OcupacaoDoDiaView(APIView):
+    def get(self, request):
+        filtros = FiltrosDeOcupacaoSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+        ocupacao = dependencias.consultar_ocupacao_do_dia().executar(
+            espaco_id=filtros.validated_data["espaco"],
+            data=filtros.validated_data["data"],
+        )
+        return resposta_sucesso(
+            mensagem_de_contagem(
+                len(ocupacao.ocupados),
+                nenhum="Nenhum horário ocupado neste dia.",
+                um="1 horário ocupado neste dia.",
+                varios="{total} horários ocupados neste dia.",
+            ),
+            OcupacaoDoDiaSaidaSerializer(ocupacao).data,
         )
 
 

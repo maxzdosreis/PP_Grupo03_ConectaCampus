@@ -2,12 +2,19 @@ from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, datetime, time
 
+from reservas.application.ocupacao_do_dia import HorarioOcupado, OcupacaoDoDia
 from reservas.application.portas import ConsultaDeEspacos
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
+from reservas.domain.regras_de_agenda import (
+    HORARIO_DE_ABERTURA,
+    HORARIO_DE_FECHAMENTO,
+    horarios_livres,
+    motivo_de_indisponibilidade,
+)
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
@@ -96,6 +103,38 @@ class ConsultarHistoricoDaReserva:
     def executar(self, reserva_id: int, *, ator: Ator) -> list[RegistroDeSituacao]:
         _obter_ou_falhar(self._repositorio, reserva_id, ator)
         return self._repositorio.listar_historico(reserva_id)
+
+
+class ConsultarOcupacaoDoDia:
+    def __init__(
+        self,
+        repositorio: RepositorioReservas,
+        consulta_de_espacos: ConsultaDeEspacos,
+        relogio: Callable[[], datetime],
+    ) -> None:
+        self._repositorio = repositorio
+        self._consulta_de_espacos = consulta_de_espacos
+        self._relogio = relogio
+
+    def executar(self, *, espaco_id: int, data: date) -> OcupacaoDoDia:
+        self._consulta_de_espacos.obter_espaco_reservavel(espaco_id)
+        reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
+        agora = self._relogio()
+        motivo = motivo_de_indisponibilidade(data, agora)
+        intervalos = [reserva.intervalo for reserva in reservas]
+        livres = horarios_livres(intervalos, data=data, agora=agora)
+        return OcupacaoDoDia(
+            data=data,
+            horario_de_abertura=HORARIO_DE_ABERTURA,
+            horario_de_fechamento=HORARIO_DE_FECHAMENTO,
+            ocupados=tuple(
+                HorarioOcupado(intervalo=reserva.intervalo, situacao=reserva.situacao)
+                for reserva in reservas
+            ),
+            livres=() if motivo else tuple(livres),
+            reservavel=motivo is None,
+            motivo_indisponivel=motivo,
+        )
 
 
 def _restringir_ao_ator(filtros: FiltrosDeReservas, ator: Ator) -> FiltrosDeReservas:

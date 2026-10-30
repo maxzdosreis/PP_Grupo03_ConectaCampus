@@ -1,13 +1,7 @@
-"""Matriz de acesso da API, exercitada com JWT de verdade (AUT-07).
-
-É a fonte da verdade de quem acessa cada rota. docs/fontes/matriz_de_acesso.md
-repete esta tabela, e as duas mudam juntas. Toda rota ou método novo sob api/
-precisa de uma linha aqui: a guarda de cobertura no fim do arquivo falha se faltar.
-"""
-
 import re
 from datetime import timedelta
 from typing import NamedTuple
+from urllib.parse import urlencode
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -59,6 +53,7 @@ _TABELA = [
     ("reservas:lista",            "POST",   "nova_reserva",        401,   201,   201,   201),
     ("reservas:situacoes",        "GET",    None,                  200,   200,   200,   200),
     ("reservas:regras_de_agenda", "GET",    None,                  200,   200,   200,   200),
+    ("reservas:ocupacao",         "GET",    None,                  401,   200,   200,   200),
     ("reservas:detalhe",          "GET",    None,                  401,   200,   404,   200),
     ("reservas:detalhe",          "DELETE", None,                  401,   405,   405,   405),
     ("reservas:situacao",         "PATCH",  "confirmar",           401,   403,   404,   200),
@@ -82,6 +77,14 @@ _PARAMETROS_DO_CENARIO = {"espacos:ativar": {"espaco_id": "espaco_inativo_id"}}
 
 def _amanha():
     return (timezone.localdate() + timedelta(days=1)).isoformat()
+
+
+_CONSULTA_DO_CENARIO = {
+    "reservas:ocupacao": lambda cenario: {
+        "espaco": cenario.espaco_id,
+        "data": _amanha(),
+    },
+}
 
 
 def _reserva(espaco_id, hora_inicio, hora_fim):
@@ -144,12 +147,14 @@ def _url(nome_da_rota, cenario):
     caminho = _rotas_da_api()[nome_da_rota].caminho
     parametros = re.findall(r"<(?:\w+:)?(\w+)>", caminho)
     atributos = _PARAMETROS_DO_CENARIO.get(nome_da_rota, {})
-    return reverse(
+    url = reverse(
         nome_da_rota,
         kwargs={
             nome: getattr(cenario, atributos.get(nome, nome)) for nome in parametros
         },
     )
+    consulta = _CONSULTA_DO_CENARIO.get(nome_da_rota)
+    return f"{url}?{urlencode(consulta(cenario))}" if consulta else url
 
 
 def _requisitar(cliente, metodo, url, corpo):

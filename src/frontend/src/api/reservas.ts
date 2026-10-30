@@ -63,6 +63,26 @@ export type RegrasDeAgenda = {
   data_limite: string
 }
 
+export type HorarioLivre = {
+  hora_inicio: string
+  hora_fim: string
+}
+
+export type HorarioOcupado = HorarioLivre & {
+  situacao: string
+  situacao_rotulo: string
+}
+
+export type OcupacaoDoDia = {
+  data: string
+  horario_de_abertura: string
+  horario_de_fechamento: string
+  reservavel: boolean
+  motivo_indisponivel: string | null
+  ocupados: HorarioOcupado[]
+  livres: HorarioLivre[]
+}
+
 export type RegistroDeSituacao = {
   situacao_anterior: string | null
   situacao_anterior_rotulo: string | null
@@ -116,4 +136,8 @@ export function listarSituacoesDeReserva() {
 
 export function obterRegrasDeAgenda() {
   return requisitar<RegrasDeAgenda>('/reservas/regras-de-agenda/')
+}
+
+export function obterOcupacaoDoDia(espacoId: string, data: string) {
+  return requisitar<OcupacaoDoDia>(comParametros('/reservas/ocupacao/', { espaco: espacoId, data }))
 }

@@ -55,6 +55,13 @@ class FiltrosReservasSerializer(serializers.Serializer):
         )
 
 
+class FiltrosDeOcupacaoSerializer(serializers.Serializer):
+    espaco = serializers.IntegerField(
+        min_value=1, max_value=_MAIOR_IDENTIFICADOR_DO_BANCO
+    )
+    data = serializers.DateField()
+
+
 class AlteracaoDeSituacaoSerializer(serializers.Serializer):
     situacao = serializers.CharField()
     motivo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -89,6 +96,32 @@ class RegrasDeAgendaSaidaSerializer(serializers.Serializer):
 
 def _em_minutos(duracao: timedelta) -> int:
     return duracao // timedelta(minutes=1)
+
+
+class HorarioLivreSaidaSerializer(serializers.Serializer):
+    hora_inicio = serializers.TimeField(format=_FORMATO_DA_HORA)
+    hora_fim = serializers.TimeField(format=_FORMATO_DA_HORA)
+
+
+class HorarioOcupadoSaidaSerializer(serializers.Serializer):
+    hora_inicio = serializers.TimeField(
+        source="intervalo.hora_inicio", format=_FORMATO_DA_HORA
+    )
+    hora_fim = serializers.TimeField(
+        source="intervalo.hora_fim", format=_FORMATO_DA_HORA
+    )
+    situacao = serializers.CharField(source="situacao.value")
+    situacao_rotulo = serializers.CharField(source="situacao.rotulo")
+
+
+class OcupacaoDoDiaSaidaSerializer(serializers.Serializer):
+    data = serializers.DateField()
+    horario_de_abertura = serializers.TimeField(format=_FORMATO_DA_HORA)
+    horario_de_fechamento = serializers.TimeField(format=_FORMATO_DA_HORA)
+    reservavel = serializers.BooleanField()
+    motivo_indisponivel = serializers.CharField(allow_null=True)
+    ocupados = HorarioOcupadoSaidaSerializer(many=True)
+    livres = HorarioLivreSaidaSerializer(many=True)
 
 
 class AcaoDisponivelSaidaSerializer(serializers.Serializer):
