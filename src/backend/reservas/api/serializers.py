@@ -1,6 +1,16 @@
+from datetime import datetime, timedelta
+
 from rest_framework import serializers
 
 from reservas.application.repositorio import FiltrosDeReservas
+from reservas.domain.regras_de_agenda import (
+    ANTECEDENCIA_MAXIMA_EM_DIAS,
+    DURACAO_MAXIMA,
+    DURACAO_MINIMA,
+    HORARIO_DE_ABERTURA,
+    HORARIO_DE_FECHAMENTO,
+    data_limite_para_reservar,
+)
 from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserva
 
 _MAIOR_IDENTIFICADOR_DO_BANCO = 9_223_372_036_854_775_807
@@ -53,6 +63,32 @@ class AlteracaoDeSituacaoSerializer(serializers.Serializer):
 class SituacaoDeReservaSaidaSerializer(serializers.Serializer):
     valor = serializers.CharField(source="value")
     rotulo = serializers.CharField()
+
+
+class RegrasDeAgendaSaidaSerializer(serializers.Serializer):
+    horario_de_abertura = serializers.TimeField(format=_FORMATO_DA_HORA)
+    horario_de_fechamento = serializers.TimeField(format=_FORMATO_DA_HORA)
+    duracao_minima_em_minutos = serializers.IntegerField()
+    duracao_maxima_em_minutos = serializers.IntegerField()
+    antecedencia_maxima_em_dias = serializers.IntegerField()
+    data_limite = serializers.DateField()
+
+    @classmethod
+    def vigentes(cls, agora: datetime) -> "RegrasDeAgendaSaidaSerializer":
+        return cls(
+            {
+                "horario_de_abertura": HORARIO_DE_ABERTURA,
+                "horario_de_fechamento": HORARIO_DE_FECHAMENTO,
+                "duracao_minima_em_minutos": _em_minutos(DURACAO_MINIMA),
+                "duracao_maxima_em_minutos": _em_minutos(DURACAO_MAXIMA),
+                "antecedencia_maxima_em_dias": ANTECEDENCIA_MAXIMA_EM_DIAS,
+                "data_limite": data_limite_para_reservar(agora),
+            }
+        )
+
+
+def _em_minutos(duracao: timedelta) -> int:
+    return duracao // timedelta(minutes=1)
 
 
 class AcaoDisponivelSaidaSerializer(serializers.Serializer):

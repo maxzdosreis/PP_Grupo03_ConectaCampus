@@ -95,7 +95,7 @@ Pela tela, em http://localhost:5173, com os usuários de exemplo:
 
 1. **Entrar como solicitante.** Abrir http://localhost:5173/reservas sem login: a aplicação leva para a tela de entrar. Entrar como Bruno (`bruno.lima@exemplo.com`, `Rede-Alta-73`); depois do login, ela volta para as reservas. O cabeçalho mostra "Bruno Lima · Solicitante".
 2. **Consultar.** O menu mostra "Minhas reservas", e Bruno vê só as próprias reservas (Solicitada, Recusada e Concluída), sem os filtros de solicitante. Filtrar por espaço "Quadra Poliesportiva Central" e situação "Solicitada" (dois critérios combinados). Só a Solicitada tem ação, e só "Cancelar". Limpar os filtros e clicar na data da reserva Concluída (ontem, Quadra de Tênis 1): a linha do tempo mostra as três etapas — "Solicitada por Bruno Lima", "Confirmada por Carla Mendes" e "Concluída por Carla Mendes", cada uma com data e hora.
-3. **Entrada inválida.** Em "Nova reserva", que mostra "Solicitante: Bruno Lima (2026101)", pedir a Quadra Poliesportiva Central **amanhã, 10:30–11:30**, com qualquer finalidade: o aviso no topo do formulário explica o conflito de horário (**409** `CONFLITO_DE_HORARIO`) e os valores continuam preenchidos. Outras entradas inválidas prontas: uma data de ontem, explicada embaixo do campo Data, e um término antes do início.
+3. **Entrada inválida.** Em "Nova reserva", que mostra "Solicitante: Bruno Lima (2026101)", pedir a Quadra Poliesportiva Central **amanhã, 10:30–11:30**, com qualquer finalidade: o aviso no topo do formulário explica o conflito de horário (**409** `CONFLITO_DE_HORARIO`) e os valores continuam preenchidos. Outras entradas inválidas prontas: uma data de ontem, explicada embaixo do campo Data; um término antes do início; e **22:00–23:00**, fora do horário de funcionamento, com a mensagem "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período." embaixo do campo Término. Acima de Data, a dica mostra as [regras de agenda](#regras-de-agenda) que vêm da API.
 4. **Solicitar.** Trocar o horário para **16:00–17:00** e enviar: a mensagem de sucesso aparece e o resumo mostra a situação "Solicitada". "Ver minhas reservas" leva à lista com a nova reserva.
 5. **Cancelar.** Em "Minhas reservas", abrir a reserva Solicitada de amanhã às 10:00 (a dos dados de exemplo) e cancelá-la pelo detalhe: o diálogo pede o motivo, e sem motivo o erro aparece embaixo do campo. Com o motivo, a reserva passa a "Cancelada" e a linha do tempo ganha o item "Cancelada por Bruno Lima" com o motivo.
 6. **Sem permissão.** Em "Espaços", Bruno vê a lista e o aviso "Somente o gestor cadastra espaços.", sem o formulário. Sair (botão "Sair" no cabeçalho).
@@ -127,7 +127,7 @@ Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/
    curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "10:30", "hora_fim": "11:30", "finalidade": "Treino de futsal"}'
    ```
 
-   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`.
+   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`; 22:00–23:00 → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_fim`; 10:00–14:00 → **400** `DURACAO_INVALIDA`; uma data daqui a 40 dias → **400** `ANTECEDENCIA_EXCEDIDA` (ver [Regras de agenda](#regras-de-agenda)).
 
 4. Solicitar um horário livre (amanhã, 16:00–17:00) → **201**, situação `SOLICITADA`; anote o `id` da resposta:
 
@@ -190,7 +190,7 @@ docker compose exec backend python manage.py carregar_dados_exemplo
 
 ### Exemplos de uso da API
 
-Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/` e `GET /api/reservas/situacoes/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Para os exemplos de espaços, entre como a gestora de exemplo Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), porque só o Gestor cadastra espaços, e guarde o `access` em `ACCESS` como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token). Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
+Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/`, `GET /api/reservas/situacoes/` e `GET /api/reservas/regras-de-agenda/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Para os exemplos de espaços, entre como a gestora de exemplo Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), porque só o Gestor cadastra espaços, e guarde o `access` em `ACCESS` como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token). Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
 
 Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`. A mesma lista, com os rótulos, sai de `GET /api/espacos/tipos/` (é dela que o frontend monta os seletores):
 
@@ -412,7 +412,35 @@ Repetir o pedido no mesmo horário responde **409**:
 {"erro": {"codigo": "CONFLITO_DE_HORARIO", "mensagem": "Este espaço já tem uma reserva Solicitada em 10/11/2026 10:00–11:00. Escolha outro horário."}}
 ```
 
-Outros erros: sem token → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
+Outros erros: sem token → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; fora das [regras de agenda](#regras-de-agenda) → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO`, `DURACAO_INVALIDA` ou `ANTECEDENCIA_EXCEDIDA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
+
+#### Regras de agenda
+
+Toda nova solicitação precisa respeitar estes limites, iguais para todos os espaços:
+
+| Regra | Valor | Erro (400) e campo |
+|---|---|---|
+| Horário de funcionamento | início a partir das **07:00** e término até as **22:00** | `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_inicio` (antes da abertura) ou `hora_fim` (depois do fechamento) |
+| Duração | de **30 minutos** a **3 horas**, com as bordas incluídas | `DURACAO_INVALIDA` em `hora_fim` |
+| Antecedência máxima | até **30 dias** a partir de hoje (fuso de São Paulo) | `ANTECEDENCIA_EXCEDIDA` em `data`, com a data limite na mensagem |
+
+As regras valem só ao solicitar. Reservas já gravadas continuam válidas se os limites mudarem. Por exemplo, pedir 06:00–07:00 responde:
+
+```json
+{"erro": {"codigo": "FORA_DO_HORARIO_DE_FUNCIONAMENTO", "mensagem": "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período.", "campos": {"hora_inicio": ["Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período."]}}}
+```
+
+Os valores vigentes saem de `GET /api/reservas/regras-de-agenda/`, que não exige login. É deles que a tela de nova reserva monta a dica acima dos campos de data e horário:
+
+```bash
+curl http://localhost:8000/api/reservas/regras-de-agenda/
+```
+
+```json
+{"mensagem": "Regras de agenda.", "dados": {"horario_de_abertura": "07:00", "horario_de_fechamento": "22:00", "duracao_minima_em_minutos": 30, "duracao_maxima_em_minutos": 180, "antecedencia_maxima_em_dias": 30, "data_limite": "2026-11-29"}}
+```
+
+`data_limite` é hoje + 30 dias e muda a cada dia.
 
 #### Consultar reservas
 

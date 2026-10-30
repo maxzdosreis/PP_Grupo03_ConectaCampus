@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
-import type { Reserva } from '../api/reservas.ts'
+import { obterRegrasDeAgenda, type RegrasDeAgenda, type Reserva } from '../api/reservas.ts'
 import Carregando from '../components/estados/Carregando.tsx'
 import EstadoVazio from '../components/estados/EstadoVazio.tsx'
 import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
@@ -19,6 +19,8 @@ function PaginaNovaReserva() {
   const [parametros] = useSearchParams()
   const espacoDaUrl = parametros.get(PARAMETRO_DO_ESPACO) ?? ''
   const { estado, recarregar } = useConsulta(() => listarEspacos({ apenasAtivos: true }), [])
+  const { estado: estadoDasRegras } = useConsulta(obterRegrasDeAgenda, [])
+  const regras = estadoDasRegras.tipo === 'sucesso' ? estadoDasRegras.dados : null
 
   function conteudo() {
     if (estado.tipo === 'carregando') {
@@ -37,7 +39,14 @@ function PaginaNovaReserva() {
         </EstadoVazio>
       )
     }
-    return <Solicitacao key={espacoDaUrl} espacos={estado.dados} espacoDaUrl={espacoDaUrl} />
+    return (
+      <Solicitacao
+        key={espacoDaUrl}
+        espacos={estado.dados}
+        espacoDaUrl={espacoDaUrl}
+        regras={regras}
+      />
+    )
   }
 
   return (
@@ -56,9 +65,10 @@ function PaginaNovaReserva() {
 type PropriedadesDaSolicitacao = {
   espacos: Espaco[]
   espacoDaUrl: string
+  regras: RegrasDeAgenda | null
 }
 
-function Solicitacao({ espacos, espacoDaUrl }: PropriedadesDaSolicitacao) {
+function Solicitacao({ espacos, espacoDaUrl, regras }: PropriedadesDaSolicitacao) {
   const [espacoEscolhido, setEspacoEscolhido] = useState(() =>
     espacos.some(({ id }) => String(id) === espacoDaUrl) ? espacoDaUrl : '',
   )
@@ -89,6 +99,7 @@ function Solicitacao({ espacos, espacoDaUrl }: PropriedadesDaSolicitacao) {
       espacos={espacos}
       espacoInicial={espacoEscolhido}
       focarAoAbrir={voltouDoResumo}
+      regras={regras}
       aoSolicitar={aoSolicitar}
     />
   )

@@ -54,6 +54,15 @@ export type SituacaoDeReserva = {
   rotulo: string
 }
 
+export type RegrasDeAgenda = {
+  horario_de_abertura: string
+  horario_de_fechamento: string
+  duracao_minima_em_minutos: number
+  duracao_maxima_em_minutos: number
+  antecedencia_maxima_em_dias: number
+  data_limite: string
+}
+
 export type RegistroDeSituacao = {
   situacao_anterior: string | null
   situacao_anterior_rotulo: string | null
@@ -103,4 +112,8 @@ export function alterarSituacaoReserva(id: number, dados: AlteracaoDeSituacao) {
 
 export function listarSituacoesDeReserva() {
   return requisitar<SituacaoDeReserva[]>('/reservas/situacoes/')
+}
+
+export function obterRegrasDeAgenda() {
+  return requisitar<RegrasDeAgenda>('/reservas/regras-de-agenda/')
 }

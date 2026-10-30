@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Espaco } from '../../api/espacos.ts'
-import { solicitarReserva, type DadosDaReserva, type Reserva } from '../../api/reservas.ts'
+import {
+  solicitarReserva,
+  type DadosDaReserva,
+  type RegrasDeAgenda,
+  type Reserva,
+} from '../../api/reservas.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
+import { descreverRegrasDeAgenda } from './dicaDaAgenda.ts'
 import estilos from './FormularioDeReserva.module.css'
 
 type PropriedadesDoFormulario = {
   espacos: Espaco[]
   espacoInicial: string
   focarAoAbrir: boolean
+  regras: RegrasDeAgenda | null
   aoSolicitar: (reserva: Reserva) => void
 }
 
@@ -19,6 +26,7 @@ function FormularioDeReserva({
   espacos,
   espacoInicial,
   focarAoAbrir,
+  regras,
   aoSolicitar,
 }: PropriedadesDoFormulario) {
   const [dados, setDados] = useState<DadosDaReserva>({
@@ -77,6 +85,7 @@ function FormularioDeReserva({
           </select>
         )}
       </Campo>
+      {regras && <p className={estilos.dicaDaAgenda}>{descreverRegrasDeAgenda(regras)}</p>}
       <Campo rotulo="Data" erro={errosDosCampos.data}>
         {(controle) => (
           <input

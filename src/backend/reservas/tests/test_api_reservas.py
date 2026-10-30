@@ -136,12 +136,26 @@ def test_campos_ausentes_respondem_400_com_cada_campo(cliente):
         ({"hora_inicio": "11:00", "hora_fim": "10:00"}, "HORARIO_INVALIDO", "hora_fim"),
         ({"data": _ontem().isoformat()}, "DATA_RETROATIVA", "data"),
         ({"finalidade": "   "}, "CAMPO_OBRIGATORIO_AUSENTE", "finalidade"),
+        (
+            {"hora_inicio": "06:00", "hora_fim": "07:00"},
+            "FORA_DO_HORARIO_DE_FUNCIONAMENTO",
+            "hora_inicio",
+        ),
+        ({"hora_inicio": "10:00", "hora_fim": "14:00"}, "DURACAO_INVALIDA", "hora_fim"),
+        (
+            {"data": (timezone.localdate() + timedelta(days=40)).isoformat()},
+            "ANTECEDENCIA_EXCEDIDA",
+            "data",
+        ),
     ],
     ids=[
         "data-inexistente",
         "fim-antes-do-inicio",
         "data-retroativa",
         "sem-finalidade",
+        "antes-da-abertura",
+        "duracao-acima-da-maxima",
+        "alem-da-antecedencia",
     ],
 )
 def test_dado_invalido_responde_400_sem_salvar(

@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -9,6 +10,7 @@ from reservas.api.serializers import (
     AlteracaoDeSituacaoSerializer,
     FiltrosReservasSerializer,
     RegistroDeSituacaoSaidaSerializer,
+    RegrasDeAgendaSaidaSerializer,
     ReservaEntradaSerializer,
     ReservaSaidaSerializer,
     SituacaoDeReservaSaidaSerializer,
@@ -89,6 +91,16 @@ class SituacoesDeReservaView(APIView):
         return resposta_sucesso(
             "Situações de reserva disponíveis.",
             SituacaoDeReservaSaidaSerializer(list(SituacaoReserva), many=True).data,
+        )
+
+
+class RegrasDeAgendaView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return resposta_sucesso(
+            "Regras de agenda.",
+            RegrasDeAgendaSaidaSerializer.vigentes(timezone.now()).data,
         )
 
 
