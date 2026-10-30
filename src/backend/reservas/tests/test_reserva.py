@@ -9,6 +9,8 @@ from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
     DataRetroativa,
+    DuracaoInvalida,
+    ForaDoHorarioDeFuncionamento,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
     ReservaDesatualizada,
@@ -209,6 +211,57 @@ def test_reconstituir_reserva_com_data_passada_e_aceito():
     # Assert
     assert reserva.intervalo == ontem
     assert reserva.situacao is S.CONCLUIDA
+
+
+def test_solicitar_fora_do_horario_de_funcionamento_e_recusado():
+    # Act
+    with pytest.raises(ForaDoHorarioDeFuncionamento) as erro:
+        _solicitar(hora_inicio=time(22, 0), hora_fim=time(23, 0))
+
+    # Assert
+    assert erro.value.campo == "hora_fim"
+
+
+def test_data_retroativa_e_checada_antes_do_horario_de_funcionamento():
+    # Act / Assert
+    with pytest.raises(DataRetroativa):
+        _solicitar(
+            data=AGORA.date() - timedelta(days=1),
+            hora_inicio=time(5, 0),
+            hora_fim=time(6, 0),
+        )
+
+
+def test_horario_de_funcionamento_e_checado_antes_da_duracao():
+    # Act / Assert
+    with pytest.raises(ForaDoHorarioDeFuncionamento):
+        _solicitar(hora_inicio=time(5, 0), hora_fim=time(9, 0))
+
+
+def test_duracao_e_checada_antes_da_antecedencia():
+    # Act / Assert
+    with pytest.raises(DuracaoInvalida):
+        _solicitar(
+            data=AGORA.date() + timedelta(days=31),
+            hora_inicio=time(10, 0),
+            hora_fim=time(14, 0),
+        )
+
+
+def test_reconstituir_reserva_fora_das_regras_de_agenda_e_aceito():
+    # Arrange
+    tarde_da_noite_e_distante = IntervaloDeHorario(
+        data=AGORA.date() + timedelta(days=60),
+        hora_inicio=time(23, 30),
+        hora_fim=time(23, 59),
+    )
+
+    # Act
+    reserva = _reconstituir(intervalo=tarde_da_noite_e_distante)
+
+    # Assert
+    assert reserva.intervalo == tarde_da_noite_e_distante
+    assert reserva.situacao is S.SOLICITADA
 
 
 def test_reconstituir_aceita_situacao_e_motivo_como_texto():

@@ -33,6 +33,7 @@
 | `reservas:lista` | `/api/reservas/` | GET | — | 401 | 200 | 200 | 200 |
 | `reservas:lista` | `/api/reservas/` | POST | nova reserva (14:00–15:00) | 401 | 201 | 201 | 201 |
 | `reservas:situacoes` | `/api/reservas/situacoes/` | GET | — | 200 | 200 | 200 | 200 |
+| `reservas:regras_de_agenda` | `/api/reservas/regras-de-agenda/` | GET | — | 200 | 200 | 200 | 200 |
 | `reservas:detalhe` | `/api/reservas/{id}/` | GET | — | 401 | 200 | 404 | 200 |
 | `reservas:detalhe` | `/api/reservas/{id}/` | DELETE | — | 401 | 405 | 405 | 405 |
 | `reservas:situacao` | `/api/reservas/{id}/situacao/` | PATCH | `CONFIRMADA` | 401 | 403 | 404 | 200 |
@@ -42,7 +43,7 @@
 
 ## Leitura
 
-- **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`) e login, refresh e cadastro.
+- **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`, `reservas:regras_de_agenda`) e login, refresh e cadastro.
 - **403 x 404:** o solicitante recebe 403 quando a ação é proibida ao perfil numa reserva que ele vê (confirmar a própria), e 404 numa reserva de outra pessoa, para não revelar que ela existe.
 - **Sem exclusão:** `DELETE` não existe em espaços, em reservas nem no histórico (405 para quem está logado; o anônimo recebe 401 antes, porque a autenticação vem primeiro). Espaço é desativado, reserva muda de situação e o histórico só recebe registros novos (RES-07); nada é excluído.
 - **Gestão de espaços (ESP-04):** cadastrar, editar (`PATCH`), desativar e reativar são só do gestor; os dois solicitantes recebem 403. As rotas de ação só aceitam `POST`: um `GET` nelas responde 405 a quem está logado, porque a restrição ao gestor vale só para o método implementado.

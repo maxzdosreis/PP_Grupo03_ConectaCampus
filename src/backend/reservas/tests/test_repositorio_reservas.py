@@ -321,7 +321,14 @@ def test_salvar_reserva_cancelada_sobreposta_a_uma_solicitada_salva_normalmente(
 def test_reserva_no_fim_do_dia_volta_na_mesma_data(repositorio):
     # Arrange
     salva = repositorio.salvar(
-        _solicitar(hora_inicio=time(23, 30), hora_fim=time(23, 59))
+        Reserva(
+            espaco_id=3,
+            solicitante=ANA,
+            intervalo=IntervaloDeHorario(DATA, time(23, 30), time(23, 59)),
+            finalidade="Treino do time de vôlei",
+            situacao=S.SOLICITADA,
+            criada_em=AGORA,
+        )
     )
 
     # Act

@@ -4,7 +4,12 @@ import { Route, Routes } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
-import { solicitarReserva, type Reserva } from '../api/reservas.ts'
+import {
+  obterRegrasDeAgenda,
+  solicitarReserva,
+  type RegrasDeAgenda,
+  type Reserva,
+} from '../api/reservas.ts'
 import type { RespostaSucesso } from '../api/tipos.ts'
 import { renderizarComProvedores, valorDaSessao } from '../testes/renderizar.tsx'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
@@ -16,7 +21,20 @@ vi.mock('../api/espacos.ts', () => ({
 
 vi.mock('../api/reservas.ts', () => ({
   solicitarReserva: vi.fn(),
+  obterRegrasDeAgenda: vi.fn(),
 }))
+
+// Valores fictícios de propósito: os limites reais só existem no backend.
+const REGRAS: RegrasDeAgenda = {
+  horario_de_abertura: '08:00',
+  horario_de_fechamento: '20:00',
+  duracao_minima_em_minutos: 60,
+  duracao_maxima_em_minutos: 90,
+  antecedencia_maxima_em_dias: 15,
+  data_limite: '2026-12-01',
+}
+
+const DICA_DA_AGENDA = 'Funcionamento das 08:00 às 20:00 · duração de 1 h a 1 h 30 min · até 01/12/2026.'
 
 const GINASIO: Espaco = {
   id: 1,
@@ -99,10 +117,61 @@ describe('PaginaNovaReserva', () => {
   beforeEach(() => {
     vi.mocked(listarEspacos).mockReset()
     vi.mocked(solicitarReserva).mockReset()
+    vi.mocked(obterRegrasDeAgenda).mockReset()
     vi.mocked(listarEspacos).mockResolvedValue({
       mensagem: '2 espaços encontrados.',
       dados: [GINASIO, QUADRA],
     })
+    vi.mocked(obterRegrasDeAgenda).mockResolvedValue({ mensagem: 'Regras de agenda.', dados: REGRAS })
+  })
+
+  it('mostra a dica da agenda com os valores vindos da API, sem limites nos campos', async () => {
+    renderizar()
+
+    expect(await screen.findByText(DICA_DA_AGENDA)).toBeTruthy()
+    for (const rotulo of ['Data', 'Início', 'Término']) {
+      const campo = controle(rotulo)
+      expect(campo.getAttribute('min')).toBeNull()
+      expect(campo.getAttribute('max')).toBeNull()
+      expect(campo.getAttribute('step')).toBeNull()
+    }
+  })
+
+  it('sem as regras de agenda, o formulário funciona sem a dica', async () => {
+    vi.mocked(obterRegrasDeAgenda).mockRejectedValue(
+      new ErroDaApi(0, 'SEM_CONEXAO', 'Não foi possível conectar ao servidor.'),
+    )
+    vi.mocked(solicitarReserva).mockResolvedValue({ mensagem: MENSAGEM_DE_SUCESSO, dados: RESERVA })
+    renderizar()
+    await preencherFormulario()
+
+    await enviarFormulario()
+
+    expect(await screen.findByRole('region', { name: 'Reserva solicitada' })).toBeTruthy()
+    expect(screen.queryByText(/^Funcionamento das/)).toBeNull()
+    expect(screen.queryByText('Não foi possível conectar ao servidor.')).toBeNull()
+  })
+
+  it.each([
+    ['FORA_DO_HORARIO_DE_FUNCIONAMENTO', 'hora_inicio', 'Início'],
+    ['DURACAO_INVALIDA', 'hora_fim', 'Término'],
+    ['ANTECEDENCIA_EXCEDIDA', 'data', 'Data'],
+  ])('o erro %s da agenda aparece embaixo do campo do domínio', async (codigo, campo, rotulo) => {
+    const mensagem = `Mensagem do domínio para ${codigo}.`
+    vi.mocked(solicitarReserva).mockRejectedValue(
+      new ErroDaApi(400, codigo, mensagem, { [campo]: [mensagem] }),
+    )
+    renderizar()
+    await preencherFormulario()
+
+    await enviarFormulario()
+
+    const controleComErro = controle(rotulo)
+    await waitFor(() => expect(document.activeElement).toBe(controleComErro))
+    expect(controleComErro.getAttribute('aria-invalid')).toBe('true')
+    const idDoErro = controleComErro.getAttribute('aria-describedby') ?? ''
+    expect(document.getElementById(idDoErro)?.textContent).toContain(mensagem)
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 
   it('mostra quem está solicitando, com o nome e a matrícula do usuário logado', async () => {

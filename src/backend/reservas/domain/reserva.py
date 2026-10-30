@@ -14,6 +14,7 @@ from reservas.domain.excecoes import (
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.momento import exigir_fuso
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
+from reservas.domain.regras_de_agenda import garantir_regras_de_agenda
 from reservas.domain.situacao import (
     DESTINOS_DE_TRANSICAO,
     SITUACOES_QUE_EXIGEM_MOTIVO,
@@ -72,6 +73,7 @@ class Reserva:
         )
         if intervalo.inicio() <= agora:
             raise DataRetroativa()
+        garantir_regras_de_agenda(intervalo, agora)
         reserva = cls(
             espaco_id=espaco_id,
             solicitante=solicitante,
