@@ -2,7 +2,6 @@ import pytest
 from django.db import IntegrityError, connection
 from django.test.utils import CaptureQueriesContext
 
-from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
     EspacoDesatualizado,
     EspacoNaoEncontrado,
@@ -11,9 +10,12 @@ from espacos.domain.excecoes import (
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.models import EspacoEsportivoModel
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
-from espacos.tests.fakes import RepositorioEspacosEmMemoria
-
-ID_INEXISTENTE = 9999
+from espacos.tests.fakes import (
+    ID_INEXISTENTE,
+    RepositorioEspacosEmMemoria,
+    nomes,
+    novo_espaco,
+)
 
 
 @pytest.fixture(
@@ -28,34 +30,22 @@ def repositorio(request):
     return request.param()
 
 
-def _novo_espaco(**sobrescritas):
-    dados = {
-        "nome": "Quadra Central",
-        "tipo": TipoEspaco.QUADRA_POLIESPORTIVA,
-        "capacidade": 20,
-    }
-    dados.update(sobrescritas)
-    return EspacoEsportivo(**dados)
-
-
 def _salvar_espacos_para_listagem(repositorio):
-    repositorio.salvar(_novo_espaco(nome="Quadra Coberta"))
     repositorio.salvar(
-        _novo_espaco(nome="Ginasio Antigo", tipo=TipoEspaco.GINASIO, ativo=False)
+        novo_espaco(nome="Quadra Coberta", tipo=TipoEspaco.QUADRA_POLIESPORTIVA)
     )
     repositorio.salvar(
-        _novo_espaco(nome="Campo Norte", tipo=TipoEspaco.CAMPO_DE_FUTEBOL)
+        novo_espaco(nome="Ginasio Antigo", tipo=TipoEspaco.GINASIO, ativo=False)
     )
-    repositorio.salvar(_novo_espaco(nome="Ginasio Novo", tipo=TipoEspaco.GINASIO))
-
-
-def _nomes(espacos):
-    return [espaco.nome for espaco in espacos]
+    repositorio.salvar(
+        novo_espaco(nome="Campo Norte", tipo=TipoEspaco.CAMPO_DE_FUTEBOL)
+    )
+    repositorio.salvar(novo_espaco(nome="Ginasio Novo", tipo=TipoEspaco.GINASIO))
 
 
 def test_salvar_espaco_novo_atribui_id_e_permite_obter_igual(repositorio):
     # Act
-    salvo = repositorio.salvar(_novo_espaco(tipo=TipoEspaco.GINASIO))
+    salvo = repositorio.salvar(novo_espaco(tipo=TipoEspaco.GINASIO))
 
     # Assert
     obtido = repositorio.obter_por_id(salvo.id)
@@ -69,7 +59,7 @@ def test_salvar_espaco_novo_atribui_id_e_permite_obter_igual(repositorio):
 
 def test_salvar_espaco_existente_atualiza_sem_criar_outro(repositorio):
     # Arrange
-    salvo = repositorio.salvar(_novo_espaco())
+    salvo = repositorio.salvar(novo_espaco())
     alterado = repositorio.obter_por_id(salvo.id)
     alterado.alterar_dados(nome="Quadra Reformada", capacidade=30)
     alterado.desativar()
@@ -90,7 +80,7 @@ def test_salvar_espaco_existente_atualiza_sem_criar_outro(repositorio):
 
 def test_salvar_espaco_existente_mantendo_o_proprio_nome_nao_conflita(repositorio):
     # Arrange
-    salvo = repositorio.salvar(_novo_espaco())
+    salvo = repositorio.salvar(novo_espaco())
     alterado = repositorio.obter_por_id(salvo.id)
     alterado.alterar_dados(nome="Quadra Central", capacidade=40)
 
@@ -105,7 +95,7 @@ def test_salvar_espaco_existente_mantendo_o_proprio_nome_nao_conflita(repositori
 def test_salvar_com_id_inexistente_lanca_espaco_nao_encontrado(repositorio):
     # Act
     with pytest.raises(EspacoNaoEncontrado) as erro:
-        repositorio.salvar(_novo_espaco(id=ID_INEXISTENTE))
+        repositorio.salvar(novo_espaco(id=ID_INEXISTENTE))
 
     # Assert
     assert erro.value.espaco_id == ID_INEXISTENTE
@@ -124,20 +114,20 @@ def test_salvar_nome_repetido_com_caixa_diferente_lanca_nome_ja_cadastrado(
     repositorio,
 ):
     # Arrange
-    repositorio.salvar(_novo_espaco(nome="Ginásio A"))
+    repositorio.salvar(novo_espaco(nome="Ginásio A"))
 
     # Act
     with pytest.raises(NomeDeEspacoJaCadastrado):
-        repositorio.salvar(_novo_espaco(nome="ginásio a"))
+        repositorio.salvar(novo_espaco(nome="ginásio a"))
 
     # Assert
-    assert _nomes(repositorio.listar()) == ["Ginásio A"]
+    assert nomes(repositorio.listar()) == ["Ginásio A"]
 
 
 def test_renomear_para_o_nome_de_outro_espaco_lanca_nome_ja_cadastrado(repositorio):
     # Arrange
-    repositorio.salvar(_novo_espaco(nome="Ginásio A"))
-    outro = repositorio.salvar(_novo_espaco(nome="Ginásio B"))
+    repositorio.salvar(novo_espaco(nome="Ginásio A"))
+    outro = repositorio.salvar(novo_espaco(nome="Ginásio B"))
     renomeado = repositorio.obter_por_id(outro.id)
     renomeado.alterar_dados(nome="GINÁSIO A")
 
@@ -150,7 +140,7 @@ def test_renomear_para_o_nome_de_outro_espaco_lanca_nome_ja_cadastrado(repositor
 
 
 def _duas_leituras(repositorio):
-    espaco_id = repositorio.salvar(_novo_espaco()).id
+    espaco_id = repositorio.salvar(novo_espaco()).id
     return repositorio.obter_por_id(espaco_id), repositorio.obter_por_id(espaco_id)
 
 
@@ -190,7 +180,7 @@ def test_edicao_de_outro_campo_sobre_leitura_desatualizada_nao_apaga_a_primeira(
 
 def test_salvar_de_novo_o_mesmo_objeto_nao_acusa_desatualizado(repositorio):
     # Arrange
-    espaco = repositorio.obter_por_id(repositorio.salvar(_novo_espaco()).id)
+    espaco = repositorio.obter_por_id(repositorio.salvar(novo_espaco()).id)
     espaco.alterar_dados(capacidade=30)
     repositorio.salvar(espaco)
     espaco.alterar_dados(capacidade=40)
@@ -206,7 +196,7 @@ def test_salvar_de_novo_o_mesmo_objeto_nao_acusa_desatualizado(repositorio):
 def test_salvar_espaco_existente_bloqueia_a_linha():
     # Arrange
     repositorio = RepositorioEspacosDjango()
-    espaco = repositorio.obter_por_id(repositorio.salvar(_novo_espaco()).id)
+    espaco = repositorio.obter_por_id(repositorio.salvar(novo_espaco()).id)
     espaco.alterar_dados(capacidade=30)
 
     # Act
@@ -229,7 +219,7 @@ def test_listar_ordena_por_nome(repositorio):
     espacos = repositorio.listar()
 
     # Assert
-    assert _nomes(espacos) == [
+    assert nomes(espacos) == [
         "Campo Norte",
         "Ginasio Antigo",
         "Ginasio Novo",
@@ -255,17 +245,28 @@ def test_listar_aplica_os_filtros(repositorio, filtros, nomes_esperados):
     espacos = repositorio.listar(**filtros)
 
     # Assert
-    assert _nomes(espacos) == nomes_esperados
+    assert nomes(espacos) == nomes_esperados
 
 
-def test_alterar_entidade_devolvida_nao_altera_o_repositorio(repositorio):
+@pytest.mark.parametrize(
+    "alterar_fora_do_repositorio",
+    [
+        lambda repositorio, salvo: repositorio.obter_por_id(salvo.id).alterar_dados(
+            capacidade=99
+        ),
+        lambda repositorio, salvo: repositorio.listar()[0].desativar(),
+        lambda repositorio, salvo: salvo.alterar_dados(nome="Nome alterado fora"),
+    ],
+    ids=["obtida", "listada", "devolvida-ao-salvar"],
+)
+def test_alterar_entidade_devolvida_nao_altera_o_repositorio(
+    repositorio, alterar_fora_do_repositorio
+):
     # Arrange
-    salvo = repositorio.salvar(_novo_espaco())
+    salvo = repositorio.salvar(novo_espaco())
 
     # Act
-    repositorio.obter_por_id(salvo.id).alterar_dados(capacidade=99)
-    repositorio.listar()[0].desativar()
-    salvo.alterar_dados(nome="Nome alterado fora do repositório")
+    alterar_fora_do_repositorio(repositorio, salvo)
 
     # Assert
     guardado = repositorio.obter_por_id(salvo.id)
@@ -276,23 +277,37 @@ def test_alterar_entidade_devolvida_nao_altera_o_repositorio(repositorio):
     )
 
 
-def test_existe_com_nome_nao_diferencia_caixa(repositorio):
+@pytest.mark.parametrize(
+    ("nome", "existe"),
+    [("GINÁSIO a", True), ("Ginásio B", False)],
+    ids=["mesmo-nome-com-outra-caixa", "nome-de-nenhum-espaco"],
+)
+def test_existe_com_nome_nao_diferencia_caixa(repositorio, nome, existe):
     # Arrange
-    repositorio.salvar(_novo_espaco(nome="Ginásio A"))
+    repositorio.salvar(novo_espaco(nome="Ginásio A"))
 
-    # Act / Assert
-    assert repositorio.existe_com_nome("GINÁSIO a") is True
-    assert repositorio.existe_com_nome("Ginásio B") is False
+    # Act
+    resultado = repositorio.existe_com_nome(nome)
+
+    # Assert
+    assert resultado is existe
 
 
-def test_existe_com_nome_ignora_apenas_o_id_informado(repositorio):
+@pytest.mark.parametrize(
+    ("ignorado", "existe"),
+    [("o-dono-do-nome", False), ("outro-espaco", True)],
+)
+def test_existe_com_nome_ignora_apenas_o_id_informado(repositorio, ignorado, existe):
     # Arrange
-    espaco = repositorio.salvar(_novo_espaco(nome="Ginásio A"))
-    outro = repositorio.salvar(_novo_espaco(nome="Ginásio B"))
+    dono = repositorio.salvar(novo_espaco(nome="Ginásio A"))
+    outro = repositorio.salvar(novo_espaco(nome="Ginásio B"))
+    ignorar_id = {"o-dono-do-nome": dono.id, "outro-espaco": outro.id}[ignorado]
 
-    # Act / Assert
-    assert repositorio.existe_com_nome("ginásio a", ignorar_id=espaco.id) is False
-    assert repositorio.existe_com_nome("ginásio a", ignorar_id=outro.id) is True
+    # Act
+    resultado = repositorio.existe_com_nome("ginásio a", ignorar_id=ignorar_id)
+
+    # Assert
+    assert resultado is existe
 
 
 @pytest.mark.django_db
@@ -317,7 +332,7 @@ def test_banco_recusa_dados_que_a_entidade_nao_aceitaria(campos, constraint):
 @pytest.mark.django_db
 def test_salvar_repassa_integrity_error_que_nao_e_de_nome_repetido():
     # Arrange
-    espaco = _novo_espaco()
+    espaco = novo_espaco()
     espaco._capacidade = 0
 
     # Act / Assert

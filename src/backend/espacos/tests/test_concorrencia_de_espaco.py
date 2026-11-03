@@ -8,6 +8,7 @@ from espacos.domain.espaco_esportivo import EspacoEsportivo, EstadoDoEspaco
 from espacos.domain.excecoes import EspacoDesatualizado
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
+from espacos.tests.fakes import novo_espaco
 
 ESPERA_MAXIMA_S = 10
 
@@ -44,13 +45,7 @@ def _executar_em_paralelo(pedidos):
 
 
 def _cadastrar():
-    return (
-        RepositorioEspacosDjango()
-        .salvar(
-            EspacoEsportivo(nome="Ginásio A", tipo=TipoEspaco.GINASIO, capacidade=20)
-        )
-        .id
-    )
+    return RepositorioEspacosDjango().salvar(novo_espaco(nome="Ginásio A")).id
 
 
 def _vencedor(resultados):

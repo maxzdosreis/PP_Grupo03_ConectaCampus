@@ -1,7 +1,7 @@
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-extend-exclude = ["migrations"]
+extend-exclude = ["migrations", "mutants"]
 
 [tool.ruff.lint]
 # E/W: pycodestyle (PEP 8)    F: pyflakes             I: ordem dos imports
@@ -44,6 +44,21 @@ omit = [
 
 [tool.coverage.report]
 show_missing = true
+fail_under = 95
+
+[tool.mutmut]
+source_paths = ["espacos/"]
+only_mutate = ["espacos/domain/*", "espacos/application/*"]
+also_copy = [
+    "config/",
+    "compartilhado/",
+    "reservas/",
+    "contas/",
+    "exemplos/",
+    "conftest.py",
+    "manage.py",
+]
+pytest_add_cli_args_test_selection = ["espacos/tests/", "-m", "not django_db"]
 
 [tool.importlinter]
 root_packages = [

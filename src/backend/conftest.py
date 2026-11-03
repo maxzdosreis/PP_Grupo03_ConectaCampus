@@ -1,9 +1,16 @@
+import os
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from hypothesis import settings
 from rest_framework.test import APIClient
 
 SENHA_DE_TESTE = "senha-de-teste-123"
+
+settings.register_profile("rapido", max_examples=50, derandomize=True, deadline=None)
+settings.register_profile("exaustivo", max_examples=2000, deadline=None)
+settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "rapido"))
 
 
 def _cliente_de(usuario):

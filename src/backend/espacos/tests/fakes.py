@@ -7,13 +7,33 @@ from espacos.domain.excecoes import (
 )
 from espacos.domain.tipo_espaco import TipoEspaco
 
+ID_INEXISTENTE = 9999
+
+
+def novo_espaco(**sobrescritas) -> EspacoEsportivo:
+    dados = {"nome": "Quadra Central", "tipo": TipoEspaco.GINASIO, "capacidade": 20}
+    dados.update(sobrescritas)
+    return EspacoEsportivo(**dados)
+
+
+def dados_validos(**sobrescritas) -> dict:
+    dados = {"nome": "Ginásio A", "tipo": "GINASIO", "capacidade": 50}
+    dados.update(sobrescritas)
+    return dados
+
+
+def nomes(espacos: list[EspacoEsportivo]) -> list[str]:
+    return [espaco.nome for espaco in espacos]
+
 
 class RepositorioEspacosEmMemoria(RepositorioEspacos):
     def __init__(self) -> None:
         self._espacos: dict[int, EspacoEsportivo] = {}
         self._proximo_id = 1
+        self.chamadas_de_salvar = 0
 
     def salvar(self, espaco: EspacoEsportivo) -> EspacoEsportivo:
+        self.chamadas_de_salvar += 1
         if espaco.id is not None and espaco.id not in self._espacos:
             raise EspacoNaoEncontrado(espaco.id)
         if (

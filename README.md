@@ -665,10 +665,38 @@ Testes (pytest):
 docker compose exec backend pytest
 ```
 
-Cobertura de testes dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`:
+Cobertura de testes (linhas e ramos) dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`. Falha abaixo de 95% no total (`fail_under` em `pyproject.toml`; proposta de cobertura-alvo ainda pendente de decisão do grupo):
 
 ```bash
 docker compose exec backend pytest --cov
+```
+
+Cobertura por camada: exige 100% de linhas e ramos no domínio e na aplicação de `espacos` (troque o `--include` para ver outra camada, por exemplo `espacos/infrastructure/*`):
+
+```bash
+docker compose exec backend sh -c "pytest --cov && coverage report --include='espacos/domain/*,espacos/application/*' --fail-under=100"
+```
+
+Testes por propriedade (Hypothesis, em `espacos/tests/test_propriedades_do_espaco.py`). No dia a dia rodam com o perfil `rapido` (50 exemplos por propriedade, sempre os mesmos). Antes da entrega, rode o perfil `exaustivo` (2.000 exemplos aleatórios por propriedade):
+
+```bash
+docker compose exec -e HYPOTHESIS_PROFILE=exaustivo backend pytest espacos/tests/test_propriedades_do_espaco.py --durations=0
+```
+
+Testes de mutação (mutmut), só em `espacos/domain` e `espacos/application`. O mutmut altera o código de propósito (troca `!=` por `==`, apaga argumentos, muda textos) e confere se algum teste falha. Leva alguns minutos, por isso fica fora da verificação de cada PR; rode antes da entrega. Os mutantes que sobrevivem e são equivalentes estão justificados em `docs/fontes/testes_de_espacos.md`:
+
+```bash
+docker compose exec backend sh -c "rm -rf mutants && mutmut run"
+```
+
+```bash
+docker compose exec backend mutmut results
+```
+
+Para ver a mudança de um mutante (o nome sai do `mutmut results`):
+
+```bash
+docker compose exec backend mutmut show "espacos.domain.espaco_esportivo.xǁEspacoEsportivoǁ__eq____mutmut_2"
 ```
 
 Só a matriz de acesso (quem pode chamar cada rota da API, com login JWT de verdade, em `src/backend/config/tests/test_matriz_de_acesso.py`) e os outros testes de segurança de `config/`:
@@ -692,7 +720,7 @@ docker compose exec backend lint-imports
 Verificação completa, antes de cada PR:
 
 ```bash
-docker compose exec backend sh -c "ruff check . && ruff format --check . && lint-imports && pytest"
+docker compose exec backend sh -c "ruff check . && ruff format --check . && lint-imports && pytest --cov"
 ```
 
 Ao mudar o `requirements.txt` ou o `requirements-dev.txt`, reconstrua a imagem do backend:

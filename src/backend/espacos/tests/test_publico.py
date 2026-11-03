@@ -3,20 +3,15 @@ from dataclasses import FrozenInstanceError
 import pytest
 
 from espacos import publico
-from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import EspacoInativo, EspacoNaoEncontrado
-from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
+from espacos.tests.fakes import ID_INEXISTENTE, novo_espaco
 
 pytestmark = pytest.mark.django_db
 
-ID_INEXISTENTE = 9999
-
 
 def _salvar(nome="Ginásio A", *, ativo=True):
-    return RepositorioEspacosDjango().salvar(
-        EspacoEsportivo(nome=nome, tipo=TipoEspaco.GINASIO, capacidade=10, ativo=ativo)
-    )
+    return RepositorioEspacosDjango().salvar(novo_espaco(nome=nome, ativo=ativo))
 
 
 def test_verificar_espaco_disponivel_devolve_dto_com_id_e_nome():

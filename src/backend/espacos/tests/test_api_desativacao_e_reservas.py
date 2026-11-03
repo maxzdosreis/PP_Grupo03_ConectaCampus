@@ -45,13 +45,15 @@ def test_espaco_desativado_recusa_nova_reserva_com_409(
     }
 
 
-def test_reserva_existente_continua_valendo_depois_de_desativar(
+def _reserva_de_amanha(cliente, espaco_id):
+    return _solicitar(cliente, espaco_id, "10:00", "11:00").data["dados"]["id"]
+
+
+def test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar(
     cliente_gestor, cliente_solicitante, espaco_id
 ):
     # Arrange
-    reserva_id = _solicitar(cliente_solicitante, espaco_id, "10:00", "11:00").data[
-        "dados"
-    ]["id"]
+    reserva_id = _reserva_de_amanha(cliente_solicitante, espaco_id)
 
     # Act
     cliente_gestor.post(reverse("espacos:desativar", args=[espaco_id]))
@@ -60,12 +62,25 @@ def test_reserva_existente_continua_valendo_depois_de_desativar(
     reservas = cliente_gestor.get(URL_RESERVAS, {"espaco": espaco_id}).data["dados"]
     assert [reserva["id"] for reserva in reservas] == [reserva_id]
     assert _situacoes_das_acoes(reservas[0]) == ["CONFIRMADA", "RECUSADA", "CANCELADA"]
-    confirmacao = cliente_gestor.patch(
+
+
+def test_reserva_existente_pode_ser_confirmada_depois_de_desativar(
+    cliente_gestor, cliente_solicitante, espaco_id
+):
+    # Arrange
+    reserva_id = _reserva_de_amanha(cliente_solicitante, espaco_id)
+    cliente_gestor.post(reverse("espacos:desativar", args=[espaco_id]))
+
+    # Act
+    resposta = cliente_gestor.patch(
         reverse("reservas:situacao", args=[reserva_id]),
         {"situacao": "CONFIRMADA"},
         format="json",
     )
-    assert confirmacao.status_code == 200
+
+    # Assert
+    assert resposta.status_code == 200
+    assert resposta.data["dados"]["situacao"] == "CONFIRMADA"
 
 
 def test_reativar_volta_a_aceitar_reservas(
