@@ -41,7 +41,7 @@ Caminhos de código relativos a `src/backend/espacos/`; testes em `src/backend/e
 | Estado preservado depois de uma operação recusada | nada muda | `test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`, `::test_desativar_espaco_ja_inativo_e_recusado`, `::test_ativar_espaco_ja_ativo_e_recusado`; `test_propriedades_do_espaco.py::TestMaquinaDoEspaco` (toda recusa compara o estado antes e depois); `test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [x]`; `test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`, `::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `test_repositorio_espacos.py::test_edicao_sobre_leitura_anterior_a_uma_desativacao_e_recusada` |
 | Consulta pelo critério 1 e pelo critério 2 | só os registros correspondentes; inalterado | `test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string [apenas-ativos, por-tipo, ativos-e-tipo]`, `::test_listar_com_tipo_desconhecido_no_filtro_responde_400`; `test_repositorio_espacos.py::test_listar_aplica_os_filtros [x]`; `test_casos_de_uso.py::test_listar_repassa_os_filtros_ao_repositorio [x]` |
 
-Os cenários de solicitação e de transição de situação da matriz são de `reservas` e ficam fora deste catálogo.
+Os cenários de solicitação e de transição de situação da matriz são de `reservas` e estão em `testes_de_reservas.md`.
 
 ## 3. Mutação: resultado e mutantes equivalentes
 

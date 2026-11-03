@@ -6,18 +6,14 @@ from django.db import connection
 from django.utils import timezone
 
 from reservas.application.casos_de_uso import AlterarSituacaoReserva
-from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import ReservaDesatualizada
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+from reservas.tests.fakes import ANA, ATOR_ANA, GESTOR
 from reservas.tests.historico import verificar_historico_coerente
 
 S = SituacaoReserva
-ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
-DONA = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 ESPERA_MAXIMA_S = 10
 
 
@@ -77,7 +73,7 @@ def test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente():
         reserva_id,
         [
             ("gestor", GESTOR, S.CONFIRMADA, None),
-            ("dona", DONA, S.CANCELADA, "Não poderei comparecer"),
+            ("dona", ATOR_ANA, S.CANCELADA, "Não poderei comparecer"),
         ],
     )
 

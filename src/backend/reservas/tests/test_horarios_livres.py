@@ -1,30 +1,22 @@
 from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
 import pytest
 
 from reservas.domain.excecoes import AntecedenciaExcedida, DataRetroativa
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO
 from reservas.domain.regras_de_agenda import (
-    data_limite_para_reservar,
     garantir_data_reservavel,
     horarios_livres,
     motivo_de_indisponibilidade,
 )
+from reservas.tests.fakes import AGORA, UTC, exatamente, fuso_do_processo, intervalo
 
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-UTC = ZoneInfo("UTC")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 HOJE = AGORA.date()
 AMANHA = HOJE + timedelta(days=1)
 
 
 def _ocupado(inicio, fim, data=AMANHA):
-    return IntervaloDeHorario(
-        data=data,
-        hora_inicio=time.fromisoformat(inicio),
-        hora_fim=time.fromisoformat(fim),
-    )
+    return intervalo(inicio, fim, data)
 
 
 def _como_texto(livres):
@@ -32,7 +24,7 @@ def _como_texto(livres):
 
 
 def _agora_hoje(hora):
-    return datetime.combine(HOJE, time.fromisoformat(hora), tzinfo=SAO_PAULO)
+    return datetime.combine(HOJE, time.fromisoformat(hora), tzinfo=FUSO_HORARIO)
 
 
 @pytest.mark.parametrize(
@@ -94,23 +86,30 @@ def test_janela_de_30_minutos_entre_dois_ocupados_aparece():
 
 
 @pytest.mark.parametrize(
-    ("agora", "primeira"),
+    ("agora", "inicio"),
     [
-        ("15:37", "15:40–22:00"),
-        ("15:37:59", "15:40–22:00"),
-        ("15:40", "15:45–22:00"),
-        ("06:12", "07:00–22:00"),
+        ("15:37", time(15, 40)),
+        ("15:37:59", time(15, 40)),
+        ("15:37:59.500000", time(15, 40)),
+        ("15:40", time(15, 45)),
+        ("06:12", time(7, 0)),
     ],
-    ids=["15h37", "15h37-e-59s", "exatamente-15h40", "antes-da-abertura"],
+    ids=[
+        "15h37",
+        "15h37-e-59s",
+        "15h37-59s-e-meio",
+        "exatamente-15h40",
+        "antes-da-abertura",
+    ],
 )
-def test_hoje_a_primeira_janela_comeca_no_proximo_multiplo_de_5_minutos(
-    agora, primeira
-):
+def test_hoje_a_primeira_janela_comeca_no_proximo_multiplo_de_5_minutos(agora, inicio):
     # Act
     livres = horarios_livres([], data=HOJE, agora=_agora_hoje(agora))
 
     # Assert
-    assert _como_texto(livres) == [primeira]
+    assert [(livre.hora_inicio, livre.hora_fim) for livre in livres] == [
+        (inicio, time(22, 0))
+    ]
 
 
 def test_hoje_o_passado_e_recortado_antes_dos_ocupados():
@@ -130,6 +129,18 @@ def test_agora_em_utc_e_lido_no_fuso_de_sao_paulo():
 
     # Act
     livres = horarios_livres([], data=HOJE, agora=agora_em_utc)
+
+    # Assert
+    assert _como_texto(livres) == ["15:40–22:00"]
+
+
+def test_primeira_janela_de_hoje_nao_depende_do_fuso_do_processo():
+    # Arrange
+    agora_em_utc = _agora_hoje("15:37").astimezone(UTC)
+
+    # Act
+    with fuso_do_processo("UTC"):
+        livres = horarios_livres([], data=HOJE, agora=agora_em_utc)
 
     # Assert
     assert _como_texto(livres) == ["15:40–22:00"]
@@ -156,11 +167,13 @@ def test_data_passada_nao_tem_livres():
 
 def test_livres_com_agora_sem_fuso_e_erro_de_programacao():
     # Act / Assert
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match=exatamente("agora deve ser um datetime com fuso horário.")
+    ):
         horarios_livres([], data=AMANHA, agora=datetime(2026, 10, 21, 12, 0))
 
 
-@pytest.mark.parametrize(
+DATAS_CUJO_FUNCIONAMENTO_JA_ACABOU = pytest.mark.parametrize(
     ("data", "agora"),
     [
         (HOJE - timedelta(days=1), AGORA),
@@ -169,30 +182,43 @@ def test_livres_com_agora_sem_fuso_e_erro_de_programacao():
     ],
     ids=["ontem", "hoje-no-fechamento", "hoje-depois-do-fechamento"],
 )
+
+
+@DATAS_CUJO_FUNCIONAMENTO_JA_ACABOU
 def test_data_cujo_funcionamento_ja_acabou_e_retroativa(data, agora):
+    # Act / Assert
+    with pytest.raises(DataRetroativa):
+        garantir_data_reservavel(data, agora)
+
+
+@DATAS_CUJO_FUNCIONAMENTO_JA_ACABOU
+def test_data_cujo_funcionamento_ja_acabou_traz_o_motivo_de_data_retroativa(
+    data, agora
+):
     # Act
     motivo = motivo_de_indisponibilidade(data, agora)
 
     # Assert
     assert motivo == DataRetroativa().mensagem
-    with pytest.raises(DataRetroativa):
-        garantir_data_reservavel(data, agora)
+
+
+def test_data_alem_da_antecedencia_e_recusada():
+    # Act
+    with pytest.raises(AntecedenciaExcedida) as erro:
+        garantir_data_reservavel(HOJE + timedelta(days=31), AGORA)
+
+    # Assert
+    assert erro.value.data_limite == date(2026, 11, 20)
 
 
 def test_data_alem_da_antecedencia_traz_a_mensagem_com_a_data_limite():
-    # Arrange
-    data = HOJE + timedelta(days=31)
-
     # Act
-    motivo = motivo_de_indisponibilidade(data, AGORA)
+    motivo = motivo_de_indisponibilidade(HOJE + timedelta(days=31), AGORA)
 
     # Assert
     assert motivo == (
         "Só é possível reservar com até 30 dias de antecedência (até 20/11/2026)."
     )
-    assert data_limite_para_reservar(AGORA) == date(2026, 11, 20)
-    with pytest.raises(AntecedenciaExcedida):
-        garantir_data_reservavel(data, AGORA)
 
 
 @pytest.mark.parametrize(
@@ -214,5 +240,7 @@ def test_data_reservavel_nao_tem_motivo(data, agora):
 
 def test_disponibilidade_com_agora_sem_fuso_e_erro_de_programacao():
     # Act / Assert
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match=exatamente("agora deve ser um datetime com fuso horário.")
+    ):
         motivo_de_indisponibilidade(AMANHA, datetime(2026, 10, 21, 12, 0))

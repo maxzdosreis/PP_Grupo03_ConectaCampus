@@ -1,10 +1,6 @@
-from datetime import date, datetime, time
-from zoneinfo import ZoneInfo
-
 import pytest
 
 from reservas.application.casos_de_uso import AlterarSituacaoReserva
-from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
     MotivoObrigatorio,
@@ -12,25 +8,22 @@ from reservas.domain.excecoes import (
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
 )
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import (
     SITUACOES_QUE_EXIGEM_MOTIVO,
     TRANSICOES_PERMITIDAS,
     SituacaoReserva,
 )
-from reservas.domain.solicitante import Solicitante
-from reservas.tests.fakes import RepositorioReservasEmMemoria
-
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
-INTERVALO = IntervaloDeHorario(
-    data=date(2026, 10, 25), hora_inicio=time(10, 0), hora_fim=time(11, 0)
+from reservas.tests.fakes import (
+    AGORA,
+    ATOR_ANA,
+    GESTOR,
+    ID_INEXISTENTE,
+    MOTIVO,
+    OUTRA_PESSOA,
+    RepositorioReservasEmMemoria,
+    motivo_para,
+    reserva_reconstituida,
 )
-MOTIVO = "Chuva forte"
-ID_INEXISTENTE = 9999
 
 TRANSICOES_VALIDAS = [
     (atual, nova)
@@ -64,20 +57,7 @@ def repositorio():
 
 
 def _salvar_em(repositorio, situacao):
-    reserva = Reserva(
-        espaco_id=1,
-        solicitante=ANA,
-        intervalo=INTERVALO,
-        finalidade="Treino",
-        situacao=situacao,
-        motivo_da_situacao=_motivo_para(situacao),
-        criada_em=AGORA,
-    )
-    return repositorio.salvar(reserva)
-
-
-def _motivo_para(situacao):
-    return MOTIVO if situacao in SITUACOES_QUE_EXIGEM_MOTIVO else None
+    return repositorio.salvar(reserva_reconstituida(id=None, situacao=situacao))
 
 
 def _retrato(repositorio, reserva_id):
@@ -97,7 +77,7 @@ def test_transicao_permitida_e_persistida(repositorio, atual, nova):
         ator=GESTOR,
         reserva_id=reserva.id,
         nova_situacao=nova,
-        motivo=_motivo_para(nova),
+        motivo=motivo_para(nova),
     )
 
     # Assert
@@ -237,14 +217,13 @@ def test_ciclo_solicitada_confirmada_concluida(repositorio):
 def test_solicitante_cancela_a_propria_reserva(repositorio):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    dona = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 
     # Act
     AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         reserva_id=reserva.id,
         nova_situacao=SituacaoReserva.CANCELADA,
         motivo=MOTIVO,
-        ator=dona,
+        ator=ATOR_ANA,
     )
 
     # Assert
@@ -256,14 +235,13 @@ def test_solicitante_confirmando_a_propria_lanca_nao_permitida_e_preserva(
 ):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    dona = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 
     # Act / Assert
     with pytest.raises(AlteracaoDeSituacaoNaoPermitida):
         AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
             reserva_id=reserva.id,
             nova_situacao=SituacaoReserva.CONFIRMADA,
-            ator=dona,
+            ator=ATOR_ANA,
         )
 
     assert _retrato(repositorio, reserva.id) == (SituacaoReserva.SOLICITADA, None)
@@ -274,9 +252,6 @@ def test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada(
 ):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    outra_pessoa = Ator(
-        usuario_id=99, nome="Solicitante de Teste", papel=PapelDoAtor.SOLICITANTE
-    )
 
     # Act / Assert
     with pytest.raises(ReservaNaoEncontrada) as erro:
@@ -284,7 +259,7 @@ def test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada(
             reserva_id=reserva.id,
             nova_situacao=SituacaoReserva.CANCELADA,
             motivo=MOTIVO,
-            ator=outra_pessoa,
+            ator=OUTRA_PESSOA,
         )
 
     assert erro.value.reserva_id == reserva.id

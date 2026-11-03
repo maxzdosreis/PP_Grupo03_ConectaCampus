@@ -1,13 +1,95 @@
-from collections.abc import Iterable
-from datetime import date
+import os
+import re
+from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
+from datetime import date, datetime, time
+from time import tzset
+from zoneinfo import ZoneInfo
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
 from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
+from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
+from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserva
+from reservas.domain.solicitante import Solicitante
+
+UTC = ZoneInfo("UTC")
+AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=FUSO_HORARIO)
+DIA = date(2026, 10, 25)
+ID_INEXISTENTE = 9999
+MOTIVO = "Chuva forte"
+ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
+BRUNO = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
+GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
+ATOR_ANA = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
+OUTRA_PESSOA = Ator(usuario_id=99, nome="Outra Pessoa", papel=PapelDoAtor.SOLICITANTE)
+
+
+def exatamente(texto: str) -> str:
+    return f"^{re.escape(texto)}$"
+
+
+@contextmanager
+def fuso_do_processo(nome: str) -> Iterator[None]:
+    anterior = os.environ.get("TZ")
+    os.environ["TZ"] = nome
+    tzset()
+    try:
+        yield
+    finally:
+        if anterior is None:
+            del os.environ["TZ"]
+        else:
+            os.environ["TZ"] = anterior
+        tzset()
+
+
+def motivo_para(situacao: SituacaoReserva) -> str | None:
+    return MOTIVO if situacao in SITUACOES_QUE_EXIGEM_MOTIVO else None
+
+
+def intervalo(
+    inicio: str = "10:00", fim: str = "11:00", data: date = DIA
+) -> IntervaloDeHorario:
+    return IntervaloDeHorario(
+        data=data,
+        hora_inicio=time.fromisoformat(inicio),
+        hora_fim=time.fromisoformat(fim),
+    )
+
+
+def reserva_solicitada(**sobrescritas) -> Reserva:
+    dados = {
+        "espaco_id": 3,
+        "solicitante": ANA,
+        "data": DIA,
+        "hora_inicio": time(10, 0),
+        "hora_fim": time(11, 0),
+        "finalidade": "Treino do time de vôlei",
+        "agora": AGORA,
+    }
+    dados.update(sobrescritas)
+    return Reserva.solicitar(**dados)
+
+
+def reserva_reconstituida(**sobrescritas) -> Reserva:
+    dados = {
+        "id": 12,
+        "espaco_id": 3,
+        "solicitante": ANA,
+        "intervalo": intervalo(),
+        "finalidade": "Treino do time de vôlei",
+        "situacao": SituacaoReserva.SOLICITADA,
+        "criada_em": AGORA,
+    }
+    dados.update(sobrescritas)
+    dados.setdefault("motivo_da_situacao", motivo_para(dados["situacao"]))
+    return Reserva(**dados)
 
 
 class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
@@ -36,8 +118,10 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         self._reservas: dict[int, Reserva] = {}
         self._historico: dict[int, list[RegistroDeSituacao]] = {}
         self._proximo_id = 1
+        self.chamadas_de_salvar = 0
 
     def salvar(self, reserva: Reserva) -> Reserva:
+        self.chamadas_de_salvar += 1
         if reserva.id is not None and reserva.id not in self._reservas:
             raise ReservaNaoEncontrada(reserva.id)
         if reserva.id is not None:

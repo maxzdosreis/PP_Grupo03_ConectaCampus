@@ -33,7 +33,6 @@ from espacos.tests.fakes import RepositorioEspacosEmMemoria, novo_espaco
 
 
 class Gerado(NamedTuple):
-
     valor: object
     esperado: object = None
     erro: type[ErroDeDominio] | None = None

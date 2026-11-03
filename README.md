@@ -665,28 +665,38 @@ Testes (pytest):
 docker compose exec backend pytest
 ```
 
-Cobertura de testes (linhas e ramos) dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`. Falha abaixo de 95% no total (`fail_under` em `pyproject.toml`; proposta de cobertura-alvo ainda pendente de decisão do grupo):
+Cobertura de testes (linhas e ramos) dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`. Falha abaixo de 99% no total (`fail_under` em `pyproject.toml`; proposta de cobertura-alvo ainda pendente de decisão do grupo):
 
 ```bash
 docker compose exec backend pytest --cov
 ```
 
-Cobertura por camada: exige 100% de linhas e ramos no domínio e na aplicação de `espacos` (troque o `--include` para ver outra camada, por exemplo `espacos/infrastructure/*`):
+Cobertura por camada: exige 100% de linhas e ramos no domínio e na aplicação de `espacos` e de `reservas` (troque o `--include` para ver outra camada, por exemplo `reservas/infrastructure/*`):
 
 ```bash
-docker compose exec backend sh -c "pytest --cov && coverage report --include='espacos/domain/*,espacos/application/*' --fail-under=100"
+docker compose exec backend sh -c "pytest --cov && coverage report --include='espacos/domain/*,espacos/application/*,reservas/domain/*,reservas/application/*' --fail-under=100"
 ```
 
-Testes por propriedade (Hypothesis, em `espacos/tests/test_propriedades_do_espaco.py`). No dia a dia rodam com o perfil `rapido` (50 exemplos por propriedade, sempre os mesmos). Antes da entrega, rode o perfil `exaustivo` (2.000 exemplos aleatórios por propriedade):
+Testes por propriedade (Hypothesis): `espacos/tests/test_propriedades_do_espaco.py` e, em reservas, `test_propriedades_da_reserva.py` (a máquina de estados da reserva: gestor, dona e outra pessoa tentam mudar a situação em sequências geradas, e depois de cada passo o teste confere as invariantes, entre elas que os botões de ação da tela são exatamente as mudanças que o backend aceita), `test_propriedades_do_horario.py` e `test_propriedades_da_agenda.py`. No dia a dia rodam com o perfil `rapido` (50 exemplos por propriedade, sempre os mesmos). Antes da entrega, rode o perfil `exaustivo` (2.000 exemplos aleatórios por propriedade):
 
 ```bash
-docker compose exec -e HYPOTHESIS_PROFILE=exaustivo backend pytest espacos/tests/test_propriedades_do_espaco.py --durations=0
+docker compose exec -e HYPOTHESIS_PROFILE=exaustivo backend sh -c "pytest espacos/tests/test_propriedades_do_espaco.py reservas/tests/test_propriedades_*.py --durations=0"
 ```
 
-Testes de mutação (mutmut), só em `espacos/domain` e `espacos/application`. O mutmut altera o código de propósito (troca `!=` por `==`, apaga argumentos, muda textos) e confere se algum teste falha. Leva alguns minutos, por isso fica fora da verificação de cada PR; rode antes da entrega. Os mutantes que sobrevivem e são equivalentes estão justificados em `docs/fontes/testes_de_espacos.md`:
+Para ver um passo a passo gerado pela máquina de estados da reserva:
 
 ```bash
-docker compose exec backend sh -c "rm -rf mutants && mutmut run"
+docker compose exec backend pytest reservas/tests/test_propriedades_da_reserva.py -s --hypothesis-verbosity=debug
+```
+
+Testes de mutação (mutmut), em `domain` e `application` de `espacos` e de `reservas`. O mutmut altera o código de propósito (troca `<` por `<=`, apaga argumentos, muda textos) e confere se algum teste falha. Leva vários minutos (cerca de meia hora para `reservas` no Docker do Windows), por isso fica fora da verificação de cada PR; rode antes da entrega, um contexto de cada vez. Os mutantes que sobrevivem e são equivalentes estão justificados em `docs/fontes/testes_de_espacos.md` e `docs/fontes/testes_de_reservas.md`:
+
+```bash
+docker compose exec backend sh -c "rm -rf mutants && mutmut run 'reservas.*'"
+```
+
+```bash
+docker compose exec backend sh -c "rm -rf mutants && mutmut run 'espacos.*'"
 ```
 
 ```bash
@@ -696,7 +706,7 @@ docker compose exec backend mutmut results
 Para ver a mudança de um mutante (o nome sai do `mutmut results`):
 
 ```bash
-docker compose exec backend mutmut show "espacos.domain.espaco_esportivo.xǁEspacoEsportivoǁ__eq____mutmut_2"
+docker compose exec backend mutmut show "reservas.domain.regras_de_agenda.x__janelas_entre__mutmut_2"
 ```
 
 Só a matriz de acesso (quem pode chamar cada rota da API, com login JWT de verdade, em `src/backend/config/tests/test_matriz_de_acesso.py`) e os outros testes de segurança de `config/`:

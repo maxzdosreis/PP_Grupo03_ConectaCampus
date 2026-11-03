@@ -1,5 +1,4 @@
 from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -9,7 +8,7 @@ from reservas.domain.excecoes import (
     DuracaoInvalida,
     ForaDoHorarioDeFuncionamento,
 )
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.regras_de_agenda import (
     ANTECEDENCIA_MAXIMA_EM_DIAS,
     DURACAO_MAXIMA,
@@ -19,15 +18,12 @@ from reservas.domain.regras_de_agenda import (
     data_limite_para_reservar,
     garantir_regras_de_agenda,
 )
+from reservas.tests.fakes import AGORA, DIA, UTC, exatamente, fuso_do_processo
 
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-UTC = ZoneInfo("UTC")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DATA = AGORA.date() + timedelta(days=4)
 DATA_LIMITE = date(2026, 11, 20)
 
 
-def _intervalo(hora_inicio=time(10, 0), hora_fim=time(11, 0), data=DATA):
+def _intervalo(hora_inicio=time(10, 0), hora_fim=time(11, 0), data=DIA):
     return IntervaloDeHorario(data=data, hora_inicio=hora_inicio, hora_fim=hora_fim)
 
 
@@ -150,7 +146,7 @@ def test_data_alem_da_antecedencia_e_recusada_com_a_data_limite():
 
 def test_data_limite_conta_hoje_no_fuso_de_sao_paulo():
     # Arrange
-    noite_em_sao_paulo = datetime(2026, 10, 21, 23, 30, tzinfo=SAO_PAULO)
+    noite_em_sao_paulo = datetime(2026, 10, 21, 23, 30, tzinfo=FUSO_HORARIO)
     mesmo_instante_em_utc = noite_em_sao_paulo.astimezone(UTC)
 
     # Act
@@ -163,7 +159,7 @@ def test_data_limite_conta_hoje_no_fuso_de_sao_paulo():
 
 def test_virada_do_dia_em_utc_nao_muda_a_antecedencia():
     # Arrange
-    agora_em_utc = datetime(2026, 10, 21, 23, 30, tzinfo=SAO_PAULO).astimezone(UTC)
+    agora_em_utc = datetime(2026, 10, 21, 23, 30, tzinfo=FUSO_HORARIO).astimezone(UTC)
 
     # Act / Assert
     garantir_regras_de_agenda(_intervalo(data=DATA_LIMITE), agora_em_utc)
@@ -176,8 +172,22 @@ def test_virada_do_dia_em_utc_nao_muda_a_antecedencia():
 @pytest.mark.parametrize("agora", [datetime(2026, 10, 21, 12, 0), None])
 def test_data_limite_com_agora_sem_fuso_e_erro_de_programacao(agora):
     # Act / Assert
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match=exatamente("agora deve ser um datetime com fuso horário.")
+    ):
         data_limite_para_reservar(agora)
+
+
+def test_data_limite_nao_depende_do_fuso_do_processo():
+    # Arrange
+    noite_em_sao_paulo = datetime(2026, 10, 21, 23, 30, tzinfo=FUSO_HORARIO)
+
+    # Act
+    with fuso_do_processo("UTC"):
+        limite = data_limite_para_reservar(noite_em_sao_paulo)
+
+    # Assert
+    assert limite == DATA_LIMITE
 
 
 @pytest.mark.parametrize(

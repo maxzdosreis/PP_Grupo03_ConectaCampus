@@ -1,6 +1,4 @@
-from datetime import date, datetime, time
 from itertools import product
-from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -11,19 +9,11 @@ from reservas.domain.excecoes import (
     ReservaNaoEncontrada,
     TransicaoDeSituacaoInvalida,
 )
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import DESTINOS_POR_PAPEL, SituacaoReserva
-from reservas.domain.solicitante import Solicitante
+from reservas.tests.fakes import AGORA, ANA, BRUNO, MOTIVO, reserva_reconstituida
 
 S = SituacaoReserva
 P = PapelDoAtor
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DONA_ID = 7
-OUTRO_ID = 8
-MOTIVO = "Chuva forte"
-ANA = Solicitante(usuario_id=DONA_ID, nome="Ana Souza", matricula="2026001")
 
 TABELA_DE_PERMISSOES = {
     P.GESTOR: {S.CONFIRMADA, S.RECUSADA, S.CONCLUIDA, S.CANCELADA},
@@ -74,25 +64,14 @@ def _id_do_caso(caso):
 
 def _ator(papel, dono):
     return Ator(
-        usuario_id=DONA_ID if dono else OUTRO_ID,
+        usuario_id=ANA.usuario_id if dono else BRUNO.usuario_id,
         nome="Solicitante de Teste",
         papel=papel,
     )
 
 
 def _reserva_em(situacao):
-    return Reserva(
-        id=12,
-        espaco_id=3,
-        solicitante=ANA,
-        intervalo=IntervaloDeHorario(
-            data=date(2026, 10, 25), hora_inicio=time(10, 0), hora_fim=time(11, 0)
-        ),
-        finalidade="Treino",
-        situacao=situacao,
-        motivo_da_situacao=MOTIVO if situacao in (S.RECUSADA, S.CANCELADA) else None,
-        criada_em=AGORA,
-    )
+    return reserva_reconstituida(situacao=situacao)
 
 
 def _retrato(reserva):
@@ -191,7 +170,25 @@ def test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409():
         )
 
     assert erro.value.mensagem == "Somente o gestor pode concluir reservas."
+    assert erro.value.nova is S.CONCLUIDA
     assert reserva.situacao is S.SOLICITADA
+
+
+def test_quem_nao_ve_a_reserva_recebe_nao_encontrada_com_o_codigo_dela():
+    # Arrange
+    reserva = _reserva_em(S.SOLICITADA)
+
+    # Act
+    with pytest.raises(ReservaNaoEncontrada) as erro:
+        reserva.alterar_situacao(
+            S.CANCELADA,
+            motivo=MOTIVO,
+            ator=_ator(P.SOLICITANTE, dono=False),
+            agora=AGORA,
+        )
+
+    # Assert
+    assert erro.value.reserva_id == reserva.id
 
 
 @pytest.mark.parametrize("papel", P)
@@ -215,7 +212,7 @@ def test_solicitada_como_destino_e_transicao_invalida_para_os_dois_papeis(papel)
         (P.SOLICITANTE, False, False),
     ],
 )
-def test_visivel_para(papel, dono, visivel):
+def test_so_o_gestor_e_o_dono_enxergam_a_reserva(papel, dono, visivel):
     # Assert
     assert _reserva_em(S.SOLICITADA).visivel_para(_ator(papel, dono)) is visivel
 

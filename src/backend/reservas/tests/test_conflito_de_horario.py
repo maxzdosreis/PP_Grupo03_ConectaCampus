@@ -1,5 +1,4 @@
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import time, timedelta
 
 import pytest
 
@@ -7,16 +6,16 @@ from compartilhado.api.tratador_de_erros import tratar_excecao
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ConflitoDeHorario
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
+from reservas.tests.fakes import (
+    BRUNO,
+    DIA,
+    intervalo,
+    reserva_reconstituida,
+    reserva_solicitada,
+)
 
 S = SituacaoReserva
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DATA = AGORA.date() + timedelta(days=4)
-QUEM_SOLICITA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-OUTRO_SOLICITANTE = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
 MENSAGEM_CONFIRMADA_10_AS_11 = (
     "Este espaço já tem uma reserva Confirmada em 25/10/2026 10:00–11:00. "
     "Escolha outro horário."
@@ -24,17 +23,7 @@ MENSAGEM_CONFIRMADA_10_AS_11 = (
 
 
 def _nova(**sobrescritas):
-    dados = {
-        "espaco_id": 3,
-        "solicitante": QUEM_SOLICITA,
-        "data": DATA,
-        "hora_inicio": time(10, 0),
-        "hora_fim": time(11, 0),
-        "finalidade": "Treino do time de vôlei",
-        "agora": AGORA,
-    }
-    dados.update(sobrescritas)
-    return Reserva.solicitar(**dados)
+    return reserva_solicitada(**sobrescritas)
 
 
 def _existente(
@@ -43,25 +32,19 @@ def _existente(
     espaco_id=3,
     hora_inicio=time(10, 0),
     hora_fim=time(11, 0),
-    data=DATA,
+    data=DIA,
     situacao=S.CONFIRMADA,
 ):
-    return Reserva(
+    return reserva_reconstituida(
         id=id,
         espaco_id=espaco_id,
-        solicitante=OUTRO_SOLICITANTE,
+        solicitante=BRUNO,
         intervalo=IntervaloDeHorario(
             data=data, hora_inicio=hora_inicio, hora_fim=hora_fim
         ),
         finalidade="Aula de educação física",
         situacao=situacao,
-        motivo_da_situacao=_motivo_para(situacao),
-        criada_em=AGORA,
     )
-
-
-def _motivo_para(situacao):
-    return "Motivo informado" if situacao in (S.RECUSADA, S.CANCELADA) else None
 
 
 def test_sem_reservas_existentes_o_horario_esta_livre():
@@ -96,7 +79,7 @@ def test_mesmo_horario_em_outro_espaco_e_aceito():
 
 def test_mesmo_horario_em_outra_data_e_aceito():
     # Act / Assert
-    garantir_horario_livre(_nova(), [_existente(data=DATA + timedelta(days=1))])
+    garantir_horario_livre(_nova(), [_existente(data=DIA + timedelta(days=1))])
 
 
 @pytest.mark.parametrize(
@@ -163,19 +146,17 @@ def test_mensagem_mostra_horario_e_situacao_sem_dados_do_outro_solicitante():
     # Assert
     mensagem = erro.value.mensagem
     assert mensagem == MENSAGEM_CONFIRMADA_10_AS_11
-    assert OUTRO_SOLICITANTE.nome not in mensagem
-    assert OUTRO_SOLICITANTE.matricula not in mensagem
+    assert BRUNO.nome not in mensagem
+    assert BRUNO.matricula not in mensagem
     assert erro.value.campo is None
 
 
 def test_conflito_de_horario_vira_409_sem_campos():
     # Arrange
-    intervalo = IntervaloDeHorario(
-        data=date(2026, 10, 25), hora_inicio=time(10, 0), hora_fim=time(11, 0)
-    )
+    ocupado = intervalo()
 
     # Act
-    resposta = tratar_excecao(ConflitoDeHorario(intervalo, S.CONFIRMADA), {})
+    resposta = tratar_excecao(ConflitoDeHorario(ocupado, S.CONFIRMADA), {})
 
     # Assert
     assert resposta.status_code == 409

@@ -1,5 +1,4 @@
-from datetime import date, datetime, time
-from zoneinfo import ZoneInfo
+from datetime import time
 
 import pytest
 
@@ -8,25 +7,22 @@ from reservas.application.casos_de_uso import CriarReserva
 from reservas.application.portas import EspacoReservavel
 from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.excecoes import ConflitoDeHorario, DataRetroativa, HorarioInvalido
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
 from reservas.tests.fakes import (
+    AGORA,
+    ANA,
+    BRUNO,
+    DIA,
+    ID_INEXISTENTE,
     ConsultaDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
+    reserva_reconstituida,
 )
 
 S = SituacaoReserva
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DIA = date(2026, 10, 25)
-SOLICITANTE = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-OUTRO_SOLICITANTE = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
 QUADRA = EspacoReservavel(id=1, nome="Quadra Coberta")
 CAMPO = EspacoReservavel(id=2, nome="Campo Norte")
 GINASIO_INATIVO = EspacoReservavel(id=3, nome="Ginásio Antigo")
-ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
@@ -49,7 +45,7 @@ def criar(repositorio, consulta):
 def _dados_validos(**sobrescritas):
     dados = {
         "espaco_id": QUADRA.id,
-        "solicitante": SOLICITANTE,
+        "solicitante": ANA,
         "data": DIA,
         "hora_inicio": time(10, 0),
         "hora_fim": time(11, 0),
@@ -60,18 +56,13 @@ def _dados_validos(**sobrescritas):
 
 
 def _salvar_existente(repositorio, situacao, *, espaco_id=QUADRA.id):
-    motivo = "Chuva" if situacao is S.CANCELADA else None
     return repositorio.salvar(
-        Reserva(
+        reserva_reconstituida(
+            id=None,
             espaco_id=espaco_id,
-            solicitante=OUTRO_SOLICITANTE,
-            intervalo=IntervaloDeHorario(
-                data=DIA, hora_inicio=time(10, 0), hora_fim=time(11, 0)
-            ),
+            solicitante=BRUNO,
             finalidade="Jogo marcado",
             situacao=situacao,
-            motivo_da_situacao=motivo,
-            criada_em=AGORA,
         )
     )
 
@@ -88,7 +79,7 @@ def test_solicitacao_valida_e_salva_como_solicitada(criar, repositorio):
     assert reserva.id is not None
     assert reserva.situacao is S.SOLICITADA
     assert reserva.criada_em == AGORA
-    assert reserva.solicitante == SOLICITANTE
+    assert reserva.solicitante == ANA
     assert _todas(repositorio) == [reserva]
 
 
@@ -122,6 +113,9 @@ def test_horario_ocupado_lanca_conflito_sem_salvar(criar, repositorio, situacao)
     # Assert
     assert erro.value.situacao is situacao
     assert _todas(repositorio) == [existente]
+    assert repositorio.chamadas_de_salvar == 1, (
+        "o conflito vem antes de pedir para gravar"
+    )
 
 
 @pytest.mark.parametrize(
