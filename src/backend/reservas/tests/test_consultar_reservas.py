@@ -1,27 +1,23 @@
-from datetime import date, datetime, time
-from zoneinfo import ZoneInfo
+from datetime import time
 
 import pytest
 
 from reservas.application.casos_de_uso import ConsultarReservas, ObterReserva
 from reservas.application.repositorio import FiltrosDeReservas
-from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import ReservaNaoEncontrada
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
-from reservas.tests.fakes import RepositorioReservasEmMemoria
+from reservas.tests.fakes import (
+    ANA,
+    ATOR_ANA,
+    BRUNO,
+    GESTOR,
+    ID_INEXISTENTE,
+    RepositorioReservasEmMemoria,
+    reserva_solicitada,
+)
 
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DIA = date(2026, 10, 25)
-ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-BRUNO = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
-GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
-ATOR_ANA = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
 QUADRA = 1
 CAMPO = 2
-ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
@@ -38,14 +34,11 @@ def ids(repositorio):
 
 
 def _salvar(repositorio, espaco_id, solicitante, hora_inicio, hora_fim):
-    reserva = Reserva.solicitar(
+    reserva = reserva_solicitada(
         espaco_id=espaco_id,
         solicitante=solicitante,
-        data=DIA,
         hora_inicio=hora_inicio,
         hora_fim=hora_fim,
-        finalidade="Treino",
-        agora=AGORA,
     )
     return repositorio.salvar(reserva)
 
@@ -139,15 +132,13 @@ def test_solicitante_sem_filtros_ve_todas_as_proprias(repositorio, ids):
     assert _ids_de(reservas) == [ids["tarde"]]
 
 
-def test_gestor_ve_todas_e_filtra_por_solicitante(repositorio, ids):
+def test_gestor_filtra_pelo_nome_de_qualquer_solicitante(repositorio, ids):
     # Act
-    todas = ConsultarReservas(repositorio).executar(FiltrosDeReservas(), ator=GESTOR)
     do_bruno = ConsultarReservas(repositorio).executar(
         FiltrosDeReservas(solicitante="bruno"), ator=GESTOR
     )
 
     # Assert
-    assert len(todas) == 3
     assert _ids_de(do_bruno) == [ids["manha"], ids["meio_dia"]]
 
 

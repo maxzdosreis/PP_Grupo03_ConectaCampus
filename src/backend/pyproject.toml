@@ -44,21 +44,30 @@ omit = [
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 95
+fail_under = 99
 
 [tool.mutmut]
-source_paths = ["espacos/"]
-only_mutate = ["espacos/domain/*", "espacos/application/*"]
+source_paths = ["espacos/", "reservas/"]
+only_mutate = [
+    "espacos/domain/*",
+    "espacos/application/*",
+    "reservas/domain/*",
+    "reservas/application/*",
+]
 also_copy = [
     "config/",
     "compartilhado/",
-    "reservas/",
     "contas/",
     "exemplos/",
     "conftest.py",
     "manage.py",
 ]
-pytest_add_cli_args_test_selection = ["espacos/tests/", "-m", "not django_db"]
+pytest_add_cli_args_test_selection = [
+    "espacos/tests/",
+    "reservas/tests/",
+    "-m",
+    "not django_db",
+]
 
 [tool.importlinter]
 root_packages = [

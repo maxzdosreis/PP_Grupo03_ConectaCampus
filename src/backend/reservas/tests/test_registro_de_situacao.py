@@ -1,14 +1,13 @@
 from dataclasses import FrozenInstanceError
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 import pytest
 
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.situacao import SituacaoReserva
+from reservas.tests.fakes import AGORA, exatamente
 
 S = SituacaoReserva
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=ZoneInfo("America/Sao_Paulo"))
 
 
 def _registro(**sobrescritas):
@@ -58,21 +57,29 @@ def test_registros_com_os_mesmos_fatos_sao_iguais():
     assert _registro() == _registro()
 
 
+_NOVA_INVALIDA = "situacao_nova deve ser uma SituacaoReserva."
+_ANTERIOR_INVALIDA = "situacao_anterior deve ser uma SituacaoReserva ou None."
+_ANTERIOR_IGUAL = "situacao_anterior deve ser diferente de situacao_nova."
+_SEM_FUSO = "registrado_em deve ser um datetime com fuso horário."
+_AUTOR_ID = "autor_usuario_id deve ser um inteiro positivo."
+_AUTOR_NOME = "autor_nome é obrigatório."
+
+
 @pytest.mark.parametrize(
-    ("campos", "erro"),
+    ("campos", "erro", "mensagem"),
     [
-        ({"situacao_nova": None}, TypeError),
-        ({"situacao_nova": "CONFIRMADA"}, TypeError),
-        ({"situacao_anterior": "SOLICITADA"}, TypeError),
-        ({"situacao_anterior": S.CONFIRMADA}, ValueError),
-        ({"registrado_em": None}, TypeError),
-        ({"registrado_em": datetime(2026, 10, 21, 12, 0)}, TypeError),
-        ({"autor_usuario_id": 0}, ValueError),
-        ({"autor_usuario_id": True}, ValueError),
-        ({"autor_usuario_id": "1"}, ValueError),
-        ({"autor_nome": ""}, ValueError),
-        ({"autor_nome": "   "}, ValueError),
-        ({"autor_nome": None}, ValueError),
+        ({"situacao_nova": None}, TypeError, _NOVA_INVALIDA),
+        ({"situacao_nova": "CONFIRMADA"}, TypeError, _NOVA_INVALIDA),
+        ({"situacao_anterior": "SOLICITADA"}, TypeError, _ANTERIOR_INVALIDA),
+        ({"situacao_anterior": S.CONFIRMADA}, ValueError, _ANTERIOR_IGUAL),
+        ({"registrado_em": None}, TypeError, _SEM_FUSO),
+        ({"registrado_em": datetime(2026, 10, 21, 12, 0)}, TypeError, _SEM_FUSO),
+        ({"autor_usuario_id": 0}, ValueError, _AUTOR_ID),
+        ({"autor_usuario_id": True}, ValueError, _AUTOR_ID),
+        ({"autor_usuario_id": "1"}, ValueError, _AUTOR_ID),
+        ({"autor_nome": ""}, ValueError, _AUTOR_NOME),
+        ({"autor_nome": "   "}, ValueError, _AUTOR_NOME),
+        ({"autor_nome": None}, ValueError, _AUTOR_NOME),
     ],
     ids=[
         "nova-ausente",
@@ -89,7 +96,7 @@ def test_registros_com_os_mesmos_fatos_sao_iguais():
         "autor-nome-ausente",
     ],
 )
-def test_registro_invalido_e_erro_de_programacao(campos, erro):
+def test_registro_invalido_e_erro_de_programacao(campos, erro, mensagem):
     # Act / Assert
-    with pytest.raises(erro):
+    with pytest.raises(erro, match=exatamente(mensagem)):
         _registro(**campos)

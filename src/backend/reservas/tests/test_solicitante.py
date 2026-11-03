@@ -4,6 +4,7 @@ import pytest
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from reservas.domain.solicitante import Solicitante
+from reservas.tests.fakes import exatamente
 
 
 def _criar_solicitante(**sobrescritas):
@@ -23,31 +24,42 @@ def test_criacao_valida_normaliza_nome_e_matricula():
 
 
 @pytest.mark.parametrize(
-    ("campo", "valor"),
+    ("campo", "valor", "rotulo"),
     [
-        ("usuario_id", None),
-        ("nome", None),
-        ("nome", ""),
-        ("nome", "   "),
-        ("matricula", None),
-        ("matricula", ""),
-        ("matricula", "   "),
+        ("usuario_id", None, "Usuário"),
+        ("nome", None, "Nome"),
+        ("nome", "", "Nome"),
+        ("nome", "   ", "Nome"),
+        ("matricula", None, "Matrícula"),
+        ("matricula", "", "Matrícula"),
+        ("matricula", "   ", "Matrícula"),
     ],
 )
-def test_campo_vazio_e_recusado_como_obrigatorio(campo, valor):
+def test_campo_vazio_e_recusado_como_obrigatorio(campo, valor, rotulo):
     # Act
     with pytest.raises(CampoObrigatorioAusente) as erro:
         _criar_solicitante(**{campo: valor})
 
     # Assert
     assert erro.value.campo == campo
+    assert erro.value.mensagem == f'O campo "{rotulo}" é obrigatório.'
 
 
 @pytest.mark.parametrize("usuario_id", [0, -1, True, "1"])
 def test_usuario_id_que_nao_e_inteiro_positivo_e_erro_de_programacao(usuario_id):
     # Act / Assert
-    with pytest.raises(ValueError, match="inteiro positivo"):
+    with pytest.raises(
+        ValueError, match=exatamente("usuario_id deve ser um inteiro positivo.")
+    ):
         _criar_solicitante(usuario_id=usuario_id)
+
+
+def test_usuario_id_1_e_o_menor_aceito():
+    # Act
+    solicitante = _criar_solicitante(usuario_id=1)
+
+    # Assert
+    assert solicitante.usuario_id == 1
 
 
 def test_solicitante_e_imutavel():

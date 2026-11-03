@@ -1,5 +1,4 @@
 from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
 
 import pytest
 from django.db import IntegrityError, connection
@@ -7,35 +6,34 @@ from django.db.models import ProtectedError
 from django.test.utils import CaptureQueriesContext
 
 from reservas.application.repositorio import FiltrosDeReservas
-from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     ConflitoDeHorario,
     ReservaDesatualizada,
     ReservaNaoEncontrada,
 )
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
 from reservas.infrastructure.models import (
     CONSTRAINT_SEM_SOBREPOSICAO,
     RegistroDeSituacaoModel,
     ReservaModel,
 )
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
-from reservas.tests.fakes import RepositorioReservasEmMemoria
+from reservas.tests.fakes import (
+    AGORA,
+    ANA,
+    BRUNO,
+    DIA,
+    GESTOR,
+    ID_INEXISTENTE,
+    RepositorioReservasEmMemoria,
+)
 from reservas.tests.historico import verificar_historico_coerente
 
 S = SituacaoReserva
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DATA = AGORA.date() + timedelta(days=4)
-DIA_SEGUINTE = DATA + timedelta(days=1)
-ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-BRUNO = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
-GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
-ID_INEXISTENTE = 9999
+DIA_SEGUINTE = DIA + timedelta(days=1)
 
 
 @pytest.fixture(
@@ -54,7 +52,7 @@ def _solicitar(**sobrescritas):
     dados = {
         "espaco_id": 3,
         "solicitante": ANA,
-        "data": DATA,
+        "data": DIA,
         "hora_inicio": time(10, 0),
         "hora_fim": time(11, 0),
         "finalidade": "Treino do time de vôlei",
@@ -122,7 +120,7 @@ def test_salvar_reserva_nova_atribui_id_e_permite_obter_igual(repositorio):
     assert obtida == salva
     assert obtida.espaco_id == 3
     assert obtida.solicitante == ANA
-    assert obtida.intervalo == IntervaloDeHorario(DATA, time(10, 0), time(11, 0))
+    assert obtida.intervalo == IntervaloDeHorario(DIA, time(10, 0), time(11, 0))
     assert obtida.finalidade == "Treino do time de vôlei"
     assert obtida.situacao is S.SOLICITADA
     assert obtida.motivo_da_situacao is None
@@ -208,7 +206,7 @@ def test_listar_ordena_por_inicio_e_desempata_por_id(repositorio):
             FiltrosDeReservas(espaco_id=3, situacao=S.SOLICITADA),
             ["Vôlei", "Handebol"],
         ),
-        (FiltrosDeReservas(data=DATA, solicitante="bruno"), ["Futsal"]),
+        (FiltrosDeReservas(data=DIA, solicitante="bruno"), ["Futsal"]),
         (FiltrosDeReservas(espaco_id=4, situacao=S.SOLICITADA), []),
     ],
     ids=[
@@ -238,8 +236,8 @@ def test_listar_aplica_os_filtros(repositorio, filtros, finalidades_esperadas):
 @pytest.mark.parametrize(
     ("espaco_id", "data", "finalidades_esperadas"),
     [
-        (3, DATA, ["Futsal", "Vôlei"]),
-        (4, DATA, []),
+        (3, DIA, ["Futsal", "Vôlei"]),
+        (4, DIA, []),
         (4, DIA_SEGUINTE, ["Tênis"]),
     ],
     ids=["solicitada-e-confirmada", "so-cancelada", "outro-dia"],
@@ -304,7 +302,7 @@ def test_salvar_reserva_cancelada_sobreposta_a_uma_solicitada_salva_normalmente(
     cancelada = Reserva(
         espaco_id=3,
         solicitante=BRUNO,
-        intervalo=IntervaloDeHorario(DATA, time(10, 30), time(11, 30)),
+        intervalo=IntervaloDeHorario(DIA, time(10, 30), time(11, 30)),
         finalidade="Futsal",
         situacao=S.CANCELADA,
         motivo_da_situacao="Desistência",
@@ -324,7 +322,7 @@ def test_reserva_no_fim_do_dia_volta_na_mesma_data(repositorio):
         Reserva(
             espaco_id=3,
             solicitante=ANA,
-            intervalo=IntervaloDeHorario(DATA, time(23, 30), time(23, 59)),
+            intervalo=IntervaloDeHorario(DIA, time(23, 30), time(23, 59)),
             finalidade="Treino do time de vôlei",
             situacao=S.SOLICITADA,
             criada_em=AGORA,
@@ -333,10 +331,10 @@ def test_reserva_no_fim_do_dia_volta_na_mesma_data(repositorio):
 
     # Act
     obtida = repositorio.obter_por_id(salva.id)
-    do_dia = repositorio.listar(FiltrosDeReservas(data=DATA))
+    do_dia = repositorio.listar(FiltrosDeReservas(data=DIA))
 
     # Assert
-    assert obtida.intervalo == IntervaloDeHorario(DATA, time(23, 30), time(23, 59))
+    assert obtida.intervalo == IntervaloDeHorario(DIA, time(23, 30), time(23, 59))
     assert do_dia == [salva]
 
 
@@ -364,8 +362,8 @@ def _dados_do_model(**sobrescritas):
         "solicitante_usuario_id": BRUNO.usuario_id,
         "solicitante_nome": BRUNO.nome,
         "solicitante_matricula": BRUNO.matricula,
-        "inicio": datetime.combine(DATA, time(10, 0), tzinfo=SAO_PAULO),
-        "fim": datetime.combine(DATA, time(11, 0), tzinfo=SAO_PAULO),
+        "inicio": datetime.combine(DIA, time(10, 0), tzinfo=FUSO_HORARIO),
+        "fim": datetime.combine(DIA, time(11, 0), tzinfo=FUSO_HORARIO),
         "finalidade": "Futsal",
         "situacao": S.CONFIRMADA.value,
         "criada_em": AGORA,
@@ -396,7 +394,7 @@ def test_banco_barra_sobreposicao_que_escapou_da_checagem_em_codigo():
     ("campos", "constraint"),
     [
         (
-            {"fim": datetime.combine(DATA, time(10, 0), tzinfo=SAO_PAULO)},
+            {"fim": datetime.combine(DIA, time(10, 0), tzinfo=FUSO_HORARIO)},
             "reservas_reserva_fim_apos_inicio",
         ),
         ({"situacao": "PENDENTE"}, "reservas_reserva_situacao_valida"),

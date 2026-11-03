@@ -1,5 +1,4 @@
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta
 
 import pytest
 
@@ -8,29 +7,27 @@ from reservas.application.casos_de_uso import ConsultarOcupacaoDoDia
 from reservas.application.ocupacao_do_dia import HorarioOcupado
 from reservas.application.portas import EspacoReservavel
 from reservas.domain.excecoes import AntecedenciaExcedida, DataRetroativa
-from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.regras_de_agenda import (
     HORARIO_DE_ABERTURA,
     HORARIO_DE_FECHAMENTO,
     data_limite_para_reservar,
 )
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
 from reservas.tests.fakes import (
+    AGORA,
+    BRUNO,
+    DIA,
+    ID_INEXISTENTE,
     ConsultaDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
+    intervalo,
+    reserva_reconstituida,
 )
 
 S = SituacaoReserva
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
-DIA = date(2026, 10, 25)
-SOLICITANTE = Solicitante(usuario_id=8, nome="Bruno Lima", matricula="2026002")
 QUADRA = EspacoReservavel(id=1, nome="Quadra Coberta")
 CAMPO = EspacoReservavel(id=2, nome="Campo Norte")
 GINASIO_INATIVO = EspacoReservavel(id=3, nome="Ginásio Antigo")
-ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
@@ -50,25 +47,14 @@ def consultar(repositorio, consulta):
     return ConsultarOcupacaoDoDia(repositorio, consulta, lambda: AGORA)
 
 
-def _intervalo(inicio, fim, data=DIA):
-    return IntervaloDeHorario(
-        data=data,
-        hora_inicio=time.fromisoformat(inicio),
-        hora_fim=time.fromisoformat(fim),
-    )
-
-
 def _salvar(repositorio, situacao, inicio, fim, *, espaco_id=QUADRA.id, data=DIA):
-    motivo = "Chuva" if situacao in (S.CANCELADA, S.RECUSADA) else None
     return repositorio.salvar(
-        Reserva(
+        reserva_reconstituida(
+            id=None,
             espaco_id=espaco_id,
-            solicitante=SOLICITANTE,
-            intervalo=_intervalo(inicio, fim, data),
-            finalidade="Treino",
+            solicitante=BRUNO,
+            intervalo=intervalo(inicio, fim, data),
             situacao=situacao,
-            motivo_da_situacao=motivo,
-            criada_em=AGORA,
         )
     )
 
@@ -122,8 +108,8 @@ def test_so_solicitadas_e_confirmadas_ocupam_e_o_resto_fica_livre(
 
     # Assert
     assert ocupacao.ocupados == (
-        HorarioOcupado(intervalo=_intervalo("08:00", "09:00"), situacao=S.SOLICITADA),
-        HorarioOcupado(intervalo=_intervalo("10:00", "11:00"), situacao=S.CONFIRMADA),
+        HorarioOcupado(intervalo=intervalo("08:00", "09:00"), situacao=S.SOLICITADA),
+        HorarioOcupado(intervalo=intervalo("10:00", "11:00"), situacao=S.CONFIRMADA),
     )
     assert _livres_como_texto(ocupacao) == [
         "07:00–08:00",

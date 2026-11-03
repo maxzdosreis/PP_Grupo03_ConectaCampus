@@ -1,5 +1,4 @@
-from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta
 
 import pytest
 
@@ -7,23 +6,22 @@ from reservas.application.casos_de_uso import (
     AlterarSituacaoReserva,
     ConsultarHistoricoDaReserva,
 )
-from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import ReservaNaoEncontrada
-from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
-from reservas.domain.solicitante import Solicitante
-from reservas.tests.fakes import RepositorioReservasEmMemoria
+from reservas.tests.fakes import (
+    AGORA,
+    ANA,
+    ATOR_ANA,
+    GESTOR,
+    ID_INEXISTENTE,
+    OUTRA_PESSOA,
+    RepositorioReservasEmMemoria,
+    reserva_solicitada,
+)
 from reservas.tests.historico import verificar_historico_coerente
 
 S = SituacaoReserva
-SAO_PAULO = ZoneInfo("America/Sao_Paulo")
-AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=SAO_PAULO)
 DEPOIS = AGORA + timedelta(hours=3)
-ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
-GESTOR = Ator(usuario_id=1, nome="Gestora de Teste", papel=PapelDoAtor.GESTOR)
-DONA = Ator(usuario_id=ANA.usuario_id, nome=ANA.nome, papel=PapelDoAtor.SOLICITANTE)
-OUTRA_PESSOA = Ator(usuario_id=99, nome="Outra Pessoa", papel=PapelDoAtor.SOLICITANTE)
-ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
@@ -33,24 +31,14 @@ def repositorio():
 
 @pytest.fixture
 def reserva_confirmada(repositorio):
-    reserva = repositorio.salvar(
-        Reserva.solicitar(
-            espaco_id=1,
-            solicitante=ANA,
-            data=date(2026, 10, 25),
-            hora_inicio=time(10, 0),
-            hora_fim=time(11, 0),
-            finalidade="Treino",
-            agora=AGORA,
-        )
-    )
+    reserva = repositorio.salvar(reserva_solicitada())
     AlterarSituacaoReserva(repositorio, lambda: DEPOIS).executar(
         reserva_id=reserva.id, nova_situacao=S.CONFIRMADA, ator=GESTOR
     )
     return reserva
 
 
-@pytest.mark.parametrize("ator", [GESTOR, DONA], ids=["gestor", "dona"])
+@pytest.mark.parametrize("ator", [GESTOR, ATOR_ANA], ids=["gestor", "dona"])
 def test_quem_ve_a_reserva_recebe_o_historico_em_ordem(
     repositorio, reserva_confirmada, ator
 ):

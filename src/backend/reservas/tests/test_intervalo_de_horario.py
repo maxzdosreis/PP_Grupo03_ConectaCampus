@@ -6,6 +6,7 @@ import pytest
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from reservas.domain.excecoes import HorarioInvalido
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
+from reservas.tests.fakes import exatamente
 
 SAO_PAULO = ZoneInfo("America/Sao_Paulo")
 
@@ -25,14 +26,22 @@ def test_fuso_horario_e_o_de_sao_paulo():
     assert FUSO_HORARIO == SAO_PAULO
 
 
-@pytest.mark.parametrize("campo", ["data", "hora_inicio", "hora_fim"])
-def test_campo_vazio_e_recusado_como_obrigatorio(campo):
+@pytest.mark.parametrize(
+    ("campo", "rotulo"),
+    [
+        ("data", "Data"),
+        ("hora_inicio", "Hora de início"),
+        ("hora_fim", "Hora de término"),
+    ],
+)
+def test_campo_vazio_e_recusado_como_obrigatorio(campo, rotulo):
     # Act
     with pytest.raises(CampoObrigatorioAusente) as erro:
         _criar_intervalo(**{campo: None})
 
     # Assert
     assert erro.value.campo == campo
+    assert erro.value.mensagem == f'O campo "{rotulo}" é obrigatório.'
 
 
 @pytest.mark.parametrize("hora_fim", [time(10, 0), time(9, 59)])
@@ -50,14 +59,16 @@ def test_fim_igual_ou_antes_do_inicio_e_recusado(hora_fim):
 
 def test_datetime_no_lugar_de_date_e_recusado():
     # Act / Assert
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match=exatamente("data deve ser um date, não um datetime.")
+    ):
         _criar_intervalo(data=datetime(2026, 10, 25, 10, 0))
 
 
 @pytest.mark.parametrize("campo", ["hora_inicio", "hora_fim"])
 def test_hora_que_nao_e_time_e_recusada(campo):
     # Act / Assert
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match=exatamente(f"{campo} deve ser um time.")):
         _criar_intervalo(**{campo: "10:00"})
 
 
