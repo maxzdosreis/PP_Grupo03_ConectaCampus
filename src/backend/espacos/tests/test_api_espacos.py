@@ -3,12 +3,12 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from espacos.domain.tipo_espaco import TipoEspaco
+from espacos.tests.fakes import ID_INEXISTENTE, dados_validos
 
 pytestmark = pytest.mark.django_db
 
 URL_LISTA = reverse("espacos:lista")
 URL_TIPOS = reverse("espacos:tipos")
-ID_INEXISTENTE = 9999
 
 
 @pytest.fixture
@@ -20,14 +20,8 @@ def _url_detalhe(espaco_id):
     return reverse("espacos:detalhe", args=[espaco_id])
 
 
-def _dados_validos(**sobrescritas):
-    dados = {"nome": "Ginásio A", "tipo": "GINASIO", "capacidade": 50}
-    dados.update(sobrescritas)
-    return dados
-
-
 def _cadastrar(cliente, **sobrescritas):
-    return cliente.post(URL_LISTA, _dados_validos(**sobrescritas), format="json")
+    return cliente.post(URL_LISTA, dados_validos(**sobrescritas), format="json")
 
 
 def _listar(cliente, **filtros):
@@ -92,25 +86,25 @@ def test_espaco_cadastrado_aparece_na_listagem(cliente):
             "DADOS_INVALIDOS",
             "nome",
         ),
-        (_dados_validos(nome="   "), 400, "CAMPO_OBRIGATORIO_AUSENTE", "nome"),
-        (_dados_validos(tipo=""), 400, "CAMPO_OBRIGATORIO_AUSENTE", "tipo"),
-        (_dados_validos(capacidade="abc"), 400, "DADOS_INVALIDOS", "capacidade"),
-        (_dados_validos(capacidade=0), 400, "CAPACIDADE_INVALIDA", "capacidade"),
+        (dados_validos(nome="   "), 400, "CAMPO_OBRIGATORIO_AUSENTE", "nome"),
+        (dados_validos(tipo=""), 400, "CAMPO_OBRIGATORIO_AUSENTE", "tipo"),
+        (dados_validos(capacidade="abc"), 400, "DADOS_INVALIDOS", "capacidade"),
+        (dados_validos(capacidade=0), 400, "CAPACIDADE_INVALIDA", "capacidade"),
         (
-            _dados_validos(capacidade=99_999_999_999),
+            dados_validos(capacidade=99_999_999_999),
             400,
             "DADOS_INVALIDOS",
             "capacidade",
         ),
         (
-            _dados_validos(nome="Quadra " + "x" * 100),
+            dados_validos(nome="Quadra " + "x" * 100),
             400,
             "NOME_DE_ESPACO_MUITO_LONGO",
             "nome",
         ),
-        (_dados_validos(tipo="PISCINA"), 400, "TIPO_DE_ESPACO_INVALIDO", "tipo"),
+        (dados_validos(tipo="PISCINA"), 400, "TIPO_DE_ESPACO_INVALIDO", "tipo"),
         (
-            _dados_validos(nome="  GINÁSIO   a "),
+            dados_validos(nome="  GINÁSIO   a "),
             409,
             "NOME_DE_ESPACO_JA_CADASTRADO",
             "nome",
@@ -314,12 +308,19 @@ def test_solicitante_nao_cadastra_espaco_e_nada_e_gravado(cliente_solicitante, c
     assert _nomes(_listar(cliente)) == []
 
 
-def test_solicitante_lista_e_obtem_espacos(cliente_solicitante, espaco_id):
+def test_solicitante_lista_espacos(cliente_solicitante, espaco_id):
     # Act
-    lista = _listar(cliente_solicitante)
-    detalhe = cliente_solicitante.get(_url_detalhe(espaco_id))
+    resposta = _listar(cliente_solicitante)
 
     # Assert
-    assert lista.status_code == 200
-    assert _nomes(lista) == ["Quadra Coberta"]
-    assert detalhe.status_code == 200
+    assert resposta.status_code == 200
+    assert _nomes(resposta) == ["Quadra Coberta"]
+
+
+def test_solicitante_obtem_o_detalhe_de_um_espaco(cliente_solicitante, espaco_id):
+    # Act
+    resposta = cliente_solicitante.get(_url_detalhe(espaco_id))
+
+    # Assert
+    assert resposta.status_code == 200
+    assert resposta.data["dados"]["id"] == espaco_id

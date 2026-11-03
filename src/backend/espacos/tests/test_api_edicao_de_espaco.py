@@ -1,10 +1,11 @@
 import pytest
 from django.urls import reverse
 
+from espacos.tests.fakes import ID_INEXISTENTE
+
 pytestmark = pytest.mark.django_db
 
 URL_LISTA = reverse("espacos:lista")
-ID_INEXISTENTE = 9999
 
 
 def _url(nome_da_rota, espaco_id):
@@ -159,20 +160,34 @@ def test_acoes_em_espaco_inexistente_respondem_404(cliente_gestor, agir):
     assert resposta.data["erro"]["codigo"] == "ESPACO_NAO_ENCONTRADO"
 
 
-def test_desativar_responde_200_e_de_novo_responde_409(cliente_gestor, espaco_id):
+def test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo(
+    cliente_gestor, espaco_id
+):
     # Act
-    primeira = _desativar(cliente_gestor, espaco_id)
-    segunda = _desativar(cliente_gestor, espaco_id)
+    resposta = _desativar(cliente_gestor, espaco_id)
 
     # Assert
-    assert primeira.status_code == 200
-    assert primeira.data["mensagem"] == (
+    assert resposta.status_code == 200
+    assert resposta.data["mensagem"] == (
         "Espaço desativado. Novas reservas ficam bloqueadas; "
         "as existentes continuam valendo."
     )
-    assert primeira.data["dados"]["ativo"] is False
-    assert segunda.status_code == 409
-    assert segunda.data == {
+    assert resposta.data["dados"]["ativo"] is False
+    assert _espaco_na_listagem(cliente_gestor, espaco_id)["ativo"] is False
+
+
+def test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo(
+    cliente_gestor, espaco_id
+):
+    # Arrange
+    _desativar(cliente_gestor, espaco_id)
+
+    # Act
+    resposta = _desativar(cliente_gestor, espaco_id)
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data == {
         "erro": {
             "codigo": "ESPACO_JA_INATIVO",
             "mensagem": "Este espaço já está inativo.",
@@ -181,22 +196,28 @@ def test_desativar_responde_200_e_de_novo_responde_409(cliente_gestor, espaco_id
     assert _espaco_na_listagem(cliente_gestor, espaco_id)["ativo"] is False
 
 
-def test_ativar_espaco_inativo_responde_200_e_de_novo_responde_409(
+def test_ativar_espaco_inativo_responde_200_com_o_espaco_ativo(
     cliente_gestor, espaco_id
 ):
     # Arrange
     _desativar(cliente_gestor, espaco_id)
 
     # Act
-    primeira = _ativar(cliente_gestor, espaco_id)
-    segunda = _ativar(cliente_gestor, espaco_id)
+    resposta = _ativar(cliente_gestor, espaco_id)
 
     # Assert
-    assert primeira.status_code == 200
-    assert primeira.data["mensagem"] == "Espaço reativado."
-    assert primeira.data["dados"]["ativo"] is True
-    assert segunda.status_code == 409
-    assert segunda.data["erro"]["codigo"] == "ESPACO_JA_ATIVO"
+    assert resposta.status_code == 200
+    assert resposta.data["mensagem"] == "Espaço reativado."
+    assert resposta.data["dados"]["ativo"] is True
+
+
+def test_ativar_espaco_ja_ativo_responde_409(cliente_gestor, espaco_id):
+    # Act
+    resposta = _ativar(cliente_gestor, espaco_id)
+
+    # Assert
+    assert resposta.status_code == 409
+    assert resposta.data["erro"]["codigo"] == "ESPACO_JA_ATIVO"
 
 
 @pytest.mark.parametrize(

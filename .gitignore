@@ -66,6 +66,7 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
+mutants/
 .pytest_cache/
 cover/
 venv/

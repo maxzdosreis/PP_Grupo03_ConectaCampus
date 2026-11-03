@@ -4,7 +4,6 @@ from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from espacos.domain.espaco_esportivo import (
     NOME_MAXIMO_CARACTERES,
-    EspacoEsportivo,
     EstadoDoEspaco,
 )
 from espacos.domain.excecoes import (
@@ -20,21 +19,12 @@ from espacos.domain.excecoes import (
     TipoDeEspacoInvalido,
 )
 from espacos.domain.tipo_espaco import TipoEspaco
-
-
-def _criar_espaco(**sobrescritas):
-    dados = {
-        "nome": "Quadra Central",
-        "tipo": TipoEspaco.GINASIO,
-        "capacidade": 20,
-    }
-    dados.update(sobrescritas)
-    return EspacoEsportivo(**dados)
+from espacos.tests.fakes import novo_espaco
 
 
 def test_criacao_valida_normaliza_nome_e_converte_tipo():
     # Act
-    espaco = _criar_espaco(nome="  Quadra   Central ", tipo="GINASIO")
+    espaco = novo_espaco(nome="  Quadra   Central ", tipo="GINASIO")
 
     # Assert
     assert espaco.nome == "Quadra Central"
@@ -44,7 +34,7 @@ def test_criacao_valida_normaliza_nome_e_converte_tipo():
 
 def test_espaco_novo_comeca_ativo_e_sem_id():
     # Act
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Assert
     assert espaco.ativo is True
@@ -55,10 +45,11 @@ def test_espaco_novo_comeca_ativo_e_sem_id():
 def test_nome_vazio_e_recusado_como_campo_obrigatorio(nome):
     # Act
     with pytest.raises(CampoObrigatorioAusente) as erro:
-        _criar_espaco(nome=nome)
+        novo_espaco(nome=nome)
 
     # Assert
     assert erro.value.campo == "nome"
+    assert erro.value.mensagem == 'O campo "Nome" é obrigatório.'
 
 
 def test_nome_no_limite_de_caracteres_e_aceito():
@@ -66,7 +57,7 @@ def test_nome_no_limite_de_caracteres_e_aceito():
     nome = "A" * NOME_MAXIMO_CARACTERES
 
     # Act
-    espaco = _criar_espaco(nome=nome)
+    espaco = novo_espaco(nome=nome)
 
     # Assert
     assert espaco.nome == nome
@@ -78,10 +69,11 @@ def test_nome_acima_do_limite_de_caracteres_e_recusado():
 
     # Act
     with pytest.raises(NomeDeEspacoMuitoLongo) as erro:
-        _criar_espaco(nome=nome)
+        novo_espaco(nome=nome)
 
     # Assert
     assert erro.value.campo == "nome"
+    assert erro.value.limite == NOME_MAXIMO_CARACTERES
     assert erro.value.mensagem == (
         "O nome do espaço deve ter no máximo 100 caracteres."
     )
@@ -91,37 +83,41 @@ def test_nome_acima_do_limite_de_caracteres_e_recusado():
 def test_tipo_vazio_e_recusado_como_campo_obrigatorio(tipo):
     # Act
     with pytest.raises(CampoObrigatorioAusente) as erro:
-        _criar_espaco(tipo=tipo)
+        novo_espaco(tipo=tipo)
 
     # Assert
     assert erro.value.campo == "tipo"
+    assert erro.value.mensagem == 'O campo "Tipo" é obrigatório.'
 
 
 def test_tipo_desconhecido_e_recusado_listando_os_tipos_aceitos():
     # Act
     with pytest.raises(TipoDeEspacoInvalido) as erro:
-        _criar_espaco(tipo="PISCINA")
+        novo_espaco(tipo="PISCINA")
 
     # Assert
     assert erro.value.campo == "tipo"
-    assert "Quadra poliesportiva" in erro.value.mensagem
-    assert "Quadra de tênis" in erro.value.mensagem
+    assert erro.value.mensagem == (
+        "Tipo de espaço inválido. Escolha um destes: Quadra poliesportiva, "
+        "Campo de futebol, Ginásio, Quadra de areia, Quadra de tênis."
+    )
 
 
 def test_capacidade_ausente_e_recusada_como_campo_obrigatorio():
     # Act
     with pytest.raises(CampoObrigatorioAusente) as erro:
-        _criar_espaco(capacidade=None)
+        novo_espaco(capacidade=None)
 
     # Assert
     assert erro.value.campo == "capacidade"
+    assert erro.value.mensagem == 'O campo "Capacidade" é obrigatório.'
 
 
 @pytest.mark.parametrize("capacidade", [0, -1, True, "10"])
 def test_capacidade_que_nao_e_inteiro_positivo_e_recusada(capacidade):
     # Act
     with pytest.raises(CapacidadeInvalida) as erro:
-        _criar_espaco(capacidade=capacidade)
+        novo_espaco(capacidade=capacidade)
 
     # Assert
     assert erro.value.campo == "capacidade"
@@ -129,7 +125,7 @@ def test_capacidade_que_nao_e_inteiro_positivo_e_recusada(capacidade):
 
 def test_capacidade_minima_e_aceita():
     # Act
-    espaco = _criar_espaco(capacidade=1)
+    espaco = novo_espaco(capacidade=1)
 
     # Assert
     assert espaco.capacidade == 1
@@ -137,7 +133,7 @@ def test_capacidade_minima_e_aceita():
 
 def test_garantir_que_esta_ativo_passa_quando_o_espaco_esta_ativo():
     # Arrange
-    espaco = _criar_espaco(ativo=True)
+    espaco = novo_espaco(ativo=True)
 
     # Act / Assert
     espaco.garantir_que_esta_ativo()
@@ -145,7 +141,7 @@ def test_garantir_que_esta_ativo_passa_quando_o_espaco_esta_ativo():
 
 def test_garantir_que_esta_ativo_recusa_espaco_inativo():
     # Arrange
-    espaco = _criar_espaco(ativo=False)
+    espaco = novo_espaco(ativo=False)
 
     # Act / Assert
     with pytest.raises(EspacoInativo):
@@ -185,7 +181,7 @@ def _dados(espaco):
 )
 def test_alterar_dados_muda_so_os_campos_informados(alteracao, esperado):
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act
     espaco.alterar_dados(**alteracao)
@@ -219,7 +215,7 @@ def test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada(
     alteracao, excecao
 ):
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
     antes = _dados(espaco)
 
     # Act
@@ -232,7 +228,7 @@ def test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada(
 
 def test_alterar_dados_sem_nenhum_campo_e_recusado():
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act
     with pytest.raises(NenhumaAlteracaoInformada) as erro:
@@ -245,7 +241,7 @@ def test_alterar_dados_sem_nenhum_campo_e_recusado():
 
 def test_desativar_espaco_ativo_o_deixa_inativo():
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act
     espaco.desativar()
@@ -256,7 +252,7 @@ def test_desativar_espaco_ativo_o_deixa_inativo():
 
 def test_desativar_espaco_ja_inativo_e_recusado():
     # Arrange
-    espaco = _criar_espaco(ativo=False)
+    espaco = novo_espaco(ativo=False)
 
     # Act / Assert
     with pytest.raises(EspacoJaInativo):
@@ -266,7 +262,7 @@ def test_desativar_espaco_ja_inativo_e_recusado():
 
 def test_ativar_espaco_inativo_o_deixa_ativo():
     # Arrange
-    espaco = _criar_espaco(ativo=False)
+    espaco = novo_espaco(ativo=False)
 
     # Act
     espaco.ativar()
@@ -277,7 +273,7 @@ def test_ativar_espaco_inativo_o_deixa_ativo():
 
 def test_ativar_espaco_ja_ativo_e_recusado():
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act / Assert
     with pytest.raises(EspacoJaAtivo):
@@ -296,7 +292,7 @@ def test_ativar_espaco_ja_ativo_e_recusado():
 )
 def test_dados_do_espaco_nao_aceitam_atribuicao_direta(campo, valor):
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act / Assert
     with pytest.raises(AttributeError):
@@ -332,8 +328,8 @@ def test_nenhuma_alteracao_informada_vira_400_sem_campo():
 
 def test_espacos_com_o_mesmo_id_sao_iguais():
     # Arrange
-    espaco = _criar_espaco(id=1)
-    mesmo_espaco = _criar_espaco(id=1, nome="Outro nome")
+    espaco = novo_espaco(id=1)
+    mesmo_espaco = novo_espaco(id=1, nome="Outro nome")
 
     # Act / Assert
     assert espaco == mesmo_espaco
@@ -342,27 +338,27 @@ def test_espacos_com_o_mesmo_id_sao_iguais():
 
 def test_espacos_com_ids_diferentes_sao_diferentes():
     # Act / Assert
-    assert _criar_espaco(id=1) != _criar_espaco(id=2)
+    assert novo_espaco(id=1) != novo_espaco(id=2)
 
 
 def test_espacos_sem_id_so_sao_iguais_a_si_mesmos():
     # Arrange
-    espaco = _criar_espaco()
+    espaco = novo_espaco()
 
     # Act / Assert
     assert espaco == espaco
-    assert espaco != _criar_espaco()
-    assert len({espaco, _criar_espaco()}) == 2
+    assert espaco != novo_espaco()
+    assert len({espaco, novo_espaco()}) == 2
 
 
 def test_espaco_nao_e_igual_a_objeto_de_outro_tipo():
     # Act / Assert
-    assert _criar_espaco(id=1) != 1
+    assert novo_espaco(id=1) != 1
 
 
 def test_str_mostra_nome_e_rotulo_do_tipo():
     # Act
-    texto = str(_criar_espaco())
+    texto = str(novo_espaco())
 
     # Assert
     assert texto == "Quadra Central (Ginásio)"
@@ -370,7 +366,7 @@ def test_str_mostra_nome_e_rotulo_do_tipo():
 
 def test_repr_mostra_os_campos_para_depuracao():
     # Act
-    texto = repr(_criar_espaco(id=3))
+    texto = repr(novo_espaco(id=3))
 
     # Assert
     assert texto.startswith("EspacoEsportivo(id=3, nome='Quadra Central'")
@@ -435,7 +431,7 @@ def test_capacidade_invalida_vira_400_marcando_o_campo():
 
 def test_estado_de_origem_guarda_o_que_foi_lido_enquanto_o_estado_muda():
     # Arrange
-    espaco = _criar_espaco(nome="  Quadra   Central ")
+    espaco = novo_espaco(nome="  Quadra   Central ")
     lido = EstadoDoEspaco("Quadra Central", TipoEspaco.GINASIO, 20, True)
 
     # Act
@@ -451,7 +447,7 @@ def test_estado_de_origem_guarda_o_que_foi_lido_enquanto_o_estado_muda():
 
 def test_marcar_como_gravado_faz_o_estado_atual_virar_a_origem():
     # Arrange
-    espaco = _criar_espaco(ativo=False)
+    espaco = novo_espaco(ativo=False)
     espaco.ativar()
 
     # Act
