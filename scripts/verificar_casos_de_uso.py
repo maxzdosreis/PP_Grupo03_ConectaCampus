@@ -6,12 +6,42 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from verificar_requisitos import PASTA, fichas_de_rf, ler, relativo  # noqa: E402
+from verificar_requisitos import PASTA, ancoras, fichas_de_rf, ler, relativo  # noqa: E402
 
 PASTA_UC = PASTA / "casos-de-uso"
 README_UC = PASTA_UC / "README.md"
 SRS = PASTA / "requisitos" / "srs.md"
-DIAGRAMAS = sorted(PASTA_UC.glob("*.puml"))
+DIAGRAMAS = sorted(PASTA_UC.glob("diagrama-*.puml"))
+FLUXO_UC04 = PASTA_UC / "fluxo-solicitar-reserva.puml"
+RESUMIDAS = PASTA_UC / "fichas-resumidas.md"
+
+FICHAS_COMPLETAS = {
+    "UC-02-autenticar.md": ["UC-02"],
+    "UC-04-solicitar-reserva.md": ["UC-04", "UC-05", "UC-13"],
+    "UC-10-alterar-situacao-da-reserva.md": ["UC-10", "UC-11", "UC-12", "UC-13", "UC-17", "UC-18", "UC-19"],
+    "UC-14-cadastrar-espaco.md": ["UC-14"],
+}
+UCS_RESUMIDOS = ["UC-01", "UC-03", "UC-06", "UC-07", "UC-08", "UC-09", "UC-15", "UC-16", "UC-20", "UC-21", "UC-22"]
+
+PASSO = re.compile(r'^\d+\.\s+<a id="p(\d+)"></a>')
+ITEM_COMPLETO = re.compile(r'^####\s+<a id="([ae])(\d+)-(\d+)"></a>([AE])(\d+)\.(\d+)\b')
+PARTES_DA_EXCECAO = ("- **Condição:**", "- **Resultado para o ator:**", "- **Estado depois:**", "- **Requisito:**")
+REQUISITO = re.compile(r"\[(?:RF|RNF)-[\w.]+\]\(")
+ANCORA_INTERNA = re.compile(r"\]\(#([\w-]+)\)")
+SECAO_RESUMIDA = re.compile(r'^## <a id="uc-(\d{2})"></a>UC-\d{2}')
+TERMOS_DE_INTERFACE = {
+    "clica/clicar": r"\bclica",
+    "botão": r"\bbot[aã]o",
+    "tela": r"\btelas?\b",
+    "menu": r"\bmenus?\b",
+    "seleciona": r"\bseleciona",
+    "campo de texto": r"campo de texto",
+    "http": r"https?:",
+    "/api/": r"/api/",
+    "React": r"\breact\b",
+    "Django": r"\bdjango\b",
+    "JWT": r"\bjwt\b",
+}
 
 ID_UC = re.compile(r"UC-\d{2}")
 ATOR = re.compile(r'^\s*actor\s+(?:"(?P<rotulo>[^"]+)"\s+as\s+)?(?P<alias>\w+)\s*$')
@@ -197,7 +227,7 @@ def verificar_rf_uc(diagramas: list[Diagrama]) -> list[str]:
         erros.append(f"{uc} não cobre nenhum RF (nem como principal, nem em 'também em')")
     papeis = {}
     for linhas in tabela.values():
-        papel = linhas[0]["como"].split(" (")[0]
+        papel = linhas[0]["como"].split(" — ")[0].split(" (")[0]
         papeis[papel] = papeis.get(papel, 0) + 1
     print(f"RF na tabela-resumo da SRS: {len(resumo)}; na tabela RF → UC: {len(tabela)}")
     print("Como entram:", ", ".join(f"{papel} {n}" for papel, n in sorted(papeis.items())))
@@ -314,6 +344,225 @@ def verificar_imagens(diagramas: list[Diagrama]) -> list[str]:
     return erros
 
 
+def rfs_do_grupo(ucs: list[str]) -> list[str]:
+    """RF cujo UC principal ou "também em" está no grupo (sem os transversais)."""
+    rfs = []
+    for rf, linhas in tabela_rf_uc().items():
+        linha = linhas[0]
+        citados = {uc_principal(linha["uc"]), *ID_UC.findall(linha["tambem"])}
+        if citados & set(ucs):
+            rfs.append(rf)
+    return rfs
+
+
+def _ids_html(texto: str) -> set[str]:
+    return set(re.findall(r'<a id="([^"]+)"', texto))
+
+
+def _secao(texto: str, titulo: str) -> str:
+    achado = re.search(rf"^## {re.escape(titulo)}\s*$(.*?)(?=^## |\Z)", texto, flags=re.M | re.S)
+    return achado.group(1) if achado else ""
+
+
+def _linhas_de_rf(secao: str) -> dict[str, list[str]]:
+    """RF → âncoras internas citadas na mesma linha (tabela) ou no mesmo trecho (lista com " · ")."""
+    ligacoes: dict[str, list[str]] = {}
+    for linha in secao.splitlines():
+        for trecho in linha.split(" · "):
+            achado = re.match(r"^\W*\[(RF-[\d.]+)\]\(", trecho.strip(" |*").replace("RFs cobertos:** ", ""))
+            if achado:
+                ligacoes.setdefault(achado[1], []).extend(ANCORA_INTERNA.findall(trecho))
+    return ligacoes
+
+
+def verificar_fichas_completas() -> list[str]:
+    erros = []
+    for nome, ucs in FICHAS_COMPLETAS.items():
+        arquivo = PASTA_UC / nome
+        if not arquivo.exists():
+            erros.append(f"{nome} não existe")
+            continue
+        texto = ler(arquivo)
+        ids = _ids_html(texto)
+        passos = {int(a[1]) for linha in texto.splitlines() if (a := PASSO.match(linha))}
+        contagem = {"a": 0, "e": 0}
+        linhas = texto.splitlines()
+        for numero, linha in enumerate(linhas):
+            item = ITEM_COMPLETO.match(linha)
+            if not item:
+                continue
+            tipo, passo, ordem, letra, passo_rotulo, ordem_rotulo = item.groups()
+            rotulo = f"{letra}{passo_rotulo}.{ordem_rotulo}"
+            contagem[tipo] += 1
+            if (tipo.upper(), passo, ordem) != (letra, passo_rotulo, ordem_rotulo):
+                erros.append(f"{nome}: âncora {tipo}{passo}-{ordem} não bate com o rótulo {rotulo}")
+            if int(passo) not in passos:
+                erros.append(f"{nome}: {rotulo} cita o passo {passo}, que não existe no fluxo principal")
+            if tipo == "e":
+                bloco = []
+                for seguinte in linhas[numero + 1 :]:
+                    if re.match(r"^#{2,4} ", seguinte):
+                        break
+                    bloco.append(seguinte)
+                faltam = [p for p in PARTES_DA_EXCECAO if not any(b.startswith(p) for b in bloco)]
+                if faltam:
+                    erros.append(f"{nome}: {rotulo} sem {', '.join(faltam)}")
+                requisito = next((b for b in bloco if b.startswith(PARTES_DA_EXCECAO[-1])), "")
+                if requisito and not REQUISITO.search(requisito):
+                    erros.append(f"{nome}: {rotulo} não cita RF nem RNF em Requisito")
+        ligacoes = _linhas_de_rf(_secao(texto, "RFs cobertos"))
+        esperados = rfs_do_grupo(ucs)
+        for rf in esperados:
+            ancoras = ligacoes.get(rf, [])
+            if not ancoras:
+                erros.append(f"{nome}: {rf} (atribuído a {'/'.join(ucs)}) não está em 'RFs cobertos' com âncora")
+            for ancora in ancoras:
+                if ancora not in ids:
+                    erros.append(f"{nome}: {rf} aponta para #{ancora}, que não existe na ficha")
+        print(
+            f"{nome}: {len(passos)} passos, {contagem['a']} alternativas, {contagem['e']} exceções; "
+            f"RF esperados {len(esperados)}, ligados {sum(1 for rf in esperados if ligacoes.get(rf))}"
+        )
+    return erros
+
+
+def verificar_fichas_resumidas() -> list[str]:
+    erros = []
+    texto = ler(RESUMIDAS)
+    ids = _ids_html(texto)
+    secoes: dict[str, list[str]] = {}
+    atual = None
+    for linha in texto.splitlines():
+        if achado := SECAO_RESUMIDA.match(linha):
+            atual = f"UC-{achado[1]}"
+            secoes[atual] = []
+        elif linha.startswith("# "):
+            atual = None
+        if atual:
+            secoes[atual].append(linha)
+    for uc in UCS_RESUMIDOS:
+        if uc not in secoes:
+            erros.append(f"fichas-resumidas.md: {uc} sem seção")
+            continue
+        prefixo = "uc" + uc[3:]
+        corpo = secoes[uc]
+        passos = {int(p) for linha in corpo for p in re.findall(rf'<a id="{prefixo}-p(\d+)"></a>', linha)}
+        if not 3 <= len(passos) <= 6:
+            erros.append(f"fichas-resumidas.md: {uc} tem {len(passos)} passos (esperado de 3 a 6)")
+        excecoes = 0
+        for linha in corpo:
+            for tipo, passo, ordem, letra, passo_r, ordem_r in re.findall(
+                rf'<a id="{prefixo}-([ae])(\d+)-(\d+)"></a>\**([AE])(\d+)\.(\d+)', linha
+            ):
+                rotulo = f"{letra}{passo_r}.{ordem_r}"
+                if (tipo.upper(), passo, ordem) != (letra, passo_r, ordem_r):
+                    erros.append(f"fichas-resumidas.md: {uc} âncora {tipo}{passo}-{ordem} ≠ rótulo {rotulo}")
+                if int(passo) not in passos:
+                    erros.append(f"fichas-resumidas.md: {uc} {rotulo} cita o passo {passo}, que não existe")
+                if tipo == "e":
+                    excecoes += 1
+                    celulas = [c.strip() for c in linha.strip().strip("|").split("|")]
+                    if len(celulas) != 5 or not all(celulas):
+                        erros.append(f"fichas-resumidas.md: {uc} {rotulo} sem as quatro partes")
+                    elif not REQUISITO.search(celulas[-1]):
+                        erros.append(f"fichas-resumidas.md: {uc} {rotulo} não cita RF nem RNF")
+        ligacoes = _linhas_de_rf("\n".join(l for l in corpo if l.startswith("**RFs cobertos:**")))
+        for rf in rfs_do_grupo([uc]):
+            ancoras = ligacoes.get(rf, [])
+            if not ancoras:
+                erros.append(f"fichas-resumidas.md: {uc} não cita {rf} em 'RFs cobertos' com âncora")
+            erros += [f"fichas-resumidas.md: {uc} {rf} → #{a} inexistente" for a in ancoras if a not in ids]
+        print(f"{uc}: {len(passos)} passos, {excecoes} exceções, {len(rfs_do_grupo([uc]))} RF citados")
+    return erros
+
+
+def _ancoras_de(arquivo: Path, cache: dict[Path, set[str]]) -> set[str]:
+    if arquivo not in cache:
+        cache[arquivo] = _ids_html(ler(arquivo)) | set(ancoras(arquivo))
+    return cache[arquivo]
+
+
+def verificar_readme_das_fichas() -> list[str]:
+    erros = []
+    cache: dict[Path, set[str]] = {}
+    refinados = 0
+    for rf, linhas in tabela_rf_uc().items():
+        como = linhas[0]["como"]
+        if como.startswith("transversal"):
+            continue
+        alvos = re.findall(r"\]\(([\w.-]+\.md)#([\w-]+)\)", como)
+        if not alvos:
+            erros.append(f"{rf}: 'Como entra' sem o passo, a alternativa ou a exceção exata ({como!r})")
+        for arquivo, ancora in alvos:
+            destino = PASTA_UC / arquivo
+            if not destino.exists() or ancora not in _ancoras_de(destino, cache):
+                erros.append(f"{rf}: 'Como entra' aponta para {arquivo}#{ancora}, que não existe")
+        refinados += bool(alvos)
+    esperados = {uc: [n for n, ucs in FICHAS_COMPLETAS.items() if uc in ucs] for uc in indice_do_readme()}
+    for uc in UCS_RESUMIDOS:
+        esperados[uc] = [RESUMIDAS.name]
+    for linha in ler(README_UC).splitlines():
+        if achado := LINHA_DO_INDICE.match(linha):
+            estado = linha.rstrip(" |").rsplit("|", 1)[-1]
+            arquivos = set(re.findall(r"\]\(([\w.-]+\.md)", estado))
+            if not arquivos & set(esperados[achado["id"]]):
+                erros.append(f"{achado['id']}: Estado {estado.strip()!r} não aponta para {esperados[achado['id']]}")
+    print(f"'Como entra' com referência exata: {refinados} RF; coluna Estado conferida em {len(esperados)} UCs")
+    return erros
+
+
+def _sem_trechos_ignorados(linha: str) -> str:
+    linha = re.sub(r"`[^`]*`", " ", linha)
+    return re.sub(r"\]\([^)]*\)", "] ", linha)
+
+
+def verificar_termos_de_interface() -> list[str]:
+    erros = []
+    no_anexo = 0
+    arquivos = [PASTA_UC / nome for nome in FICHAS_COMPLETAS] + [RESUMIDAS, FLUXO_UC04]
+    for arquivo in arquivos:
+        dentro_do_anexo = False
+        for numero, linha in enumerate(ler(arquivo).splitlines(), start=1):
+            if linha.startswith("## Anexo"):
+                dentro_do_anexo = True
+            limpa = _sem_trechos_ignorados(linha)
+            for termo, padrao in TERMOS_DE_INTERFACE.items():
+                achados = len(re.findall(padrao, linha, flags=re.I))
+                if not achados:
+                    continue
+                if dentro_do_anexo:
+                    no_anexo += achados
+                elif re.search(padrao, limpa, flags=re.I):
+                    erros.append(f"{relativo(arquivo)}:{numero}: termo de interface {termo!r}")
+    print(f"Arquivos lidos: {len(arquivos)}; ocorrências no anexo de evidência (aceitas): {no_anexo}")
+    return erros
+
+
+def verificar_fluxo_uc04() -> list[str]:
+    erros = []
+    ficha = ler(PASTA_UC / "UC-04-solicitar-reserva.md")
+    na_ficha = set()
+    for linha in ficha.splitlines():
+        item = ITEM_COMPLETO.match(linha)
+        if item and item[1] == "e":
+            na_ficha.add(f"E{item[2]}.{item[3]}")
+    fonte = "\n".join(l for l in ler(FLUXO_UC04).splitlines() if not l.strip().startswith("'"))
+    no_fluxo = set(re.findall(r"\bE\d+\.\d+\b", fonte))
+    erros += [f"{FLUXO_UC04.name}: cita {e}, que não existe na ficha de UC-04" for e in sorted(no_fluxo - na_ficha)]
+    erros += [f"{FLUXO_UC04.name}: a exceção {e} da ficha não aparece no fluxo" for e in sorted(na_ficha - no_fluxo)]
+    for imagem in (FLUXO_UC04.with_suffix(".svg"), FLUXO_UC04.with_suffix(".png")):
+        if not imagem.exists():
+            erros.append(f"{relativo(imagem)} não existe: gere as imagens (README da pasta)")
+    svg = FLUXO_UC04.with_suffix(".svg")
+    if svg.exists():
+        texto_svg = ler(svg)
+        faltam = sorted(e for e in no_fluxo if e not in texto_svg)
+        if faltam or "deprecated" in texto_svg:
+            erros.append(f"{relativo(svg)} desatualizado ou com aviso do PlantUML: gere as imagens de novo")
+    print(f"Exceções na ficha: {len(na_ficha)}; no fluxo: {len(no_fluxo)}")
+    return erros
+
+
 def main() -> int:
     diagramas = [ler_diagrama(arquivo) for arquivo in DIAGRAMAS]
     verificacoes = [
@@ -322,6 +571,11 @@ def main() -> int:
         ("3. UC nas fichas rf-*.md e na SRS (seção 6.4)", verificar_fichas_e_srs),
         ("4. Notação UML dos diagramas", lambda: verificar_notacao(diagramas)),
         ("5. Imagens geradas", lambda: verificar_imagens(diagramas)),
+        ("6. Fichas completas: RF ligados, passos citados e as quatro partes das exceções", verificar_fichas_completas),
+        ("7. Fichas resumidas: RF de cada caso de uso, passos e exceções", verificar_fichas_resumidas),
+        ("8. README: 'Como entra' exato e coluna Estado", verificar_readme_das_fichas),
+        ("9. Termos de interface nas fichas (fora do anexo de evidência)", verificar_termos_de_interface),
+        ("10. Fluxo de decisão de UC-04 ↔ exceções da ficha", verificar_fluxo_uc04),
     ]
     falhou = False
     for titulo, verificar in verificacoes:

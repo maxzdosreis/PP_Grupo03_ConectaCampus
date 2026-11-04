@@ -13,7 +13,7 @@
 | **Alternativas** | **b)** Impedir a desativação enquanto houver reservas futuras que ocupam horário. **c)** Cancelar automaticamente as reservas futuras, com um motivo padrão. **d)** Mostrar ao gestor as reservas afetadas antes de confirmar a desativação. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente (premissa P-01). |
 | **Prazo sugerido** | 06/11/2026 (Aula 7). |
-| **Artefatos afetados** | `EspacoEsportivo.desativar` e `ativar`; `DesativarEspaco` e `AtivarEspaco`; `POST /api/espacos/{id}/desativar/` e `.../ativar/`; texto do `DialogoDeAtivacao`; `espacos/tests/test_api_desativacao_e_reservas.py`; [Visão](../visao.md) (NS-02, fora do escopo, R-09); casos de uso de espaços (REQ-03). |
+| **Artefatos afetados** | `EspacoEsportivo.desativar` e `ativar`; `DesativarEspaco` e `AtivarEspaco`; `POST /api/espacos/{id}/desativar/` e `.../ativar/`; texto do `DialogoDeAtivacao`; `espacos/tests/test_api_desativacao_e_reservas.py`; [Visão](../visao.md) (NS-02, fora do escopo, R-09); casos de uso de espaços (REQ-03); fichas de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#e8-2) (E8.2), [UC-10](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#questões-em-aberto) e [UC-16](../casos-de-uso/fichas-resumidas.md#uc-16) (REQ-04). |
 | **Origem** | ESP-04, decisão a ("Proposta de DEC-06" no `CLAUDE.md`). |
 | **Observações** | As opções b e c fazem um contexto depender do outro e são mudança comportamental (CR). |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da decisão proposta na ESP-04 (REQ-01). |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as fichas de caso de uso que dependem desta decisão (REQ-04). |

@@ -13,7 +13,7 @@
 | **Alternativas** | **b)** Concluir só depois do término; confirmar e recusar só antes do início; cancelar só antes do início. **c)** Como b, e as Solicitadas não decididas passam a não ocupar horário depois da data (ou são recusadas automaticamente). **d)** Só a regra de concluir (b1), mantendo as demais livres. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente. |
 | **Prazo sugerido** | 06/11/2026 (Aula 7). |
-| **Artefatos afetados** | `Reserva.alterar_situacao` (`reservas/domain/reserva.py`); [RF-17](../requisitos/rf-reservas.md#rf-17), [RF-18](../requisitos/rf-reservas.md#rf-18), [RF-19](../requisitos/rf-reservas.md#rf-19), [RF-20](../requisitos/rf-reservas.md#rf-20), [RF-21](../requisitos/rf-reservas.md#rf-21) e [RF-16](../requisitos/rf-reservas.md#rf-16) (ações disponíveis); [Visão](../visao.md) (NS-09); máquina de estados da reserva nos testes; dados de exemplo (a Concluída). |
+| **Artefatos afetados** | `Reserva.alterar_situacao` (`reservas/domain/reserva.py`); [RF-17](../requisitos/rf-reservas.md#rf-17), [RF-18](../requisitos/rf-reservas.md#rf-18), [RF-19](../requisitos/rf-reservas.md#rf-19), [RF-20](../requisitos/rf-reservas.md#rf-20), [RF-21](../requisitos/rf-reservas.md#rf-21) e [RF-16](../requisitos/rf-reservas.md#rf-16) (ações disponíveis); [Visão](../visao.md) (NS-09); máquina de estados da reserva nos testes; dados de exemplo (a Concluída); ficha de [UC-10](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#questões-em-aberto) (onde nasceriam as exceções novas) e [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#e9-1) (E9.1) (REQ-04). |
 | **Origem** | REQ-02 (SRS), lacuna L-01. |
 | **Observações** | Qualquer opção diferente de a) é mudança comportamental e passa por CR com regressão dos testes de transição. Os dados de exemplo já concluem a reserva depois do término, então continuam válidos em b). |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da pergunta encontrada na REQ-02. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as fichas de caso de uso que dependem desta decisão (REQ-04). |

@@ -13,7 +13,7 @@
 | **Alternativas** | **b)** Não mostrar: o conflito só aparece na recusa do pedido. **c)** Mostrar só "ocupado", sem a situação. **d)** Mostrar também quem reservou. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente. |
 | **Prazo sugerido** | 06/11/2026 (Aula 7). |
-| **Artefatos afetados** | `OcupacaoDoDia` e `HorarioOcupado` (`reservas/application/ocupacao_do_dia.py`); `ConsultarOcupacaoDoDia`; `GET /api/reservas/ocupacao/`; mensagem de `ConflitoDeHorario`; `AgendaDoDia` (frontend); [matriz de acesso](../../matriz_de_acesso.md); [Visão](../visao.md) (NS-05, NS-14, R-14). |
+| **Artefatos afetados** | `OcupacaoDoDia` e `HorarioOcupado` (`reservas/application/ocupacao_do_dia.py`); `ConsultarOcupacaoDoDia`; `GET /api/reservas/ocupacao/`; mensagem de `ConflitoDeHorario`; `AgendaDoDia` (frontend); [matriz de acesso](../../matriz_de_acesso.md); [Visão](../visao.md) (NS-05, NS-14, R-14); fichas de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#a3-1) (A3.1) e de [UC-06](../casos-de-uso/fichas-resumidas.md#uc-06) (REQ-04). |
 | **Origem** | FE-07, decisão a (exceção à regra de visibilidade da AUT-05, decisão f). |
 | **Observações** | ID novo: decisão de privacidade encontrada na revisão das tarefas, sem DEC proposta no `CLAUDE.md`. |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da decisão tomada na FE-07 (REQ-01). |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as fichas de caso de uso que dependem desta decisão (REQ-04). |

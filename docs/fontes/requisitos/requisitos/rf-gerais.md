@@ -14,6 +14,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: RF-38 a RF-40 (REQ-02). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o UC de cada ficha preenchido, com link para o [índice de casos de uso](../casos-de-uso/README.md#índice-dos-casos-de-uso) (REQ-03). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 
 ## Mensagens
 
@@ -25,7 +26,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-13 |
 | **Funcionalidade** | F6 |
 | **Prioridade (QFD)** | Normal — "exibir mensagens claras de sucesso e erro" é a sexta funcionalidade do enunciado. |
-| **Vínculos** | UC: transversal, qualidade de todos os casos de uso, sem caso de uso próprio ([decisão a](../casos-de-uso/README.md#decisao-a)) · US e CA a definir (REQ-04, REQ-05) |
+| **Vínculos** | UC: transversal, qualidade de todos os casos de uso, sem caso de uso próprio ([decisão a](../casos-de-uso/README.md#decisao-a)) · US e CA a definir (REQ-05) |
 | **Evidência (complementar)** | Formato `{"mensagem", "dados"}` e `{"erro": {"codigo", "mensagem", "campos"}}`; notificação no canto da tela, aviso no topo do formulário e erro embaixo do campo. `compartilhado/tests/test_respostas.py::test_resposta_sucesso_devolve_mensagem_dados_e_status_pedidos`, `::test_corpo_de_erro_com_campos_inclui_os_campos`; `compartilhado/tests/test_tratador_de_erros.py::test_campo_obrigatorio_ausente_indica_o_campo_que_falhou`, `::test_excecao_do_framework_vira_codigo_e_mensagem_em_portugues [x]`; `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [x]`; `components/mensagens/MensagensProvider.test.tsx`; `components/formulario/Campo.test.tsx` ("com erro, descreve o controle pela dica e pelo erro e o marca como inválido"); `hooks/useEnvio.test.ts` |
 | **Regras de negócio** | [Mensagem de resultado](../glossario.md#mensagem-de-resultado). A forma e a língua das mensagens são o [RNF-U01](rnf.md#rnf-u01). |
 | **Decisões** | — |
@@ -43,7 +44,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-16 |
 | **Funcionalidade** | Extra (INF-06) |
 | **Prioridade (QFD)** | Esperado — o professor avalia executando o sistema; sem dados, a demonstração começaria do zero. |
-| **Vínculos** | UC: [UC-21 Carregar dados de exemplo](../casos-de-uso/README.md#uc-21) (fluxo principal) · US e CA a definir (REQ-04, REQ-05) |
+| **Vínculos** | UC: [UC-21 Carregar dados de exemplo](../casos-de-uso/README.md#uc-21) (fluxo principal) — na ficha: [UC-21 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc21-p1) · US e CA a definir (REQ-05) |
 | **Evidência (complementar)** | `python manage.py carregar_dados_exemplo`. `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`, `::test_cria_um_espaco_de_cada_tipo_e_um_inativo`, `::test_cria_uma_reserva_de_cada_situacao`, `::test_primeira_execucao_informa_o_que_foi_criado`, `::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam`, `::test_com_debug_desligado_recusa_sem_criar_nada` |
 | **Regras de negócio** | [Dados de exemplo](../glossario.md#dados-de-exemplo); os dados passam pelas mesmas regras de todas as fichas acima. |
 | **Decisões** | — |
@@ -59,7 +60,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-16 |
 | **Funcionalidade** | Extra |
 | **Prioridade (QFD)** | Esperado — quem instala precisa saber se terminou antes de abrir as telas. |
-| **Vínculos** | UC: [UC-22 Verificar se o sistema está no ar](../casos-de-uso/README.md#uc-22) (fluxo principal) · US e CA a definir (REQ-04, REQ-05) |
+| **Vínculos** | UC: [UC-22 Verificar se o sistema está no ar](../casos-de-uso/README.md#uc-22) (fluxo principal) — na ficha: [UC-22 passos 1 a 3](../casos-de-uso/fichas-resumidas.md#uc22-p1) · US e CA a definir (REQ-05) |
 | **Evidência (complementar)** | `GET /api/health/` (sem login): 200 ou 503 `BANCO_INDISPONIVEL`; situação da API na página inicial `/`. `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` (`health`). **Sem teste do 503** (lacuna [L-08](srs.md#lacunas)). |
 | **Regras de negócio** | — |
 | **Decisões** | — |

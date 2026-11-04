@@ -12,6 +12,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: RF-01 a RF-40 (60 fichas), RNF-F01 a RNF-S06 (31 fichas), restrições, priorização QFD, lacunas, auditoria e rastreabilidade (REQ-02). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Coluna UC da seção 6.4 preenchida e vínculos UC das fichas, a partir do [diagrama e do índice de casos de uso](../casos-de-uso/README.md) (REQ-03). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Lacunas L-12 a L-14, achadas ao escrever as [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); auditoria do RF-11, RF-17, RF-26 e RF-33.1 e resumo recontado; textos sobre US e CA apontam para a REQ-05 (REQ-04). Coluna UC da 6.4 sem mudança. Sem aprovação. |
 
 ## Sumário
 
@@ -26,7 +27,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 9. [Auditoria de qualidade](#9-auditoria-de-qualidade)
 10. [Checklist de revisão por pares](#10-checklist-de-revisão-por-pares)
 
-No sumário do template A4·s11, este documento cobre a parte 3 (RF e RNF), a parte das interfaces da 4 e a rastreabilidade da 5. O diagrama e o índice dos casos de uso estão em [`casos-de-uso/`](../casos-de-uso/README.md) (REQ-03); as fichas dos casos de uso, as histórias e os critérios de aceite vêm nas próximas tarefas (REQ-04 e REQ-05).
+No sumário do template A4·s11, este documento cobre a parte 3 (RF e RNF), a parte das interfaces da 4 e a rastreabilidade da 5. O diagrama e o índice dos casos de uso estão em [`casos-de-uso/`](../casos-de-uso/README.md) (REQ-03); as fichas dos casos de uso estão na mesma pasta (REQ-04); as histórias e os critérios de aceite vêm na REQ-05.
 
 ---
 
@@ -98,7 +99,7 @@ Reservas consulta o cadastro de espaços para saber se um espaço é [reserváve
 - **Recusas (F5):** a recusa de uma operação inválida é uma obrigação do sistema diante de um pedido, não uma capacidade do ator. Por isso usa a sintaxe "O sistema deve impedir que o [ator] [ação inválida], sem alterar [o quê], e informar [o motivo e o campo]." São as únicas fichas que não começam com "O sistema deve permitir ao". RF-37 e RF-39 começam com "O sistema deve permitir à" só pela concordância com o ator ("à Equipe de TI"): é a mesma sintaxe.
 - **Decomposição (A4·s8):** uma obrigação por ID. A recusa específica de uma operação é um filho `RF-xx.n` do RF da operação (ex.: [RF-11.4](rf-reservas.md#rf-11-4), conflito de horário no pedido). A recusa que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas listadas na ficha (ex.: [RF-23](rf-reservas.md#rf-23), reserva inexistente ou de outra pessoa, que protege o detalhe, o histórico e a mudança de situação). Assim cada recusa tem um ID e uma evidência, sem repetir a mesma obrigação em várias fichas, e a F5 fica coberta por IDs próprios.
 - **Ficha (A4·s9):** ID e título, enunciado, pai (filhos) ou operações protegidas (recusas comuns), origem (NS principal primeiro), funcionalidade do enunciado, prioridade QFD com justificativa, vínculos, evidência, regras de negócio (com link para o glossário), decisões, revisão, estado e responsável.
-- **Vínculos:** o caso de uso em que o RF entra, com o papel dele (fluxo principal, alternativa, exceção ou transversal), definido na REQ-03 ([rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc)); US e CA ficam "a definir (REQ-04, REQ-05)".
+- **Vínculos:** o caso de uso em que o RF entra, com o papel dele (fluxo principal, alternativa, exceção ou transversal), definido na REQ-03 ([rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc)), e o passo, a alternativa ou a exceção exata na ficha do caso de uso (REQ-04); US e CA ficam "a definir (REQ-05)".
 - **Evidência (complementar):** o endpoint ou a tela e o `arquivo::teste` que prova o comportamento. É uma extensão do grupo: a cadeia do professor para em CA/TA, e a pergunta se o elo até o código é esperado segue aberta (ponto 13 de `.claude/requisitos.md`).
 - **Estado:** todos em **Rascunho** (versão 0.1). Nenhum RF ficou "Não implementado": todas as NS têm comportamento implementado (ver [lacunas](#lacunas)).
 
@@ -319,7 +320,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 
 ### 6.4 RF → evidência, UC, US e CA
 
-A evidência detalhada (endpoint ou tela e `arquivo::teste`) está em cada ficha; aqui fica um teste representativo por RF, para a amostra de verificação. A coluna UC traz o caso de uso principal de cada RF (REQ-03); o papel do RF nele e os demais casos de uso em que aparece estão na [rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc). US e CA são preenchidos na REQ-04 (UC detalhados e US) e na REQ-05 (CA).
+A evidência detalhada (endpoint ou tela e `arquivo::teste`) está em cada ficha; aqui fica um teste representativo por RF, para a amostra de verificação. A coluna UC traz o caso de uso principal de cada RF (REQ-03); o papel do RF nele e os demais casos de uso em que aparece estão na [rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc). O passo, a alternativa ou a exceção exata de cada RF está na coluna "Como entra" da rastreabilidade e no campo Vínculos da ficha (REQ-04). US e CA são preenchidos na REQ-05.
 
 | RF | Teste representativo (a partir de `src/backend/`, ou `src/frontend/src/` quando indicado) | UC | US | CA |
 |---|---|---|---|---|
@@ -423,6 +424,9 @@ Comportamento que uma necessidade pede e o sistema não tem, comportamento sem t
 | <a id="l-09"></a>L-09 | RNF sem verificação automática | 360 px, teclado, contraste nas telas, situação sem depender da cor, execução num ambiente novo e ausência de segredos no ZIP dependem de verificação manual. | RNF-U02 a RNF-U05, RNF-S01, RNF-S06 | **Aceitar**, com a verificação feita no ensaio antes da entrega e o resultado registrado na versão 0.2. |
 | <a id="l-10"></a>L-10 | Comportamento sem NS | (a) Só a origem das telas é autorizada a chamar a API pelo navegador (RNF-F11): proteção técnica sem NS própria, ligada à NS-14. (b) A administração (`/admin/`) permite à Equipe de TI mudar o perfil e desativar usuários, sem RF próprio além do [RF-37](rf-contas.md#rf-37). (c) O Gestor também pede reservas em nome próprio ([RF-11](rf-reservas.md#rf-11)) e filtra "somente as minhas" ([RF-12](rf-reservas.md#rf-12)), mas a NS-03 e a NS-07 têm só o Solicitante como origem. | RNF-F11; RF-37; RF-11, RF-12; Visão | (a) e (b) **aceitar**: são operação da Equipe de TI, que não é ator do negócio. (c) Ajuste editorial na Visão na 0.2 (acrescentar o Gestor à origem da NS-03 e da NS-07), sem mudança de comportamento. |
 | <a id="l-11"></a>L-11 | NS sem RF implementado | Nenhuma. As 16 NS têm pelo menos um RF implementado e com teste. | — | — |
+| <a id="l-12"></a>L-12 | RF × comportamento | Ao solicitar, a finalidade (em branco ou acima de 200 caracteres) e o espaço informado por um número que não é positivo são conferidos **depois** da data retroativa e das regras de agenda, e não junto com os outros dados do RF-11.1, como diz a ordem do campo Regras de negócio do [RF-11](rf-reservas.md#rf-11). Um pedido com finalidade vazia e data passada recebe primeiro "data retroativa". O que é aceito não muda, só qual mensagem aparece primeiro; nenhum teste fixa essa posição. Achada ao escrever a ficha de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#p7) (REQ-04). | RF-11, RF-11.1; UC-04 | **Aceitar** o comportamento; ajuste editorial do campo Regras de negócio do RF-11 na 0.2 (a ficha de UC-04 já mostra a ordem real) e um teste da ordem numa tarefa de testes. |
+| <a id="l-13"></a>L-13 | RF incompleto | O motivo de mais de 300 caracteres é recusado em **qualquer** mudança de situação, inclusive ao confirmar e ao concluir, em que é opcional; o [RF-26](rf-reservas.md#rf-26) só cobre recusar e cancelar, e o [RF-17](rf-reservas.md#rf-17) e o [RF-19](rf-reservas.md#rf-19) dizem só "motivo opcional". Provado pela máquina de estados da reserva. Achada na ficha de [UC-10](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-6) (REQ-04). | RF-17, RF-19, RF-26; UC-10 | **Aceitar**; ajuste editorial na 0.2 ("motivo opcional de até 300 caracteres" no RF-17 e no RF-19). |
+| <a id="l-14"></a>L-14 | Comportamento sem RF | A entrada sem e-mail ou sem senha, ou com e-mail mal formado, é recusada com a indicação de cada dado, antes de conferir as credenciais; nenhum RF descreve essa recusa (o [RF-33.1](rf-contas.md#rf-33-1) trata só as credenciais inválidas). Coberta por teste. Achada na ficha de [UC-02](../casos-de-uso/UC-02-autenticar.md#e3-1) (REQ-04). | RF-33, RF-33.1; UC-02 | **Aceitar**; na 0.2, um RF filho novo (o próximo ID livre do RF-33), sem mudança de comportamento. |
 
 ## 9. Auditoria de qualidade
 
@@ -449,7 +453,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-08.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-09 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-10 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-11 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O Gestor também pede: ajuste editorial na Visão ([L-10](#l-10)). |
+| RF-11 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O Gestor também pede: ajuste editorial na Visão ([L-10](#l-10)). A ordem das verificações no campo Regras de negócio difere da real para a finalidade ([L-12](#l-12)). |
 | RF-11.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-11.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | "Data retroativa" compara data e hora (divergência registrada no glossário). |
 | RF-11.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
@@ -461,7 +465,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-14 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-15 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-16 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: as ações não consideram o horário da reserva. Ação: [DEC-13](../decisoes/DEC-13.md). |
-| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). |
+| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). Co: o limite de 300 caracteres do motivo opcional não está no enunciado ([L-13](#l-13)). |
 | RF-18 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: recusar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). |
 | RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: concluir antes do término é aceito, contra a NS-09. Ação: [DEC-13](../decisoes/DEC-13.md), lacuna [L-01](#l-01). |
 | RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: cancelar depois do uso é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). |
@@ -470,7 +474,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-23 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-24 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-25 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-26 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-26 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O limite do motivo também vale ao confirmar e concluir, fora deste RF ([L-13](#l-13)). |
 | RF-27 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-29 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Privacidade depende da [DEC-11](../decisoes/DEC-11.md). |
@@ -483,7 +487,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-32.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-33 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Sem limite de tentativas ([L-03](#l-03)). |
-| RF-33.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-33.1 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: a entrada sem e-mail ou senha, ou com e-mail mal formado, é recusada antes das credenciais e não está descrita. Ação: [L-14](#l-14). |
 | RF-34 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-34.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Evidência só no frontend; o lado do servidor é o 401 da renovação recusada. |
 | RF-35 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
@@ -529,7 +533,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-S05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar antes da entrega ([L-09](#l-09)). |
 
-**Resumo:** 9 ✘ em 91 fichas, todos com ação: 7 em Completo (DEC-13 e DEC-05), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
+**Resumo:** 10 ✘ em 91 fichas, todos com ação: 8 em Completo (DEC-13, DEC-05 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
 
 ## 10. Checklist de revisão por pares
 
