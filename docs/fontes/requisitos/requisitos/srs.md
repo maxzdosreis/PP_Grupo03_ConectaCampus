@@ -11,6 +11,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: RF-01 a RF-40 (60 fichas), RNF-F01 a RNF-S06 (31 fichas), restrições, priorização QFD, lacunas, auditoria e rastreabilidade (REQ-02). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Coluna UC da seção 6.4 preenchida e vínculos UC das fichas, a partir do [diagrama e do índice de casos de uso](../casos-de-uso/README.md) (REQ-03). Sem aprovação. |
 
 ## Sumário
 
@@ -25,7 +26,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 9. [Auditoria de qualidade](#9-auditoria-de-qualidade)
 10. [Checklist de revisão por pares](#10-checklist-de-revisão-por-pares)
 
-No sumário do template A4·s11, este documento cobre a parte 3 (RF e RNF), a parte das interfaces da 4 e a rastreabilidade da 5. Casos de uso, histórias e critérios de aceite vêm nas próximas tarefas (REQ-03 a REQ-05).
+No sumário do template A4·s11, este documento cobre a parte 3 (RF e RNF), a parte das interfaces da 4 e a rastreabilidade da 5. O diagrama e o índice dos casos de uso estão em [`casos-de-uso/`](../casos-de-uso/README.md) (REQ-03); as fichas dos casos de uso, as histórias e os critérios de aceite vêm nas próximas tarefas (REQ-04 e REQ-05).
 
 ---
 
@@ -97,7 +98,7 @@ Reservas consulta o cadastro de espaços para saber se um espaço é [reserváve
 - **Recusas (F5):** a recusa de uma operação inválida é uma obrigação do sistema diante de um pedido, não uma capacidade do ator. Por isso usa a sintaxe "O sistema deve impedir que o [ator] [ação inválida], sem alterar [o quê], e informar [o motivo e o campo]." São as únicas fichas que não começam com "O sistema deve permitir ao". RF-37 e RF-39 começam com "O sistema deve permitir à" só pela concordância com o ator ("à Equipe de TI"): é a mesma sintaxe.
 - **Decomposição (A4·s8):** uma obrigação por ID. A recusa específica de uma operação é um filho `RF-xx.n` do RF da operação (ex.: [RF-11.4](rf-reservas.md#rf-11-4), conflito de horário no pedido). A recusa que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas listadas na ficha (ex.: [RF-23](rf-reservas.md#rf-23), reserva inexistente ou de outra pessoa, que protege o detalhe, o histórico e a mudança de situação). Assim cada recusa tem um ID e uma evidência, sem repetir a mesma obrigação em várias fichas, e a F5 fica coberta por IDs próprios.
 - **Ficha (A4·s9):** ID e título, enunciado, pai (filhos) ou operações protegidas (recusas comuns), origem (NS principal primeiro), funcionalidade do enunciado, prioridade QFD com justificativa, vínculos, evidência, regras de negócio (com link para o glossário), decisões, revisão, estado e responsável.
-- **Vínculos:** UC, US e CA ficam "a definir (REQ-03, REQ-04, REQ-05)".
+- **Vínculos:** o caso de uso em que o RF entra, com o papel dele (fluxo principal, alternativa, exceção ou transversal), definido na REQ-03 ([rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc)); US e CA ficam "a definir (REQ-04, REQ-05)".
 - **Evidência (complementar):** o endpoint ou a tela e o `arquivo::teste` que prova o comportamento. É uma extensão do grupo: a cadeia do professor para em CA/TA, e a pergunta se o elo até o código é esperado segue aberta (ponto 13 de `.claude/requisitos.md`).
 - **Estado:** todos em **Rascunho** (versão 0.1). Nenhum RF ficou "Não implementado": todas as NS têm comportamento implementado (ver [lacunas](#lacunas)).
 
@@ -318,70 +319,70 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 
 ### 6.4 RF → evidência, UC, US e CA
 
-A evidência detalhada (endpoint ou tela e `arquivo::teste`) está em cada ficha; aqui fica um teste representativo por RF, para a amostra de verificação. UC, US e CA são preenchidos na REQ-03 (UC), na REQ-04 (UC detalhados e US) e na REQ-05 (CA).
+A evidência detalhada (endpoint ou tela e `arquivo::teste`) está em cada ficha; aqui fica um teste representativo por RF, para a amostra de verificação. A coluna UC traz o caso de uso principal de cada RF (REQ-03); o papel do RF nele e os demais casos de uso em que aparece estão na [rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc). US e CA são preenchidos na REQ-04 (UC detalhados e US) e na REQ-05 (CA).
 
 | RF | Teste representativo (a partir de `src/backend/`, ou `src/frontend/src/` quando indicado) | UC | US | CA |
 |---|---|---|---|---|
-| RF-01 | `espacos/tests/test_api_espacos.py::test_listar_ordena_por_nome` | | | |
-| RF-02 | `espacos/tests/test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string` | | | |
-| RF-02.1 | `espacos/tests/test_api_espacos.py::test_listar_com_tipo_desconhecido_no_filtro_responde_400` | | | |
-| RF-03 | `espacos/tests/test_api_espacos.py::test_obter_espaco_existente_responde_200_com_o_espaco` | | | |
-| RF-04 | `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum` | | | |
-| RF-05 | `espacos/tests/test_api_espacos.py::test_cadastrar_espaco_valido_responde_201_com_o_espaco` | | | |
-| RF-05.1 | `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem` | | | |
-| RF-05.2 | `espacos/tests/test_casos_de_uso.py::test_cadastrar_nome_repetido_com_caixa_e_espacos_diferentes_lanca_conflito` | | | |
-| RF-06 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos` | | | |
-| RF-06.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_sem_nenhum_campo_responde_400` | | | |
-| RF-06.2 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava` | | | |
-| RF-07 | `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar` | | | |
-| RF-07.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo` | | | |
-| RF-08 | `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas` | | | |
-| RF-08.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_ja_ativo_responde_409` | | | |
-| RF-09 | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404` | | | |
-| RF-10 | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda` | | | |
-| RF-11 | `reservas/tests/test_api_reservas.py::test_solicitacao_valida_responde_201_com_a_reserva` | | | |
-| RF-11.1 | `reservas/tests/test_api_reservas.py::test_campos_ausentes_respondem_400_com_cada_campo` | | | |
-| RF-11.2 | `reservas/tests/test_reserva.py::test_solicitar_com_inicio_igual_a_agora_e_recusado` | | | |
-| RF-11.3 | `reservas/tests/test_api_reservas.py::test_espaco_inexistente_responde_404` | | | |
-| RF-11.4 | `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` | | | |
-| RF-11.5 | `reservas/tests/test_regras_de_agenda.py::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo` | | | |
-| RF-12 | `reservas/tests/test_api_consulta_reservas.py::test_criterios_combinados_se_somam` | | | |
-| RF-12.1 | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` | | | |
-| RF-13 | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias` | | | |
-| RF-14 | `reservas/tests/test_api_consulta_reservas.py::test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao` | | | |
-| RF-15 | `reservas/tests/test_api_consulta_reservas.py::test_situacoes_de_reserva_listam_todas_na_ordem_do_enum_sem_login` | | | |
-| RF-16 | `reservas/tests/test_api_situacao_reserva.py::test_reserva_solicitada_traz_confirmar_recusar_e_cancelar` | | | |
-| RF-17 | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada` | | | |
-| RF-18 | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao` | | | |
-| RF-19 | `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida` | | | |
-| RF-20 | `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva` | | | |
-| RF-21 | `reservas/tests/test_api_permissoes.py::test_solicitante_cancela_a_propria` | | | |
-| RF-22 | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` | | | |
-| RF-23 | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404` | | | |
-| RF-24 | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva` | | | |
-| RF-25 | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400` | | | |
-| RF-26 | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo` | | | |
-| RF-27 | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada` | | | |
-| RF-28 | `reservas/tests/test_api_regras_de_agenda.py::test_regras_de_agenda_sem_login_respondem_200_com_as_constantes_do_dominio` | | | |
-| RF-29 | `reservas/tests/test_api_ocupacao_do_dia.py::test_solicitante_ve_a_reserva_de_outra_pessoa_sem_nenhum_dado_pessoal` | | | |
-| RF-29.1 | `reservas/tests/test_api_ocupacao_do_dia.py::test_sem_espaco_ou_sem_data_responde_400_com_o_campo` | | | |
-| RF-29.2 | `reservas/tests/test_api_ocupacao_do_dia.py::test_espaco_inativo_responde_409` | | | |
-| RF-30 | `reservas/tests/test_propriedades_da_agenda.py::test_agenda_mostra_livre_exatamente_o_que_o_backend_aceitaria` | | | |
-| RF-31 | `reservas/tests/test_api_ocupacao_do_dia.py::test_ontem_nao_e_reservavel_e_traz_a_mensagem_do_dominio` | | | |
-| RF-32 | `contas/tests/test_api_cadastro.py::test_cadastro_valido_responde_201_com_solicitante_sem_senha` | | | |
-| RF-32.1 | `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo` | | | |
-| RF-32.2 | `contas/tests/test_api_cadastro.py::test_senha_fraca_responde_400_com_motivos_em_senha` | | | |
-| RF-32.3 | `contas/tests/test_api_cadastro.py::test_email_repetido_com_caixa_diferente_responde_409` | | | |
-| RF-33 | `contas/tests/test_api_autenticacao.py::test_login_valido_devolve_tokens_e_usuario_sem_senha` | | | |
-| RF-33.1 | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual` | | | |
-| RF-34 | `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me` | | | |
-| RF-34.1 | `api/cliente.test.ts` (frontend) | | | |
-| RF-35 | `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil` | | | |
-| RF-36 | `components/sessao/SessaoProvider.test.tsx` (frontend) | | | |
-| RF-37 | `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser` | | | |
-| RF-38 | `compartilhado/tests/test_tratador_de_erros.py::test_campo_obrigatorio_ausente_indica_o_campo_que_falhou` | | | |
-| RF-39 | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` | | | |
-| RF-40 | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login` (sem teste do 503: [L-08](#lacunas)) | | | |
+| RF-01 | `espacos/tests/test_api_espacos.py::test_listar_ordena_por_nome` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-02 | `espacos/tests/test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-02.1 | `espacos/tests/test_api_espacos.py::test_listar_com_tipo_desconhecido_no_filtro_responde_400` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-03 | `espacos/tests/test_api_espacos.py::test_obter_espaco_existente_responde_200_com_o_espaco` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-04 | `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-05 | `espacos/tests/test_api_espacos.py::test_cadastrar_espaco_valido_responde_201_com_o_espaco` | [UC-14](../casos-de-uso/README.md#uc-14) | | |
+| RF-05.1 | `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem` | [UC-14](../casos-de-uso/README.md#uc-14) | | |
+| RF-05.2 | `espacos/tests/test_casos_de_uso.py::test_cadastrar_nome_repetido_com_caixa_e_espacos_diferentes_lanca_conflito` | [UC-14](../casos-de-uso/README.md#uc-14) | | |
+| RF-06 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos` | [UC-15](../casos-de-uso/README.md#uc-15) | | |
+| RF-06.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_sem_nenhum_campo_responde_400` | [UC-15](../casos-de-uso/README.md#uc-15) | | |
+| RF-06.2 | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava` | [UC-15](../casos-de-uso/README.md#uc-15) | | |
+| RF-07 | `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar` | [UC-16](../casos-de-uso/README.md#uc-16) | | |
+| RF-07.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo` | [UC-16](../casos-de-uso/README.md#uc-16) | | |
+| RF-08 | `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas` | [UC-16](../casos-de-uso/README.md#uc-16) | | |
+| RF-08.1 | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_ja_ativo_responde_409` | [UC-16](../casos-de-uso/README.md#uc-16) | | |
+| RF-09 | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404` | [UC-03](../casos-de-uso/README.md#uc-03) | | |
+| RF-10 | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda` | [UC-14](../casos-de-uso/README.md#uc-14) | | |
+| RF-11 | `reservas/tests/test_api_reservas.py::test_solicitacao_valida_responde_201_com_a_reserva` | [UC-04](../casos-de-uso/README.md#uc-04) | | |
+| RF-11.1 | `reservas/tests/test_api_reservas.py::test_campos_ausentes_respondem_400_com_cada_campo` | [UC-04](../casos-de-uso/README.md#uc-04) | | |
+| RF-11.2 | `reservas/tests/test_reserva.py::test_solicitar_com_inicio_igual_a_agora_e_recusado` | [UC-04](../casos-de-uso/README.md#uc-04) | | |
+| RF-11.3 | `reservas/tests/test_api_reservas.py::test_espaco_inexistente_responde_404` | [UC-05](../casos-de-uso/README.md#uc-05) | | |
+| RF-11.4 | `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` | [UC-05](../casos-de-uso/README.md#uc-05) | | |
+| RF-11.5 | `reservas/tests/test_regras_de_agenda.py::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo` | [UC-05](../casos-de-uso/README.md#uc-05) | | |
+| RF-12 | `reservas/tests/test_api_consulta_reservas.py::test_criterios_combinados_se_somam` | [UC-07](../casos-de-uso/README.md#uc-07) | | |
+| RF-12.1 | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` | [UC-07](../casos-de-uso/README.md#uc-07) | | |
+| RF-13 | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias` | [UC-07](../casos-de-uso/README.md#uc-07) | | |
+| RF-14 | `reservas/tests/test_api_consulta_reservas.py::test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao` | [UC-08](../casos-de-uso/README.md#uc-08) | | |
+| RF-15 | `reservas/tests/test_api_consulta_reservas.py::test_situacoes_de_reserva_listam_todas_na_ordem_do_enum_sem_login` | [UC-07](../casos-de-uso/README.md#uc-07) | | |
+| RF-16 | `reservas/tests/test_api_situacao_reserva.py::test_reserva_solicitada_traz_confirmar_recusar_e_cancelar` | [UC-07](../casos-de-uso/README.md#uc-07) | | |
+| RF-17 | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada` | [UC-17](../casos-de-uso/README.md#uc-17) | | |
+| RF-18 | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao` | [UC-18](../casos-de-uso/README.md#uc-18) | | |
+| RF-19 | `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida` | [UC-19](../casos-de-uso/README.md#uc-19) | | |
+| RF-20 | `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva` | [UC-11](../casos-de-uso/README.md#uc-11) | | |
+| RF-21 | `reservas/tests/test_api_permissoes.py::test_solicitante_cancela_a_propria` | [UC-11](../casos-de-uso/README.md#uc-11) | | |
+| RF-22 | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` | [UC-09](../casos-de-uso/README.md#uc-09) | | |
+| RF-23 | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404` | [UC-08](../casos-de-uso/README.md#uc-08) | | |
+| RF-24 | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva` | [UC-10](../casos-de-uso/README.md#uc-10) | | |
+| RF-25 | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400` | [UC-10](../casos-de-uso/README.md#uc-10) | | |
+| RF-26 | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo` | [UC-12](../casos-de-uso/README.md#uc-12) | | |
+| RF-27 | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada` | [UC-10](../casos-de-uso/README.md#uc-10) | | |
+| RF-28 | `reservas/tests/test_api_regras_de_agenda.py::test_regras_de_agenda_sem_login_respondem_200_com_as_constantes_do_dominio` | [UC-04](../casos-de-uso/README.md#uc-04) | | |
+| RF-29 | `reservas/tests/test_api_ocupacao_do_dia.py::test_solicitante_ve_a_reserva_de_outra_pessoa_sem_nenhum_dado_pessoal` | [UC-06](../casos-de-uso/README.md#uc-06) | | |
+| RF-29.1 | `reservas/tests/test_api_ocupacao_do_dia.py::test_sem_espaco_ou_sem_data_responde_400_com_o_campo` | [UC-06](../casos-de-uso/README.md#uc-06) | | |
+| RF-29.2 | `reservas/tests/test_api_ocupacao_do_dia.py::test_espaco_inativo_responde_409` | [UC-06](../casos-de-uso/README.md#uc-06) | | |
+| RF-30 | `reservas/tests/test_propriedades_da_agenda.py::test_agenda_mostra_livre_exatamente_o_que_o_backend_aceitaria` | [UC-06](../casos-de-uso/README.md#uc-06) | | |
+| RF-31 | `reservas/tests/test_api_ocupacao_do_dia.py::test_ontem_nao_e_reservavel_e_traz_a_mensagem_do_dominio` | [UC-06](../casos-de-uso/README.md#uc-06) | | |
+| RF-32 | `contas/tests/test_api_cadastro.py::test_cadastro_valido_responde_201_com_solicitante_sem_senha` | [UC-01](../casos-de-uso/README.md#uc-01) | | |
+| RF-32.1 | `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo` | [UC-01](../casos-de-uso/README.md#uc-01) | | |
+| RF-32.2 | `contas/tests/test_api_cadastro.py::test_senha_fraca_responde_400_com_motivos_em_senha` | [UC-01](../casos-de-uso/README.md#uc-01) | | |
+| RF-32.3 | `contas/tests/test_api_cadastro.py::test_email_repetido_com_caixa_diferente_responde_409` | [UC-01](../casos-de-uso/README.md#uc-01) | | |
+| RF-33 | `contas/tests/test_api_autenticacao.py::test_login_valido_devolve_tokens_e_usuario_sem_senha` | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-33.1 | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual` | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-34 | `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me` | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-34.1 | `api/cliente.test.ts` (frontend) | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-35 | `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil` | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-36 | `components/sessao/SessaoProvider.test.tsx` (frontend) | [UC-02](../casos-de-uso/README.md#uc-02) | | |
+| RF-37 | `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser` | [UC-20](../casos-de-uso/README.md#uc-20) | | |
+| RF-38 | `compartilhado/tests/test_tratador_de_erros.py::test_campo_obrigatorio_ausente_indica_o_campo_que_falhou` | transversal | | |
+| RF-39 | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` | [UC-21](../casos-de-uso/README.md#uc-21) | | |
+| RF-40 | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login` (sem teste do 503: [L-08](#lacunas)) | [UC-22](../casos-de-uso/README.md#uc-22) | | |
 
 ## 7. Análise QFD
 

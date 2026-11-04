@@ -1,0 +1,111 @@
+@startuml diagrama-casos-de-uso
+' UCD-01 • 0.1 • Rascunho — diagrama de casos de uso do negócio (REQ-03).
+' Fonte versionada. Os arquivos .svg e .png ao lado são GERADOS a partir deste
+' arquivo (comando no README.md desta pasta): não os edite à mão.
+' Nomes de atores e casos de uso: glossario.md. Decisões de modelagem: README.md.
+
+left to right direction
+skinparam dpi 150
+skinparam shadowing false
+' Menos espaço entre linhas e mais entre colunas: cabe melhor numa A4 deitada.
+skinparam nodesep 6
+skinparam ranksep 110
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam ActorBorderColor #333333
+skinparam RectangleBorderColor #333333
+skinparam NoteBorderColor #888888
+skinparam NoteBackgroundColor #FFFBE6
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  BackgroundColor<<subfunção>> #E8E8E8
+}
+
+title Conecta Campus — casos de uso do negócio (UCD-01 • 0.1 • Rascunho)
+
+actor Gestor
+actor Solicitante
+actor Visitante
+' Generalização de atores: o Gestor é um Solicitante com mais casos de uso.
+' Um traço só deixa os dois atores na mesma coluna.
+Gestor -|> Solicitante
+
+rectangle "Conecta Campus" {
+  usecase "UC-03 Consultar espaços" as UC03
+  usecase "UC-04 Solicitar reserva\n--\npontos de extensão:\nantes de enviar o pedido" as UC04
+  usecase "UC-05 Verificar disponibilidade do horário" as UC05 <<subfunção>>
+  usecase "UC-06 Consultar agenda do dia" as UC06
+  usecase "UC-07 Consultar reservas" as UC07
+  usecase "UC-08 Consultar detalhe da reserva\n--\npontos de extensão:\nver o histórico" as UC08
+  usecase "UC-09 Consultar histórico da reserva" as UC09
+  usecase "//UC-10 Alterar situação da reserva//\n{abstrato}" as UC10
+  usecase "UC-11 Cancelar reserva" as UC11
+  usecase "UC-12 Informar motivo" as UC12 <<subfunção>>
+  usecase "UC-13 Registrar no histórico" as UC13 <<subfunção>>
+
+  usecase "UC-14 Cadastrar espaço" as UC14
+  usecase "UC-15 Editar espaço" as UC15
+  usecase "UC-16 Desativar ou reativar espaço" as UC16
+  usecase "UC-17 Confirmar reserva" as UC17
+  usecase "UC-18 Recusar reserva" as UC18
+  usecase "UC-19 Concluir reserva" as UC19
+
+  usecase "UC-01 Cadastrar-se" as UC01
+  usecase "UC-02 Autenticar" as UC02
+}
+
+' Associações ator–caso de uso (o Gestor herda as do Solicitante). UC-06 e UC-09
+' não têm associação própria: só acontecem como extensão de UC-04 e UC-08.
+Visitante -- UC01
+Visitante -- UC02
+
+Solicitante -- UC03
+Solicitante -- UC04
+Solicitante -- UC07
+Solicitante -- UC08
+Solicitante -- UC11
+
+Gestor -- UC14
+Gestor -- UC15
+Gestor -- UC16
+Gestor -- UC17
+Gestor -- UC18
+Gestor -- UC19
+
+' Inclusões (obrigatórias): base ..> incluído ("...>" é a mesma seta, mais longa, só de layout)
+UC04 ..> UC05 : <<include>>
+UC04 ...> UC13 : <<include>>
+UC10 ..> UC13 : <<include>>
+UC11 ..> UC12 : <<include>>
+UC18 ..> UC12 : <<include>>
+
+' Extensões (opcionais): a seta vai da extensão para a base, no ponto de extensão
+' indicado. Escritas como "base <. extensão" (um ponto) só para a extensão ficar logo abaixo da base.
+UC04 <. UC06 : <<extend>>\n(antes de enviar o pedido)
+UC08 <. UC09 : <<extend>>\n(ver o histórico)
+
+
+' Generalização entre casos de uso: filho --|> pai abstrato
+UC11 --|> UC10
+UC17 --|> UC10
+UC18 --|> UC10
+UC19 --|> UC10
+
+note "Precondição de todos os casos de uso\ndo Solicitante e do Gestor:\nator autenticado (UC-02 Autenticar)." as PRECONDICAO
+Solicitante .. PRECONDICAO
+Gestor .. PRECONDICAO
+
+legend right
+  |= Notação |= Significado |
+  | linha contínua | associação ator–caso de uso |
+  | ..> <<include>> | inclusão obrigatória: o caso base sempre executa o incluído |
+  | ..> <<extend>> (ponto) | extensão opcional, no ponto de extensão indicado do caso base |
+  | seta de triângulo vazado | generalização: o filho herda associações e comportamento do pai |
+  | //itálico// {abstrato} | caso de uso abstrato: só acontece por um dos filhos |
+  | <<subfunção>> (cinza) | parte de outro caso de uso, sem ator próprio |
+  Sem sistema externo: integração institucional fora do escopo (Visão).
+  Equipe de TI: diagrama de apoio "Administração" (UCD-02).
+endlegend
+
+@enduml

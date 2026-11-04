@@ -10,6 +10,7 @@
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: termos do domínio com definição única e o nome no código (REQ-01). Sem aprovação. |
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Acréscimo dos termos usados na SRS que faltavam: equipe de TI, usuário autenticado, sessão, credenciais inválidas, política de senha, vocabulário público, mensagem de resultado e dados de exemplo; nova seção 6 (REQ-02). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Nova seção 7, com os nomes de caso de uso que são termos novos: autenticar, verificar disponibilidade do horário, alterar situação da reserva, informar motivo e registrar no histórico (REQ-03). Sem aprovação. |
 
 ## Como ler este glossário
 
@@ -26,6 +27,7 @@
 4. [Horários e agenda](#4-horários-e-agenda)
 5. [Histórico](#5-histórico)
 6. [Mensagens e operação](#6-mensagens-e-operação)
+7. [Casos de uso](#7-casos-de-uso)
 
 ## 1. Espaços
 
@@ -110,3 +112,15 @@
 | <a id="mensagem-de-resultado"></a>**Mensagem de resultado** | Texto em português que encerra toda operação: no sucesso, diz o que foi feito; na recusa, diz o que impediu e, quando a causa é um campo, aparece também ao lado do campo. Toda recusa tem também um código próprio. | `resposta_sucesso`, `resposta_erro`, `corpo_de_erro` (`compartilhado/api/respostas.py`); `tratar_excecao` (`compartilhado/api/tratador_de_erros.py`); `useMensagens`, `Aviso` (frontend) | Funcionalidade F6 do enunciado. |
 | <a id="vocabulario-publico"></a>**Vocabulário público** | Listas que qualquer pessoa pode consultar sem entrar, porque não são dados de ninguém: os tipos de espaço, as situações de reserva e as regras de agenda. | `TiposDeEspacoView` (`espacos/api/views.py`); `SituacoesDeReservaView`, `RegrasDeAgendaView` (`reservas/api/views.py`) | As telas leem as listas daqui em vez de repeti-las, para a regra existir num lugar só. |
 | <a id="dados-de-exemplo"></a>**Dados de exemplo** | Conjunto fixo de usuários, espaços e reservas para demonstração, criado pelas mesmas regras do sistema e documentado no README, inclusive as senhas de teste. | comando `carregar_dados_exemplo` (`exemplos/management/commands/carregar_dados_exemplo.py`); conteúdo em `exemplos/dados.py` | Só pode ser carregado em modo de desenvolvimento, porque cria senhas conhecidas. Repetir o comando não duplica nada. |
+
+## 7. Casos de uso
+
+Nomes de caso de uso do [diagrama](casos-de-uso/README.md) que não são outro termo deste glossário. Os demais casos de uso usam os termos já definidos (ex.: "Solicitar reserva" usa [reserva](#reserva); "Consultar agenda do dia" usa [agenda do dia](#agenda-do-dia)). Ator, nos diagramas, tem o sentido da UML ([ator](#ator)).
+
+| Termo | Definição | Nome no código | Observações |
+|---|---|---|---|
+| <a id="autenticar"></a>**Autenticar** | Entrar com e-mail e senha para iniciar uma [sessão](#sessao) e passar a ser um [usuário autenticado](#usuario-autenticado); inclui continuar identificado, confirmar a identificação ao voltar e sair. Caso de uso UC-02, do [visitante](#visitante). | `LoginView`, `RenovarTokenView`, `UsuarioAtualView` (`contas/api/views.py`); `SessaoProvider` (frontend) | **Divergência:** a tela e o [RF-33](requisitos/rf-contas.md#rf-33) dizem "Entrar"; o caso de uso diz "Autenticar", o nome da [DEC-04](decisoes/DEC-04.md). É precondição de todos os casos de uso do Solicitante e do Gestor (nota no diagrama). |
+| <a id="verificar-disponibilidade-do-horario"></a>**Verificar disponibilidade do horário** | Conferir, ao receber um pedido de reserva, que o espaço é [reservável](#espaco-reservavel), que o pedido respeita as [regras de agenda](#regras-de-agenda) e que não há [conflito de horário](#conflito-de-horario). Caso de uso de subfunção UC-05, incluído por "Solicitar reserva". | `CriarReserva` (`reservas/application/casos_de_uso.py`): `garantir_regras_de_agenda`, `obter_espaco_reservavel`, `garantir_horario_livre` | "Disponibilidade" aqui tem esse sentido exato (as três condições juntas), e não o "disponível" vago da [seção 1](#espaco-reservavel). A data retroativa e os campos do pedido são conferidos antes, no próprio "Solicitar reserva". |
+| <a id="alterar-situacao-da-reserva"></a>**Alterar situação da reserva** | Caso de uso abstrato UC-10: fazer uma [transição de situação](#transicao-de-situacao) permitida pela tabela e pelo perfil de quem age. Só acontece por um dos filhos: confirmar, recusar, concluir ou cancelar. | `AlterarSituacaoReserva`, `Reserva.alterar_situacao` | As recusas comuns aos quatro (transição não permitida, situação desconhecida, perfil sem permissão, reserva de outra pessoa) ficam no pai. |
+| <a id="informar-motivo"></a>**Informar motivo** | Escrever o [motivo](#motivo) obrigatório de uma recusa ou de um cancelamento. Caso de uso de subfunção UC-12. | `SITUACOES_QUE_EXIGEM_MOTIVO`; `MotivoObrigatorio` | Confirmar e concluir aceitam motivo, mas não o exigem, por isso não incluem este caso de uso. |
+| <a id="registrar-no-historico"></a>**Registrar no histórico** | Gravar um [registro de situação](#registro-de-situacao) na mesma gravação da criação da reserva ou de cada mudança aceita. Caso de uso de subfunção UC-13, sem ator: o sistema faz sozinho. | `Reserva.registros_pendentes`; `RepositorioReservasDjango.salvar` | Tentativas recusadas não são registradas ([DEC-05](decisoes/DEC-05.md)). |
