@@ -1,0 +1,40 @@
+@startuml diagrama-administracao
+' UCD-02 • 0.1 • Rascunho — diagrama de apoio "Administração" (REQ-03).
+' Fonte versionada. Os arquivos .svg e .png ao lado são GERADOS a partir deste
+' arquivo (comando no README.md desta pasta): não os edite à mão.
+' A Equipe de TI não é ator dos casos de uso do negócio (Visão, seção 2); estes
+' casos de uso existem para a rastreabilidade RF → UC ficar completa.
+
+left to right direction
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam ActorBorderColor #333333
+skinparam RectangleBorderColor #333333
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+title Conecta Campus — administração (UCD-02 • 0.1 • Rascunho)
+
+actor "Equipe de TI" as EquipeDeTI
+
+rectangle "Conecta Campus — administração" {
+  usecase "UC-20 Criar usuário Gestor" as UC20
+  usecase "UC-21 Carregar dados de exemplo" as UC21
+  usecase "UC-22 Verificar se o sistema está no ar" as UC22
+}
+
+EquipeDeTI -- UC20
+EquipeDeTI -- UC21
+EquipeDeTI -- UC22
+
+legend right
+  |= Notação |= Significado |
+  | linha contínua | associação ator–caso de uso |
+  Apoio à instalação e à demonstração; fora do diagrama do negócio (UCD-01).
+endlegend
+
+@enduml

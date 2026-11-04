@@ -11,7 +11,7 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | [`visao.md`](visao.md) | **VIS-01**, Documento de Visão (RUP, 4 quadrantes): problema, stakeholders, necessidades NS-xx, escopo, premissas, critérios de sucesso e riscos. | 0.1 • Rascunho (REQ-01) |
 | [`glossario.md`](glossario.md) | **GLO-01**, termos do domínio com definição única e o nome correspondente no código. | 0.1 • Rascunho (REQ-01) |
 | [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (60 fichas, por área) e RNF-F01 a RNF-S06 (31, por FURPS). | 0.1 • Rascunho (REQ-02) |
-| [`casos-de-uso/`](casos-de-uso/README.md) | UC-xx (ficha Cockburn) e o diagrama de casos de uso. | vazia; REQ-03 |
+| [`casos-de-uso/`](casos-de-uso/README.md) | **UCD-01** (diagrama do negócio, UC-01 a UC-19) e **UCD-02** (diagrama de apoio "Administração", UC-20 a UC-22) em PlantUML, com as imagens geradas, o índice dos UCs e a rastreabilidade RF → UC. Fichas Cockburn na REQ-04. | 0.1 • Rascunho (REQ-03) |
 | [`historias/`](historias/README.md) | US-xx com CA-xx (Dado/Quando/Então) e TA-xx. | vazia; REQ-04 em diante |
 | [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice. | DEC-01 a DEC-13 |
 | [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança depois de uma baseline. | vazia |
@@ -32,6 +32,13 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 - **d) Versão.** Todos os documentos da REQ-02 nascem em 0.1 • Rascunho. A Visão e o glossário ganham uma linha no histórico (vínculos NS → RF e termos novos), sem mudar de versão.
 - **Recusas (F5).** A recusa específica de uma operação é um filho `RF-xx.n`; a que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas na ficha. As recusas usam a sintaxe "O sistema deve impedir que…" (justificativa na [SRS, seção 3](requisitos/srs.md#como-ler)).
 - **IDs de documento.** `SRS-01` identifica a SRS; `REST-xx` identifica as restrições (o "+" de FURPS+) em [`rnf.md`](requisitos/rnf.md#6-restrições); `L-xx`, as lacunas da SRS.
+
+## Decisões de organização (REQ-03)
+
+- **a) Diagramas como texto.** Os diagramas de casos de uso são fontes PlantUML (`.puml`) versionadas; os `.svg` e `.png` ao lado são gerados por Docker e nunca editados à mão (comando e justificativa no [README da pasta](casos-de-uso/README.md#como-gerar-as-imagens)).
+- **b) Decisões de modelagem no README da pasta.** Granularidade, notação, generalização, autenticação como precondição, Equipe de TI à parte e ausência de sistema externo: [decisões a) a g)](casos-de-uso/README.md#decisões-de-modelagem).
+- **c) Vínculo RF → UC em três lugares, uma fonte.** A tabela de [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) é a fonte; a coluna UC da [SRS, seção 6.4](requisitos/srs.md#64-rf--evidência-uc-us-e-ca) e o campo "Vínculos" de cada ficha repetem o UC principal, e `scripts/verificar_casos_de_uso.py` confere que os três batem.
+- **d) Versão.** O README de casos de uso nasce em 0.1 • Rascunho; a SRS, as fichas e o glossário ganham uma linha no histórico, sem mudar de versão.
 
 ## Identificadores
 
@@ -90,8 +97,9 @@ NS-xx → RF-xx → UC-xx → US-xx → CA-xx / TA-xx → código e testes
 ```
 
 - Os slides param em CA/TA. O elo até o código e os testes é uma extensão do grupo, e a pergunta se ele é esperado segue aberta.
-- Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência) e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). UC, US e CA preenchem o meio da cadeia nas próximas tarefas (REQ-03 a REQ-06).
+- Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência), os casos de uso com a [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) (REQ-03) e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). US e CA preenchem o resto da cadeia nas próximas tarefas (REQ-04 a REQ-06).
 - `python scripts/verificar_requisitos.py` (na raiz) confere que toda NS tem RF, que todo RF tem NS, a sintaxe dos enunciados, os termos vagos e os links e âncoras desta pasta.
+- `python scripts/verificar_casos_de_uso.py` (na raiz) confere que os UCs dos diagramas e do índice são os mesmos, que todo RF tem UC (na tabela RF → UC, na SRS e na ficha), a notação dos diagramas e se as imagens estão atualizadas.
 - A matriz responde a três perguntas: **impacto** (que artefatos são afetados?), **cobertura** (todo requisito tem teste?) e **justificativa** (que necessidade o originou?).
 
 ## Pontos a confirmar com o professor
