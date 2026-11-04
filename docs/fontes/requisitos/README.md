@@ -10,10 +10,10 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 |---|---|---|
 | [`visao.md`](visao.md) | **VIS-01**, Documento de Visão (RUP, 4 quadrantes): problema, stakeholders, necessidades NS-xx, escopo, premissas, critérios de sucesso e riscos. | 0.1 • Rascunho (REQ-01) |
 | [`glossario.md`](glossario.md) | **GLO-01**, termos do domínio com definição única e o nome correspondente no código. | 0.1 • Rascunho (REQ-01) |
-| [`requisitos/`](requisitos/README.md) | RF-xx e RNF-xx (SRS), com ficha A4·s9. | vazia; REQ-02 |
+| [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (60 fichas, por área) e RNF-F01 a RNF-S06 (31, por FURPS). | 0.1 • Rascunho (REQ-02) |
 | [`casos-de-uso/`](casos-de-uso/README.md) | UC-xx (ficha Cockburn) e o diagrama de casos de uso. | vazia; REQ-03 |
 | [`historias/`](historias/README.md) | US-xx com CA-xx (Dado/Quando/Então) e TA-xx. | vazia; REQ-04 em diante |
-| [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice. | DEC-01 a DEC-11 |
+| [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice. | DEC-01 a DEC-13 |
 | [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança depois de uma baseline. | vazia |
 | [`baselines/`](baselines/README.md) | Manifestos de baseline (conjunto aprovado de versões). | vazia |
 
@@ -23,6 +23,15 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 - **b) Decisões aqui.** As DECs saíram de `.claude/requisitos.md` (diretrizes locais da disciplina, fora do Git) e moram em [`decisoes/`](decisoes/README.md). As diretrizes de como documentar continuam naquele arquivo.
 - **c) Convenção de versão** (abaixo), a do slide A4·s15. O próprio slide avisa que ela não é regra universal, e a pergunta ao professor sobre a convenção segue aberta.
 - **d) Nada inventado.** O que o grupo não sabe (quem é o cliente real, o horário real de funcionamento, o formato da matrícula) aparece como premissa declarada na [Visão](visao.md#premissas) ou como DEC, nunca como afirmação.
+
+## Decisões de organização (REQ-02)
+
+- **a) SRS e fichas por área.** [`requisitos/srs.md`](requisitos/srs.md) é o documento principal, com as seis seções do A3·s8, os índices e as tabelas de rastreabilidade. As fichas ficam agrupadas por área, uma ficha por requisito: `rf-espacos.md`, `rf-reservas.md`, `rf-agenda.md`, `rf-contas.md`, `rf-gerais.md` e `rnf.md` (o README da pasta permite um arquivo por requisito ou por grupo). Cada ficha tem uma âncora explícita (`<a id="rf-11-4">`) para os links não dependerem do título.
+- **b) Comportamento real.** A SRS descreve o que o sistema faz hoje, conferido nos testes e no código. O que uma NS pede e o sistema não faz entra na seção [Lacunas](requisitos/srs.md#lacunas) (e, se fosse um RF inteiro, com estado "Não implementado"). Nenhum código muda por causa da SRS: divergência vira lacuna, DEC ou CR.
+- **c) Vínculos e evidência.** UC, US e CA ficam "a definir (REQ-03, REQ-04, REQ-05)". O vínculo com a implementação (endpoint ou tela e `arquivo::teste`) fica numa coluna **Evidência (complementar)**, porque a cadeia do professor para em CA/TA e o ponto 13 dos pontos a confirmar segue aberto.
+- **d) Versão.** Todos os documentos da REQ-02 nascem em 0.1 • Rascunho. A Visão e o glossário ganham uma linha no histórico (vínculos NS → RF e termos novos), sem mudar de versão.
+- **Recusas (F5).** A recusa específica de uma operação é um filho `RF-xx.n`; a que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas na ficha. As recusas usam a sintaxe "O sistema deve impedir que…" (justificativa na [SRS, seção 3](requisitos/srs.md#como-ler)).
+- **IDs de documento.** `SRS-01` identifica a SRS; `REST-xx` identifica as restrições (o "+" de FURPS+) em [`rnf.md`](requisitos/rnf.md#6-restrições); `L-xx`, as lacunas da SRS.
 
 ## Identificadores
 
@@ -81,7 +90,8 @@ NS-xx → RF-xx → UC-xx → US-xx → CA-xx / TA-xx → código e testes
 ```
 
 - Os slides param em CA/TA. O elo até o código e os testes é uma extensão do grupo, e a pergunta se ele é esperado segue aberta.
-- Hoje existem as NS ([Visão](visao.md#necessidades)), cada uma ligada à funcionalidade que a atende, e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). RF, UC, US e CA preenchem o meio da cadeia nas próximas tarefas (REQ-02 a REQ-06).
+- Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência) e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). UC, US e CA preenchem o meio da cadeia nas próximas tarefas (REQ-03 a REQ-06).
+- `python scripts/verificar_requisitos.py` (na raiz) confere que toda NS tem RF, que todo RF tem NS, a sintaxe dos enunciados, os termos vagos e os links e âncoras desta pasta.
 - A matriz responde a três perguntas: **impacto** (que artefatos são afetados?), **cobertura** (todo requisito tem teste?) e **justificativa** (que necessidade o originou?).
 
 ## Pontos a confirmar com o professor
