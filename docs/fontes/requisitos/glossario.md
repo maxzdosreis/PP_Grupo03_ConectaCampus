@@ -9,6 +9,7 @@
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: termos do domínio com definição única e o nome no código (REQ-01). Sem aprovação. |
+| 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Acréscimo dos termos usados na SRS que faltavam: equipe de TI, usuário autenticado, sessão, credenciais inválidas, política de senha, vocabulário público, mensagem de resultado e dados de exemplo; nova seção 6 (REQ-02). Sem aprovação. |
 
 ## Como ler este glossário
 
@@ -24,6 +25,7 @@
 3. [Reservas e situações](#3-reservas-e-situações)
 4. [Horários e agenda](#4-horários-e-agenda)
 5. [Histórico](#5-histórico)
+6. [Mensagens e operação](#6-mensagens-e-operação)
 
 ## 1. Espaços
 
@@ -43,6 +45,11 @@
 |---|---|---|---|
 | <a id="cliente"></a>**Cliente** | Quem patrocina o sistema e aprova o seu escopo: a instituição que administra os espaços esportivos. Não opera o sistema no dia a dia. | — | Diferente de [usuário](#usuario) (A2·s5). Nenhum cliente real foi nomeado; o grupo atua como representante (premissa P-01 da [Visão](visao.md#premissas)). |
 | <a id="usuario"></a>**Usuário** | Pessoa cadastrada no sistema, identificada por e-mail e [matrícula](#matricula), com um [perfil](#perfil). | `Usuario` (`contas/infrastructure/models.py`) | Entra com e-mail e senha. O e-mail é único sem diferenciar maiúsculas de minúsculas. O nome tem até `NOME_MAXIMO_CARACTERES` = 150 caracteres (`contas/domain/cadastro.py`; mesmo nome de constante que em `espacos`, com outro valor). |
+| <a id="usuario-autenticado"></a>**Usuário autenticado** | Usuário que entrou com e-mail e senha e cuja [sessão](#sessao) ainda vale, com qualquer um dos dois perfis. Toda operação exige um usuário autenticado, exceto as do [vocabulário público](#vocabulario-publico), o cadastro, a entrada e a verificação do sistema. | `IsAuthenticated` (`DEFAULT_PERMISSION_CLASSES` em `config/settings.py`); `request.user` | Na matriz de acesso, as personas `dono`, `outro` e `gestor`. O contrário é o [visitante](#visitante). |
+| <a id="sessao"></a>**Sessão** | Período em que o usuário continua identificado depois de entrar, sem informar a senha de novo. A credencial de acesso vale 30 minutos e é renovada sozinha até 1 dia depois da entrada; depois disso, ou ao sair, a pessoa precisa entrar de novo. | `SIMPLE_JWT` (`ACCESS_TOKEN_LIFETIME`, `REFRESH_TOKEN_LIFETIME` em `config/settings.py`); `Sessao`, `lerSessao`, `limparSessao` (`src/frontend/src/api/sessao.ts`) | Tecnicamente, um par de tokens JWT (acesso e renovação). Sair só descarta os tokens no navegador; não há revogação no servidor (limitação conhecida do README). |
+| <a id="credenciais-invalidas"></a>**Credenciais inválidas** | E-mail e senha que não identificam um usuário ativo: e-mail inexistente, senha errada ou conta desativada. Os três casos recebem a mesma resposta. | código `CREDENCIAIS_INVALIDAS` (`contas/api/views.py`) | Mensagem: "E-mail ou senha incorretos.". |
+| <a id="politica-de-senha"></a>**Política de senha** | Regras que uma senha nova precisa cumprir: pelo menos 8 caracteres, não ser só de números, não estar numa lista de senhas comuns e não ser parecida com o e-mail, o nome ou a matrícula. | `PoliticaDeSenha` (`contas/application/portas.py`), `PoliticaDeSenhaDjango` (`contas/infrastructure/politica_de_senha.py`); recusa: `SenhaFraca` | Usa os validadores de senha do Django, com as mensagens em português dele. |
+| <a id="equipe-de-ti"></a>**Equipe de TI** | Quem instala e opera o sistema, cria os usuários Gestor e carrega os [dados de exemplo](#dados-de-exemplo). | — (usa `createsuperuser`, a administração em `/admin/` e `carregar_dados_exemplo`) | Stakeholder da [Visão](visao.md#2-usuários-atores-e-stakeholders); não é ator dos casos de uso do negócio. |
 | <a id="visitante"></a>**Visitante** | Pessoa que usa o sistema sem ter entrado com e-mail e senha. Só pode se cadastrar, entrar e ler o vocabulário público (tipos de espaço, situações e regras de agenda). | — | Não há classe; na matriz de acesso é a persona `anonimo` (`config/tests/test_matriz_de_acesso.py`). |
 | <a id="matricula"></a>**Matrícula** | Código que identifica o usuário na instituição. Obrigatório, único, com até 20 caracteres e sem espaços. | `Usuario.matricula`; `MATRICULA_MAXIMO_CARACTERES` = 20; `MatriculaInvalida` (`contas/domain/`) | Regra provisória: o formato real da instituição não foi definido ([DEC-09](decisoes/DEC-09.md)). Não serve para entrar no sistema. |
 | <a id="perfil"></a>**Perfil** | Conjunto de permissões de um usuário. Há dois: [Solicitante](#solicitante) e [Gestor](#gestor). Todo cadastro feito pela tela de cadastro recebe o perfil Solicitante. | `PerfilUsuario`: `SOLICITANTE`, `GESTOR` (`contas/domain/perfil.py`) | O Gestor só é criado pela equipe de TI (administração do sistema ou dados de exemplo), nunca pelo cadastro público ([DEC-04](decisoes/DEC-04.md)). |
@@ -95,3 +102,11 @@
 |---|---|---|---|
 | <a id="historico"></a>**Histórico da reserva** | Lista, em ordem cronológica, da criação da reserva e de cada mudança de situação aceita. Quem pode ver a reserva pode ver o histórico; mais ninguém. | `ConsultarHistoricoDaReserva`, `RepositorioReservas.listar_historico` (`reservas/application/`); `GET /api/reservas/{id}/historico/` | Tentativas recusadas não entram ([DEC-05](decisoes/DEC-05.md)). Registros nunca são alterados nem excluídos. Reservas gravadas antes da RES-07 não têm histórico. |
 | <a id="registro-de-situacao"></a>**Registro de situação** | Fato imutável do histórico: situação anterior (vazia na criação), situação nova, motivo (se houver), autor (identificador e nome) e momento em que aconteceu. | `RegistroDeSituacao` (`reservas/domain/registro_de_situacao.py`) | O autor é o [ator](#ator) que fez a mudança; na criação, é o solicitante. A API mostra só o nome do autor. |
+
+## 6. Mensagens e operação
+
+| Termo | Definição | Nome no código | Observações |
+|---|---|---|---|
+| <a id="mensagem-de-resultado"></a>**Mensagem de resultado** | Texto em português que encerra toda operação: no sucesso, diz o que foi feito; na recusa, diz o que impediu e, quando a causa é um campo, aparece também ao lado do campo. Toda recusa tem também um código próprio. | `resposta_sucesso`, `resposta_erro`, `corpo_de_erro` (`compartilhado/api/respostas.py`); `tratar_excecao` (`compartilhado/api/tratador_de_erros.py`); `useMensagens`, `Aviso` (frontend) | Funcionalidade F6 do enunciado. |
+| <a id="vocabulario-publico"></a>**Vocabulário público** | Listas que qualquer pessoa pode consultar sem entrar, porque não são dados de ninguém: os tipos de espaço, as situações de reserva e as regras de agenda. | `TiposDeEspacoView` (`espacos/api/views.py`); `SituacoesDeReservaView`, `RegrasDeAgendaView` (`reservas/api/views.py`) | As telas leem as listas daqui em vez de repeti-las, para a regra existir num lugar só. |
+| <a id="dados-de-exemplo"></a>**Dados de exemplo** | Conjunto fixo de usuários, espaços e reservas para demonstração, criado pelas mesmas regras do sistema e documentado no README, inclusive as senhas de teste. | comando `carregar_dados_exemplo` (`exemplos/management/commands/carregar_dados_exemplo.py`); conteúdo em `exemplos/dados.py` | Só pode ser carregado em modo de desenvolvimento, porque cria senhas conhecidas. Repetir o comando não duplica nada. |

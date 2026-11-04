@@ -28,6 +28,8 @@ O estado da decisão é diferente da versão e do estado do arquivo (`0.1 • Ra
 | DEC-09 | Formato da matrícula | Adotada provisoriamente | registrada em 03/11/2026; prazo 06/11/2026 | [DEC-09](DEC-09.md) |
 | DEC-10 | Nome de espaço único | Adotada provisoriamente | registrada em 03/11/2026; prazo 06/11/2026 | [DEC-10](DEC-10.md) |
 | DEC-11 | Períodos ocupados por outras pessoas na agenda do dia | Adotada provisoriamente | registrada em 03/11/2026; prazo 06/11/2026 | [DEC-11](DEC-11.md) |
+| DEC-12 | Metas de desempenho | Adotada provisoriamente | registrada em 03/11/2026; prazo 13/11/2026 | [DEC-12](DEC-12.md) |
+| DEC-13 | Mudança de situação em relação ao horário da reserva | Adotada provisoriamente | registrada em 03/11/2026; prazo 06/11/2026 | [DEC-13](DEC-13.md) |
 
 ## Como registrar uma nova DEC
 
