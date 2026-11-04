@@ -13,7 +13,7 @@
 | **Alternativas** | Permitir nomes repetidos; único diferenciando maiúsculas; único ignorando também acentos ("Ginásio" = "Ginasio"). |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente. |
 | **Prazo sugerido** | 06/11/2026 (Aula 7). |
-| **Artefatos afetados** | `EspacoEsportivo` (normalização do nome); `CadastrarEspaco` e `EditarEspaco`; `RepositorioEspacos.existe_com_nome`; `NomeDeEspacoJaCadastrado`; constraint `espacos_espaco_esportivo_nome_unico_sem_caixa` (migration, se mudar); [Glossário](../glossario.md#espaco-esportivo); [Visão](../visao.md) (R-13). |
+| **Artefatos afetados** | `EspacoEsportivo` (normalização do nome); `CadastrarEspaco` e `EditarEspaco`; `RepositorioEspacos.existe_com_nome`; `NomeDeEspacoJaCadastrado`; constraint `espacos_espaco_esportivo_nome_unico_sem_caixa` (migration, se mudar); [Glossário](../glossario.md#espaco-esportivo); [Visão](../visao.md) (R-13); fichas de [UC-14](../casos-de-uso/UC-14-cadastrar-espaco.md#questões-em-aberto) (E6.1 e E7.1) e de [UC-15](../casos-de-uso/fichas-resumidas.md#uc-15) (REQ-04). |
 | **Origem** | ESP-02 (regra implementada sem DEC registrada). |
 | **Observações** | ID novo. Hoje, nomes que só diferem por acento são considerados diferentes. |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da decisão tomada na ESP-02 (REQ-01). |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as fichas de caso de uso que dependem desta decisão (REQ-04). |

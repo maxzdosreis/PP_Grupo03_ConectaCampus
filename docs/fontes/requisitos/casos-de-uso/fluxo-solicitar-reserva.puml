@@ -1,0 +1,116 @@
+@startuml fluxo-solicitar-reserva
+' Fluxo de decisão de UC-04 Solicitar reserva (REQ-04), diagrama de atividade de apoio (A3·s17).
+' Fonte versionada. Os arquivos .svg e .png ao lado são GERADOS a partir deste
+' arquivo (comando no README.md desta pasta): não os edite à mão.
+' Cada pergunta leva à exceção da ficha UC-04-solicitar-reserva.md com o mesmo ID,
+' na ordem real das verificações. O script verificar_casos_de_uso.py confere os IDs.
+
+skinparam dpi 120
+skinparam shadowing false
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam ActivityBorderColor #333333
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityDiamondBorderColor #333333
+skinparam ActivityDiamondBackgroundColor #FFFFFF
+skinparam NoteBorderColor #888888
+skinparam NoteBackgroundColor #FFFBE6
+
+title UC-04 Solicitar reserva — fluxo de decisão (UC-04 • 0.1 • Rascunho)
+
+start
+:1. O Solicitante pede para reservar um espaço;
+if (Algum espaço aceita pedidos?) then (não)
+  :E2.1 Nenhum espaço aceita pedidos; <<#FFE5E5>>
+  end
+else (sim)
+endif
+:2. O sistema apresenta os espaços, as regras de agenda e o solicitante;
+:3. O Solicitante informa espaço, data, início, término e finalidade;
+if (Quer ver a agenda do dia antes de enviar?) then (sim)
+  :A3.1 Consulta a agenda do dia (UC-06)
+  e pode usar um horário livre;
+else (não)
+endif
+:4. O Solicitante envia o pedido;
+
+if (5. O pedido está completo e bem formado?) then (não)
+  :E5.1 Dados ausentes ou em formato inválido; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (O término vem depois do início?) then (não)
+  :E5.2 Término igual ou anterior ao início; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (O início ainda não passou?) then (não)
+  :E5.3 Data retroativa; <<#FFE5E5>>
+  end
+else (sim)
+endif
+
+if (6. [UC-05] Está dentro do horário de funcionamento?) then (não)
+  :E6.1 Fora do horário de funcionamento; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (A duração está entre a mínima e a máxima?) then (não)
+  :E6.2 Duração fora dos limites; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (A data está dentro da antecedência máxima?) then (não)
+  :E6.3 Além da antecedência máxima; <<#FFE5E5>>
+  end
+else (sim)
+endif
+
+if (7. A finalidade é válida? (depois da agenda: lacuna L-12)) then (não)
+  :E7.1 Finalidade em branco ou longa demais; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (O espaço está identificado por um número positivo?) then (não)
+  :E7.2 Espaço não identificado; <<#FFE5E5>>
+  end
+else (sim)
+endif
+
+if (8. [UC-05] O espaço existe?) then (não)
+  :E8.1 Espaço inexistente; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (O espaço aceita pedidos (está ativo)?) then (não)
+  :E8.2 Espaço inativo; <<#FFE5E5>>
+  end
+else (sim)
+endif
+
+if (9. [UC-05] Alguma reserva Solicitada ou Confirmada do espaço tem momento em comum?) then (sim)
+  :E9.1 Conflito com uma reserva que ocupa o horário; <<#FFE5E5>>
+  end
+else (não)
+endif
+
+:10. O sistema grava a reserva Solicitada
+e o registro de criação (UC-13), na mesma gravação;
+if (Um pedido simultâneo ocupou o período antes da gravação?) then (sim)
+  :E10.1 Conflito descoberto na gravação; <<#FFE5E5>>
+  end
+else (não)
+endif
+:11. O sistema mostra a reserva criada, aguardando o Gestor;
+stop
+
+legend right
+  |= Notação |= Significado |
+  | losango | pergunta: cada uma revela uma regra (A3·s17) |
+  | caixa rosa "Ex.y" | exceção da ficha UC-04: a meta é interrompida, nada é gravado |
+  | ⊗ | fim sem sucesso (exceção) |
+  | ● dentro de círculo | fim com sucesso (reserva Solicitada) |
+  Numeração: passos 1 a 11, A<passo>.<n> e E<passo>.<n> (decisão i).
+endlegend
+
+@enduml
