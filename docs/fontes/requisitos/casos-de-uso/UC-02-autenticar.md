@@ -11,6 +11,7 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, alternativas da sessão, exceções, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -181,3 +182,5 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E3.2](#e3-2) | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` (credenciais inválidas no aviso do topo) |
 | [E4.1](#e4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_me_com_access_expirado_responde_401`, `::test_token_adulterado_responde_401 [x]`, `::test_access_usado_como_refresh_responde_401`; `api/cliente.test.ts` (renovação recusada lança a sessão expirada); `components/sessao/SessaoProvider.test.tsx` (expiração leva ao login com o caminho atual) |
 | [E4.2](#e4-2) | `contas/tests/test_api_autenticacao.py::test_access_de_usuario_desativado_depois_do_login_responde_401`, `::test_access_de_usuario_excluido_responde_401`, `::test_refresh_de_usuario_inativo_responde_401`, `::test_refresh_de_usuario_excluido_responde_401` |
+
+**Histórias derivadas:** [US-02 Entrar no sistema](../historias/US-02-entrar-no-sistema.md), [US-03 Manter e encerrar a sessão](../historias/US-03-manter-e-encerrar-a-sessao.md). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).

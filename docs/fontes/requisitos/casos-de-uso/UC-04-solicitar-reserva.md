@@ -11,6 +11,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, alternativas, exceções na ordem real das verificações, garantias, RF cobertos, evidência e fluxo de decisão (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -293,3 +294,5 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E10.1](#e10-1) | `reservas/tests/test_repositorio_reservas.py::test_banco_barra_sobreposicao_que_escapou_da_checagem_em_codigo`, `::test_conflito_barrado_pelo_banco_nao_grava_registro` |
 
 <a id="evidencia-da-ordem"></a>**Ordem das exceções.** A ordem 5 → 6 → 8 → 9 está fixada por `reservas/tests/test_reserva.py::test_data_retroativa_e_checada_antes_do_horario_de_funcionamento`, `::test_horario_de_funcionamento_e_checado_antes_da_duracao`, `::test_duracao_e_checada_antes_da_antecedencia`; `reservas/tests/test_propriedades_da_agenda.py::test_solicitar_aceita_so_o_que_respeita_as_regras_e_recusa_pela_primeira_violada`; e `reservas/tests/test_criar_reserva.py::test_horario_no_passado_lanca_data_retroativa_antes_de_consultar_o_espaco`. A posição do passo 7 vem do código (`Reserva.solicitar` aplica as regras de agenda antes de chamar o construtor, que confere `espaco_id` e a finalidade) e não tem teste que a fixe ([L-12](../requisitos/srs.md#l-12)).
+
+**Histórias derivadas:** [US-08 Solicitar reserva](../historias/US-08-solicitar-reserva.md), [US-09 Ver a agenda do dia antes de pedir](../historias/US-09-ver-a-agenda-do-dia.md) (a US-09 é a extensão [A3.1](#a3-1)). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).

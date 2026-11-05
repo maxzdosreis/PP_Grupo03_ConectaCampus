@@ -12,7 +12,7 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | [`glossario.md`](glossario.md) | **GLO-01**, termos do domínio com definição única e o nome correspondente no código. | 0.1 • Rascunho (REQ-01) |
 | [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (60 fichas, por área) e RNF-F01 a RNF-S06 (31, por FURPS). | 0.1 • Rascunho (REQ-02) |
 | [`casos-de-uso/`](casos-de-uso/README.md) | **UCD-01** (diagrama do negócio, UC-01 a UC-19) e **UCD-02** (diagrama de apoio "Administração", UC-20 a UC-22) em PlantUML, com as imagens geradas, o índice dos UCs e a rastreabilidade RF → UC (REQ-03); fichas Cockburn completas de UC-02, UC-04, UC-10 e UC-14, resumidas dos demais e o fluxo de decisão de UC-04 (REQ-04). | 0.1 • Rascunho (REQ-03, REQ-04) |
-| [`historias/`](historias/README.md) | US-xx com CA-xx (Dado/Quando/Então) e TA-xx. | vazia; REQ-05 em diante |
+| [`historias/`](historias/README.md) | **HIS-01**: histórias US-01 a US-19 (Index Card e INVEST), 156 critérios de aceite CA-xx em Dado/Quando/Então e os testes de aceite TA-01 a TA-156 ligados aos testes que existem, com a cobertura UC → US/CA e a rastreabilidade RF → US/CA. | 0.1 • Rascunho (REQ-05) |
 | [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice. | DEC-01 a DEC-13 |
 | [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança depois de uma baseline. | vazia |
 | [`baselines/`](baselines/README.md) | Manifestos de baseline (conjunto aprovado de versões). | vazia |
@@ -39,6 +39,12 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 - **b) Decisões de modelagem no README da pasta.** Granularidade, notação, generalização, autenticação como precondição, Equipe de TI à parte e ausência de sistema externo: [decisões a) a g)](casos-de-uso/README.md#decisões-de-modelagem).
 - **c) Vínculo RF → UC em três lugares, uma fonte.** A tabela de [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) é a fonte; a coluna UC da [SRS, seção 6.4](requisitos/srs.md#64-rf--evidência-uc-us-e-ca) e o campo "Vínculos" de cada ficha repetem o UC principal, e `scripts/verificar_casos_de_uso.py` confere que os três batem.
 - **d) Versão.** O README de casos de uso nasce em 0.1 • Rascunho; a SRS, as fichas e o glossário ganham uma linha no histórico, sem mudar de versão.
+
+## Decisões de organização (REQ-05)
+
+- **a) Histórias por fatia de valor.** As US saem dos casos de uso de objetivo, uma ou mais por caso de uso; as subfunções aparecem como CAs, e F5 e F6 não têm história própria. Fatiamento, numeração (CA dentro da história, TA global), Index Card, INVEST, ordem dos CAs, linguagem e DECs: [decisões a) a h)](historias/README.md#decisões-de-organização-req-05).
+- **b) Uma fonte, vários espelhos.** Cada história é a fonte dos seus CAs e TAs; o índice dos TAs do README de `historias/`, o campo Vínculos das fichas de RF, as colunas US e CA da SRS 6.4 e a coluna Histórias do índice de casos de uso repetem esses vínculos, e `scripts/verificar_historias.py` confere que batem.
+- **c) Versão.** O README de `historias/` e cada história nascem em 0.1 • Rascunho; a SRS, as fichas de RF, as fichas de caso de uso e o glossário ganham uma linha no histórico, sem mudar de versão.
 
 ## Identificadores
 
@@ -97,9 +103,10 @@ NS-xx → RF-xx → UC-xx → US-xx → CA-xx / TA-xx → código e testes
 ```
 
 - Os slides param em CA/TA. O elo até o código e os testes é uma extensão do grupo, e a pergunta se ele é esperado segue aberta.
-- Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência), os casos de uso com a [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) (REQ-03) e as fichas que ligam cada RF a um passo, alternativa ou exceção (REQ-04), e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). US e CA preenchem o resto da cadeia nas próximas tarefas (REQ-05 e REQ-06).
+- Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência), os casos de uso com a [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) (REQ-03) e as fichas que ligam cada RF a um passo, alternativa ou exceção (REQ-04), e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). Desde a REQ-05, as [histórias](historias/README.md) completam a cadeia até CA/TA: cada RF aponta para os CAs que o verificam, e cada TA, para os testes automatizados ou para um roteiro manual. A matriz completa, até o código, é da REQ-06.
 - `python scripts/verificar_requisitos.py` (na raiz) confere que toda NS tem RF, que todo RF tem NS, a sintaxe dos enunciados, os termos vagos e os links e âncoras desta pasta.
 - `python scripts/verificar_casos_de_uso.py` (na raiz) confere que os UCs dos diagramas e do índice são os mesmos, que todo RF tem UC (na tabela RF → UC, na SRS e na ficha), a notação dos diagramas, se as imagens estão atualizadas e, desde a REQ-04, as fichas de caso de uso (RF ligados a âncoras, passos citados, as quatro partes das exceções, termos de interface e o fluxo de decisão).
+- `python scripts/verificar_historias.py` (na raiz), desde a REQ-05, confere o Index Card e o INVEST de cada história, os CAs (Dado/Quando/Então, origem, RF e TA), a cobertura de cada alternativa e exceção das fichas, o RF → US/CA nas fichas e na SRS, a existência de cada teste citado num TA, a sequência dos IDs e a linguagem dos CAs.
 - A matriz responde a três perguntas: **impacto** (que artefatos são afetados?), **cobertura** (todo requisito tem teste?) e **justificativa** (que necessidade o originou?).
 
 ## Pontos a confirmar com o professor

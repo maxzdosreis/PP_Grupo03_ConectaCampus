@@ -12,6 +12,7 @@
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Acréscimo dos termos usados na SRS que faltavam: equipe de TI, usuário autenticado, sessão, credenciais inválidas, política de senha, vocabulário público, mensagem de resultado e dados de exemplo; nova seção 6 (REQ-02). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Nova seção 7, com os nomes de caso de uso que são termos novos: autenticar, verificar disponibilidade do horário, alterar situação da reserva, informar motivo e registrar no histórico (REQ-03). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Termos das fichas de caso de uso: término sugerido (seção 4) e alternativa, exceção, garantia mínima e ponto de extensão (seção 7) (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Nova seção 8, com os termos das histórias: história de usuário, critério de aceite, teste de aceite, INVEST, Index Card e pronta (REQ-05). Sem aprovação. |
 
 ## Como ler este glossário
 
@@ -29,6 +30,7 @@
 5. [Histórico](#5-histórico)
 6. [Mensagens e operação](#6-mensagens-e-operação)
 7. [Casos de uso](#7-casos-de-uso)
+8. [Histórias e aceite](#8-histórias-e-aceite)
 
 ## 1. Espaços
 
@@ -130,3 +132,16 @@ Nomes de caso de uso do [diagrama](casos-de-uso/README.md) que não são outro t
 | <a id="excecao"></a>**Exceção** (de caso de uso) | Caminho de uma ficha de caso de uso em que a **meta é interrompida** num passo; descreve a condição, o resultado observável para o ator, o estado depois e o requisito atendido. Identificada como `E<passo>.<n>`. | As exceções de domínio do código (ex.: `ConflitoDeHorario`) são a implementação de várias delas | Não confundir com a "exceção de domínio" do código: uma exceção de caso de uso pode vir de uma recusa do formato do pedido, sem exceção de domínio. Numeração A × E: ponto 5 a confirmar. |
 | <a id="garantia-minima"></a>**Garantia mínima** | O que é verdade ao fim de um caso de uso **mesmo quando a meta falha** (Cockburn, A3·s10): por exemplo, "nenhuma reserva é gravada pela metade". A **garantia de sucesso** é o que vale quando a meta é alcançada. | — | Corresponde ao [RNF-R03](requisitos/rnf.md#rnf-r03) (operação recusada não muda nada). |
 | <a id="ponto-de-extensao"></a>**Ponto de extensão** | Lugar nomeado do fluxo de um caso de uso em que uma extensão `«extend»` pode acontecer, por escolha do ator. Hoje: "antes de enviar o pedido" (UC-04, estendido por UC-06) e "ver o histórico" (UC-08, estendido por UC-09). | — | Na ficha da base, a extensão aparece como uma alternativa no passo do ponto (ex.: [UC-04 A3.1](casos-de-uso/UC-04-solicitar-reserva.md#a3-1)). |
+
+## 8. Histórias e aceite
+
+Termos das [histórias de usuário](historias/README.md) (REQ-05), da disciplina de Requisitos (A3·s19–24).
+
+| Termo | Definição | Nome no código | Observações |
+|---|---|---|---|
+| <a id="historia-de-usuario"></a>**História de usuário** (US) | Fatia de valor de um caso de uso para um papel, escrita como "Como [papel], quero [capacidade] para [benefício]", com valor, origem e o checklist INVEST. Identificada como `US-xx`. | — | Um caso de uso pode gerar várias histórias sem perder a meta (ex.: UC-02 → US-02 e US-03). |
+| <a id="criterio-de-aceite"></a>**Critério de aceite** (CA) | Condição observável que a história precisa cumprir, escrita em Dado/Quando/Então, do tipo sucesso, alternativa, exceção, registro ou acesso. Numerado dentro da história: "US-08 · CA-03". | — | Descreve o que a pessoa observa, nunca a implementação ([decisão g](historias/README.md#decisao-g)). |
+| <a id="teste-de-aceite"></a>**Teste de aceite** (TA) | Verificação executável de um critério de aceite: os testes automatizados que o comprovam ou, sem eles, um roteiro manual (precondição, passos e resultado esperado). Numerado de forma global: `TA-xx`. | os testes citados em cada TA (pytest em `src/backend/`, Vitest em `src/frontend/src/`) | CA sem TA automatizado é lacuna da SRS (L-08, L-15, L-16). |
+| <a id="invest"></a>**INVEST** | Checklist de qualidade de uma história: Independente, Negociável, Valiosa, Estimável, Small (pequena) e Testável, cada letra com ✓ ou ✗ e uma justificativa. | — | O diagnóstico segue o do professor ("valiosa e testável, mas ainda precisa ser pequena e negociável"). |
+| <a id="index-card"></a>**Index Card** | O cartão da história (o Card dos 3 Cs: Card → Conversation → Confirmation): ID, título, história, valor, origem, prioridade, estimativa em "Custo em Semanas", conversa e o critério de "pronta". | — | O formato padrão e a fração na estimativa são o ponto 6 dos pontos a confirmar. |
+| <a id="pronta"></a>**Pronta** (história) | A história em que todos os CAs têm o TA passando, os documentos ligados estão atualizados e a revisão por pares está registrada. | — | Critério exato pedido no Index Card da Aula 3 (A3·s28). |

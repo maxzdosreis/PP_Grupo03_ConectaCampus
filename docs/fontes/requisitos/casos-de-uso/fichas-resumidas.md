@@ -13,6 +13,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: UC-01, UC-03, UC-06 a UC-09, UC-15 e UC-16 e o bloco de apoio UC-20 a UC-22 (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" em cada caso de uso (REQ-05), sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -52,6 +53,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-32](../requisitos/rf-contas.md#rf-32) → [passos 1 a 4](#uc01-p1) · [RF-32.1](../requisitos/rf-contas.md#rf-32-1) → [E3.1](#uc01-e3-1) · [RF-32.2](../requisitos/rf-contas.md#rf-32-2) → [E3.2](#uc01-e3-2) · [RF-32.3](../requisitos/rf-contas.md#rf-32-3) → [E3.3](#uc01-e3-3)
 
+**Histórias derivadas:** [US-01 Criar minha conta](../historias/US-01-criar-minha-conta.md)
+
 ---
 
 ## <a id="uc-03"></a>UC-03 · Consultar espaços
@@ -83,6 +86,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | <a id="uc03-e2-2"></a>E2.2 · Espaço inexistente | Em A2.2, não existe espaço com a identificação escolhida. | "Espaço de código «n» não encontrado." | Nenhum espaço muda. | [RF-09](../requisitos/rf-espacos.md#rf-09) |
 
 **RFs cobertos:** [RF-01](../requisitos/rf-espacos.md#rf-01) → [passo 2](#uc03-p2) · [RF-02](../requisitos/rf-espacos.md#rf-02) → [A2.1](#uc03-a2-1) · [RF-02.1](../requisitos/rf-espacos.md#rf-02-1) → [E2.1](#uc03-e2-1) · [RF-03](../requisitos/rf-espacos.md#rf-03) → [A2.2](#uc03-a2-2) · [RF-04](../requisitos/rf-espacos.md#rf-04) → [A2.1](#uc03-a2-1) (os tipos do filtro) · [RF-09](../requisitos/rf-espacos.md#rf-09) → [E2.2](#uc03-e2-2)
+
+**Histórias derivadas:** [US-04 Consultar os espaços](../historias/US-04-consultar-os-espacos.md)
 
 ---
 
@@ -119,6 +124,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-28](../requisitos/rf-agenda.md#rf-28) → [passo 5](#uc06-p5) (a duração máxima do término sugerido) · [RF-29](../requisitos/rf-agenda.md#rf-29) → [passo 3](#uc06-p3) · [RF-29.1](../requisitos/rf-agenda.md#rf-29-1) → [E2.1](#uc06-e2-1) · [RF-29.2](../requisitos/rf-agenda.md#rf-29-2) → [E2.2](#uc06-e2-2) · [RF-30](../requisitos/rf-agenda.md#rf-30) → [passos 4 e 5](#uc06-p4) · [RF-31](../requisitos/rf-agenda.md#rf-31) → [A4.1](#uc06-a4-1)
 
+**Histórias derivadas:** [US-09 Ver a agenda do dia antes de pedir](../historias/US-09-ver-a-agenda-do-dia.md)
+
 ---
 
 ## <a id="uc-07"></a>UC-07 · Consultar reservas
@@ -152,6 +159,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-12](../requisitos/rf-reservas.md#rf-12) → [passos 3 e 4](#uc07-p3) · [RF-12.1](../requisitos/rf-reservas.md#rf-12-1) → [E3.1](#uc07-e3-1) · [RF-13](../requisitos/rf-reservas.md#rf-13) → [passo 2](#uc07-p2), [A3.1](#uc07-a3-1) · [RF-15](../requisitos/rf-reservas.md#rf-15) → [passo 3](#uc07-p3) · [RF-16](../requisitos/rf-reservas.md#rf-16) → [passo 2](#uc07-p2)
 
+**Histórias derivadas:** [US-10 Acompanhar minhas reservas](../historias/US-10-acompanhar-minhas-reservas.md), [US-11 Acompanhar todas as reservas](../historias/US-11-acompanhar-todas-as-reservas.md)
+
 ---
 
 ## <a id="uc-08"></a>UC-08 · Consultar detalhe da reserva
@@ -183,6 +192,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-14](../requisitos/rf-reservas.md#rf-14) → [passo 3](#uc08-p3) · [RF-16](../requisitos/rf-reservas.md#rf-16) → [passo 3](#uc08-p3) · [RF-23](../requisitos/rf-reservas.md#rf-23) → [E2.1](#uc08-e2-1)
 
+**Histórias derivadas:** [US-12 Ver o detalhe e o histórico de uma reserva](../historias/US-12-ver-detalhe-e-historico.md)
+
 ---
 
 ## <a id="uc-09"></a>UC-09 · Consultar histórico da reserva
@@ -213,6 +224,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | <a id="uc09-e3-1"></a>E3.1 · Histórico não pôde ser obtido | Falha de comunicação só ao consultar o histórico. | Que não foi possível carregar o histórico, com a opção de tentar de novo; o detalhe da reserva continua visível. | Nada muda. | [RF-22](../requisitos/rf-reservas.md#rf-22) |
 
 **RFs cobertos:** [RF-22](../requisitos/rf-reservas.md#rf-22) → [passo 3](#uc09-p3) · [RF-23](../requisitos/rf-reservas.md#rf-23) → [E2.1](#uc09-e2-1)
+
+**Histórias derivadas:** [US-12 Ver o detalhe e o histórico de uma reserva](../historias/US-12-ver-detalhe-e-historico.md)
 
 ---
 
@@ -252,6 +265,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-04](../requisitos/rf-espacos.md#rf-04) → [passo 2](#uc15-p2) · [RF-05.2](../requisitos/rf-espacos.md#rf-05-2) → [E4.5](#uc15-e4-5) · [RF-06](../requisitos/rf-espacos.md#rf-06) → [passos 1 a 5](#uc15-p1) · [RF-06.1](../requisitos/rf-espacos.md#rf-06-1) → [E4.3](#uc15-e4-3) · [RF-06.2](../requisitos/rf-espacos.md#rf-06-2) → [E4.1](#uc15-e4-1), [E4.4](#uc15-e4-4) · [RF-09](../requisitos/rf-espacos.md#rf-09) → [E4.2](#uc15-e4-2) · [RF-10](../requisitos/rf-espacos.md#rf-10) → [E1.1](#uc15-e1-1)
 
+**Histórias derivadas:** [US-06 Editar espaço](../historias/US-06-editar-espaco.md)
+
 ---
 
 ## <a id="uc-16"></a>UC-16 · Desativar ou reativar espaço
@@ -289,6 +304,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 **RFs cobertos:** [RF-07](../requisitos/rf-espacos.md#rf-07) → [passos 1 a 5](#uc16-p1) · [RF-07.1](../requisitos/rf-espacos.md#rf-07-1) → [E4.2](#uc16-e4-2) · [RF-08](../requisitos/rf-espacos.md#rf-08) → [A1.1](#uc16-a1-1) · [RF-08.1](../requisitos/rf-espacos.md#rf-08-1) → [E4.3](#uc16-e4-3) · [RF-09](../requisitos/rf-espacos.md#rf-09) → [E4.1](#uc16-e4-1) · [RF-10](../requisitos/rf-espacos.md#rf-10) → [E1.1](#uc16-e1-1)
 
+**Histórias derivadas:** [US-07 Desativar e reativar espaço](../historias/US-07-desativar-e-reativar-espaco.md)
+
 ---
 
 # Apoio (diagrama UCD-02, Equipe de TI)
@@ -323,6 +340,8 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 
 **RFs cobertos:** [RF-37](../requisitos/rf-contas.md#rf-37) → [passos 1 a 4](#uc20-p1), [E2.1](#uc20-e2-1)
 
+**Histórias derivadas:** [US-17 Criar o primeiro Gestor](../historias/US-17-criar-o-primeiro-gestor.md)
+
 ## <a id="uc-21"></a>UC-21 · Carregar dados de exemplo
 
 | Campo | Conteúdo |
@@ -352,6 +371,8 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 
 **RFs cobertos:** [RF-39](../requisitos/rf-gerais.md#rf-39) → [passos 1 a 4](#uc21-p1), [A3.1](#uc21-a3-1), [E2.1](#uc21-e2-1)
 
+**Histórias derivadas:** [US-18 Carregar os dados de exemplo](../historias/US-18-carregar-os-dados-de-exemplo.md)
+
 ## <a id="uc-22"></a>UC-22 · Verificar se o sistema está no ar
 
 | Campo | Conteúdo |
@@ -374,3 +395,5 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 | <a id="uc22-e2-1"></a>E2.1 · Banco de dados fora do ar | O banco de dados não responde. | "Não foi possível conectar ao banco de dados." | Nada muda. | [RF-40](../requisitos/rf-gerais.md#rf-40) (sem teste: [lacuna L-08](../requisitos/srs.md#l-08)) |
 
 **RFs cobertos:** [RF-40](../requisitos/rf-gerais.md#rf-40) → [passos 1 a 3](#uc22-p1), [E2.1](#uc22-e2-1)
+
+**Histórias derivadas:** [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md)
