@@ -1,0 +1,135 @@
+flowchart TB
+%% Figura 1 — Visão geral do Conecta Campus (DOC-01).
+%% Fonte versionada. visao-geral.svg e visao-geral.png são GERADOS a partir deste arquivo
+%% (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Mapeamento nó → código, conferido por scripts/verificar_visao_do_sistema.py:
+%% servico: SVC_FRONT = frontend
+%% servico: SVC_BACK = backend
+%% servico: PG = db
+%% imagem: db = postgres:16-alpine
+%% caminho: VITE = src/frontend/vite.config.ts
+%% caminho: FE_UI = src/frontend/src - src/frontend/src/api
+%% caminho: FE_API = src/frontend/src/api
+%% modulo: CONFIG = config
+%% modulo: ESP_API = espacos.api
+%% modulo: ESP_APP = espacos.application
+%% modulo: ESP_DOM = espacos.domain
+%% modulo: ESP_INFRA = espacos.infrastructure
+%% modulo: RES_API = reservas.api
+%% modulo: RES_APP = reservas.application
+%% modulo: RES_DOM = reservas.domain
+%% modulo: RES_INFRA = reservas.infrastructure
+%% modulo: CON_API = contas.api
+%% modulo: CON_APP = contas.application
+%% modulo: CON_DOM = contas.domain
+%% modulo: CON_INFRA = contas.infrastructure
+%% modulo: COMP_API = compartilhado.api
+%% modulo: COMP_DOM = compartilhado.domain
+%% modulo: EXEMPLOS = exemplos
+%% Relações sem import (rede ou referência por texto), com o arquivo e o trecho que as provam:
+%% sem-import: FE_UI -> VITE | src/docker-compose.yml | npm run dev
+%% sem-import: FE_API -> CONFIG | src/frontend/src/api/cliente.ts | Bearer ${access}
+%% sem-import: CONFIG -> ESP_API | src/backend/config/urls.py | include("espacos.api.urls")
+%% sem-import: CONFIG -> RES_API | src/backend/config/urls.py | include("reservas.api.urls")
+%% sem-import: CONFIG -> CON_API | src/backend/config/urls.py | include("contas.api.urls")
+%% sem-import: CONFIG -> COMP_API | src/backend/config/settings.py | "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao"
+%% sem-import: CONFIG -> CON_INFRA | src/backend/config/settings.py | AUTH_USER_MODEL = "contas.Usuario"
+%% sem-import: ESP_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
+%% sem-import: RES_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
+%% sem-import: CON_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
+%% As setas entre as camadas de um mesmo contexto, as de cada contexto para compartilhado e a única
+%% ligação entre contextos (reservas.infrastructure → espacos.publico) estão na Figura 2
+%% (regras-de-dependencia.mmd); aqui elas cruzariam a figura toda e dobrariam a altura.
+%% CTXS só agrupa os três contextos na figura; não é um pacote.
+%% As ligações ~~~ são invisíveis: só empilham as camadas na ordem api, application, domain, infrastructure.
+
+  subgraph NAV["Navegador"]
+    FE_UI["páginas, componentes e hooks<br/>(SessaoProvider, RotaProtegida)"]:::outro
+    FE_API["api/<br/>cliente.ts: Bearer JWT, renova no 401<br/>sessao.ts: tokens"]:::outro
+  end
+
+  subgraph COMPOSE["Docker Compose"]
+    subgraph SVC_FRONT["frontend"]
+      VITE["Vite :5173<br/>(entrega o app React)"]:::externo
+    end
+
+    subgraph SVC_BACK["backend (Django + DRF, :8000)"]
+      CONFIG["config<br/>(settings, urls,<br/>JWTAuthentication)"]:::outro
+      EXEMPLOS["exemplos<br/>(dados de exemplo)"]:::outro
+
+      subgraph CTXS["contextos"]
+        subgraph ESP["espacos"]
+          ESP_API["espacos.api"]:::api
+          ESP_APP["espacos.application"]:::application
+          ESP_DOM["espacos.domain"]:::domain
+          ESP_INFRA["espacos.infrastructure"]:::infrastructure
+        end
+
+        subgraph RES["reservas"]
+          RES_API["reservas.api"]:::api
+          RES_APP["reservas.application"]:::application
+          RES_DOM["reservas.domain"]:::domain
+          RES_INFRA["reservas.infrastructure"]:::infrastructure
+        end
+
+        subgraph CON["contas"]
+          CON_API["contas.api"]:::api
+          CON_APP["contas.application"]:::application
+          CON_DOM["contas.domain"]:::domain
+          CON_INFRA["contas.infrastructure"]:::infrastructure
+        end
+      end
+
+      subgraph COMP["compartilhado"]
+        COMP_API["compartilhado.api<br/>(respostas, erros, ApenasGestor)"]:::api
+        COMP_DOM["compartilhado.domain<br/>(ErroDeDominio)"]:::domain
+      end
+    end
+
+    PG[("db<br/>PostgreSQL 16")]:::externo
+  end
+
+  ESP_API ~~~ ESP_APP
+  ESP_APP ~~~ ESP_DOM
+  ESP_DOM ~~~ ESP_INFRA
+  RES_API ~~~ RES_APP
+  RES_APP ~~~ RES_DOM
+  RES_DOM ~~~ RES_INFRA
+  CON_API ~~~ CON_APP
+  CON_APP ~~~ CON_DOM
+  CON_DOM ~~~ CON_INFRA
+
+  FE_UI -->|"chama a API, lê a sessão"| FE_API
+  FE_UI ==>|"HTTP: carrega o app"| VITE
+  FE_API ==>|"HTTP/JSON + Bearer JWT"| CONFIG
+
+  CONFIG -->|"urls"| ESP_API
+  CONFIG -->|"urls"| RES_API
+  CONFIG -->|"urls"| CON_API
+  CONFIG -->|"AUTH_USER_MODEL"| CON_INFRA
+  CONFIG -->|"tratador de erros"| COMP_API
+  EXEMPLOS -->|"casos de uso"| CTXS
+  EXEMPLOS --> COMP_DOM
+
+  ESP_INFRA ==>|"SQL (ORM)"| PG
+  RES_INFRA ==>|"SQL (ORM)"| PG
+  CON_INFRA ==>|"SQL (ORM)"| PG
+
+  subgraph LEGENDA["Legenda"]
+    LEG_A["api"]:::api
+    LEG_B["application"]:::application
+    LEG_C["domain"]:::domain
+    LEG_D["infrastructure"]:::infrastructure
+    LEG_E["serviço ou banco"]:::externo
+  end
+  LEG_A -->|"depende de (importa)"| LEG_B
+  LEG_D -.->|"implementa (Protocol)"| LEG_B
+  LEG_D ==>|"rede"| LEG_E
+  LEG_B ~~~ LEG_C
+
+  classDef api fill:#dbeafe,stroke:#1e3a8a,color:#111827
+  classDef application fill:#dcfce7,stroke:#14532d,color:#111827
+  classDef domain fill:#fef3c7,stroke:#78350f,color:#111827
+  classDef infrastructure fill:#ede9fe,stroke:#4c1d95,color:#111827
+  classDef outro fill:#f3f4f6,stroke:#374151,color:#111827
+  classDef externo fill:#ffffff,stroke:#111827,color:#111827,stroke-width:2px
