@@ -11,6 +11,7 @@ Ficha do caso de uso abstrato UC-10 do [índice](README.md#uc-10). Ela descreve 
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo comum, variações UC-11/17/18/19, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -248,3 +249,5 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | Nenhuma exceção registra | `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico` |
 
 <a id="evidencia-da-ordem"></a>**Ordem das exceções.** E6.1 vem antes de procurar a reserva porque o formato do pedido é conferido primeiro (`ReservaSituacaoView.patch` valida a entrada e só então chama `AlterarSituacaoReserva`). E6.2 → E6.3 → E6.4 → E6.5 → E6.6 → E6.7 é a ordem de `Reserva.alterar_situacao` (visibilidade, conversão da situação, `_exigir_permissao`, `transicao_permitida`, `_normalizar_motivo`, `_exigir_motivo_se_necessario`), fixada por `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]` e `::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` (perfil antes da transição). E7.1 só pode acontecer na gravação (`RepositorioReservasDjango.salvar`, com a linha bloqueada).
+
+**Histórias derivadas:** [US-13 Cancelar uma reserva](../historias/US-13-cancelar-uma-reserva.md), [US-14 Confirmar uma reserva](../historias/US-14-confirmar-uma-reserva.md), [US-15 Recusar uma reserva com motivo](../historias/US-15-recusar-uma-reserva.md), [US-16 Concluir uma reserva](../historias/US-16-concluir-uma-reserva.md) (uma por variação; [A1.1](#a1-1) também em US-11 e US-12). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).

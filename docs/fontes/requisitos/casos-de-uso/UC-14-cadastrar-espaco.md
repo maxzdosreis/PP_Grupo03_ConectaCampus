@@ -11,6 +11,7 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
+| 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -197,3 +198,5 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E7.1](#e7-1) | `espacos/tests/test_repositorio_espacos.py::test_salvar_nome_repetido_com_caixa_diferente_lanca_nome_ja_cadastrado` |
 
 <a id="evidencia-da-ordem"></a>**Ordem das exceções.** E1.1 antes dos dados: a permissão do Gestor é aplicada a todo pedido de cadastro antes de lê-lo (`EspacosView`, `metodos_do_gestor`). E5.1 é a conferência de formato, que aponta todos os dados de uma vez. E5.2 → E5.3 → E5.4 → E5.5 é a ordem do construtor de `EspacoEsportivo` (nome, tipo, capacidade), provada por `espacos/tests/test_propriedades_do_espaco.py::test_entrada_invalida_lanca_so_o_erro_de_dominio_do_primeiro_campo_invalido`. E6.1 só depois dos dados válidos (`CadastrarEspaco.executar`: entidade, `existe_com_nome`, `salvar`), provado por `espacos/tests/test_casos_de_uso.py::test_cadastrar_com_dado_invalido_propaga_erro_do_dominio_sem_salvar`.
+
+**Histórias derivadas:** [US-05 Cadastrar espaço](../historias/US-05-cadastrar-espaco.md). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).
