@@ -11,7 +11,7 @@
 | Legenda | ◆ composição · → associação · tracejada sem seta: referência por id · «…» papel da classe · 1, 0..* multiplicidade · sublinhado: método de classe |
 |---|---|
 
-**O que cada classe garante sozinha.** `EspacoEsportivo` nunca tem nome vazio, tipo fora de `TipoEspaco` nem capacidade abaixo de `CAPACIDADE_MINIMA`, e só muda por `alterar_dados`, `desativar` e `ativar`; inativo, recusa reservas novas (DEC-06). Reserva nova só nasce por `Reserva.solicitar`, em `SOLICITADA`, no futuro e dentro das regras de agenda; o construtor só reconstitui. `alterar_situacao` aceita apenas o que a tabela e o papel do `Ator` permitem, exige motivo para recusar ou cancelar e gera um `RegistroDeSituacao` a cada mudança; `acoes_permitidas_para` usa a mesma regra. `IntervaloDeHorario` sempre termina depois de começar; o conflito entre reservas é a função `garantir_horario_livre`, porque depende das já gravadas. `Usuario`, único model do Django na figura, delega `eh_gestor` a `PerfilUsuario.eh_gestor`.
+**O que cada classe garante sozinha.** `EspacoEsportivo` nunca tem nome vazio, tipo fora de `TipoEspaco` nem capacidade abaixo de `CAPACIDADE_MINIMA`, e só muda pelos métodos da figura; inativo, recusa reservas novas (DEC-06). O construtor da `Reserva`, público, exige o que vale em qualquer situação (como o motivo em Recusada e Cancelada); início no futuro, regras de agenda e o registro inicial só existem em `Reserva.solicitar`, e passar por ele é convenção da aplicação: só `CriarReserva` cria, e o repositório só reconstitui. `alterar_situacao` aceita apenas o que a tabela e o papel do `Ator` permitem e gera um `RegistroDeSituacao` a cada mudança; `acoes_permitidas_para` usa a mesma regra. `IntervaloDeHorario` sempre termina depois de começar; o conflito entre reservas fica na função `garantir_horario_livre`. `Usuario.eh_gestor` delega a `PerfilUsuario.eh_gestor`.
 
 **Decisões de modelagem.**
 
@@ -20,4 +20,4 @@
 - **`PapelDoAtor` ≠ `PerfilUsuario`**, pelo contrato `reservas não importa contas`; a API monta o `Ator` a partir de `request.user`.
 - **`RegistroDeSituacao` sai da `Reserva`**, gravado na mesma transação e só nas mudanças aceitas (DEC-05). As transições não dependem do horário (DEC-13).
 
-**No banco** repetem-se as regras que uma corrida furaria: `ExclusionConstraint`, `UniqueConstraint(Lower("nome"))`, `CheckConstraint`. **Fora do diagrama:** `EstadoDoEspaco`, `DadosDeCadastro`, exceções, repositórios, `*Model`.
+**No banco** repetem-se `ExclusionConstraint`, `UniqueConstraint(Lower("nome"))` e `CheckConstraint`. **Fora do diagrama:** `EstadoDoEspaco`, `DadosDeCadastro`, exceções, repositórios, `*Model`.
