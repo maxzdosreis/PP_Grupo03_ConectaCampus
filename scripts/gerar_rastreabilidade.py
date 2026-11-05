@@ -453,7 +453,7 @@ def cabecalho_gerado(titulo: str, modelo: Modelo, descricao: str) -> list[str]:
         "| Identificação | Responsabilidade |",
         "|---|---|",
         f"| **Parte da [RAS-01](README.md) • {versao} • {estado}** | "
-        "Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha",
+        "Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha |",
         "",
         descricao,
         "",
