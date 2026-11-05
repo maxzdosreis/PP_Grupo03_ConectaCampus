@@ -9,6 +9,7 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+DESCRICAO = "DOC-01: confere as figuras da Visão do sistema (docs/fontes/modelagem/*.mmd) contra o código."
 RAIZ = Path(__file__).resolve().parent.parent
 BACKEND = RAIZ / "src" / "backend"
 FRONTEND_SRC = RAIZ / "src" / "frontend" / "src"
@@ -572,7 +573,7 @@ def imprimir_tabela(tabela: list[tuple[Seta, list[str]]], figuras: dict[str, Fig
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=DESCRICAO)
     parser.add_argument("--pasta", type=Path, default=PASTA_PADRAO, help="pasta com os .mmd")
     args = parser.parse_args()
     pasta = args.pasta.resolve()
