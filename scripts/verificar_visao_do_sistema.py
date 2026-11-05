@@ -115,6 +115,14 @@ def primeira_linha(rotulo: str) -> str:
     return re.split(r"<br\s*/?>", rotulo)[0].strip()
 
 
+def eh_flowchart(caminho: Path) -> bool:
+    for bruta in caminho.read_text(encoding="utf-8").splitlines():
+        linha = bruta.strip()
+        if linha and not linha.startswith("%%"):
+            return re.match(r"(flowchart|graph)\b", linha) is not None
+    return False
+
+
 def ler_figura(caminho: Path, resultado: Resultado) -> Figura:
     figura = Figura(nome=caminho.name, texto=caminho.read_text(encoding="utf-8"))
     pilha: list[str] = []
@@ -579,7 +587,7 @@ def main() -> int:
     pasta = args.pasta.resolve()
 
     resultado = Resultado()
-    fontes = sorted(pasta.glob("*.mmd"))
+    fontes = [f for f in sorted(pasta.glob("*.mmd")) if eh_flowchart(f)]
     if not fontes:
         print(f"Nenhum .mmd em {pasta}")
         return 1
