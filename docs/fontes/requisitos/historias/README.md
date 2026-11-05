@@ -12,6 +12,7 @@ Histórias de usuário (US-xx) no formato "Como [papel], quero [capacidade] para
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: US-01 a US-19, 156 critérios de aceite e TA-01 a TA-156, decisões de organização, cobertura UC → US/CA, rastreabilidade RF → US/CA e índice dos TAs (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Link para a [matriz de rastreabilidade gerada](../rastreabilidade/matriz.md); a SRS 6.4 não repete mais US e CA (REQ-06). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Cobertura de UC-04 E7.1 e E7.2 trocada, acompanhando a nova numeração da ficha (espaço antes da finalidade, como no código; DOC-03). Sem aprovação. |
 
 ## Sumário
 
@@ -166,8 +167,8 @@ Toda alternativa e toda exceção das fichas de caso de uso — completas e resu
 | [UC-04 E6.1](../casos-de-uso/UC-04-solicitar-reserva.md#e6-1) | Fora do horário de funcionamento | [US-08 · CA-10](US-08-solicitar-reserva.md#us-08-ca-10) |  |
 | [UC-04 E6.2](../casos-de-uso/UC-04-solicitar-reserva.md#e6-2) | Duração fora dos limites | [US-08 · CA-11](US-08-solicitar-reserva.md#us-08-ca-11) |  |
 | [UC-04 E6.3](../casos-de-uso/UC-04-solicitar-reserva.md#e6-3) | Além da antecedência máxima | [US-08 · CA-12](US-08-solicitar-reserva.md#us-08-ca-12) |  |
-| [UC-04 E7.1](../casos-de-uso/UC-04-solicitar-reserva.md#e7-1) | Finalidade em branco ou longa demais | [US-08 · CA-14](US-08-solicitar-reserva.md#us-08-ca-14) |  |
-| [UC-04 E7.2](../casos-de-uso/UC-04-solicitar-reserva.md#e7-2) | Espaço não identificado | [US-08 · CA-15](US-08-solicitar-reserva.md#us-08-ca-15) |  |
+| [UC-04 E7.1](../casos-de-uso/UC-04-solicitar-reserva.md#e7-1) | Espaço não identificado | [US-08 · CA-15](US-08-solicitar-reserva.md#us-08-ca-15) |  |
+| [UC-04 E7.2](../casos-de-uso/UC-04-solicitar-reserva.md#e7-2) | Finalidade em branco ou longa demais | [US-08 · CA-14](US-08-solicitar-reserva.md#us-08-ca-14) |  |
 | [UC-04 E8.1](../casos-de-uso/UC-04-solicitar-reserva.md#e8-1) | Espaço inexistente | [US-08 · CA-16](US-08-solicitar-reserva.md#us-08-ca-16) |  |
 | [UC-04 E8.2](../casos-de-uso/UC-04-solicitar-reserva.md#e8-2) | Espaço inativo | [US-08 · CA-17](US-08-solicitar-reserva.md#us-08-ca-17) |  |
 | [UC-04 E9.1](../casos-de-uso/UC-04-solicitar-reserva.md#e9-1) | Conflito com uma reserva que ocupa o horário | [US-08 · CA-18](US-08-solicitar-reserva.md#us-08-ca-18) |  |

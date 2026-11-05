@@ -1,0 +1,45 @@
+%%{init: {"sequence": {"mirrorActors": false, "actorMargin": 24, "messageMargin": 22, "boxMargin": 6, "noteMargin": 6}}}%%
+sequenceDiagram
+%% Figura 5 — Solicitar uma reserva (DOC-03).
+%% Fonte versionada. solicitar-reserva.svg e solicitar-reserva.png são GERADOS a partir deste arquivo
+%% (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Conferido por scripts/verificar_fluxo_principal.py: participantes, métodos e parâmetros nomeados,
+%% ordem das chamadas (ast), ordem da nota "Verificações", códigos, status e mensagens.
+%% Cenário dos dados de exemplo (carregar_dados_exemplo): Bruno Lima pede a Quadra Poliesportiva Central
+%% para amanhã (06/11/2026 nesta figura); a reserva Solicitada dele das 10:00–11:00 ocupa o horário. Dois
+%% pedidos iguais até o passo 8, que só diferem no horário: 10:30–11:30, o horário de conflito documentado no
+%% README (CONFLITO_PARA_DEMONSTRACAO), e 11:00–14:00, o do "Usar este horário". O alt decide por ele.
+%% participante: NAV = src/frontend/src/components/reservas/FormularioDeReserva.tsx, src/frontend/src/api/reservas.ts
+%% participante: VIEW = reservas.api.views.ReservasView
+%% participante: CASO = reservas.application.casos_de_uso.CriarReserva
+%% participante: DOM = reservas.domain.reserva.Reserva, reservas.domain.conflito_de_horario.garantir_horario_livre
+%% participante: ESP = reservas.infrastructure.consulta_de_espacos.ConsultaDeEspacosViaFachada, espacos.publico.verificar_espaco_disponivel
+%% participante: REPO = reservas.infrastructure.repositorio_django.RepositorioReservasDjango, reservas.infrastructure.models.ReservaModel
+%% rota: POST reservas:lista
+%% campo: CAMPO_OBRIGATORIO_AUSENTE = finalidade
+  autonumber
+  participant NAV as Solicitante<br/>(navegador, React)
+  participant VIEW as ReservasView<br/>reservas.api
+  participant CASO as CriarReserva<br/>reservas.application
+  participant DOM as Reserva ·<br/>garantir_horario_livre<br/>reservas.domain
+  participant ESP as ConsultaDeEspacosViaFachada<br/>reservas.infrastructure<br/>→ espacos.publico
+  participant REPO as RepositorioReservasDjango<br/>reservas.infrastructure<br/>+ PostgreSQL
+
+  NAV->>VIEW: POST /api/reservas/ com Bearer<br/>Quadra Central, amanhã, início–término
+  VIEW->>CASO: executar(solicitante=<br/>solicitante_autenticado(request), …)
+  CASO->>DOM: Reserva.solicitar(…, agora=relogio())
+  DOM-->>CASO: reserva SOLICITADA + registro<br/>pendente None → SOLICITADA
+  CASO->>ESP: obter_espaco_reservavel(espaco_id)
+  CASO->>REPO: listar_que_ocupam_horario(espaco_id, data)
+  REPO-->>CASO: [Solicitada 10:00–11:00]
+  CASO->>DOM: garantir_horario_livre(reserva, existentes)
+  alt pedido de 10:30–11:30: sobrepõe a das 10:00–11:00
+    DOM--xVIEW: ConflitoDeHorario sobe:<br/>salvar não é chamado, nada é gravado
+    VIEW-->>NAV: 409 CONFLITO_DE_HORARIO<br/>(tratar_excecao) “Este espaço<br/>já tem uma reserva Solicitada<br/>em 06/11/2026 10:00–11:00.<br/>Escolha outro horário.”
+  else pedido de 11:00–14:00: só encosta, horário livre
+    CASO->>REPO: salvar(reserva)
+    Note over REPO: transaction.atomic: INSERT da<br/>reserva + bulk_create do registro.<br/>Pedido simultâneo que passou pela<br/>checagem: a restrição de exclusão<br/>recusa → 409 CONFLITO_DE_HORARIO
+    REPO-->>CASO: reserva com id, SOLICITADA
+    VIEW-->>NAV: 201 “Reserva solicitada<br/>com sucesso. Aguarde a<br/>confirmação do gestor.”
+  end
+  Note over NAV,REPO: Verificações, na ordem do código (qualquer recusa sobe sem gravar nada):<br/>formato do JSON → 400 DADOS_INVALIDOS · término depois do início → 400 HORARIO_INVALIDO<br/>início no futuro → 400 DATA_RETROATIVA · 07:00–22:00 → 400 FORA_DO_HORARIO_DE_FUNCIONAMENTO<br/>30 min a 3 h → 400 DURACAO_INVALIDA · até 30 dias → 400 ANTECEDENCIA_EXCEDIDA<br/>espaço > 0 → 400 IDENTIFICADOR_DE_ESPACO_INVALIDO · finalidade preenchida → 400 CAMPO_OBRIGATORIO_AUSENTE<br/>espaço existe → 404 ESPACO_NAO_ENCONTRADO · espaço ativo → 409 ESPACO_INATIVO<br/>horário livre → 409 CONFLITO_DE_HORARIO (desenhada)

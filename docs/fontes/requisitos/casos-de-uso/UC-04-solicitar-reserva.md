@@ -12,6 +12,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, alternativas, exceções na ordem real das verificações, garantias, RF cobertos, evidência e fluxo de decisão (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Passo 7 na ordem real do código: a identificação do espaço antes da finalidade; E7.1 passa a ser "Espaço não identificado" e E7.2, "Finalidade em branco ou longa demais" (achado da DOC-03). Sem aprovação. |
 
 ## Sumário
 
@@ -57,13 +58,13 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 4. <a id="p4"></a>O Solicitante envia o pedido.
 5. <a id="p5"></a>O sistema confere que o pedido está completo e bem formado, que o término vem depois do início e que o início ainda não passou.
 6. <a id="p6"></a>O sistema confere que o pedido respeita as regras de agenda, nesta ordem: horário de funcionamento, duração e antecedência. *(UC-05.)*
-7. <a id="p7"></a>O sistema confere a finalidade e a identificação do espaço.
+7. <a id="p7"></a>O sistema confere a identificação do espaço e, depois, a finalidade.
 8. <a id="p8"></a>O sistema confere que o espaço existe e aceita pedidos ([espaço reservável](../glossario.md#espaco-reservavel)). *(UC-05.)*
 9. <a id="p9"></a>O sistema confere que nenhuma [reserva que ocupa horário](../glossario.md#reserva-que-ocupa-horario) do mesmo espaço tem algum momento em comum com o intervalo pedido (o intervalo é semiaberto: encostar não é conflito). *(UC-05.)*
 10. <a id="p10"></a>O sistema grava a reserva na situação Solicitada, com o usuário autenticado como solicitante e o momento do pedido, e, na mesma gravação, o [registro de situação](../glossario.md#registro-de-situacao) da criação: sem situação anterior, nova Solicitada, autor = solicitante, momento = o do pedido. *(UC-13.)*
 11. <a id="p11"></a>O sistema mostra a reserva criada (espaço, data e horário, finalidade, situação Solicitada e solicitante) e informa que o pedido aguarda a decisão do Gestor.
 
-**Subfunções incluídas.** UC-05 *Verificar disponibilidade do horário* = passos [6](#p6), [8](#p8) e [9](#p9): as três condições que dependem das regras de uso e do estado do sistema. UC-13 *Registrar no histórico* = a segunda metade do passo [10](#p10). O passo [7](#p7) fica entre as verificações de UC-05 porque essa é a ordem real do sistema ([lacuna L-12](../requisitos/srs.md#l-12)): a finalidade e a identificação do espaço são conferidas depois das regras de agenda.
+**Subfunções incluídas.** UC-05 *Verificar disponibilidade do horário* = passos [6](#p6), [8](#p8) e [9](#p9): as três condições que dependem das regras de uso e do estado do sistema. UC-13 *Registrar no histórico* = a segunda metade do passo [10](#p10). O passo [7](#p7) fica entre as verificações de UC-05 porque essa é a ordem real do sistema ([lacuna L-12](../requisitos/srs.md#l-12)): a identificação do espaço e a finalidade, nessa ordem, são conferidas depois das regras de agenda.
 
 **Uma regra por vez.** No passo 5, os dados ausentes ou mal formados são apontados todos de uma vez, cada um junto ao dado correspondente ([E5.1](#e5-1)). Daí em diante, a primeira regra violada interrompe o pedido, na ordem dos passos, e é a única informada.
 
@@ -151,19 +152,19 @@ A meta é interrompida: **nenhuma reserva e nenhum registro de histórico são g
 - **Estado depois:** nada é gravado.
 - **Requisito:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5).
 
-#### <a id="e7-1"></a>E7.1 · Finalidade em branco ou longa demais
+#### <a id="e7-1"></a>E7.1 · Espaço não identificado
 
-- **Condição:** no passo 7, a finalidade só tem espaços, ou passa de 200 caracteres depois de tirar os espaços das pontas e os repetidos.
-- **Resultado para o ator:** junto à finalidade, 'O campo "Finalidade" é obrigatório.' ou 'O campo "Finalidade" deve ter no máximo 200 caracteres.'
-- **Estado depois:** nada é gravado.
-- **Requisito:** [RF-11.1](../requisitos/rf-reservas.md#rf-11-1) (ordem divergente do RF-11: [lacuna L-12](../requisitos/srs.md#l-12)).
-
-#### <a id="e7-2"></a>E7.2 · Espaço não identificado
-
-- **Condição:** no passo 7, o espaço informado é um número, mas não positivo (zero ou negativo).
+- **Condição:** no passo 7, o espaço informado é um número, mas não positivo (zero ou negativo). É conferido antes da finalidade: com os dois problemas, só este é informado.
 - **Resultado para o ator:** junto ao espaço, "O espaço deve ser informado por um número inteiro positivo."
 - **Estado depois:** nada é gravado.
 - **Requisito:** [RF-11.1](../requisitos/rf-reservas.md#rf-11-1) ([lacuna L-12](../requisitos/srs.md#l-12)).
+
+#### <a id="e7-2"></a>E7.2 · Finalidade em branco ou longa demais
+
+- **Condição:** no passo 7, com o espaço bem identificado, a finalidade só tem espaços, ou passa de 200 caracteres depois de tirar os espaços das pontas e os repetidos.
+- **Resultado para o ator:** junto à finalidade, 'O campo "Finalidade" é obrigatório.' ou 'O campo "Finalidade" deve ter no máximo 200 caracteres.'
+- **Estado depois:** nada é gravado.
+- **Requisito:** [RF-11.1](../requisitos/rf-reservas.md#rf-11-1) (ordem divergente do RF-11: [lacuna L-12](../requisitos/srs.md#l-12)).
 
 #### <a id="e8-1"></a>E8.1 · Espaço inexistente
 
@@ -265,7 +266,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário | Uma Solicitada não decidida continua ocupando o horário depois da data e, portanto, entrando em [E9.1](#e9-1); a opção c) mudaria isso. |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | O Gestor pede em nome próprio; não há pedido em nome de outra pessoa. |
 
-A ordem do passo 7 (finalidade depois das regras de agenda) diverge do texto do RF-11 e está registrada como [lacuna L-12](../requisitos/srs.md#l-12), não como decisão: não muda o que é aceito, só qual mensagem aparece primeiro.
+A ordem do passo 7 (espaço e finalidade depois das regras de agenda) diverge do texto do RF-11 e está registrada como [lacuna L-12](../requisitos/srs.md#l-12), não como decisão: não muda o que é aceito, só qual mensagem aparece primeiro.
 
 ## Anexo — Evidência (complementar)
 
@@ -284,8 +285,8 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E6.1](#e6-1) | `reservas/tests/test_regras_de_agenda.py::test_horario_nas_bordas_do_funcionamento_e_aceito [x]`, `::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [antes-da-abertura]` |
 | [E6.2](#e6-2) | `reservas/tests/test_regras_de_agenda.py::test_duracao_nas_bordas_e_aceita [x]`, `::test_duracao_fora_dos_limites_e_recusada_no_termino [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [duracao-acima-da-maxima]` |
 | [E6.3](#e6-3) | `reservas/tests/test_regras_de_agenda.py::test_data_no_limite_da_antecedencia_e_aceita`, `::test_data_alem_da_antecedencia_e_recusada_com_a_data_limite`, `::test_data_limite_conta_hoje_no_fuso_de_sao_paulo`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [alem-da-antecedencia]` |
-| [E7.1](#e7-1) | `reservas/tests/test_reserva.py::test_finalidade_vazia_e_recusada [x]`, `::test_finalidade_no_limite_e_aceita`, `::test_finalidade_acima_do_limite_e_recusada`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [sem-finalidade]` |
-| [E7.2](#e7-2) | `reservas/tests/test_reserva.py::test_espaco_id_vazio_e_recusado_como_obrigatorio`, `::test_espaco_id_que_nao_e_inteiro_positivo_e_recusado [x]` |
+| [E7.1](#e7-1) | `reservas/tests/test_reserva.py::test_espaco_id_vazio_e_recusado_como_obrigatorio`, `::test_espaco_id_que_nao_e_inteiro_positivo_e_recusado [x]` |
+| [E7.2](#e7-2) | `reservas/tests/test_reserva.py::test_finalidade_vazia_e_recusada [x]`, `::test_finalidade_no_limite_e_aceita`, `::test_finalidade_acima_do_limite_e_recusada`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [sem-finalidade]` |
 | [E8.1](#e8-1), [E8.2](#e8-2) | `reservas/tests/test_api_reservas.py::test_espaco_inexistente_responde_404`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`; `reservas/tests/test_criar_reserva.py::test_espaco_indisponivel_propaga_o_erro_sem_salvar [x]` |
 | [E2.1](#e2-1) | `pages/PaginaNovaReserva.test.tsx` ("sem espaços ativos, mostra o estado vazio com um link para os espaços") |
 | [A1.1](#a1-1) | `pages/PaginaNovaReserva.test.tsx` ("pré-seleciona o espaço ativo informado em ?espaco=", "ignora ?espaco= de um espaço inexistente ou inativo") |

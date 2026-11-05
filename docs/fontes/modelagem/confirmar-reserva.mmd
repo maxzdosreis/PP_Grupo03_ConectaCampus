@@ -1,0 +1,41 @@
+%%{init: {"sequence": {"mirrorActors": false, "actorMargin": 24, "messageMargin": 22, "boxMargin": 6, "noteMargin": 6}}}%%
+sequenceDiagram
+%% Figura 6 — Confirmar a reserva (DOC-03).
+%% Fonte versionada. confirmar-reserva.svg e confirmar-reserva.png são GERADOS a partir deste arquivo
+%% (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Conferido por scripts/verificar_fluxo_principal.py: participantes, métodos e parâmetros nomeados,
+%% ordem das chamadas (ast), ordem da nota "Verificações", códigos, status e mensagens.
+%% Cenário dos dados de exemplo: dois pedidos iguais da gestora Carla Mendes, que só diferem na reserva
+%% lida no passo 4. Caminho feliz: a reserva Solicitada do Bruno (a da Figura 5). Rejeição: a reserva já
+%% Recusada do Bruno no Ginásio Coberto, que sempre existe nos dados de exemplo e continua Recusada depois
+%% da tentativa, então dá para repetir na demonstração. Cada execução é um pedido só; o alt decide pela
+%% situação lida no passo 4.
+%% participante: NAV = src/frontend/src/components/reservas/DialogoDeSituacao.tsx, src/frontend/src/api/reservas.ts
+%% participante: VIEW = reservas.api.views.ReservaSituacaoView
+%% participante: CASO = reservas.application.casos_de_uso.AlterarSituacaoReserva
+%% participante: RES = reservas.domain.reserva.Reserva
+%% participante: REPO = reservas.infrastructure.repositorio_django.RepositorioReservasDjango, reservas.infrastructure.models.ReservaModel
+%% rota: PATCH reservas:situacao
+  autonumber
+  participant NAV as Gestor<br/>(navegador, React)
+  participant VIEW as ReservaSituacaoView<br/>reservas.api
+  participant CASO as AlterarSituacaoReserva<br/>reservas.application
+  participant RES as Reserva<br/>reservas.domain
+  participant REPO as RepositorioReservasDjango<br/>reservas.infrastructure<br/>+ PostgreSQL
+
+  NAV->>VIEW: PATCH /api/reservas/{id}/situacao/<br/>com Bearer, situacao CONFIRMADA
+  VIEW->>CASO: executar(reserva_id=…, nova_situacao=…,<br/>ator=ator_autenticado(request))
+  CASO->>REPO: obter_por_id(reserva_id)
+  REPO-->>CASO: reserva lida (visivel_para(ator):<br/>o gestor vê todas)
+  CASO->>RES: alterar_situacao(nova_situacao, motivo=None,<br/>ator=ator, agora=relogio())
+  alt reserva lida RECUSADA (Ginásio Coberto): transição não permitida
+    RES--xVIEW: TransicaoDeSituacaoInvalida sobe: situação,<br/>motivo e registros intactos, salvar não é chamado
+    VIEW-->>NAV: 409 TRANSICAO_DE_SITUACAO_INVALIDA<br/>(tratar_excecao) “Não é possível alterar<br/>uma reserva Recusada para Confirmada.”
+  else reserva lida SOLICITADA (a da Figura 5): SOLICITADA → CONFIRMADA
+    RES-->>CASO: situacao = CONFIRMADA + registro<br/>pendente SOLICITADA → CONFIRMADA
+    CASO->>REPO: salvar(reserva)
+    Note over REPO: transaction.atomic: select_for_update<br/>da linha. Situação gravada ≠ a de<br/>origem (decisão simultânea) → 409<br/>RESERVA_DESATUALIZADA. Senão, UPDATE<br/>+ bulk_create do registro
+    REPO-->>CASO: reserva CONFIRMADA
+    VIEW-->>NAV: 200 “Reserva confirmada<br/>com sucesso.”
+  end
+  Note over NAV,REPO: Verificações, na ordem do código (qualquer recusa deixa reserva e histórico como estavam):<br/>situacao no corpo → 400 DADOS_INVALIDOS · visível ao ator → 404 RESERVA_NAO_ENCONTRADA<br/>situação conhecida → 400 SITUACAO_INVALIDA · o papel pode → 403 ACAO_NAO_PERMITIDA<br/>transição permitida → 409 TRANSICAO_DE_SITUACAO_INVALIDA (desenhada)<br/>motivo até 300 caracteres → 400 TEXTO_MUITO_LONGO · motivo para recusar ou cancelar → 400 MOTIVO_OBRIGATORIO<br/>ainda na situação lida → 409 RESERVA_DESATUALIZADA

@@ -66,13 +66,13 @@ if (A data está dentro da antecedência máxima?) then (não)
 else (sim)
 endif
 
-if (7. A finalidade é válida? (depois da agenda: lacuna L-12)) then (não)
-  :E7.1 Finalidade em branco ou longa demais; <<#FFE5E5>>
+if (7. O espaço está identificado por um número positivo? (depois da agenda: lacuna L-12)) then (não)
+  :E7.1 Espaço não identificado; <<#FFE5E5>>
   end
 else (sim)
 endif
-if (O espaço está identificado por um número positivo?) then (não)
-  :E7.2 Espaço não identificado; <<#FFE5E5>>
+if (A finalidade é válida?) then (não)
+  :E7.2 Finalidade em branco ou longa demais; <<#FFE5E5>>
   end
 else (sim)
 endif
