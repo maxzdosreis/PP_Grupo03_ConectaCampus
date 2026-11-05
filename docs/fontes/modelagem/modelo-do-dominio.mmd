@@ -1,0 +1,133 @@
+%%{init: {"look": "classic", "class": {"hideEmptyMembersBox": true}}}%%
+classDiagram
+  direction TB
+%% Figura 3 — Modelo do domínio (DOC-02).
+%% Fonte versionada. modelo-do-dominio.svg e modelo-do-dominio.png são GERADOS a partir deste arquivo
+%% (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Mapeamento classe → código, conferido por scripts/verificar_modelo_do_dominio.py:
+%% classe: EspacoEsportivo = espacos.domain.espaco_esportivo.EspacoEsportivo
+%% classe: TipoEspaco = espacos.domain.tipo_espaco.TipoEspaco
+%% classe: Reserva = reservas.domain.reserva.Reserva
+%% classe: SituacaoReserva = reservas.domain.situacao.SituacaoReserva
+%% classe: RegistroDeSituacao = reservas.domain.registro_de_situacao.RegistroDeSituacao
+%% classe: Solicitante = reservas.domain.solicitante.Solicitante
+%% classe: IntervaloDeHorario = reservas.domain.intervalo_de_horario.IntervaloDeHorario
+%% classe: Ator = reservas.domain.ator.Ator
+%% classe: PapelDoAtor = reservas.domain.ator.PapelDoAtor
+%% classe: Usuario = contas.infrastructure.models.Usuario
+%% classe: PerfilUsuario = contas.domain.perfil.PerfilUsuario
+%% Referências por id entre contextos e a coluna que as guarda no banco (sem ForeignKey):
+%% referencia-por-id: Reserva.espaco_id -> EspacoEsportivo | reservas.infrastructure.models.ReservaModel.espaco_id
+%% referencia-por-id: Solicitante.usuario_id -> Usuario | reservas.infrastructure.models.ReservaModel.solicitante_usuario_id
+%% referencia-por-id: RegistroDeSituacao.autor_usuario_id -> Usuario | reservas.infrastructure.models.RegistroDeSituacaoModel.autor_usuario_id
+%% Notas presas a uma classe e o trecho do código que prova o que elas dizem:
+%% nota: Ator | src/backend/reservas/api/autenticacao.py | Ator(usuario_id=usuario.pk, nome=usuario.nome, papel=papel)
+
+  note "Legenda<br/>namespace = contexto · «…» = papel da classe<br/>◆ composição: parte da Reserva<br/>→ associação: atributo desse tipo<br/>‥ tracejada sem seta: referência por id<br/>nota tracejada: explica a classe<br/>1, 0..*: multiplicidade · sublinhado: de classe"
+
+  namespace espacos {
+    class EspacoEsportivo {
+      <<entidade>>
+      id: int | None
+      nome: str
+      tipo: TipoEspaco
+      capacidade: int
+      ativo: bool
+      alterar_dados(nome, tipo, capacidade) None
+      desativar() None
+      ativar() None
+      garantir_que_esta_ativo() None
+    }
+    class TipoEspaco {
+      <<enumeration>>
+      QUADRA_POLIESPORTIVA
+      CAMPO_DE_FUTEBOL
+      GINASIO
+      QUADRA_DE_AREIA
+      QUADRA_DE_TENIS
+    }
+  }
+
+  namespace reservas {
+    class Reserva {
+      <<raiz do agregado>>
+      id: int | None
+      espaco_id: int
+      finalidade: str
+      motivo_da_situacao: str | None
+      criada_em: datetime
+      solicitar(…)$ Reserva
+      alterar_situacao(nova, motivo, ator, agora) None
+      visivel_para(ator) bool
+      acoes_permitidas_para(ator) list[SituacaoReserva]
+    }
+    class SituacaoReserva {
+      <<enumeration>>
+      SOLICITADA
+      CONFIRMADA
+      RECUSADA
+      CANCELADA
+      CONCLUIDA
+      eh_final: bool
+      ocupa_horario: bool
+    }
+    class Solicitante {
+      <<objeto de valor>>
+      usuario_id: int
+      nome: str
+      matricula: str
+    }
+    class IntervaloDeHorario {
+      <<objeto de valor>>
+      data: date
+      hora_inicio: time
+      hora_fim: time
+      sobrepoe(outro) bool
+    }
+    class RegistroDeSituacao {
+      <<objeto de valor>>
+      situacao_anterior: SituacaoReserva | None
+      motivo: str | None
+      autor_usuario_id: int
+      autor_nome: str
+      registrado_em: datetime
+    }
+    class Ator {
+      <<objeto de valor>>
+      usuario_id: int
+      nome: str
+    }
+    class PapelDoAtor {
+      <<enumeration>>
+      GESTOR
+      SOLICITANTE
+    }
+  }
+
+  namespace contas {
+    class Usuario {
+      <<Django model>>
+      id: int
+      nome: str
+      matricula: str
+      email: str
+      perfil: str
+      eh_gestor: bool
+    }
+    class PerfilUsuario {
+      <<enumeration>>
+      SOLICITANTE
+      GESTOR
+      eh_gestor: bool
+    }
+  }
+
+  Reserva "1" *-- "1" Solicitante : solicitante
+  Reserva "1" *-- "1" IntervaloDeHorario : intervalo
+  Reserva "1" *-- "0..*" RegistroDeSituacao : registros_pendentes
+  Reserva --> "1" SituacaoReserva : situacao
+  Ator --> "1" PapelDoAtor : papel
+  Reserva "0..*" .. "1" EspacoEsportivo : espaco_id
+  Solicitante "0..*" .. "1" Usuario : usuario_id
+  RegistroDeSituacao "0..*" .. "1" Usuario : autor_usuario_id
+  note for Ator "Montado pela API a partir de request.user<br/>(duck typing); PapelDoAtor ≠ PerfilUsuario"

@@ -1,0 +1,33 @@
+%%{init: {"state": {"wrappingWidth": 400}}}%%
+stateDiagram-v2
+%% Figura 4 — Estados da reserva (DOC-02).
+%% Fonte versionada. estados-da-reserva.svg e estados-da-reserva.png são GERADOS a partir deste arquivo
+%% (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Conferido por scripts/verificar_modelo_do_dominio.py contra reservas/domain/situacao.py:
+%% as transições são exatamente TRANSICOES_PERMITIDAS, cada rótulo é "rotulo_da_acao · papéis",
+%% com "· motivo obrigatório" quando o destino está em SITUACOES_QUE_EXIGEM_MOTIVO; o estado
+%% composto "Ocupa o horário" é SITUACOES_QUE_OCUPAM_HORARIO; os estados → [*] são os de eh_final.
+%% Texto de cada papel de DESTINOS_POR_PAPEL nos rótulos (PapelDoAtor → texto):
+%% papel: GESTOR = Gestor
+%% papel: SOLICITANTE = Solicitante (só o dono)
+%% motivo: motivo obrigatório
+  direction LR
+  classDef nota fill:#fef9c3,stroke:#a16207,color:#111827,text-align:left
+
+  state "Legenda: ● início · ◉ fim (situação final)<br/>moldura: reserva que ocupa o horário<br/>rótulo: ação · quem pode · motivo obrigatório<br/>As transições não dependem do horário<br/>da reserva (DEC-13). Qualquer outra<br/>é recusada sem mudar nada." as NOTA_LEGENDA
+  class NOTA_LEGENDA nota
+
+  state "Ocupa o horário" as OCUPA {
+    SOLICITADA
+    CONFIRMADA
+  }
+
+  [*] --> SOLICITADA : Reserva.solicitar
+  SOLICITADA --> CONFIRMADA : Confirmar · Gestor
+  SOLICITADA --> RECUSADA : Recusar · Gestor · motivo obrigatório
+  SOLICITADA --> CANCELADA : Cancelar · Gestor ou Solicitante (só o dono) · motivo obrigatório
+  CONFIRMADA --> CONCLUIDA : Concluir · Gestor
+  CONFIRMADA --> CANCELADA : Cancelar · Gestor ou Solicitante (só o dono) · motivo obrigatório
+  RECUSADA --> [*]
+  CANCELADA --> [*]
+  CONCLUIDA --> [*]
