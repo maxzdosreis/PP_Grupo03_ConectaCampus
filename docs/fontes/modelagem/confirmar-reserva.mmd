@@ -5,9 +5,11 @@ sequenceDiagram
 %% (comando no README.md desta pasta); nunca edite as imagens à mão.
 %% Conferido por scripts/verificar_fluxo_principal.py: participantes, métodos e parâmetros nomeados,
 %% ordem das chamadas (ast), ordem da nota "Verificações", códigos, status e mensagens.
-%% Cenário dos dados de exemplo: a gestora Carla Mendes confirma a reserva Solicitada do Bruno (a da
-%% Figura 5). A rejeição é confirmar a reserva já Recusada do Bruno no Ginásio Coberto: ela sempre existe
-%% nos dados de exemplo e continua Recusada depois da tentativa, então dá para repetir na demonstração.
+%% Cenário dos dados de exemplo: dois pedidos iguais da gestora Carla Mendes, que só diferem na reserva
+%% lida no passo 4. Caminho feliz: a reserva Solicitada do Bruno (a da Figura 5). Rejeição: a reserva já
+%% Recusada do Bruno no Ginásio Coberto, que sempre existe nos dados de exemplo e continua Recusada depois
+%% da tentativa, então dá para repetir na demonstração. Cada execução é um pedido só; o alt decide pela
+%% situação lida no passo 4.
 %% participante: NAV = src/frontend/src/components/reservas/DialogoDeSituacao.tsx, src/frontend/src/api/reservas.ts
 %% participante: VIEW = reservas.api.views.ReservaSituacaoView
 %% participante: CASO = reservas.application.casos_de_uso.AlterarSituacaoReserva
@@ -24,12 +26,12 @@ sequenceDiagram
   NAV->>VIEW: PATCH /api/reservas/{id}/situacao/<br/>com Bearer, situacao CONFIRMADA
   VIEW->>CASO: executar(reserva_id=…, nova_situacao=…,<br/>ator=ator_autenticado(request))
   CASO->>REPO: obter_por_id(reserva_id)
-  REPO-->>CASO: reserva SOLICITADA (visivel_para(ator):<br/>o gestor vê todas)
+  REPO-->>CASO: reserva lida (visivel_para(ator):<br/>o gestor vê todas)
   CASO->>RES: alterar_situacao(nova_situacao, motivo=None,<br/>ator=ator, agora=relogio())
-  alt transição não permitida (a reserva já está RECUSADA)
+  alt reserva lida RECUSADA (Ginásio Coberto): transição não permitida
     RES--xVIEW: TransicaoDeSituacaoInvalida sobe: situação,<br/>motivo e registros intactos, salvar não é chamado
     VIEW-->>NAV: 409 TRANSICAO_DE_SITUACAO_INVALIDA<br/>(tratar_excecao) “Não é possível alterar<br/>uma reserva Recusada para Confirmada.”
-  else SOLICITADA → CONFIRMADA
+  else reserva lida SOLICITADA (a da Figura 5): SOLICITADA → CONFIRMADA
     RES-->>CASO: situacao = CONFIRMADA + registro<br/>pendente SOLICITADA → CONFIRMADA
     CASO->>REPO: salvar(reserva)
     Note over REPO: transaction.atomic: select_for_update<br/>da linha. Situação gravada ≠ a de<br/>origem (decisão simultânea) → 409<br/>RESERVA_DESATUALIZADA. Senão, UPDATE<br/>+ bulk_create do registro

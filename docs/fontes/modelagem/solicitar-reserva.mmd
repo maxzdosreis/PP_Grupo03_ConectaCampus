@@ -6,8 +6,9 @@ sequenceDiagram
 %% Conferido por scripts/verificar_fluxo_principal.py: participantes, métodos e parâmetros nomeados,
 %% ordem das chamadas (ast), ordem da nota "Verificações", códigos, status e mensagens.
 %% Cenário dos dados de exemplo (carregar_dados_exemplo): Bruno Lima pede a Quadra Poliesportiva Central
-%% para amanhã (06/11/2026 nesta figura); a reserva Solicitada dele das 10:00–11:00 ocupa o horário, e
-%% 10:30–11:30 é o horário de conflito documentado no README (CONFLITO_PARA_DEMONSTRACAO).
+%% para amanhã (06/11/2026 nesta figura); a reserva Solicitada dele das 10:00–11:00 ocupa o horário. Dois
+%% pedidos iguais até o passo 8, que só diferem no horário: 10:30–11:30, o horário de conflito documentado no
+%% README (CONFLITO_PARA_DEMONSTRACAO), e 11:00–14:00, o do "Usar este horário". O alt decide por ele.
 %% participante: NAV = src/frontend/src/components/reservas/FormularioDeReserva.tsx, src/frontend/src/api/reservas.ts
 %% participante: VIEW = reservas.api.views.ReservasView
 %% participante: CASO = reservas.application.casos_de_uso.CriarReserva
@@ -24,7 +25,7 @@ sequenceDiagram
   participant ESP as ConsultaDeEspacosViaFachada<br/>reservas.infrastructure<br/>→ espacos.publico
   participant REPO as RepositorioReservasDjango<br/>reservas.infrastructure<br/>+ PostgreSQL
 
-  NAV->>VIEW: POST /api/reservas/ com Bearer<br/>Quadra Central, amanhã, 11:00–14:00
+  NAV->>VIEW: POST /api/reservas/ com Bearer<br/>Quadra Central, amanhã, início–término
   VIEW->>CASO: executar(solicitante=<br/>solicitante_autenticado(request), …)
   CASO->>DOM: Reserva.solicitar(…, agora=relogio())
   DOM-->>CASO: reserva SOLICITADA + registro<br/>pendente None → SOLICITADA
@@ -32,10 +33,10 @@ sequenceDiagram
   CASO->>REPO: listar_que_ocupam_horario(espaco_id, data)
   REPO-->>CASO: [Solicitada 10:00–11:00]
   CASO->>DOM: garantir_horario_livre(reserva, existentes)
-  alt horário ocupado (se o pedido fosse 10:30–11:30)
+  alt pedido de 10:30–11:30: sobrepõe a das 10:00–11:00
     DOM--xVIEW: ConflitoDeHorario sobe:<br/>salvar não é chamado, nada é gravado
     VIEW-->>NAV: 409 CONFLITO_DE_HORARIO<br/>(tratar_excecao) “Este espaço<br/>já tem uma reserva Solicitada<br/>em 06/11/2026 10:00–11:00.<br/>Escolha outro horário.”
-  else horário livre
+  else pedido de 11:00–14:00: só encosta, horário livre
     CASO->>REPO: salvar(reserva)
     Note over REPO: transaction.atomic: INSERT da<br/>reserva + bulk_create do registro.<br/>Pedido simultâneo que passou pela<br/>checagem: a restrição de exclusão<br/>recusa → 409 CONFLITO_DE_HORARIO
     REPO-->>CASO: reserva com id, SOLICITADA
