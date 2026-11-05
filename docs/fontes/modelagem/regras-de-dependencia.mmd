@@ -1,0 +1,87 @@
+%%{init: {"flowchart": {"wrappingWidth": 250}}}%%
+flowchart TB
+%% Figura 2 — Regras de dependência (DOC-01).
+%% Fonte versionada. regras-de-dependencia.svg e regras-de-dependencia.png são GERADOS a partir
+%% deste arquivo (comando no README.md desta pasta); nunca edite as imagens à mão.
+%% Os nós CTX_* valem para cada contexto da lista abaixo: uma seta entre dois CTX_* só cobre
+%% imports dentro do mesmo contexto (reservas.api → reservas.domain, nunca reservas.api → contas.domain).
+%% contextos: espacos, reservas, contas
+%% modulo: CTX_API = {ctx}.api
+%% modulo: CTX_APP = {ctx}.application
+%% modulo: CTX_DOM = {ctx}.domain
+%% modulo: CTX_INFRA = {ctx}.infrastructure
+%% modulo: COMP_API = compartilhado.api
+%% modulo: COMP_DOM = compartilhado.domain
+%% modulo: RES_APP = reservas.application
+%% modulo: RES_INFRA = reservas.infrastructure
+%% modulo: ESP_PUB = espacos.publico
+%% modulo: ESP_APP = espacos.application
+%% modulo: ESP_INFRA = espacos.infrastructure
+%% somente: CTX_API -> CTX_INFRA | api/dependencias.py
+%% somente: RES_INFRA -> ESP_PUB | reservas/infrastructure/consulta_de_espacos.py
+%% Contratos do import-linter (nomes exatos do src/backend/pyproject.toml) citados na nota NOTA_C:
+%% contrato: C1 = Domínio é Python puro
+%% contrato: C2 = compartilhado não depende dos contextos
+%% contrato: C3 = Só a camada api usa compartilhado.api
+%% contrato: C4 = Camadas de cada contexto
+%% contrato: C5 = espacos não depende de outros contextos
+%% contrato: C6 = contas não depende de outros contextos
+%% contrato: C7 = reservas não importa contas
+%% contrato: C8 = reservas só conversa com espacos pela fachada pública
+%% contrato: C9 = Domínio e aplicação de reservas não conhecem espacos
+%% contrato: C10 = Nenhum contexto depende dos dados de exemplo
+
+  subgraph CTX["Cada contexto: espacos, reservas, contas"]
+    CTX_API["‹contexto›.api<br/>(views, serializers, dependencias.py)"]:::api
+    CTX_INFRA["‹contexto›.infrastructure<br/>(models, repositorio_django.py)"]:::infrastructure
+    CTX_APP["‹contexto›.application<br/>(casos de uso, portas Protocol)"]:::application
+    CTX_DOM["‹contexto›.domain<br/>(entidades, regras, exceções) · C1"]:::domain
+  end
+
+  subgraph COMP["compartilhado · C2"]
+    COMP_API["compartilhado.api<br/>(respostas, tratador de erros)"]:::api
+    COMP_DOM["compartilhado.domain<br/>(ErroDeDominio e 4 categorias) · C1"]:::domain
+  end
+
+  subgraph LIGA["A única ligação entre contextos · C5 C6 C7"]
+    RES_INFRA["reservas.infrastructure<br/>ConsultaDeEspacosViaFachada"]:::infrastructure
+    RES_APP["reservas.application<br/>porta ConsultaDeEspacos · C9"]:::application
+    ESP_PUB["espacos.publico<br/>verificar_espaco_disponivel"]:::outro
+    ESP_APP["espacos.application"]:::application
+    ESP_INFRA["espacos.infrastructure"]:::infrastructure
+  end
+
+  CTX_API -->|"C4"| CTX_APP
+  CTX_API -->|"C4"| CTX_DOM
+  CTX_API -->|"C4 · só em<br/>dependencias.py"| CTX_INFRA
+  CTX_APP -->|"C4"| CTX_DOM
+  CTX_INFRA -.->|"implementa as portas · C4"| CTX_APP
+  CTX_INFRA -->|"C4"| CTX_DOM
+  CTX_API -->|"C3"| COMP_API
+  CTX_APP --> COMP_DOM
+  CTX_DOM --> COMP_DOM
+  COMP_API --> COMP_DOM
+
+  RES_INFRA -.->|"implementa"| RES_APP
+  RES_INFRA -->|"C8"| ESP_PUB
+  ESP_PUB --> ESP_APP
+  ESP_PUB --> ESP_INFRA
+
+  NOTA_C["Contratos do import-linter<br/>C1 Domínio é Python puro<br/>C2 compartilhado não depende dos contextos<br/>C3 Só a camada api usa compartilhado.api<br/>C4 Camadas de cada contexto<br/>C5 espacos não depende de outros contextos<br/>C6 contas não depende de outros contextos<br/>C7 reservas não importa contas<br/>C8 reservas só conversa com espacos pela fachada pública<br/>C9 Domínio e aplicação de reservas não conhecem espacos<br/>C10 Nenhum contexto depende dos dados de exemplo"]:::nota
+
+  subgraph LEGENDA["Legenda"]
+    LEG_A["api"]:::api
+    LEG_B["application"]:::application
+    LEG_C["domain"]:::domain
+    LEG_D["infrastructure"]:::infrastructure
+  end
+  LEG_A -->|"depende de (importa)"| LEG_B
+  LEG_D -.->|"implementa (Protocol)"| LEG_B
+  LEG_B ~~~ LEG_C
+
+  classDef api fill:#dbeafe,stroke:#1e3a8a,color:#111827
+  classDef application fill:#dcfce7,stroke:#14532d,color:#111827
+  classDef domain fill:#fef3c7,stroke:#78350f,color:#111827
+  classDef infrastructure fill:#ede9fe,stroke:#4c1d95,color:#111827
+  classDef outro fill:#f3f4f6,stroke:#374151,color:#111827
+  classDef nota fill:#ffffff,stroke:#6b7280,color:#111827,text-align:left
