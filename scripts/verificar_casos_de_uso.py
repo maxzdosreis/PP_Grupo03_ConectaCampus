@@ -52,7 +52,6 @@ PONTO_CITADO = re.compile(r"<<extend>>\\n\((?P<ponto>[^)]+)\)")
 LINHA_DO_INDICE = re.compile(r'^\|\s*<a id="(?P<ancora>uc-\d{2})"></a>(?P<id>UC-\d{2})\s*\|\s*(?P<nome>[^|]+?)\s*\|')
 LINHA_RF_UC = re.compile(r"^\|\s*\[(?P<rf>RF-[\d.]+)\]\([^)]*\)\s*\|\s*(?P<titulo>[^|]+?)\s*\|\s*(?P<uc>[^|]+?)\s*\|\s*(?P<como>[^|]+?)\s*\|\s*(?P<tambem>[^|]+?)\s*\|")
 LINHA_DO_RESUMO = re.compile(r"^\|\s*\[(?P<rf>RF-[\d.]+)\]\([^)]*\)\s*\|\s*(?P<titulo>[^|]+?)\s*\|\s*NS-")
-LINHA_DA_64 = re.compile(r"^\|\s*(?P<rf>RF-[\d.]+)\s*\|\s*`?[^|]*\|\s*(?P<uc>[^|]*?)\s*\|\s*[^|]*\|\s*[^|]*\|\s*$")
 COMO_ENTRA = ("fluxo principal", "alternativa", "exceção", "transversal")
 
 
@@ -249,16 +248,7 @@ def verificar_fichas_e_srs() -> list[str]:
             erros.append(f"{origem}: UC {uc} ≠ tabela RF → UC {tabela.get(ficha['id'])}")
         if uc is None and "transversal" not in vinculo:
             erros.append(f"{origem}: sem UC e sem ser transversal")
-    linhas_64 = {a["rf"]: a["uc"] for linha in ler(SRS).splitlines() if (a := LINHA_DA_64.match(linha))}
-    for rf, uc_tabela in tabela.items():
-        celula = linhas_64.get(rf)
-        if celula is None:
-            erros.append(f"{rf}: sem linha na SRS, seção 6.4")
-        elif not celula:
-            erros.append(f"{rf}: coluna UC vazia na SRS, seção 6.4")
-        elif uc_principal(celula) != uc_tabela:
-            erros.append(f"{rf}: SRS 6.4 diz {celula!r}, a tabela RF → UC diz {uc_tabela}")
-    print(f"Fichas com UC: {len(fichas)}; linhas da SRS 6.4 com UC: {sum(1 for c in linhas_64.values() if c)}")
+    print(f"Fichas com UC: {len(fichas)}")
     return erros
 
 
@@ -568,7 +558,7 @@ def main() -> int:
     verificacoes = [
         ("1. Casos de uso: diagramas ↔ índice do README", lambda: verificar_ucs(diagramas)),
         ("2. RF → UC: tabela-resumo da SRS ↔ tabela do README", lambda: verificar_rf_uc(diagramas)),
-        ("3. UC nas fichas rf-*.md e na SRS (seção 6.4)", verificar_fichas_e_srs),
+        ("3. UC nas fichas rf-*.md", verificar_fichas_e_srs),
         ("4. Notação UML dos diagramas", lambda: verificar_notacao(diagramas)),
         ("5. Imagens geradas", lambda: verificar_imagens(diagramas)),
         ("6. Fichas completas: RF ligados, passos citados e as quatro partes das exceções", verificar_fichas_completas),

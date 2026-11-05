@@ -1,5 +1,9 @@
 # Requisitos funcionais e não funcionais
 
+| Identificação | Responsabilidade | Fonte oficial |
+|---|---|---|
+| **Parte da [SRS-01](srs.md) • 0.1 • Rascunho** (índice da pasta) | Autor: Max Zimmermann dos Reis • Revisor: a definir • Aprovador: a definir | `docs/fontes/requisitos/requisitos/` |
+
 RF-xx e RNF-xx (classificados por FURPS) do Conecta Campus, derivados das necessidades da [Visão](../visao.md#necessidades) e priorizados por QFD (REQ-02). Fichas no modelo do A4·s9, agrupadas por área. Índice da fonte oficial: [README](../README.md).
 
 | Arquivo | Conteúdo | Situação |
@@ -14,4 +18,11 @@ RF-xx e RNF-xx (classificados por FURPS) do Conecta Campus, derivados das necess
 
 Como ler as fichas (sintaxe, decomposição em `RF-xx.n`, recusas, evidência): [SRS, seção 3](srs.md#3-requisitos-funcionais). Cada ficha tem âncora própria (`rf-11-4`, `rnf-p01`) para links estáveis.
 
-Conferência automática da rastreabilidade, da sintaxe, dos termos vagos e dos links: `python scripts/verificar_requisitos.py`, na raiz do repositório.
+Conferência automática da rastreabilidade, da sintaxe, dos termos vagos e dos links: `python scripts/verificar_requisitos.py`, na raiz do repositório. Desde a REQ-06, cada ficha de RF tem também o campo **Código (complementar)** (`arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md), e `python scripts/gerar_rastreabilidade.py --verificar` confere que cada símbolo existe.
+
+## Histórico de revisões
+
+| Versão | Data | Autor | Alteração e referência da aprovação |
+|---|---|---|---|
+| 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação (REQ-01; data do commit, o arquivo não tinha histórico). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Cabeçalho completado (REQ-06); menção ao campo Código das fichas e à matriz gerada. Sem aprovação. |

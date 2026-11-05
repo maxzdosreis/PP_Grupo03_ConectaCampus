@@ -11,6 +11,7 @@ Histórias de usuário (US-xx) no formato "Como [papel], quero [capacidade] para
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: US-01 a US-19, 156 critérios de aceite e TA-01 a TA-156, decisões de organização, cobertura UC → US/CA, rastreabilidade RF → US/CA e índice dos TAs (REQ-05). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Link para a [matriz de rastreabilidade gerada](../rastreabilidade/matriz.md); a SRS 6.4 não repete mais US e CA (REQ-06). Sem aprovação. |
 
 ## Sumário
 
@@ -312,7 +313,7 @@ Toda alternativa e toda exceção das fichas de caso de uso — completas e resu
 
 ## Rastreabilidade RF → US/CA
 
-Prévia: cada RF das [fichas](../requisitos/README.md) e os CAs (e os TAs deles) que o verificam. O mesmo vínculo está no campo Vínculos de cada ficha e nas colunas US e CA da [SRS, seção 6.4](../requisitos/srs.md#64-rf--evidência-uc-us-e-ca). A matriz completa NS → RF → UC → US → CA/TA → código é da REQ-06.
+Prévia: cada RF das [fichas](../requisitos/README.md) e os CAs (e os TAs deles) que o verificam. O mesmo vínculo está no campo Vínculos de cada ficha. A matriz completa NS → RF → UC → US → CA/TA → endpoint ou tela → código, gerada a partir destas histórias, está em [`rastreabilidade/matriz.md`](../rastreabilidade/matriz.md) (REQ-06).
 
 | RF | Título | US | CA (TA) |
 |---|---|---|---|

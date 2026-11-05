@@ -13,6 +13,7 @@ Diagrama UML de casos de uso do Conecta Campus, índice dos casos de uso (UC-xx)
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: diagrama do negócio (UC-01 a UC-19), diagrama de apoio "Administração" (UC-20 a UC-22), decisões de modelagem, índice dos UCs e rastreabilidade RF → UC dos 60 RF (REQ-03). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Fichas Cockburn: completas de UC-02, UC-04, UC-10 e UC-14, resumidas dos demais objetivos e do apoio; fluxo de decisão de UC-04; decisões h e i; coluna Estado do índice com o link de cada ficha; "Como entra" com o passo, a alternativa ou a exceção exata de cada RF (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Coluna Histórias no índice, linha "Histórias derivadas" nas fichas e ponteiro para as histórias (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Link para a [matriz de rastreabilidade gerada](../rastreabilidade/matriz.md), que lê a tabela RF → UC; a SRS 6.4 não repete mais o UC (REQ-06). Sem aprovação. |
 
 ## Sumário
 
@@ -157,7 +158,7 @@ Nível: **objetivo** = objetivo do usuário (o "nível do mar"); **subfunção**
 
 ## Rastreabilidade RF → UC
 
-Todos os 60 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "Como entra" diz o papel do RF no caso de uso: **fluxo principal**, **alternativa** (outro caminho que ainda alcança a meta), **exceção** (a meta não é alcançada) ou **transversal** (qualidade de todos os casos de uso), seguido do passo, da alternativa ou da exceção exata nas fichas (REQ-04), com link. A coluna UC também está em cada ficha (campo "Vínculos") e na [SRS, seção 6.4](../requisitos/srs.md#64-rf--evidência-uc-us-e-ca).
+Todos os 60 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "Como entra" diz o papel do RF no caso de uso: **fluxo principal**, **alternativa** (outro caminho que ainda alcança a meta), **exceção** (a meta não é alcançada) ou **transversal** (qualidade de todos os casos de uso), seguido do passo, da alternativa ou da exceção exata nas fichas (REQ-04), com link. A coluna UC também está em cada ficha (campo "Vínculos") e na [matriz de rastreabilidade](../rastreabilidade/matriz.md), gerada a partir desta tabela (REQ-06).
 
 | RF | Título | UC | Como entra | Também em |
 |---|---|---|---|---|

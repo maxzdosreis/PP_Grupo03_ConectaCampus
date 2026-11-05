@@ -13,7 +13,7 @@
 | **Alternativas** | Persistência em memória ou JSON e execução com `venv` + `pip`, sem Docker. |
 | **Responsável** | Professor (resposta); grupo (adoção). |
 | **Prazo** | Não registrado. |
-| **Artefatos afetados** | `src/docker-compose.yml`, Dockerfiles, `src/.env.example`; README (pré-requisito, execução e persistência); `modelagem.pdf` (decisões técnicas); [Visão](../visao.md#restrições) (restrições) e risco R-02. |
+| **Artefatos afetados** | `src/docker-compose.yml`, Dockerfiles, `src/.env.example`; README (pré-requisito, execução e persistência); `modelagem.pdf` (decisões técnicas); [Visão](../visao.md#restrições) (restrições) e risco R-02. · **REQ-06:** nenhuma história; 0 critérios de aceite e 0 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-02)). |
 | **Origem** | Ponto a confirmar 2 do `CLAUDE.md` ("Docker e PostgreSQL na correção"). |
 | **Observações** | **Ambiguidade:** a resposta fala só de Docker. O uso do PostgreSQL é inferência do grupo: ele roda dentro do Docker Compose, então foi tratado como liberado junto. A mesma frase responde à DEC-02 e à DEC-03, e a data não foi registrada. A pergunta acima foi reconstruída a partir do título do ponto a confirmar. Se o professor discordar do PostgreSQL, registrar uma nova DEC, sem reutilizar este ID. |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Migrada de `.claude/requisitos.md` para a fonte oficial, no modelo A4·s13 (REQ-01). |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-02) (REQ-06). Estado e opção sem mudança. |
