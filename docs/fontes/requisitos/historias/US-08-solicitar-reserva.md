@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Origem do CA-14 e do CA-15 acompanha a nova numeração de UC-04 (E7.1 = espaço, E7.2 = finalidade, na ordem do código); o CA-14 diz qual recusa aparece com o espaço também inválido (DOC-03). Sem aprovação. |
 
 ## Index Card
 
@@ -166,8 +167,8 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 
 - **Dado** um pedido dentro das regras de agenda
 - **Quando** a finalidade só tem espaços, ou passa do limite de caracteres depois de tirar os espaços das pontas e os repetidos
-- **Então** o sistema informa, junto à finalidade, que ela é obrigatória ou o limite de caracteres; nenhuma reserva é criada. Com finalidade vazia e data passada, a data é a recusa que aparece primeiro
-- **Origem:** [UC-04 E7.1](../casos-de-uso/UC-04-solicitar-reserva.md#e7-1)
+- **Então** o sistema informa, junto à finalidade, que ela é obrigatória ou o limite de caracteres; nenhuma reserva é criada. Com finalidade vazia e data passada, a data é a recusa que aparece primeiro; com finalidade vazia e espaço zero ou negativo, o espaço ([CA-15](#us-08-ca-15))
+- **Origem:** [UC-04 E7.2](../casos-de-uso/UC-04-solicitar-reserva.md#e7-2)
 - **RF:** [RF-11.1](../requisitos/rf-reservas.md#rf-11-1) (ordem divergente do RF-11: [L-12](../requisitos/srs.md#l-12))
 - **TA:** [TA-71](#ta-71)
 
@@ -176,7 +177,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Dado** um pedido dentro das regras de agenda
 - **Quando** o espaço é informado por um número zero ou negativo
 - **Então** o sistema informa, junto ao espaço, "O espaço deve ser informado por um número inteiro positivo."; nenhuma reserva é criada
-- **Origem:** [UC-04 E7.2](../casos-de-uso/UC-04-solicitar-reserva.md#e7-2)
+- **Origem:** [UC-04 E7.1](../casos-de-uso/UC-04-solicitar-reserva.md#e7-1)
 - **RF:** [RF-11.1](../requisitos/rf-reservas.md#rf-11-1)
 - **TA:** [TA-72](#ta-72)
 
