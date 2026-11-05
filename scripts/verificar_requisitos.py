@@ -82,7 +82,7 @@ def fichas_de_rnf() -> list[dict]:
 
 
 def necessidades_da_visao() -> list[str]:
-    encontradas = re.findall(r"^\|\s*(NS-\d{2})\s*\|", ler(PASTA / "visao.md"), flags=re.M)
+    encontradas = re.findall(r'^\|\s*(?:<a id="ns-\d{2}"></a>)?(NS-\d{2})\s*\|', ler(PASTA / "visao.md"), flags=re.M)
     return list(dict.fromkeys(encontradas))
 
 

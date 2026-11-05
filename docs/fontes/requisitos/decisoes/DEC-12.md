@@ -13,7 +13,7 @@
 | **Alternativas** | **b)** 500 ms para a consulta e 200 ms para a agenda. **c)** 2 s e 1 s. **d)** Medir com mais reservas (10.000) ou com a consulta paginada. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente. |
 | **Prazo sugerido** | 13/11/2026. |
-| **Artefatos afetados** | [RNF-P01 e RNF-P02](../requisitos/rnf.md#4-desempenho-p); `scripts/medir_desempenho.py`; [SRS](../requisitos/srs.md) (seção 5 e lacunas). |
+| **Artefatos afetados** | [RNF-P01 e RNF-P02](../requisitos/rnf.md#4-desempenho-p); `scripts/medir_desempenho.py`; [SRS](../requisitos/srs.md) (seção 5 e lacunas). · **REQ-06:** nenhuma história; 0 critérios de aceite e 0 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-12)). |
 | **Origem** | REQ-02 (SRS), ao escrever os RNF de desempenho. |
 | **Observações** | Medido em 04/11/2026 ([resultado e ambiente](../requisitos/rnf.md#medição)): com 1.000 reservas, p95 de 378 ms na pior consulta e de 7 ms na agenda, as duas metas atendidas. Com 5.000, a lista do Gestor sem critério chega a 1.743 ms, porque a consulta não é paginada ([lacuna L-05](../requisitos/srs.md#l-05)): se o cliente esperar mais reservas que isso, a meta e a paginação precisam ser revistas juntas. |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da meta adotada na REQ-02. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-12) (REQ-06). Estado e opção sem mudança. |

@@ -1,26 +1,3 @@
-"""Confere as histórias de usuário da fonte oficial (docs/fontes/requisitos/historias/), REQ-05.
-
-Verificações:
-  1. Index Card completo, as seis letras INVEST com ✓/✗ e justificativa, e pelo menos
-     um CA de sucesso e um de exceção em cada US.
-  2. Todo CA com Dado, Quando e Então, Origem com link para uma âncora que existe na
-     ficha do caso de uso, pelo menos um RF que existe e o TA dele.
-  3. Toda alternativa e exceção das fichas de caso de uso (completas e resumidas)
-     aparece em "Cobertura UC → US/CA", com um CA ou com o motivo de "sem CA".
-  4. Todo RF das fichas rf-*.md aparece em pelo menos um CA (salvo os justificados),
-     e o campo Vínculos e a SRS 6.4 citam exatamente os CAs que citam o RF.
-  5. Todo teste citado num TA existe: pytest (arquivo em src/backend/ e um def, class
-     ou atribuição com o nome) e Vitest (arquivo em src/frontend/src/ e a descrição).
-  6. IDs de US, CA e TA únicos e sem buraco na sequência.
-  7. README da pasta: o índice das histórias e o índice dos TAs batem com as fichas.
-  8. Linguagem: nenhum termo técnico ou de interface nos Dado/Quando/Então.
-
-Uso, na raiz do repositório:
-  python scripts/verificar_historias.py            # as verificações
-  python scripts/verificar_historias.py --testes   # só a seleção de testes citados nos TAs
-Sai com código 1 se alguma verificação falhar. Não depende de pacotes externos.
-"""
-
 from __future__ import annotations
 
 import re
@@ -95,9 +72,6 @@ LINK_TA = re.compile(r"\[TA-(?P<numero>\d{2,3})\]\(#ta-(?P<ancora>\d{2,3})\)")
 LINK_CA = re.compile(r"\((?:\.\./historias/)?(?P<arquivo>US-\d{2}-[\w-]+\.md)#(?P<ancora>us-\d{2}-ca-\d{2})\)")
 TESTE_PYTEST = re.compile(r"`(?P<arquivo>(?:\w+/)+test_\w+\.py)::(?P<nome>\w+)(?: \[[^\]`]*\])?`")
 TESTE_VITEST = re.compile(r"`(?P<arquivo>(?:\w+/)*\w+\.test\.tsx?)`:\s*`(?P<descricao>[^`]+)`")
-LINHA_DA_64 = re.compile(
-    r"^\|\s*(?P<rf>RF-[\d.]+)\s*\|[^|]*\|[^|]*\|\s*(?P<us>[^|]*?)\s*\|\s*(?P<ca>[^|]*?)\s*\|\s*$"
-)
 
 
 @dataclass
@@ -355,7 +329,6 @@ def verificar_rf(historias: list[Historia]) -> list[str]:
         for rf in ca.rfs():
             por_rf.setdefault(rf, set()).add(ca.ancora)
     fichas = fichas_de_rf()
-    linhas_64 = {a["rf"]: a for linha in ler(SRS).splitlines() if (a := LINHA_DA_64.match(linha))}
     for ficha in fichas:
         rf = ficha["id"]
         esperados = por_rf.get(rf, set())
@@ -373,11 +346,6 @@ def verificar_rf(historias: list[Historia]) -> list[str]:
             erros.append(f"{origem}: Vínculos ainda diz 'a definir (REQ-05)'")
         if _cas_citados(vinculo) != esperados:
             erros.append(f"{origem}: Vínculos cita {sorted(_cas_citados(vinculo))}, os CAs citam {sorted(esperados)}")
-        linha = linhas_64.get(rf)
-        if linha is None:
-            erros.append(f"{rf}: sem linha na SRS 6.4")
-        elif _cas_citados(linha["ca"]) != esperados:
-            erros.append(f"{rf}: SRS 6.4 cita {sorted(_cas_citados(linha['ca']))}, os CAs citam {sorted(esperados)}")
     ativos = len(fichas) - len(RF_SEM_HISTORIA)
     cobertos = sum(1 for f in fichas if f["id"] in por_rf)
     print(f"RF nas fichas: {len(fichas)}; citados por CA: {cobertos} de {ativos}; justificados: {sorted(RF_SEM_HISTORIA)}")
@@ -527,7 +495,7 @@ def main() -> int:
         ("1. Index Card, INVEST e tipos de CA", lambda: verificar_cards_e_invest(historias)),
         ("2. CAs: Dado/Quando/Então, Origem, RF e TA", lambda: verificar_criterios(historias)),
         ("3. Cobertura UC → US/CA (alternativas e exceções das fichas)", lambda: verificar_cobertura(historias)),
-        ("4. RF → US/CA: fichas rf-*.md e SRS 6.4", lambda: verificar_rf(historias)),
+        ("4. RF → US/CA: fichas rf-*.md (a SRS 6.4 virou a matriz gerada, REQ-06)", lambda: verificar_rf(historias)),
         ("5. Testes citados nos TAs existem", lambda: verificar_testes(historias)),
         ("6. IDs de US, CA e TA", lambda: verificar_ids(historias)),
         ("7. README: índice das histórias e dos TAs", lambda: verificar_readme(historias)),

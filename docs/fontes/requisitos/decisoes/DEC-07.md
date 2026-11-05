@@ -13,7 +13,7 @@
 | **Alternativas** | Outros valores; limites por espaço (exigiria consultar o cadastro de espaços); limites por dia da semana ou feriados; sem limites. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor como representante do cliente. |
 | **Prazo sugerido** | 06/11/2026 (Aula 7). |
-| **Artefatos afetados** | `HORARIO_DE_ABERTURA`, `HORARIO_DE_FECHAMENTO`, `DURACAO_MINIMA`, `DURACAO_MAXIMA`, `ANTECEDENCIA_MAXIMA_EM_DIAS` (`reservas/domain/regras_de_agenda.py`); mensagens de `ForaDoHorarioDeFuncionamento`, `DuracaoInvalida` e `AntecedenciaExcedida`; `GET /api/reservas/regras-de-agenda/`; dica do formulário e agenda do dia; horários dos dados de exemplo; README; [Glossário](../glossario.md); [Visão](../visao.md) (NS-06, P-04, R-10); testes de regras de agenda; ficha de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#questões-em-aberto) (E6.1 a E6.3) (REQ-04). |
+| **Artefatos afetados** | `HORARIO_DE_ABERTURA`, `HORARIO_DE_FECHAMENTO`, `DURACAO_MINIMA`, `DURACAO_MAXIMA`, `ANTECEDENCIA_MAXIMA_EM_DIAS` (`reservas/domain/regras_de_agenda.py`); mensagens de `ForaDoHorarioDeFuncionamento`, `DuracaoInvalida` e `AntecedenciaExcedida`; `GET /api/reservas/regras-de-agenda/`; dica do formulário e agenda do dia; horários dos dados de exemplo; README; [Glossário](../glossario.md); [Visão](../visao.md) (NS-06, P-04, R-10); testes de regras de agenda; ficha de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#questões-em-aberto) (E6.1 a E6.3) (REQ-04). · **REQ-06:** histórias [US-08](../historias/US-08-solicitar-reserva.md), [US-09](../historias/US-09-ver-a-agenda-do-dia.md); 10 critérios de aceite e 10 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-07)). |
 | **Origem** | RES-09, decisão b ("proposta de DEC-07" no `CLAUDE.md`). |
 | **Observações** | Mudar só os valores é mudança comportamental pequena (CR com regressão dos testes de borda). Limites por espaço ou por dia são mudança comportamental grande e estão fora do escopo até um CR. |
 
@@ -23,3 +23,4 @@
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da decisão proposta na RES-09 (REQ-01). |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as fichas de caso de uso que dependem desta decisão (REQ-04). |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-07) (REQ-06). Estado e opção sem mudança. |

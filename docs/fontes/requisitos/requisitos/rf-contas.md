@@ -16,6 +16,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o UC de cada ficha preenchido, com link para o [índice de casos de uso](../casos-de-uso/README.md#índice-dos-casos-de-uso) (REQ-03). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Evidência do RF-36 passa a citar a tela de início, para onde "Sair" leva (correção editorial achada pela matriz). Sem aprovação. |
 
 ## Cadastro
 
@@ -29,6 +30,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — sem cadastro próprio, cada aluno dependeria da Equipe de TI para começar a pedir. |
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (fluxo principal) — na ficha: [UC-01 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc01-p1) · US/CA: [US-01 · CA-01](../historias/US-01-criar-minha-conta.md#us-01-ca-01) (TA-01), [US-01 · CA-02](../historias/US-01-criar-minha-conta.md#us-01-ca-02) (TA-02), [US-01 · CA-06](../historias/US-01-criar-minha-conta.md#us-01-ca-06) (TA-06), [US-02 · CA-03](../historias/US-02-entrar-no-sistema.md#us-02-ca-03) (TA-09) |
 | **Evidência (complementar)** | `POST /api/auth/cadastro/` → 201, seguido do login; tela `/cadastro`. `contas/tests/test_api_cadastro.py::test_cadastro_valido_responde_201_com_solicitante_sem_senha`, `::test_usuario_recem_cadastrado_consegue_fazer_login`, `::test_campos_de_privilegio_no_corpo_sao_ignorados`; `pages/PaginaCadastro.test.tsx` ("com sucesso, cadastra, entra com as mesmas credenciais e vai para /reservas/nova") |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::CadastrarSolicitante.executar`, `contas/domain/cadastro.py::DadosDeCadastro` |
 | **Regras de negócio** | [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula), [perfil](../glossario.md#perfil), [Solicitante](../glossario.md#solicitante) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) (o cadastro público nunca cria Gestor), [DEC-09](../decisoes/DEC-09.md) |
 | **Revisão** | 0.1 |
@@ -46,6 +48,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — a matrícula identifica quem pediu cada reserva (NS-11). |
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (exceção) — na ficha: [UC-01 E3.1](../casos-de-uso/fichas-resumidas.md#uc01-e3-1) · US/CA: [US-01 · CA-03](../historias/US-01-criar-minha-conta.md#us-01-ca-03) (TA-03) |
 | **Evidência (complementar)** | 400 com `campos`. `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo`, `::test_nome_so_com_espacos_responde_400_campo_obrigatorio`, `::test_matricula_com_espaco_responde_400`, `::test_email_malformado_responde_400`; `contas/tests/test_cadastro_dominio.py::test_nome_acima_do_limite_lanca_texto_muito_longo`, `::test_matricula_longa_ou_com_espaco_no_meio_lanca_matricula_invalida [x]` |
+| **Código (complementar)** | `contas/domain/cadastro.py::DadosDeCadastro`, `contas/domain/excecoes.py::MatriculaInvalida` |
 | **Regras de negócio** | [Matrícula](../glossario.md#matricula), [usuário](../glossario.md#usuario) |
 | **Decisões** | [DEC-09](../decisoes/DEC-09.md) |
 | **Revisão** | 0.1 |
@@ -63,6 +66,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — uma conta com senha curta ou comum exporia as reservas da pessoa. |
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (exceção) — na ficha: [UC-01 E3.2](../casos-de-uso/fichas-resumidas.md#uc01-e3-2) · US/CA: [US-01 · CA-04](../historias/US-01-criar-minha-conta.md#us-01-ca-04) (TA-04) |
 | **Evidência (complementar)** | 400 `SENHA_FRACA` em `campos.senha`. `contas/tests/test_api_cadastro.py::test_senha_fraca_responde_400_com_motivos_em_senha`; `contas/tests/test_cadastrar_solicitante.py::test_senha_fraca_lanca_senha_fraca_sem_criar_usuario`; `pages/PaginaCadastro.test.tsx` ("senha fraca aparece embaixo da senha") |
+| **Código (complementar)** | `contas/application/portas.py::PoliticaDeSenha.validar`, `contas/infrastructure/politica_de_senha.py::PoliticaDeSenhaDjango` |
 | **Regras de negócio** | [Política de senha](../glossario.md#politica-de-senha) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
@@ -80,6 +84,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — duas contas com a mesma matrícula tornariam ambíguo quem pediu uma reserva. |
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (exceção) — na ficha: [UC-01 E3.3](../casos-de-uso/fichas-resumidas.md#uc01-e3-3) · US/CA: [US-01 · CA-05](../historias/US-01-criar-minha-conta.md#us-01-ca-05) (TA-05) |
 | **Evidência (complementar)** | 409 `EMAIL_JA_CADASTRADO` ou `MATRICULA_JA_CADASTRADA`. `contas/tests/test_api_cadastro.py::test_email_repetido_com_caixa_diferente_responde_409`, `::test_matricula_repetida_responde_409`; `contas/tests/test_repositorio_usuarios.py::test_email_repetido_lanca_email_ja_cadastrado [x]` |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::CadastrarSolicitante.executar`, `contas/infrastructure/repositorio_django.py::RepositorioUsuariosDjango.criar_solicitante` |
 | **Regras de negócio** | [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
@@ -98,6 +103,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — sem identificação o sistema não sabe quem pediu cada reserva nem quem decidiu. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (fluxo principal) — na ficha: [UC-02 passos 1 a 4](../casos-de-uso/UC-02-autenticar.md#p1) · US/CA: [US-02 · CA-01](../historias/US-02-entrar-no-sistema.md#us-02-ca-01) (TA-07), [US-02 · CA-02](../historias/US-02-entrar-no-sistema.md#us-02-ca-02) (TA-08), [US-02 · CA-03](../historias/US-02-entrar-no-sistema.md#us-02-ca-03) (TA-09), [US-02 · CA-04](../historias/US-02-entrar-no-sistema.md#us-02-ca-04) (TA-10), [US-02 · CA-06](../historias/US-02-entrar-no-sistema.md#us-02-ca-06) (TA-12) |
 | **Evidência (complementar)** | `POST /api/auth/login/`; tela `/entrar` e "Nome · Perfil" no cabeçalho. `contas/tests/test_api_autenticacao.py::test_login_valido_devolve_tokens_e_usuario_sem_senha`, `::test_login_aceita_email_com_caixa_diferente_e_espacos`; `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `pages/PaginaEntrar.test.tsx`; `components/layout/Layout.test.tsx` ("logado, mostra nome e perfil, o botão Sair e todos os itens do menu") |
+| **Código (complementar)** | `contas/api/views.py::LoginView.post` |
 | **Regras de negócio** | [Usuário](../glossario.md#usuario), [perfil](../glossario.md#perfil), [sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) |
 | **Revisão** | 0.1 |
@@ -115,6 +121,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — uma resposta diferente por caso revelaria quais e-mails estão cadastrados ([RNF-F05](rnf.md#rnf-f05)). |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E3.2](../casos-de-uso/UC-02-autenticar.md#e3-2) · US/CA: [US-02 · CA-05](../historias/US-02-entrar-no-sistema.md#us-02-ca-05) (TA-11) |
 | **Evidência (complementar)** | 401 `CREDENCIAIS_INVALIDAS`. `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` ("credenciais inválidas aparecem num aviso no topo, que recebe o foco") |
+| **Código (complementar)** | `contas/api/views.py::LoginView.post` |
 | **Regras de negócio** | [Credenciais inválidas](../glossario.md#credenciais-invalidas) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
@@ -131,6 +138,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — pedir a senha a cada 30 minutos de uso atrapalharia a operação do dia a dia. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.1](../casos-de-uso/UC-02-autenticar.md#a4-1) · US/CA: [US-03 · CA-01](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-01) (TA-13), [US-03 · CA-05](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-05) (TA-17) |
 | **Evidência (complementar)** | `POST /api/auth/refresh/` chamado pelo frontend no 401. `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_refresh_dura_o_tempo_configurado`; `api/cliente.test.ts` ("401 NAO_AUTENTICADO renova o access e repete a requisição com o novo"); `components/sessao/SessaoProvider.test.tsx` ("restaura a sessão salva e confirma com /me, que atualiza o usuário") |
+| **Código (complementar)** | `contas/api/views.py::RenovarTokenView.post`, `contas/api/views.py::_refresh_de_usuario_ativo` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) |
 | **Revisão** | 0.1 |
@@ -148,6 +156,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — sem a explicação, as telas só passariam a falhar. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E4.1](../casos-de-uso/UC-02-autenticar.md#e4-1), [E4.2](../casos-de-uso/UC-02-autenticar.md#e4-2) · US/CA: [US-03 · CA-06](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-06) (TA-18), [US-03 · CA-07](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-07) (TA-19) |
 | **Evidência (complementar)** | `api/cliente.test.ts` ("se a renovação falhar, limpa a sessão, avisa os ouvintes e lança SESSAO_EXPIRADA"); `components/sessao/SessaoProvider.test.tsx` ("quando a sessão expira, avisa e leva para o login com o caminho atual"); `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao` |
+| **Código (complementar)** | `api/cliente.ts::tentarRenovar`, `api/cliente.ts::encerrarSessaoExpirada` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
@@ -164,6 +173,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Esperado — a tela mostra quem está agindo e confirma o perfil, que a Equipe de TI pode ter mudado. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.2](../casos-de-uso/UC-02-autenticar.md#a4-2) · US/CA: [US-03 · CA-03](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-03) (TA-15), [US-03 · CA-04](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-04) (TA-16) |
 | **Evidência (complementar)** | `GET /api/auth/me/`; "Solicitante: nome (matrícula)" em `/reservas/nova`. `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil`; `components/sessao/SessaoProvider.test.tsx` ("restaura a sessão salva e confirma com /me, que atualiza o usuário") |
+| **Código (complementar)** | `contas/api/views.py::UsuarioAtualView.get` |
 | **Regras de negócio** | [Usuário](../glossario.md#usuario), [perfil](../glossario.md#perfil) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
@@ -179,7 +189,8 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Funcionalidade** | Extra (AUT-06) |
 | **Prioridade (QFD)** | Esperado — num computador compartilhado, sem sair, a próxima pessoa agiria em nome da anterior. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.3](../casos-de-uso/UC-02-autenticar.md#a4-3) · US/CA: [US-03 · CA-02](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-02) (TA-14) |
-| **Evidência (complementar)** | Só no navegador (sem chamada à API: os tokens são descartados). `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início"); `api/sessao.test.ts` |
+| **Evidência (complementar)** | Só no navegador (sem chamada à API: os tokens são descartados); "Sair" no cabeçalho de toda tela, que leva ao início `/`. `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início"); `api/sessao.test.ts` |
+| **Código (complementar)** | `components/sessao/SessaoProvider.tsx::SessaoProvider`, `api/sessao.ts::limparSessao` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) (sem revogação de tokens: lacuna [L-04](srs.md#lacunas)) |
 | **Revisão** | 0.1 |
@@ -198,6 +209,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Prioridade (QFD)** | Normal — sem pelo menos um Gestor, nenhum espaço é cadastrado e nenhum pedido é decidido. |
 | **Vínculos** | UC: [UC-20 Criar usuário Gestor](../casos-de-uso/README.md#uc-20) (fluxo principal) — na ficha: [UC-20 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc20-p1) · US/CA: [US-17 · CA-01](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-01) (TA-147), [US-17 · CA-02](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-02) (TA-148), [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03) (TA-149) |
 | **Evidência (complementar)** | `python manage.py createsuperuser`; administração em `/admin/`. `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser`, `::test_superusuario_e_gestor_e_usuario_comum_nao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes` |
+| **Código (complementar)** | `contas/infrastructure/models.py::UsuarioManager.create_superuser` |
 | **Regras de negócio** | [Gestor](../glossario.md#gestor), [Equipe de TI](../glossario.md#equipe-de-ti) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md); premissa P-06 da [Visão](../visao.md#premissas) |
 | **Revisão** | 0.1 |

@@ -13,7 +13,7 @@
 | **Alternativas** | Só a meta global; nenhuma meta numérica; estender a meta de 100% ao contexto `contas`. |
 | **Responsável** | Max Zimmermann dos Reis (grupo). Decisão interna; não depende do professor. |
 | **Prazo sugerido** | 13/11/2026. |
-| **Artefatos afetados** | `src/backend/pyproject.toml` (`fail_under`, mutmut); [testes de espaços](../../testes_de_espacos.md) e [testes de reservas](../../testes_de_reservas.md); checklist pré-entrega; README (qualidade do código); [Visão](../visao.md) (R-11). |
+| **Artefatos afetados** | `src/backend/pyproject.toml` (`fail_under`, mutmut); [testes de espaços](../../testes_de_espacos.md) e [testes de reservas](../../testes_de_reservas.md); checklist pré-entrega; README (qualidade do código); [Visão](../visao.md) (R-11). · **REQ-06:** nenhuma história; 0 critérios de aceite e 0 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-08)). |
 | **Origem** | ESP-06 e RES-08 ("proposta de DEC-08" no `CLAUDE.md`). |
 | **Observações** | Medido na RES-08: 99,71% no total. |
 
@@ -22,3 +22,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da decisão proposta na ESP-06 e complementada na RES-08 (REQ-01). |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-08) (REQ-06). Estado e opção sem mudança. |
