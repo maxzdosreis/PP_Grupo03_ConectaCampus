@@ -17,6 +17,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Seção 6 aponta para a [matriz de rastreabilidade gerada](../rastreabilidade/README.md); a 6.4 fica só com o teste representativo (UC, US, CA e TA saem da matriz); "Como ler" cita o campo Código (complementar) das fichas; lacuna L-17 (tela de endereço desconhecido sem RF), achada no sentido inverso da matriz (REQ-06). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | L-12 com a ordem real entre o espaço e a finalidade (o espaço primeiro), corrigida também na ficha de UC-04 (DOC-03). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | L-03 e L-04 apontam para as limitações conhecidas do README da raiz, com a divisão do README (DOC-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): 6.3 com as DECs decididas e as DEC-14 a DEC-23; L-01, L-02 e L-06 passam a CR-01, CR-02 e CR-04, e a L-05 fica aceita com a DEC-12 decidida; referências, premissas, "Como ler" (DEC-16) e a coluna de ações da auditoria apontam para as decisões e os CRs. Mudança editorial: nenhum enunciado, regra ou critério de aceite muda (os CRs mudam na RES-11, RES-12, ESP-07 e AUT-12). Sem aprovação. |
 
 ## Sumário
 
@@ -57,7 +58,7 @@ Siglas: **NS** necessidade; **RF** requisito funcional; **RNF** requisito não f
 
 - [Documento de Visão (VIS-01)](../visao.md) — necessidades NS-01 a NS-16, atores, escopo, premissas, critérios de sucesso e riscos.
 - [Glossário (GLO-01)](../glossario.md).
-- [Decisões DEC-01 a DEC-13](../decisoes/README.md).
+- [Decisões DEC-01 a DEC-23](../decisoes/README.md) e [pedidos de mudança](../mudancas/README.md) [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) a [CR-04](../mudancas/CR-04-matricula-so-digitos.md).
 - [README da fonte oficial](../README.md) — convenções de ID, versão, estado e rastreabilidade.
 - Evidências do lado do código: [catálogo de testes de espaços](../../testes_de_espacos.md), [catálogo de testes de reservas](../../testes_de_reservas.md) e [matriz de acesso](../../matriz_de_acesso.md).
 - Diretrizes da disciplina (A1 a A4) em `.claude/requisitos.md` (arquivo local, fora do Git) e enunciado de Projeto de Programação (Seção 5, funcionalidades mínimas).
@@ -91,8 +92,8 @@ Reservas consulta o cadastro de espaços para saber se um espaço é [reserváve
 
 ### Premissas e dependências
 
-- As premissas P-01 a P-07 da [Visão](../visao.md#premissas) valem para toda a SRS. As que mais afetam os requisitos: P-01 (sem cliente real: os valores de regra são do grupo, com o professor como referência), P-03 (horário de Brasília), P-04 (regras de agenda iguais para todos os espaços), P-05 (um pedido é de um espaço, num dia, num intervalo contínuo) e P-06 (Gestor criado só pela Equipe de TI).
-- Dependências de decisão: os requisitos ligados a uma DEC adotada provisoriamente (DEC-05 a DEC-13) podem mudar quando a resposta chegar; a mudança passa pelo fluxo de [CR](../README.md#como-propor-uma-mudança). Índice: [`decisoes/`](../decisoes/README.md).
+- As premissas P-01 a P-07 da [Visão](../visao.md#premissas) valem para toda a SRS. As que mais afetam os requisitos: P-01 (sem cliente real: os valores de regra são do grupo, com o professor como referência), P-03 (horário de Brasília), P-04 (regras de agenda iguais para todos os espaços, até o [CR-03](../mudancas/CR-03-horario-por-espaco.md) trazer o horário por espaço), P-05 (um pedido é de um espaço, num dia, num intervalo contínuo) e P-06 (Gestor criado só pela Equipe de TI).
+- Dependências de decisão: as DEC-05 a DEC-13 foram decididas na Aula 7 (06/11/2026). As que mudam o comportamento seguem pelo fluxo de [CR](../README.md#como-propor-uma-mudança) e só mudam os requisitos quando a tarefa que implementa o CR for feita: DEC-13 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), RES-11), DEC-05 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), RES-12), DEC-07 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07) e DEC-09 ([CR-04](../mudancas/CR-04-matricula-so-digitos.md), AUT-12). Até lá, esta SRS descreve o comportamento atual. Índice: [`decisoes/`](../decisoes/README.md).
 - Nenhuma dependência de sistema externo (seção 4).
 
 ## 3. Requisitos funcionais
@@ -104,7 +105,7 @@ Reservas consulta o cadastro de espaços para saber se um espaço é [reserváve
 - **Decomposição (A4·s8):** uma obrigação por ID. A recusa específica de uma operação é um filho `RF-xx.n` do RF da operação (ex.: [RF-11.4](rf-reservas.md#rf-11-4), conflito de horário no pedido). A recusa que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas listadas na ficha (ex.: [RF-23](rf-reservas.md#rf-23), reserva inexistente ou de outra pessoa, que protege o detalhe, o histórico e a mudança de situação). Assim cada recusa tem um ID e uma evidência, sem repetir a mesma obrigação em várias fichas, e a F5 fica coberta por IDs próprios.
 - **Ficha (A4·s9):** ID e título, enunciado, pai (filhos) ou operações protegidas (recusas comuns), origem (NS principal primeiro), funcionalidade do enunciado, prioridade QFD com justificativa, vínculos, evidência, regras de negócio (com link para o glossário), decisões, revisão, estado e responsável.
 - **Vínculos:** o caso de uso em que o RF entra, com o papel dele (fluxo principal, alternativa, exceção ou transversal), definido na REQ-03 ([rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc)), e o passo, a alternativa ou a exceção exata na ficha do caso de uso (REQ-04); e as US e os CAs que o verificam, cada um com o seu TA ([histórias](../historias/README.md), REQ-05).
-- **Evidência (complementar):** o endpoint ou a tela e o `arquivo::teste` que prova o comportamento. **Código (complementar)** (REQ-06): o caso de uso da aplicação e a regra do domínio que implementam o RF, como `arquivo::Símbolo`, conferidos por `scripts/gerar_rastreabilidade.py`. É uma extensão do grupo: a cadeia do professor para em CA/TA, e a pergunta se o elo até o código é esperado segue aberta (ponto 13 de `.claude/requisitos.md`).
+- **Evidência (complementar):** o endpoint ou a tela e o `arquivo::teste` que prova o comportamento. **Código (complementar)** (REQ-06): o caso de uso da aplicação e a regra do domínio que implementam o RF, como `arquivo::Símbolo`, conferidos por `scripts/gerar_rastreabilidade.py`. É uma extensão do grupo: a cadeia do professor para em CA/TA, e o professor confirmou que o elo até o código conta ([DEC-16](../decisoes/DEC-16.md)).
 - **Estado:** todos em **Rascunho** (versão 0.1). Nenhum RF ficou "Não implementado": todas as NS têm comportamento implementado (ver [lacunas](#lacunas)).
 
 ### Tabela-resumo
@@ -314,15 +315,25 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | [DEC-02](../decisoes/DEC-02.md) | Decidida | — | REST-04 |
 | [DEC-03](../decisoes/DEC-03.md) | Decidida | — | REST-04 |
 | [DEC-04](../decisoes/DEC-04.md) | Decidida | RF-05, RF-10, RF-11, RF-13, RF-23, RF-27, RF-32, RF-33, RF-34, RF-36, RF-37 | RNF-F01 a RNF-F04, RNF-F09; REST-08 |
-| [DEC-05](../decisoes/DEC-05.md) | Adotada provisoriamente | RF-22 | RNF-R02 |
-| [DEC-06](../decisoes/DEC-06.md) | Adotada provisoriamente | RF-06, RF-07, RF-08, RF-11.3, RF-20 | RNF-R05 |
-| [DEC-07](../decisoes/DEC-07.md) | Adotada provisoriamente | RF-11.5, RF-28, RF-30, RF-31 | — |
-| [DEC-08](../decisoes/DEC-08.md) | Adotada provisoriamente | — | RNF-S03 |
-| [DEC-09](../decisoes/DEC-09.md) | Adotada provisoriamente | RF-32, RF-32.1 | — |
-| [DEC-10](../decisoes/DEC-10.md) | Adotada provisoriamente | RF-05.2, RF-06.2 | — |
-| [DEC-11](../decisoes/DEC-11.md) | Adotada provisoriamente | RF-29 | RNF-F06 |
-| [DEC-12](../decisoes/DEC-12.md) | Adotada provisoriamente (nova) | — | RNF-P01, RNF-P02 |
-| [DEC-13](../decisoes/DEC-13.md) | Adotada provisoriamente (nova) | RF-16, RF-17, RF-18, RF-19, RF-20, RF-21 | — |
+| [DEC-05](../decisoes/DEC-05.md) | Decidida (CR-02) | RF-22 | RNF-R02 |
+| [DEC-06](../decisoes/DEC-06.md) | Decidida | RF-06, RF-07, RF-08, RF-11.3, RF-20 | RNF-R05 |
+| [DEC-07](../decisoes/DEC-07.md) | Decidida (CR-03) | RF-11.5, RF-28, RF-30, RF-31 | — |
+| [DEC-08](../decisoes/DEC-08.md) | Decidida | — | RNF-S03 |
+| [DEC-09](../decisoes/DEC-09.md) | Decidida (CR-04) | RF-32, RF-32.1 | — |
+| [DEC-10](../decisoes/DEC-10.md) | Decidida | RF-05.2, RF-06.2 | — |
+| [DEC-11](../decisoes/DEC-11.md) | Decidida | RF-29 | RNF-F06 |
+| [DEC-12](../decisoes/DEC-12.md) | Decidida | — | RNF-P01, RNF-P02 |
+| [DEC-13](../decisoes/DEC-13.md) | Decidida (CR-01) | RF-16, RF-17, RF-18, RF-19, RF-20, RF-21 | — |
+| [DEC-14](../decisoes/DEC-14.md) | Decidida | — | — |
+| [DEC-15](../decisoes/DEC-15.md) | Decidida | — | — |
+| [DEC-16](../decisoes/DEC-16.md) | Decidida | — | — |
+| [DEC-17](../decisoes/DEC-17.md) | Decidida | — | — |
+| [DEC-18](../decisoes/DEC-18.md) | Decidida | — | — |
+| [DEC-19](../decisoes/DEC-19.md) | Decidida | — | — |
+| [DEC-20](../decisoes/DEC-20.md) | Decidida | — | — |
+| [DEC-21](../decisoes/DEC-21.md) | Decidida | — | — |
+| [DEC-22](../decisoes/DEC-22.md) | Decidida | — | — |
+| [DEC-23](../decisoes/DEC-23.md) | Decidida | — | — |
 
 ### 6.4 RF → evidência, UC, US e CA
 
@@ -419,12 +430,12 @@ Comportamento que uma necessidade pede e o sistema não tem, comportamento sem t
 
 | ID | Tipo | Lacuna | Afeta | Proposta |
 |---|---|---|---|---|
-| <a id="l-01"></a>L-01 | NS × comportamento | A NS-09 fala em registrar que o uso **aconteceu**, mas o Gestor conclui uma reserva antes do término; também confirma ou recusa depois do início, qualquer um cancela depois do uso, e uma Solicitada não decidida continua ocupando horário depois da data. | RF-16 a RF-21; NS-09 | **DEC** — [DEC-13](../decisoes/DEC-13.md) criada nesta tarefa. |
-| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **DEC** — [DEC-05](../decisoes/DEC-05.md) já aberta; risco R-08 da Visão. |
+| <a id="l-01"></a>L-01 | NS × comportamento | A NS-09 fala em registrar que o uso **aconteceu**, mas o Gestor conclui uma reserva antes do término; também confirma ou recusa depois do início, qualquer um cancela depois do uso, e uma Solicitada não decidida continua ocupando horário depois da data. | RF-16 a RF-21; NS-09 | **CR** — [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (a [DEC-13](../decisoes/DEC-13.md), decidida em 06/11/2026: concluir só a partir do término; recusar e cancelar, pelo Gestor, só antes do início); fecha com a RES-11. |
+| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **CR** — [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (a [DEC-05](../decisoes/DEC-05.md), decidida em 06/11/2026: as tentativas recusadas entram no histórico); fecha com a RES-12. |
 | <a id="l-03"></a>L-03 | RNF ausente | Não há limite de tentativas de entrada: nada impede adivinhar senhas por tentativa e erro. | RF-33; NS-11 | **Aceitar** para a entrega (está nas [limitações conhecidas do README da raiz](../../../../README.md#limitações-conhecidas); o cliente não pediu). Se pedido, CR com um RNF-F de tentativas por minuto e o valor numa DEC. |
 | <a id="l-04"></a>L-04 | RNF ausente | Sair não invalida a credencial: uma credencial copiada continua valendo até expirar (30 min; renovação, 1 dia). | RF-36; RNF-F03 | **Aceitar** ([limitação conhecida do README da raiz](../../../../README.md#limitações-conhecidas); [DEC-04](../decisoes/DEC-04.md), decisão c da AUT-03). |
-| <a id="l-05"></a>L-05 | Comportamento | A consulta de reservas não é paginada: a lista do Gestor sem critério devolve todas as reservas, e o tempo e o tamanho da resposta crescem com elas. Medido: p95 de 378 ms com 1.000 reservas (meta atendida) e de 1.743 ms com 5.000 (meta estourada). | RF-12; RNF-P01 | **Aceitar** para a entrega: a meta da [DEC-12](../decisoes/DEC-12.md) vale para 1.000 reservas e foi atingida ([medição](rnf.md#medição)). Se a carga esperada passar de alguns milhares de reservas, **CR** com paginação da consulta. |
-| <a id="l-06"></a>L-06 | NS × comportamento | A matrícula não é conferida com a instituição: qualquer texto de até 20 caracteres sem espaço é aceito. | RF-32, RF-32.1; NS-11 | **DEC** — [DEC-09](../decisoes/DEC-09.md) já aberta; a integração institucional está fora do escopo. |
+| <a id="l-05"></a>L-05 | Comportamento | A consulta de reservas não é paginada: a lista do Gestor sem critério devolve todas as reservas, e o tempo e o tamanho da resposta crescem com elas. Medido: p95 de 378 ms com 1.000 reservas (meta atendida) e de 1.743 ms com 5.000 (meta estourada). | RF-12; RNF-P01 | **Aceitar** para a entrega (aceita: [DEC-12](../decisoes/DEC-12.md) decidida em 06/11/2026): a meta vale para 1.000 reservas e foi atingida ([medição](rnf.md#medição)). Se a carga esperada passar de alguns milhares de reservas, **CR** com paginação da consulta. |
+| <a id="l-06"></a>L-06 | NS × comportamento | A matrícula não é conferida com a instituição: qualquer texto de até 20 caracteres sem espaço é aceito. | RF-32, RF-32.1; NS-11 | **CR** — [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (a [DEC-09](../decisoes/DEC-09.md), decidida em 06/11/2026: só dígitos); fecha com a AUT-12. A conferência com a instituição continua fora do escopo. |
 | <a id="l-07"></a>L-07 | RF/RNF sem teste | Não há teste com dois pedidos simultâneos de verdade (duas threads) para o mesmo período; a garantia é a restrição do banco, provada por um teste que simula a corrida. Para a mudança de situação o teste de duas threads existe. | RNF-R01; RF-11.4 | **Aceitar** nesta tarefa (não muda testes); sugerir o teste numa tarefa de testes antes da baseline. |
 | <a id="l-08"></a>L-08 | RF sem teste | A resposta "Não foi possível conectar ao banco de dados." (503) da verificação do sistema não tem teste. | RF-40; [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-156, roteiro manual, REQ-05) | **Aceitar** nesta tarefa; sugerir o teste numa tarefa de testes. |
 | <a id="l-09"></a>L-09 | RNF sem verificação automática | 360 px, teclado, contraste nas telas, situação sem depender da cor, execução num ambiente novo e ausência de segredos no ZIP dependem de verificação manual. | RNF-U02 a RNF-U05, RNF-S01, RNF-S06 | **Aceitar**, com a verificação feita no ensaio antes da entrega e o resultado registrado na versão 0.2. |
@@ -452,11 +463,11 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-05.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-05.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Depende da [DEC-10](../decisoes/DEC-10.md). |
+| RF-05.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Conforme a [DEC-10](../decisoes/DEC-10.md) (decidida). |
 | RF-06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-06.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-06.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-07 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Efeito sobre as reservas existentes depende da [DEC-06](../decisoes/DEC-06.md). |
+| RF-07 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Efeito sobre as reservas existentes conforme a [DEC-06](../decisoes/DEC-06.md) (decidida). |
 | RF-07.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-08 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-08.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
@@ -467,32 +478,32 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-11.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | "Data retroativa" compara data e hora (divergência registrada no glossário). |
 | RF-11.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-11.4 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Valores da [DEC-07](../decisoes/DEC-07.md). |
+| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Valores da [DEC-07](../decisoes/DEC-07.md), decidida; mudam pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md). |
 | RF-12 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Sem paginação ([L-05](#l-05)). |
 | RF-12.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-13 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-14 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-15 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-16 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: as ações não consideram o horário da reserva. Ação: [DEC-13](../decisoes/DEC-13.md). |
-| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). Co: o limite de 300 caracteres do motivo opcional não está no enunciado ([L-13](#l-13)). |
-| RF-18 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: recusar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). |
-| RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: concluir antes do término é aceito, contra a NS-09. Ação: [DEC-13](../decisoes/DEC-13.md), lacuna [L-01](#l-01). |
-| RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: cancelar depois do uso é aceito. Ação: [DEC-13](../decisoes/DEC-13.md). |
-| RF-21 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: idem. Ação: [DEC-13](../decisoes/DEC-13.md). |
-| RF-22 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: tentativas recusadas não são registradas. Ação: [DEC-05](../decisoes/DEC-05.md), lacuna [L-02](#l-02). |
+| RF-16 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: as ações não consideram o horário da reserva. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md). |
+| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; confirmar continua sem restrição de horário. Co: o limite de 300 caracteres do motivo opcional não está no enunciado ([L-13](#l-13)). |
+| RF-18 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: recusar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md). |
+| RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: concluir antes do término é aceito, contra a NS-09. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), lacuna [L-01](#l-01). |
+| RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: cancelar depois do uso é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (só para o Gestor). |
+| RF-21 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: idem. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; o cancelamento pelo Solicitante continua sem restrição de horário. |
+| RF-22 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: tentativas recusadas não são registradas. Ação: [DEC-05](../decisoes/DEC-05.md) decidida; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), lacuna [L-02](#l-02). |
 | RF-23 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-24 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-25 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-26 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O limite do motivo também vale ao confirmar e concluir, fora deste RF ([L-13](#l-13)). |
 | RF-27 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-29 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Privacidade depende da [DEC-11](../decisoes/DEC-11.md). |
+| RF-29 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Privacidade conforme a [DEC-11](../decisoes/DEC-11.md) (decidida). |
 | RF-29.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-29.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-30 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-31 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-32.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Formato da matrícula pela [DEC-09](../decisoes/DEC-09.md). |
+| RF-32.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Formato da matrícula pela [DEC-09](../decisoes/DEC-09.md), decidida; muda pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md). |
 | RF-32.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-33 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Sem limite de tentativas ([L-03](#l-03)). |
@@ -533,11 +544,11 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-R04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-R05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-R06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RNF-P01 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Meta da [DEC-12](../decisoes/DEC-12.md) atendida com 1.000 reservas; não escala sem paginação ([L-05](#l-05)). |
+| RNF-P01 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Meta da [DEC-12](../decisoes/DEC-12.md) (decidida) atendida com 1.000 reservas; não escala sem paginação ([L-05](#l-05)). |
 | RNF-P02 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Meta atendida (p95 de 7 ms). |
 | RNF-S01 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar (CS-03). |
 | RNF-S02 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RNF-S03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Meta interna ([DEC-08](../decisoes/DEC-08.md)). |
+| RNF-S03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Meta interna ([DEC-08](../decisoes/DEC-08.md), decidida). |
 | RNF-S04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar antes da entrega ([L-09](#l-09)). |

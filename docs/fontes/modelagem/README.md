@@ -16,6 +16,7 @@
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Ficha UC-04 corrigida (espaço antes da finalidade); a nota da Figura 5 passa a citar `IDENTIFICADOR_DE_ESPACO_INVALIDO`, e a verificação confere o campo quando o mesmo código é lançado em pontos diferentes (`%% campo:`) |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Revisão: passos antes do `alt` sem o dado que separa os cenários (horário pedido na Figura 5, situação lida na Figura 6), que agora fica só nas guardas |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Decisão f da seção 3 aponta para o README de reservas, onde ficou o exemplo da transição inválida com a divisão do README (DOC-09). Mudança editorial. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Plano do PDF: a capa sai da folga, porque não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md), Aula 7; GES-02). Mudança editorial. |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -43,7 +44,7 @@ Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, 
 | 2. Modelo do domínio (classes; estados da reserva) | DOC-02 | `02-modelo-do-dominio.md` | ≤ 1,5 página (medida: ~1,49; ver Pendências) |
 | 3. Fluxo principal (da solicitação à mudança de situação, com uma rejeição) | DOC-03 | `03-fluxo-principal.md` | ≤ 1,5 página, alvo 1,4 (medida: ~1,37; ver Pendências) |
 | 4. Decisões técnicas (Django/DRF, React, PostgreSQL, Docker, JWT, pastas) | DOC-04 | `04-decisoes-tecnicas.md` | ≤ 1 página |
-| Folga (capa, quebras de página) | — | — | 0,5 página no plano; pela medida atual das seções 1 a 3 (4,59 páginas), sobram 1,41 página: 1 para a seção 4 e **0,41** para a capa e as quebras |
+| Folga (quebras de página) | — | — | 0,5 página no plano; pela medida atual das seções 1 a 3 (4,59 páginas), sobram 1,41 página: 1 para a seção 4 e **0,41** para as quebras. A capa não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md)) |
 
 A montagem do `docs/modelagem.pdf` a partir desses arquivos é da DOC-04. As figuras entram no PDF pelo `.png`, na largura da área útil (16 cm numa A4 com margens de 2,5 cm).
 
@@ -536,8 +537,8 @@ Saída de `python scripts/verificar_fluxo_principal.py` em 05/11/2026 (caminhos 
 
 ## Para a DOC-04 (decisões técnicas e montagem do PDF)
 
-- **Ordem do PDF:** capa → `01-visao-do-sistema.md` (figuras 1 e 2) → `02-modelo-do-dominio.md` (figuras 3 e 4) → `03-fluxo-principal.md` (figuras 5 e 6) → `04-decisoes-tecnicas.md`. As figuras entram pelo `.png`, a 16 cm, na ordem da numeração; os textos citam a Figura 4 a partir da seção 3, então a numeração não pode mudar.
-- **Saldo de páginas:** as seções 1 a 3 medem ~4,59 páginas; sobram 1,41: até 1 página para as decisões técnicas e ~0,41 para a capa e as quebras. Meça com o CSS registrado nas Pendências.
+- **Ordem do PDF:** capa (só o título e os nomes, fora das 6 páginas, [DEC-21](../requisitos/decisoes/DEC-21.md)) → `01-visao-do-sistema.md` (figuras 1 e 2) → `02-modelo-do-dominio.md` (figuras 3 e 4) → `03-fluxo-principal.md` (figuras 5 e 6) → `04-decisoes-tecnicas.md`. As figuras entram pelo `.png`, a 16 cm, na ordem da numeração; os textos citam a Figura 4 a partir da seção 3, então a numeração não pode mudar.
+- **Saldo de páginas:** as seções 1 a 3 medem ~4,59 páginas; sobram 1,41: até 1 página para as decisões técnicas e ~0,41 para as quebras (a capa não conta, [DEC-21](../requisitos/decisoes/DEC-21.md)). Meça com o CSS registrado nas Pendências.
 - **Nenhum `.md` da seção tem link para `docs/fontes/`** (o PDF entra no ZIP e as fontes não); as remissões são por nome (DEC-05, US-08, US-14).
 - A legibilidade das figuras 1, 3, 5 e 6 está no limite (ver Pendências); a saída combinada é paisagem para as mais largas.
 

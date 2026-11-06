@@ -2,7 +2,7 @@
 
 | Identificação | Responsabilidade | Fonte oficial |
 |---|---|---|
-| **MCR-01 • 0.1 • Rascunho** (modelo; nenhum CR foi aberto) | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha | `docs/fontes/requisitos/mudancas/modelo-cr.md` |
+| **MCR-01 • 0.1 • Rascunho** (modelo de CR) | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha | `docs/fontes/requisitos/mudancas/modelo-cr.md` |
 
 Modelo de CR no fluxo do A4·s20 (registrar → analisar → decidir → atualizar → verificar) e na estrutura do pacote de mudança da Aula 4 (solicitação, mapa de impacto, diferença e aceite, referência candidata). Para abrir um CR, copie este arquivo como `CR-xx-<assunto>.md` (próximo número livre, nunca reutilizado), numa branch `docs/CR-xx-<assunto>`, e preencha cada seção. Commit não é aprovação; push não é publicação de baseline.
 
@@ -11,6 +11,7 @@ Modelo de CR no fluxo do A4·s20 (registrar → analisar → decidir → atualiz
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Criação do modelo, com o mapa de impacto tirado da [matriz de rastreabilidade](../rastreabilidade/README.md) (REQ-06). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Cabeçalho deixa de dizer que nenhum CR foi aberto: os CR-01 a CR-04 foram abertos a partir deste modelo (GES-02). Conteúdo do modelo sem mudança. Sem aprovação. |
 
 ---
 

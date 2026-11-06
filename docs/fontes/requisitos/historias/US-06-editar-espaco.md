@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -112,7 +113,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-15 E4.5](../casos-de-uso/fichas-resumidas.md#uc15-e4-5)
 - **RF:** [RF-05.2](../requisitos/rf-espacos.md#rf-05-2), [RF-06.2](../requisitos/rf-espacos.md#rf-06-2)
 - **TA:** [TA-46](#ta-46)
-- **Depende de:** [DEC-10](../decisoes/DEC-10.md)
+- **Depende de:** [DEC-10](../decisoes/DEC-10.md) (decidida)
 
 #### <a id="us-06-ca-09"></a>US-06 · CA-09 · Espaço alterado por outra pessoa (exceção)
 

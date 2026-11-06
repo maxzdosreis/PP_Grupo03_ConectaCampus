@@ -14,6 +14,7 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação (REQ-01; data do commit, o arquivo não tinha histórico). As REQ-02 a REQ-05 acrescentaram as próprias decisões de organização. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Cabeçalho completado (REQ-06). Estrutura com [`rastreabilidade/`](rastreabilidade/README.md); identificadores de documento IND, RAS, PAU, MCR e BL; rastreabilidade descrita até o código, com link para a matriz gerada; decisões de organização da REQ-06. Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): estrutura com DEC-01 a DEC-23 e CR-01 a CR-04; decisões c (REQ-01) e c (REQ-02), a rastreabilidade e os pontos a confirmar apontam para as DEC-14 a DEC-19. Sem aprovação. |
 
 ## Estrutura
 
@@ -24,8 +25,8 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (60 fichas, por área) e RNF-F01 a RNF-S06 (31, por FURPS). | 0.1 • Rascunho (REQ-02) |
 | [`casos-de-uso/`](casos-de-uso/README.md) | **UCD-01** (diagrama do negócio, UC-01 a UC-19) e **UCD-02** (diagrama de apoio "Administração", UC-20 a UC-22) em PlantUML, com as imagens geradas, o índice dos UCs e a rastreabilidade RF → UC (REQ-03); fichas Cockburn completas de UC-02, UC-04, UC-10 e UC-14, resumidas dos demais e o fluxo de decisão de UC-04 (REQ-04). | 0.1 • Rascunho (REQ-03, REQ-04) |
 | [`historias/`](historias/README.md) | **HIS-01**: histórias US-01 a US-19 (Index Card e INVEST), 156 critérios de aceite CA-xx em Dado/Quando/Então e os testes de aceite TA-01 a TA-156 ligados aos testes que existem, com a cobertura UC → US/CA e a rastreabilidade RF → US/CA. | 0.1 • Rascunho (REQ-05) |
-| [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice e a [pauta da Aula 7](decisoes/pauta-aula-7.md). | DEC-01 a DEC-13 |
-| [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança depois de uma baseline, e o [modelo de CR](mudancas/modelo-cr.md). | nenhum CR (modelo na REQ-06) |
+| [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice e a [pauta da Aula 7](decisoes/pauta-aula-7.md). | DEC-01 a DEC-23, todas decididas (Aula 7) |
+| [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança, e o [modelo de CR](mudancas/modelo-cr.md). | CR-01 a CR-04 aprovados, aguardando implementação (GES-02) |
 | [`baselines/`](baselines/README.md) | Manifestos de baseline (conjunto aprovado de versões). | [candidata à 1.0](baselines/conecta-campus-1.0-candidata.md), aguardando aprovação (REQ-06) |
 | [`rastreabilidade/`](rastreabilidade/README.md) | **RAS-01**: [matriz](rastreabilidade/matriz.md) NS → RF → UC → US → CA/TA → endpoint ou tela → código (e [`matriz.csv`](rastreabilidade/matriz.csv)), [cobertura](rastreabilidade/cobertura.md), [sentido inverso](rastreabilidade/sentido-inverso.md), [RNF](rastreabilidade/rnf.md) e [mapa de impacto por DEC](rastreabilidade/impacto-por-dec.md), gerados por `scripts/gerar_rastreabilidade.py`. | 0.1 • Rascunho (REQ-06) |
 
@@ -33,14 +34,14 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 
 - **a) Fonte única.** Esta pasta é a fonte oficial. Nenhum outro lugar mantém uma cópia editável dos requisitos; os demais apontam para cá.
 - **b) Decisões aqui.** As DECs saíram de `.claude/requisitos.md` (diretrizes locais da disciplina, fora do Git) e moram em [`decisoes/`](decisoes/README.md). As diretrizes de como documentar continuam naquele arquivo.
-- **c) Convenção de versão** (abaixo), a do slide A4·s15. O próprio slide avisa que ela não é regra universal, e a pergunta ao professor sobre a convenção segue aberta.
+- **c) Convenção de versão** (abaixo), a do slide A4·s15. O próprio slide avisa que ela não é regra universal; o professor a confirmou na Aula 7 ([DEC-17](decisoes/DEC-17.md)).
 - **d) Nada inventado.** O que o grupo não sabe (quem é o cliente real, o horário real de funcionamento, o formato da matrícula) aparece como premissa declarada na [Visão](visao.md#premissas) ou como DEC, nunca como afirmação.
 
 ## Decisões de organização (REQ-02)
 
 - **a) SRS e fichas por área.** [`requisitos/srs.md`](requisitos/srs.md) é o documento principal, com as seis seções do A3·s8, os índices e as tabelas de rastreabilidade. As fichas ficam agrupadas por área, uma ficha por requisito: `rf-espacos.md`, `rf-reservas.md`, `rf-agenda.md`, `rf-contas.md`, `rf-gerais.md` e `rnf.md` (o README da pasta permite um arquivo por requisito ou por grupo). Cada ficha tem uma âncora explícita (`<a id="rf-11-4">`) para os links não dependerem do título.
 - **b) Comportamento real.** A SRS descreve o que o sistema faz hoje, conferido nos testes e no código. O que uma NS pede e o sistema não faz entra na seção [Lacunas](requisitos/srs.md#lacunas) (e, se fosse um RF inteiro, com estado "Não implementado"). Nenhum código muda por causa da SRS: divergência vira lacuna, DEC ou CR.
-- **c) Vínculos e evidência.** UC, US e CA ficam "a definir (REQ-03, REQ-04, REQ-05)". O vínculo com a implementação (endpoint ou tela e `arquivo::teste`) fica numa coluna **Evidência (complementar)**, porque a cadeia do professor para em CA/TA e o ponto 13 dos pontos a confirmar segue aberto.
+- **c) Vínculos e evidência.** UC, US e CA ficam "a definir (REQ-03, REQ-04, REQ-05)". O vínculo com a implementação (endpoint ou tela e `arquivo::teste`) fica numa coluna **Evidência (complementar)**, porque a cadeia do professor para em CA/TA; o professor confirmou depois que o elo até o código conta ([DEC-16](decisoes/DEC-16.md)).
 - **d) Versão.** Todos os documentos da REQ-02 nascem em 0.1 • Rascunho. A Visão e o glossário ganham uma linha no histórico (vínculos NS → RF e termos novos), sem mudar de versão.
 - **Recusas (F5).** A recusa específica de uma operação é um filho `RF-xx.n`; a que vale para várias operações do mesmo item é um RF próprio, com as operações protegidas na ficha. As recusas usam a sintaxe "O sistema deve impedir que…" (justificativa na [SRS, seção 3](requisitos/srs.md#como-ler)).
 - **IDs de documento.** `SRS-01` identifica a SRS; `REST-xx` identifica as restrições (o "+" de FURPS+) em [`rnf.md`](requisitos/rnf.md#6-restrições); `L-xx`, as lacunas da SRS.
@@ -123,7 +124,7 @@ NS-xx → RF-xx → UC-xx (passo, alternativa ou exceção) → US-xx → CA-xx 
 ```
 
 - **A matriz completa, nos dois sentidos, está em [`rastreabilidade/`](rastreabilidade/README.md)** (REQ-06): a [matriz](rastreabilidade/matriz.md) com uma linha por RF, a [cobertura](rastreabilidade/cobertura.md) por elo, por NS e por funcionalidade, o [sentido inverso](rastreabilidade/sentido-inverso.md) (cada rota, tela e comando → RF → NS), os [RNF](rastreabilidade/rnf.md) com a forma de verificação e o [mapa de impacto por DEC](rastreabilidade/impacto-por-dec.md). Ela é **gerada** a partir dos vínculos das fontes abaixo por `python scripts/gerar_rastreabilidade.py`, e o `--verificar` falha se uma ficha mudar e a matriz ficar para trás. Exemplo de cadeia inteira (NS-04): [README da pasta](rastreabilidade/README.md#exemplo-de-cadeia-completa-ns-04-nunca-dois-usos-no-mesmo-período).
-- Os slides param em CA/TA. O elo até o endpoint, a tela e o código é uma extensão do grupo (colunas complementares da matriz, a partir dos campos Evidência e Código de cada ficha), e a pergunta se ele é esperado segue aberta.
+- Os slides param em CA/TA. O elo até o endpoint, a tela e o código é uma extensão do grupo (colunas complementares da matriz, a partir dos campos Evidência e Código de cada ficha), confirmada pelo professor ([DEC-16](decisoes/DEC-16.md)).
 - Hoje existem as NS ([Visão](visao.md#necessidades)), os RF e RNF derivados delas ([SRS, seção 6](requisitos/srs.md#6-rastreabilidade): NS → RF, RF → F1–F6, RF/RNF → DEC e RF → evidência), os casos de uso com a [rastreabilidade RF → UC](casos-de-uso/README.md#rastreabilidade-rf--uc) (REQ-03) e as fichas que ligam cada RF a um passo, alternativa ou exceção (REQ-04), e as evidências do lado do código: [catálogo de testes de espaços](../testes_de_espacos.md), [catálogo de testes de reservas](../testes_de_reservas.md) e [matriz de acesso](../matriz_de_acesso.md). Desde a REQ-05, as [histórias](historias/README.md) completam a cadeia até CA/TA: cada RF aponta para os CAs que o verificam, e cada TA, para os testes automatizados ou para um roteiro manual. Essas são as fontes que a matriz da REQ-06 lê.
 - `python scripts/verificar_requisitos.py` (na raiz) confere que toda NS tem RF, que todo RF tem NS, a sintaxe dos enunciados, os termos vagos e os links e âncoras desta pasta.
 - `python scripts/verificar_casos_de_uso.py` (na raiz) confere que os UCs dos diagramas e do índice são os mesmos, que todo RF tem UC (na tabela RF → UC, na SRS e na ficha), a notação dos diagramas, se as imagens estão atualizadas e, desde a REQ-04, as fichas de caso de uso (RF ligados a âncoras, passos citados, as quatro partes das exceções, termos de interface e o fluxo de decisão).
@@ -135,7 +136,7 @@ NS-xx → RF-xx → UC-xx (passo, alternativa ou exceção) → US-xx → CA-xx 
 
 A lista não é copiada aqui. Ela está em dois arquivos locais, fora do Git (por isso citados como caminho, sem link):
 
-- `CLAUDE.md`, seção "Pontos a Confirmar com o Professor": os pontos 1, 2, 3 e 6 já foram respondidos ([DEC-01](decisoes/DEC-01.md), [DEC-02](decisoes/DEC-02.md), [DEC-03](decisoes/DEC-03.md) e [DEC-04](decisoes/DEC-04.md)); os pontos 4 e 5 seguem abertos.
-- `.claude/requisitos.md`, seção "Pontos de Atenção / A Confirmar com o Professor": nenhum foi respondido por uma DEC. O ponto 10 (convenção de versão) e o ponto 13 (rastreabilidade até o código) foram **adotados provisoriamente** nesta pasta e seguem abertos.
+- `CLAUDE.md`, seção "Pontos a Confirmar com o Professor": os pontos 1, 2, 3 e 6 já foram respondidos ([DEC-01](decisoes/DEC-01.md), [DEC-02](decisoes/DEC-02.md), [DEC-03](decisoes/DEC-03.md) e [DEC-04](decisoes/DEC-04.md)); o ponto 5 foi respondido na Aula 7 ([DEC-15](decisoes/DEC-15.md)); o ponto 4 segue aberto (não foi perguntado).
+- `.claude/requisitos.md`, seção "Pontos de Atenção / A Confirmar com o Professor": os pontos 4, 5, 6, 10 e 13 foram respondidos na Aula 7 (06/11/2026) e viraram a [DEC-19](decisoes/DEC-19.md), a [DEC-14](decisoes/DEC-14.md), a [DEC-18](decisoes/DEC-18.md), a [DEC-17](decisoes/DEC-17.md) e a [DEC-16](decisoes/DEC-16.md); os demais não foram perguntados. O resultado de cada item está na [pauta da Aula 7](decisoes/pauta-aula-7.md#resultado).
 
 Quando um ponto for respondido, a resposta vira uma DEC em [`decisoes/`](decisoes/README.md).

@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Origem do CA-14 e do CA-15 acompanha a nova numeração de UC-04 (E7.1 = espaço, E7.2 = finalidade, na ordem do código); o CA-14 diz qual recusa aparece com o espaço também inválido (DOC-03). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -198,7 +199,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-04 E8.2](../casos-de-uso/UC-04-solicitar-reserva.md#e8-2)
 - **RF:** [RF-11.3](../requisitos/rf-reservas.md#rf-11-3)
 - **TA:** [TA-74](#ta-74)
-- **Depende de:** [DEC-06](../decisoes/DEC-06.md)
+- **Depende de:** [DEC-06](../decisoes/DEC-06.md) (decidida)
 
 #### <a id="us-08-ca-18"></a>US-08 · CA-18 · Conflito com uma reserva que ocupa o horário (exceção)
 

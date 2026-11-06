@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -59,7 +60,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-10 passos 1 a 8, variação UC-11](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-11)
 - **RF:** [RF-20](../requisitos/rf-reservas.md#rf-20)
 - **TA:** [TA-115](#ta-115)
-- **Depende de:** [DEC-06](../decisoes/DEC-06.md) (é assim que as reservas de um espaço desativado são desfeitas)
+- **Depende de:** [DEC-06](../decisoes/DEC-06.md) (decidida; é assim que as reservas de um espaço desativado são desfeitas)
 
 #### <a id="us-13-ca-03"></a>US-13 · CA-03 · Desistir de cancelar (alternativa)
 

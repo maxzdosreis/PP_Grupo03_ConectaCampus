@@ -14,6 +14,7 @@ Histórias de usuário (US-xx) no formato "Como [papel], quero [capacidade] para
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Link para a [matriz de rastreabilidade gerada](../rastreabilidade/matriz.md); a SRS 6.4 não repete mais US e CA (REQ-06). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Cobertura de UC-04 E7.1 e E7.2 trocada, acompanhando a nova numeração da ficha (espaço antes da finalidade, como no código; DOC-03). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | TA-149 e a nota da seleção de testes apontam para os READMEs do backend e do frontend, criados na divisão do README (DOC-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Pontos 5, 6 e 13 respondidos na Aula 7: decisões b e d e as Pendências apontam para as DEC-14, DEC-16 e DEC-18 (GES-02). O formato Dado/Quando/Então foi confirmado pela [DEC-15](../decisoes/DEC-15.md). Nenhuma história, CA ou TA muda. Sem aprovação. |
 
 ## Sumário
 
@@ -38,14 +39,14 @@ Histórias de usuário (US-xx) no formato "Como [papel], quero [capacidade] para
 - **Apoio (UCD-02):** só vira história o que entrega valor a um stakeholder com papel claro, a Equipe de TI ([Visão](../visao.md#2-usuários-atores-e-stakeholders)): criar o primeiro Gestor ([US-17](US-17-criar-o-primeiro-gestor.md), UC-20) e carregar os dados de exemplo para a demonstração ([US-18](US-18-carregar-os-dados-de-exemplo.md), UC-21). **UC-22 também virou história** ([US-19](US-19-verificar-se-o-sistema-esta-no-ar.md)): a regra era deixá-lo de fora "a menos que exista um RF/RNF que o justifique", e o [RF-40](../requisitos/rf-gerais.md#rf-40) existe, com origem na NS-16. O INVEST dela marca ✗ em Valiosa, porque o valor é só operacional.
 - **F5 e F6 sem história própria.** As 27 recusas (F5) são CAs de exceção das histórias que protegem, como já eram exceções dos casos de uso ([decisão a da REQ-03](../casos-de-uso/README.md#decisao-a)). O [RF-38](../requisitos/rf-gerais.md#rf-38) (ver o resultado de cada operação, F6) é transversal: aparece no Então de todos os CAs e é o único RF sem CA próprio.
 
-<a id="decisao-b"></a>**b) Numeração.** US-01 em diante, estável e nunca reutilizada. Os CAs são numerados **dentro** da história, como no exemplo do professor ("US-07 • CA-01…04"), com a referência completa "US-08 · CA-03" e a âncora `us-08-ca-03`. Os TAs são **globais** (TA-01 em diante, na ordem das histórias), como "TA-18…21" no mesmo exemplo. Essa leitura do exemplo é uma convenção do grupo: os slides não dizem se CA e TA recomeçam em cada história, e a pergunta sobre a rastreabilidade (ponto 13 dos pontos a confirmar) segue aberta.
+<a id="decisao-b"></a>**b) Numeração.** US-01 em diante, estável e nunca reutilizada. Os CAs são numerados **dentro** da história, como no exemplo do professor ("US-07 • CA-01…04"), com a referência completa "US-08 · CA-03" e a âncora `us-08-ca-03`. Os TAs são **globais** (TA-01 em diante, na ordem das histórias), como "TA-18…21" no mesmo exemplo. Essa leitura do exemplo é uma convenção do grupo: os slides não dizem se CA e TA recomeçam em cada história, e o professor confirmou a rastreabilidade até o código ([DEC-16](../decisoes/DEC-16.md)).
 
 <a id="decisao-c"></a>**c) Teste de aceite.** Um TA é a verificação executável de **um** CA (um TA por CA). Ele aponta para os testes automatizados que já existem — pytest como `arquivo::teste` a partir de `src/backend/`, Vitest como `arquivo`: `descrição` a partir de `src/frontend/src/` — ou, quando não há teste automatizado, para um roteiro manual curto (precondição, passos em termos de intenção, resultado esperado). CA sem teste automatizado é lacuna, registrada na SRS ([L-08](../requisitos/srs.md#l-08), [L-15](../requisitos/srs.md#l-15) e [L-16](../requisitos/srs.md#l-16)). Nenhum teste foi escrito nesta tarefa. Os detalhes técnicos (códigos de resposta, endereços, componentes) só aparecem no TA.
 
 <a id="decisao-d"></a>**d) Index Card.** Cada história traz: ID, título, história, Valor, Origem (o caso de uso e os passos, alternativas e exceções, com link), Prioridade, Estimativa em "Custo em Semanas", Conversa e "Pronta quando".
 
 - **Prioridade:** herdada dos RF da história, pela classificação QFD da [SRS, seção 7](../requisitos/srs.md#7-análise-qfd). Vale a mais alta, na ordem Normal > Esperado > Fascinante (leitura do grupo: o normal é o que foi pedido, o fascinante é o que sai primeiro se faltar prazo). Uma recusa comum pode puxar a prioridade para cima (ex.: US-06 é Normal por causa do RF-09); o card diz de onde ela vem.
-- **Estimativa:** aceita fração. Como o sistema já está implementado, é **retrospectiva**: o esforço que a fatia custou, tirado das tarefas do histórico do Git (ESP-xx, RES-xx, FE-xx, AUT-xx, INF-xx). O formato do "Index Card padrão" e a fração seguem em aberto (ponto 6 dos pontos a confirmar).
+- **Estimativa:** aceita fração. Como o sistema já está implementado, é **retrospectiva**: o esforço que a fatia custou, tirado das tarefas do histórico do Git (ESP-xx, RES-xx, FE-xx, AUT-xx, INF-xx). O professor confirmou os nove campos e a fração ([DEC-18](../decisoes/DEC-18.md)).
 - **Conversa** (o segundo C de Card → Conversation → Confirmation, A3·s22): as perguntas que a história levantou, cada uma com a resposta atual e a DEC ou lacuna que a guarda.
 - **Pronta quando** (o critério exato da A3·s28): todos os CAs da história com o TA passando (os automatizados na verificação do PR; os manuais executados e registrados no ensaio), a ficha e os vínculos (RF, UC e SRS 6.4) atualizados e a revisão por pares registrada no histórico (versão 0.2).
 
@@ -555,8 +556,8 @@ O script confere o Index Card e o INVEST de cada história, os CAs (Dado/Quando/
 
 ## Pendências
 
-Pontos a confirmar com o professor que afetam esta pasta (de `.claude/requisitos.md`, arquivo local fora do Git):
+Pontos a confirmar com o professor que afetavam esta pasta (de `.claude/requisitos.md`, arquivo local fora do Git), todos respondidos na Aula 7 (06/11/2026):
 
-- **Ponto 5, numeração A × E:** os CAs seguem os rótulos das fichas; se mudarem, a troca nas origens é editorial.
-- **Ponto 6, Index Card padrão:** campos e fração no "Custo em Semanas" adotados provisoriamente ([decisão d](#decisao-d)).
-- **Ponto 13, rastreabilidade até o código:** os TAs apontam para os testes ([decisão c](#decisao-c)); a numeração de CA por história e de TA global é leitura do grupo ([decisão b](#decisao-b)).
+- **Ponto 5, numeração A × E:** confirmada ([DEC-14](../decisoes/DEC-14.md)); os CAs seguem os rótulos das fichas.
+- **Ponto 6, Index Card padrão:** campos e fração no "Custo em Semanas" confirmados ([DEC-18](../decisoes/DEC-18.md); [decisão d](#decisao-d)).
+- **Ponto 13, rastreabilidade até o código:** confirmada ([DEC-16](../decisoes/DEC-16.md)); os TAs apontam para os testes ([decisão c](#decisao-c)); a numeração de CA por história e de TA global é leitura do grupo ([decisão b](#decisao-b)).

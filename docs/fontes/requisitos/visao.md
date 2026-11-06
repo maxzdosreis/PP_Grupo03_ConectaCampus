@@ -13,6 +13,7 @@ Modelo: Documento de Visão do RUP em quatro quadrantes (A3·s7), com o cabeçal
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: problema, stakeholders, necessidades NS-01 a NS-16, escopo, premissas, critérios de sucesso e riscos (REQ-01). Sem aprovação. |
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Coluna "RF derivados" na tabela de necessidades, com o vínculo NS → RF da [SRS-01](requisitos/srs.md#61-ns--rf) (REQ-02). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Âncoras estáveis `#ns-01` a `#ns-16` na tabela de necessidades, para a [matriz de rastreabilidade](rastreabilidade/README.md) apontar para cada NS (REQ-06). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): P-02, P-04, o item de regras por espaço do fora do escopo e a resposta dos riscos R-05 e R-08 a R-14 apontam para as DECs decididas e os CR-02 a CR-04. Nenhuma necessidade, premissa ou risco novo; a P-04 deixa de valer só com a ESP-07. Sem aprovação. |
 
 ## Sumário
 
@@ -128,7 +129,7 @@ Lista fechada. O que não está em "dentro do escopo" nem aqui só entra por um 
 | Lista de espera para um horário ocupado | — |
 | Limite de quantidade de pedidos por pessoa | — |
 | Bloqueio de períodos para manutenção ou eventos da instituição | Hoje, retirar um espaço de uso é desativá-lo por inteiro. |
-| Regras de uso diferentes por espaço, por dia da semana ou em feriados | [DEC-07](decisoes/DEC-07.md). |
+| Regras de uso diferentes por espaço, por dia da semana ou em feriados | [DEC-07](decisoes/DEC-07.md). O horário por espaço entra com o [CR-03](mudancas/CR-03-horario-por-espaco.md) (ESP-07); por dia da semana ou em feriados continua fora. |
 | Alterar data, horário ou espaço de um pedido já feito | Pede-se outro e cancela-se o anterior. |
 | Excluir reservas ou espaços | Reservas só mudam de situação; espaços são desativados ([DEC-06](decisoes/DEC-06.md)). |
 | Recuperar ou trocar senha; trocar o perfil pela tela | O perfil só é alterado pela administração (Equipe de TI). |
@@ -157,9 +158,9 @@ Premissa é o que o grupo assume como verdadeiro sem ter confirmado. Se uma prem
 | ID | Premissa | Se não valer |
 |---|---|---|
 | P-01 | Não há cliente real nomeado. O grupo representa a instituição, e o professor é a referência para as dúvidas de regra. | Necessidades e valores de regra precisam ser validados com o cliente real. |
-| P-02 | Solicitantes e gestores têm e-mail e matrícula e se identificam por e-mail e senha. | [DEC-09](decisoes/DEC-09.md) e o cadastro mudam. |
+| P-02 | Solicitantes e gestores têm e-mail e matrícula e se identificam por e-mail e senha. | [DEC-09](decisoes/DEC-09.md) e o cadastro mudam. A DEC-09, decidida em 06/11/2026, fixa a matrícula só com dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), AUT-12); a premissa continua valendo. |
 | P-03 | Todos os horários são de Brasília ([fuso horário](glossario.md#fuso-horario)). | Regras de agenda e conflito precisam de fuso por espaço. |
-| P-04 | As regras de agenda são as mesmas para todos os espaços e todos os dias. | [DEC-07](decisoes/DEC-07.md). |
+| P-04 | As regras de agenda são as mesmas para todos os espaços e todos os dias. | [DEC-07](decisoes/DEC-07.md). Deixa de valer quando o [CR-03](mudancas/CR-03-horario-por-espaco.md) for aplicado (ESP-07): a DEC-07, decidida em 06/11/2026, traz o horário de funcionamento por espaço; duração e antecedência continuam iguais para todos. |
 | P-05 | Um pedido é de um espaço, num único dia, num [intervalo](glossario.md#intervalo-de-horario) contínuo. | Recorrência e vários espaços por pedido exigem novos requisitos. |
 | P-06 | Os usuários Gestor são criados pela Equipe de TI, nunca pelo cadastro público. | [DEC-04](decisoes/DEC-04.md). |
 | P-07 | O acesso é por navegador, em português. | — |
@@ -188,16 +189,16 @@ Probabilidade e impacto em Baixa, Média ou Alta. Resposta: **mitigar** (reduzir
 | R-02 | O ambiente de correção não executa o sistema (sem Docker, ou Docker no Windows com finais de linha e arquivos montados diferentes). | Média | Alto | Mitigar: CS-03 num clone novo, `.gitattributes` com LF, pré-requisitos no README. |
 | R-03 | Extras atrasarem as seis funcionalidades mínimas. | Baixa | Alto | Evitar: as seis já estão integradas; contingência da [DEC-04](decisoes/DEC-04.md). |
 | R-04 | Documentos de requisitos e modelagem divergirem do código entregue. | Média | Alto | Mitigar: glossário com o nome no código; requisitos e código mudam no mesmo PR. |
-| R-05 | A rubrica de Requisitos, o formato de entrega e a ferramenta dos diagramas não estão definidos (pontos de atenção da disciplina). | Alta | Médio | Mitigar: perguntar ao professor na Aula 7 (06/11/2026). |
+| R-05 | A rubrica de Requisitos, o formato de entrega e a ferramenta dos diagramas não estão definidos (pontos de atenção da disciplina). | Alta | Médio | Mitigar: perguntar ao professor na Aula 7 (06/11/2026). Perguntado: numeração `A`/`E` ([DEC-14](decisoes/DEC-14.md)), Dado/Quando/Então ([DEC-15](decisoes/DEC-15.md)), rastreabilidade até o código ([DEC-16](decisoes/DEC-16.md)), versão ([DEC-17](decisoes/DEC-17.md)), Index Card ([DEC-18](decisoes/DEC-18.md)), diagramas ([DEC-19](decisoes/DEC-19.md)) e entrega separada dos documentos de Requisitos ([DEC-20](decisoes/DEC-20.md)); a rubrica não foi respondida, e os outros documentos pedidos serão detalhados depois. |
 | R-06 | Conhecimento concentrado em poucos integrantes; a apresentação exige domínio de todos. | Média | Alto | Mitigar: revisão por pares destes documentos e ensaio com todos. |
 | R-07 | Cliente fictício (P-01): necessidades e valores de regra sem validação externa. | Alta | Médio | Aceitar: premissa declarada e DECs com o professor como referência. |
-| R-08 | [DEC-05](decisoes/DEC-05.md): o professor esperar que tentativas recusadas também fiquem registradas (o modelo de aceite dele inclui "tentativa registrada"). | Média | Médio | Mitigar: confirmar; se mudar, CR sobre o histórico. |
-| R-09 | [DEC-06](decisoes/DEC-06.md): o cliente querer que desativar um espaço cancele ou bloqueie as reservas futuras dele. | Média | Médio | Mitigar: confirmar; a mudança cruza dois contextos do código. |
-| R-10 | [DEC-07](decisoes/DEC-07.md): o funcionamento real ter outros horários, ou horários por espaço ou por dia. | Média | Médio | Mitigar: valores são constantes únicas; horários por espaço ficam fora do escopo até um CR. |
-| R-11 | [DEC-08](decisoes/DEC-08.md): manter a cobertura-alvo consumir tempo das tarefas restantes. | Baixa | Baixo | Aceitar: meta interna do grupo, não exigida. |
-| R-12 | [DEC-09](decisoes/DEC-09.md): o formato real da matrícula ser mais restrito e invalidar dados de exemplo. | Média | Baixo | Mitigar: regra isolada numa função; ajustar exemplos junto. |
-| R-13 | [DEC-10](decisoes/DEC-10.md): existirem espaços reais com o mesmo nome (ex.: em unidades diferentes). | Baixa | Baixo | Aceitar: nomes distintos por convenção até a confirmação. |
-| R-14 | [DEC-11](decisoes/DEC-11.md): o cliente considerar que mostrar períodos ocupados por outras pessoas expõe o uso. | Baixa | Médio | Mitigar: confirmar; a agenda pode ser restrita sem afetar o pedido. |
+| R-08 | [DEC-05](decisoes/DEC-05.md): o professor esperar que tentativas recusadas também fiquem registradas (o modelo de aceite dele inclui "tentativa registrada"). | Média | Médio | Mitigar: confirmar; se mudar, CR sobre o histórico. Ocorreu: a DEC-05, decidida em 06/11/2026, pede o registro das tentativas recusadas ([CR-02](mudancas/CR-02-tentativas-recusadas-no-historico.md), RES-12). |
+| R-09 | [DEC-06](decisoes/DEC-06.md): o cliente querer que desativar um espaço cancele ou bloqueie as reservas futuras dele. | Média | Médio | Mitigar: confirmar; a mudança cruza dois contextos do código. Não ocorreu: a DEC-06 foi confirmada em 06/11/2026. |
+| R-10 | [DEC-07](decisoes/DEC-07.md): o funcionamento real ter outros horários, ou horários por espaço ou por dia. | Média | Médio | Mitigar: valores são constantes únicas; horários por espaço ficam fora do escopo até um CR. Ocorreu: a DEC-07, decidida em 06/11/2026, traz 07:00 às 00:00 e o horário por espaço ([CR-03](mudancas/CR-03-horario-por-espaco.md), ESP-07). |
+| R-11 | [DEC-08](decisoes/DEC-08.md): manter a cobertura-alvo consumir tempo das tarefas restantes. | Baixa | Baixo | Aceitar: meta interna do grupo, não exigida. A DEC-08 foi confirmada em 06/11/2026. |
+| R-12 | [DEC-09](decisoes/DEC-09.md): o formato real da matrícula ser mais restrito e invalidar dados de exemplo. | Média | Baixo | Mitigar: regra isolada numa função; ajustar exemplos junto. Ocorreu em parte: a DEC-09, decidida em 06/11/2026, exige só dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), AUT-12); os dados de exemplo já são só dígitos. |
+| R-13 | [DEC-10](decisoes/DEC-10.md): existirem espaços reais com o mesmo nome (ex.: em unidades diferentes). | Baixa | Baixo | Aceitar: nomes distintos por convenção até a confirmação. A DEC-10 foi confirmada em 06/11/2026. |
+| R-14 | [DEC-11](decisoes/DEC-11.md): o cliente considerar que mostrar períodos ocupados por outras pessoas expõe o uso. | Baixa | Médio | Mitigar: confirmar; a agenda pode ser restrita sem afetar o pedido. Não ocorreu: a DEC-11 foi confirmada em 06/11/2026. |
 
 ## 5. Checklist de revisão por pares
 
