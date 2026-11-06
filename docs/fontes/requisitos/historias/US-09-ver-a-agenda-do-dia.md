@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-06 passos 3 e 4](../casos-de-uso/fichas-resumidas.md#uc06-p3), [UC-04 A3.1](../casos-de-uso/UC-04-solicitar-reserva.md#a3-1)
 - **RF:** [RF-29](../requisitos/rf-agenda.md#rf-29), [RF-30](../requisitos/rf-agenda.md#rf-30)
 - **TA:** [TA-79](#ta-79)
-- **Depende de:** [DEC-11](../decisoes/DEC-11.md)
+- **Depende de:** [DEC-11](../decisoes/DEC-11.md) (decidida)
 
 #### <a id="us-09-ca-02"></a>US-09 · CA-02 · O livre mostrado é o que o pedido aceita (sucesso)
 
@@ -132,7 +133,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-06 passo 3](../casos-de-uso/fichas-resumidas.md#uc06-p3)
 - **RF:** [RF-29](../requisitos/rf-agenda.md#rf-29)
 - **TA:** [TA-88](#ta-88)
-- **Depende de:** [DEC-11](../decisoes/DEC-11.md)
+- **Depende de:** [DEC-11](../decisoes/DEC-11.md) (decidida)
 
 ## Testes de aceite
 

@@ -17,6 +17,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Evidência do RF-16 passa a citar as rotas e as telas onde as ações aparecem (correção editorial achada pela matriz). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Campo Decisões: a DEC-06 marcada como decidida (Aula 7, 06/11/2026; GES-02). As fichas ligadas às DEC-13 e DEC-05 ficam como estão até a RES-11 e a RES-12 aplicarem os CR-01 e CR-02. Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Pedido de reserva
 
@@ -86,7 +87,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Evidência (complementar)** | 404 `ESPACO_NAO_ENCONTRADO` ou 409 `ESPACO_INATIVO`. `reservas/tests/test_api_reservas.py::test_espaco_inexistente_responde_404`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`; `reservas/tests/test_criar_reserva.py::test_espaco_indisponivel_propaga_o_erro_sem_salvar [x]` |
 | **Código (complementar)** | `reservas/application/casos_de_uso.py::CriarReserva.executar`, `reservas/application/portas.py::ConsultaDeEspacos.obter_espaco_reservavel`, `espacos/publico.py::verificar_espaco_disponivel`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.garantir_que_esta_ativo` |
 | **Regras de negócio** | [Espaço reservável](../glossario.md#espaco-reservavel), [espaço inativo](../glossario.md#espaco-inativo) |
-| **Decisões** | [DEC-06](../decisoes/DEC-06.md) |
+| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -297,7 +298,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Evidência (complementar)** | `PATCH /api/reservas/{id}/situacao/` com `CANCELADA` e `motivo`. `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [cancelada]`, `::test_cancelar_libera_o_horario_para_nova_reserva`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` (gestor, `CANCELADA` com motivo) |
 | **Código (complementar)** | `reservas/application/casos_de_uso.py::AlterarSituacaoReserva.executar`, `reservas/domain/reserva.py::Reserva.alterar_situacao`, `reservas/domain/situacao.py::SITUACOES_QUE_EXIGEM_MOTIVO` |
 | **Regras de negócio** | [Cancelada](../glossario.md#cancelada), [motivo](../glossario.md#motivo) |
-| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (é assim que o Gestor desfaz as reservas de um espaço desativado), [DEC-13](../decisoes/DEC-13.md) |
+| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida; é assim que o Gestor desfaz as reservas de um espaço desativado), [DEC-13](../decisoes/DEC-13.md) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |

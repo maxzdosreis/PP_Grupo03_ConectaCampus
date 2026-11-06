@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -121,7 +122,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-14 E6.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e6-1)
 - **RF:** [RF-05.2](../requisitos/rf-espacos.md#rf-05-2)
 - **TA:** [TA-36](#ta-36)
-- **Depende de:** [DEC-10](../decisoes/DEC-10.md)
+- **Depende de:** [DEC-10](../decisoes/DEC-10.md) (decidida)
 
 #### <a id="us-05-ca-10"></a>US-05 · CA-10 · Nome repetido por um cadastro simultâneo (exceção)
 
@@ -131,7 +132,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-14 E7.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e7-1)
 - **RF:** [RF-05.2](../requisitos/rf-espacos.md#rf-05-2)
 - **TA:** [TA-37](#ta-37)
-- **Depende de:** [DEC-10](../decisoes/DEC-10.md)
+- **Depende de:** [DEC-10](../decisoes/DEC-10.md) (decidida)
 
 #### <a id="us-05-ca-11"></a>US-05 · CA-11 · Só o Gestor cadastra (acesso)
 

@@ -17,6 +17,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Campo Decisões: a DEC-06 e a DEC-10 marcadas como decididas (Aula 7, 06/11/2026; GES-02). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Consulta de espaços
 
@@ -156,7 +157,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Evidência (complementar)** | 409 `NOME_DE_ESPACO_JA_CADASTRADO` com `campos.nome`. `espacos/tests/test_casos_de_uso.py::test_cadastrar_nome_repetido_com_caixa_e_espacos_diferentes_lanca_conflito`; `espacos/tests/test_repositorio_espacos.py::test_salvar_nome_repetido_com_caixa_diferente_lanca_nome_ja_cadastrado`; `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [nome-repetido]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::CadastrarEspaco.executar`, `espacos/application/repositorio.py::RepositorioEspacos.existe_com_nome`, `espacos/infrastructure/models.py::EspacoEsportivoModel`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) (nome único) |
-| **Decisões** | [DEC-10](../decisoes/DEC-10.md) |
+| **Decisões** | [DEC-10](../decisoes/DEC-10.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -173,7 +174,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Evidência (complementar)** | `PATCH /api/espacos/{id}/`; diálogo "Editar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos`, `::test_editar_so_a_capacidade_mantem_os_outros_campos`, `::test_ativo_no_corpo_do_patch_e_ignorado`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_muda_so_os_campos_informados [x]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::EditarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo), [espaço desatualizado](../glossario.md#espaco-desatualizado) ([RNF-R04](rnf.md#rnf-r04)) |
-| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (espaço nunca é excluído) |
+| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida; espaço nunca é excluído) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -209,7 +210,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Evidência (complementar)** | 400 ou 409 com `campos`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`; `espacos/tests/test_casos_de_uso.py::test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar`, `::test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade [x]` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/application/casos_de_uso.py::EditarEspaco.executar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
-| **Decisões** | [DEC-10](../decisoes/DEC-10.md) |
+| **Decisões** | [DEC-10](../decisoes/DEC-10.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -226,7 +227,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Evidência (complementar)** | `POST /api/espacos/{id}/desativar/`; diálogo "Desativar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`, `::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`, `::test_reserva_existente_pode_ser_confirmada_depois_de_desativar` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::DesativarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.desativar` |
 | **Regras de negócio** | [Espaço inativo](../glossario.md#espaco-inativo), [espaço reservável](../glossario.md#espaco-reservavel) |
-| **Decisões** | [DEC-06](../decisoes/DEC-06.md) |
+| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -261,7 +262,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Evidência (complementar)** | `POST /api/espacos/{id}/ativar/`; diálogo "Reativar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_inativo_responde_200_com_o_espaco_ativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::AtivarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.ativar` |
 | **Regras de negócio** | [Espaço ativo](../glossario.md#espaco-ativo) |
-| **Decisões** | [DEC-06](../decisoes/DEC-06.md) |
+| **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |

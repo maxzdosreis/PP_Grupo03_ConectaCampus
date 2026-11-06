@@ -17,6 +17,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Evidência do RF-31 passa a citar a rota e a tela da agenda do dia (correção editorial achada pela matriz). Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Campo Decisões: a DEC-11 marcada como decidida (Aula 7, 06/11/2026; GES-02). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Regras de agenda
 
@@ -51,7 +52,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Evidência (complementar)** | `GET /api/reservas/ocupacao/?espaco=&data=`; seção "Agenda do dia" em `/reservas/nova`. `reservas/tests/test_api_ocupacao_do_dia.py::test_solicitante_ve_a_reserva_de_outra_pessoa_sem_nenhum_dado_pessoal`, `::test_um_horario_ocupado_usa_a_mensagem_no_singular`; `reservas/tests/test_consultar_ocupacao_do_dia.py::test_so_solicitadas_e_confirmadas_ocupam_e_o_resto_fica_livre`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia`; `components/reservas/AgendaDoDia.test.tsx` |
 | **Código (complementar)** | `reservas/application/casos_de_uso.py::ConsultarOcupacaoDoDia.executar`, `reservas/application/ocupacao_do_dia.py::OcupacaoDoDia` |
 | **Regras de negócio** | [Agenda do dia](../glossario.md#agenda-do-dia), [horário ocupado](../glossario.md#horario-ocupado), [reserva que ocupa horário](../glossario.md#reserva-que-ocupa-horario) |
-| **Decisões** | [DEC-11](../decisoes/DEC-11.md) |
+| **Decisões** | [DEC-11](../decisoes/DEC-11.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
