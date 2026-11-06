@@ -11,6 +11,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | TA-149 aponta para o README do backend, onde ficou o comando de criar superusuário com a divisão do README (DOC-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -76,4 +77,4 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 |---|---|---|---|
 | <a id="ta-147"></a>TA-147 | [CA-01](#us-17-ca-01) | automatizado | `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser`; `contas/tests/test_usuario_manager.py::test_superusuario_e_gestor_e_usuario_comum_nao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]` |
 | <a id="ta-148"></a>TA-148 | [CA-02](#us-17-ca-02) | automatizado | `config/tests/test_perfil_lido_do_banco.py::test_solicitante_promovido_ganha_as_permissoes_com_o_mesmo_token` |
-| <a id="ta-149"></a>TA-149 | [CA-03](#us-17-ca-03) | manual | **Precondição:** sistema no ar, com um usuário de e-mail conhecido. **Passos:** pela administração (o comando de criar superusuário do README), criar um administrador com o mesmo e-mail, em outra caixa. **Resultado esperado:** o e-mail é recusado como já usado, e nenhum usuário novo aparece na administração. Apoio automatizado (só a unicidade, sem a mensagem): `contas/tests/test_usuario_manager.py::test_email_repetido_com_caixa_diferente_viola_unicidade`. Lacuna [L-16](../requisitos/srs.md#l-16). |
+| <a id="ta-149"></a>TA-149 | [CA-03](#us-17-ca-03) | manual | **Precondição:** sistema no ar, com um usuário de e-mail conhecido. **Passos:** pela administração (o comando de criar superusuário do [README do backend](../../../../src/backend/README.md#criar-um-superusuário-acesso-ao-admin)), criar um administrador com o mesmo e-mail, em outra caixa. **Resultado esperado:** o e-mail é recusado como já usado, e nenhum usuário novo aparece na administração. Apoio automatizado (só a unicidade, sem a mensagem): `contas/tests/test_usuario_manager.py::test_email_repetido_com_caixa_diferente_viola_unicidade`. Lacuna [L-16](../requisitos/srs.md#l-16). |
