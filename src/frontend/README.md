@@ -1,6 +1,6 @@
 # Frontend — interface do Conecta Campus
 
-Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodando no serviço `frontend` do Docker Compose (Node 24) em http://localhost:5173. Testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento); lint com ESLint 10. Fala com a API pelo endereço de `VITE_API_URL` ([variáveis](../README.md#variáveis-de-ambiente-env)). Não tem regra de negócio: mostra o que a API devolve e envia o que a pessoa digitou.
+Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodando no serviço `frontend` do Docker Compose (Node 24) em http://localhost:5173. Testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento); lint com ESLint 10. Fala com a API pelo endereço de `VITE_API_URL`, que o Compose monta a partir de `BACKEND_PORT_HOST` ([variáveis derivadas](../README.md#derivadas-pelo-compose-a-partir-das-portas)). Não tem regra de negócio: mostra o que a API devolve e envia o que a pessoa digitou.
 
 ## Pastas de `src/`
 

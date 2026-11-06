@@ -71,9 +71,9 @@ Os comandos valem para Git Bash, Linux e macOS; onde o Windows muda, há a vers�
 
    | Porta ocupada | O que mudar (ex.) |
    |---|---|
-   | 5432 (banco) | `DB_PORT_HOST=5433` (`DB_PORT` continua `5432`) |
-   | 8000 (API) | `BACKEND_PORT_HOST=8001` **e** `VITE_API_URL=http://localhost:8001/api` |
-   | 5173 (tela) | `FRONTEND_PORT_HOST=5174` **e** `CORS_ALLOWED_ORIGINS=http://localhost:5174,http://127.0.0.1:5174`; a tela passa a ser http://localhost:5174 |
+   | 5432 (banco) | só `DB_PORT_HOST=5433` (`DB_PORT` continua `5432`) |
+   | 8000 (API) | só `BACKEND_PORT_HOST=8001`; a API passa a ser http://localhost:8001, e a tela já a procura lá |
+   | 5173 (tela) | só `FRONTEND_PORT_HOST=5174`; a tela passa a ser http://localhost:5174, e a API já a aceita |
 
    O que faz cada variável: [README de `src`](src/README.md#variáveis-de-ambiente-env).
 
@@ -192,13 +192,12 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 - **`required variable DB_PASSWORD is missing a value: defina DB_PASSWORD no .env`** (ou outra variável): falta o `src/.env` ou ele está incompleto. Refaça o passo 1, dentro da pasta do projeto, e rode o comando a partir de `src`. Depois de mudar o `.env`, rode `docker compose up -d` (um `restart` não relê o arquivo).
 - **`CommandError: Os dados de exemplo só podem ser carregados com DJANGO_DEBUG=True...`:** o `src/.env` tem `DJANGO_DEBUG=False`. Volte para `True`, rode `docker compose up -d` e repita o comando.
 - **"E-mail ou senha incorretos." com os usuários de exemplo:** os dados de exemplo não foram carregados neste banco (ou foram apagados com `down -v`). Rode o passo 3.
-- **A tela mostra "Não foi possível conectar ao servidor. Verifique se a API está em execução.":** a API ainda está subindo (espere a mensagem do passo 2), ou uma porta foi trocada só pela metade: `VITE_API_URL` precisa usar a porta de `BACKEND_PORT_HOST`, e `CORS_ALLOWED_ORIGINS`, a de `FRONTEND_PORT_HOST`. Corrija o `src/.env` e rode `docker compose up -d`.
+- **A tela mostra "Não foi possível conectar ao servidor. Verifique se a API está em execução.":** a API ainda está subindo (espere a mensagem do passo 2). Se você trocou uma porta no `src/.env`, rode `docker compose up -d` para ela valer e abra a tela na porta da `FRONTEND_PORT_HOST`. Um `src/.env` antigo, que ainda tenha `VITE_API_URL` ou `CORS_ALLOWED_ORIGINS`, pode continuar como está: o Compose ignora essas duas e as calcula a partir das portas.
 - **Finais de linha no Windows:** não é preciso converter nada. O grupo testou uma cópia com os arquivos em formato Windows (CRLF), inclusive o `.env`, o `docker-compose.yml` e os `Dockerfile`, e ela sobe igual.
 
 ## Limitações conhecidas
 
 - **Configuração de desenvolvimento, não de produção:** a API roda no servidor de desenvolvimento do Django e a tela no do Vite, com o modo de depuração ligado, e o `.env.example` traz uma senha de banco e uma chave de exemplo. Serve para avaliar e demonstrar localmente, não para publicar.
-- **Troca de porta em duas variáveis:** trocar a porta da API ou da tela exige ajustar também `VITE_API_URL` ou `CORS_ALLOWED_ORIGINS` (passo 1); o sistema não deduz uma da outra.
 - **Fuso horário fixo:** datas e horários são sempre os de Brasília (America/Sao_Paulo), independentemente do fuso do computador.
 - **Regras de agenda iguais para todos os espaços:** funcionamento das 07:00 às 22:00, duração de 30 minutos a 3 horas e até 30 dias de antecedência valem para todos; não há horário próprio por espaço.
 - **Situação e horário da reserva independentes:** o Gestor pode concluir uma reserva antes do horário terminar e confirmar ou recusar depois de ele começar, qualquer um pode cancelar depois do uso, e uma reserva Solicitada que ninguém decidiu continua ocupando o horário mesmo depois da data.

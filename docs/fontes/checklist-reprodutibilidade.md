@@ -12,6 +12,7 @@ Roteiro do critério de sucesso CS-03 da [Visão](requisitos/visao.md): **um int
 |---|---|---|---|
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Criação do roteiro e rodada 1, executada pelo assistente de IA num projeto Compose separado (DOC-05). A rodada do CS-03 por um integrante fica para a DOC-07. Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | P-1 e P-4 resolvidas (portas da API e da tela configuráveis; `127.0.0.1` no CORS do exemplo); passos 4 e 19 ajustados. A rodada 1 ficou como foi feita, antes da correção. Sem aprovação. |
+| 0.1 | 06/11/2026 | Max Zimmermann dos Reis | P-5 resolvida (INF-07): `VITE_API_URL` e `CORS_ALLOWED_ORIGINS` derivadas das portas no `docker-compose.yml`, fora do `.env`; passos 1, 4 e 19 ajustados; notas em P-1 e P-4. Sem aprovação. |
 
 ## Como executar a rodada
 
@@ -34,10 +35,10 @@ Roteiro do critério de sucesso CS-03 da [Visão](requisitos/visao.md): **um int
 
 | # | Passo do README | Resultado esperado | ok? | Observação |
 |---|---|---|---|---|
-| 1 | Pré-requisitos: Docker Desktop aberto | Ícone do Docker "running" | | |
+| 1 | Pré-requisitos: Docker Desktop aberto | Ícone do Docker "running" (se uma porta do passo 4 estiver ocupada, a tabela do passo 1 do README pede uma variável só) | | |
 | 2 | `docker compose version` | `Docker Compose version v…` | | |
 | 3 | `docker version` | Seções Client **e Server**, sem `failed to connect to the docker API` | | |
-| 4 | Portas 5173, 8000 e 5432 livres | Nada mais rodando nelas; se alguma estiver ocupada, a tabela do passo 1 do README diz o que trocar | | |
+| 4 | Portas 5173, 8000 e 5432 livres | Nada mais rodando nelas; se alguma estiver ocupada, a tabela do passo 1 do README diz qual variável trocar (uma só por porta: `DB_PORT_HOST`, `BACKEND_PORT_HOST` ou `FRONTEND_PORT_HOST`) | | |
 | 5 | Passo 0: extrair o ZIP ou clonar; abrir o terminal na pasta com `README.md`, `src/` e `docs/` | As três entradas aparecem na pasta | | |
 | 6 | Passo 1: `cp src/.env.example src/.env` (ou `copy src\.env.example src\.env`) | `src/.env` criado, sem editar nada | | |
 | 7 | Passo 2: `cd src` e `docker compose up --build` | Termina com `Starting development server at http://0.0.0.0:8000/` e `Local: http://localhost:5173/`; anote o tempo | | |
@@ -52,17 +53,18 @@ Roteiro do critério de sucesso CS-03 da [Visão](requisitos/visao.md): **um int
 | 16 | Parar: `docker compose down`; subir: `docker compose up` | Ao entrar de novo, os mesmos dados (5 reservas para a Carla, mais as criadas no roteiro) | | |
 | 17 | Rodar de novo o comando de dados de exemplo | "0 criados, 3 já existiam" (nada duplicado) | | |
 | 18 | Recomeçar do zero: `down -v`, `up -d`, comando de dados de exemplo (só no projeto de teste) | Dados recriados: 3 usuários, 6 espaços, 5 reservas | | |
-| 19 | Abrir http://127.0.0.1:5173 | A página inicial mostra "API no ar." e o login funciona, como por `localhost` | | |
+| 19 | Abrir http://127.0.0.1:5173 (ou a porta da `FRONTEND_PORT_HOST`, se foi trocada) | A página inicial mostra "API no ar." e o login funciona, como por `localhost`, sem editar outra variável | | |
 | 20 | Os links do README abrem (ZIP ou GitHub) | Nenhum link quebrado | | |
 
 ## Pendências que só se resolvem no código ou na infraestrutura
 
 | # | Pendência | Contorno no README | Proposta (tarefa separada) |
 |---|---|---|---|
-| P-1 | **Resolvida em 06/11/2026.** As portas 8000 e 5173 eram fixas no `docker-compose.yml`. | Tabela de portas no passo 1 do README. | Feito: `"${BACKEND_PORT_HOST:-8000}:8000"` e `"${FRONTEND_PORT_HOST:-5173}:5173"` no compose, as duas no `.env.example` com o aviso de que `VITE_API_URL` e `CORS_ALLOWED_ORIGINS` acompanham a troca. Prova: uma cópia com 8001, 5174 e 5433 subiu ao lado do ambiente do integrante (nas portas padrão), com login pela tela; sem as variáveis novas no `.env`, o `docker compose config` publica 8000, 5432 e 5173. |
+| P-1 | **Resolvida em 06/11/2026.** As portas 8000 e 5173 eram fixas no `docker-compose.yml`. | Tabela de portas no passo 1 do README. | Feito: `"${BACKEND_PORT_HOST:-8000}:8000"` e `"${FRONTEND_PORT_HOST:-5173}:5173"` no compose, as duas no `.env.example` com o aviso de que `VITE_API_URL` e `CORS_ALLOWED_ORIGINS` acompanham a troca (desde a INF-07 elas acompanham sozinhas: ver P-5). Prova: uma cópia com 8001, 5174 e 5433 subiu ao lado do ambiente do integrante (nas portas padrão), com login pela tela; sem as variáveis novas no `.env`, o `docker compose config` publica 8000, 5432 e 5173. |
 | P-2 | O nome fixo do projeto (`name: conecta-campus`) faz duas cópias no mesmo computador dividirem containers e volume: um `down -v` numa apaga os dados da outra, e a rodada de teste precisa do `-p`. | Persistência: rodar uma cópia de cada vez. | Avaliar tirar o `name:` (o Compose usaria o nome da pasta, e o volume mudaria para `src_postgres_data`) ou documentar o `-p` como o jeito de testar; mudar o nome muda o volume dos integrantes, então exige aviso e migração dos dados. |
 | P-3 | `docker compose version` funciona com o Docker Desktop fechado, então sozinho não prova que o Docker está pronto. | O README pede também `docker version` (parte Server). | Nenhuma mudança de código; registrar no roteiro da DOC-07. |
-| P-4 | **Resolvida em 06/11/2026.** A tela só falava com a API quando aberta por `localhost` (CORS). | — | Feito: `CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` no `.env.example`. Prova: a pré-verificação de CORS do login devolve `Access-Control-Allow-Origin` para as duas origens e nenhum para `http://localhost:9999`; pela tela, `127.0.0.1` mostra "API no ar." e o login do Bruno funciona. Quem já tem um `src/.env` precisa acrescentar a origem à mão. |
+| P-4 | **Resolvida em 06/11/2026.** A tela só falava com a API quando aberta por `localhost` (CORS). | — | Feito: `CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173` no `.env.example`. Prova: a pré-verificação de CORS do login devolve `Access-Control-Allow-Origin` para as duas origens e nenhum para `http://localhost:9999`; pela tela, `127.0.0.1` mostra "API no ar." e o login do Bruno funciona. Quem já tinha um `src/.env` precisava acrescentar a origem à mão; desde a INF-07 (P-5) não precisa mais, porque o Compose monta as duas origens. |
+| P-5 | **Resolvida em 06/11/2026 (INF-07).** Trocar a porta da API ou da tela exigia mudar também `VITE_API_URL` ou `CORS_ALLOWED_ORIGINS` no `.env`; um valor esquecido deixava a tela sem conexão. | — | Feito: o `docker-compose.yml` deriva as duas das portas (`VITE_API_URL: http://localhost:${BACKEND_PORT_HOST:-8000}/api` no `frontend`; `CORS_ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT_HOST:-5173},http://127.0.0.1:${FRONTEND_PORT_HOST:-5173}` no `environment:` do `backend`, que vence o `env_file`), e elas saíram do `.env.example`. Prova: `docker compose config` com o `.env.example`, com 8001/5174 e com 8001/5174 mais um `.env` antigo (`VITE_API_URL=http://localhost:8000/api`, `CORS_ALLOWED_ORIGINS=http://localhost:5173`) dá sempre os valores derivados; num projeto separado (`-p conecta-campus-portas`, 8001, 5174 e 5433, com esse `.env` antigo), health 200 em 8001, a pré-verificação de CORS do login devolve `Access-Control-Allow-Origin` para `http://localhost:5174` e `http://127.0.0.1:5174` e nenhum para `http://localhost:5173`, o container do backend tem `CORS_ALLOWED_ORIGINS=http://localhost:5174,http://127.0.0.1:5174` e o do frontend `VITE_API_URL=http://localhost:8001/api`; pela tela em http://localhost:5174, o login do Bruno mostra "Minhas reservas" com 3 reservas e o console diz `[vite] connected.` (o HMR não precisou de `hmr.clientPort`). Um `.env` antigo pode ficar como está. |
 
 ## Rodada 1 — 06/11/2026 (assistente de IA, durante a DOC-05)
 
