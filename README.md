@@ -2,6 +2,12 @@
 
 Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, solicitar reservas e acompanhar a situação de cada reserva.
 
+## Identificação
+
+- **Grupo 03** — Unilasalle RS, semestre 2026/2.
+- **Disciplinas:** Requisitos de Software e Projeto de Programação. **Professor:** Luis Antonio Leite Francisco da Costa.
+- **Integrantes:** [nome]; [nome]; [nome]. Quem fez cada parte está em [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf).
+
 ## O que o sistema faz
 
 1. **Espaços:** o Gestor cadastra, lista, edita, desativa e reativa quadras e espaços (espaço nunca é excluído).
@@ -17,59 +23,84 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 | Parte | Tecnologia e versão |
 |---|---|
-| Backend | Python 3.12, Django 5.2 LTS (5.2.18), Django REST Framework 3.18, Simple JWT 5.5 (login com token), django-cors-headers 4.9 |
-| Banco | PostgreSQL 16 (driver psycopg 3) |
-| Frontend | Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10; testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento) |
+| Backend | Python 3.12 (imagem `python:3.12-slim`), Django 5.2.18 LTS, Django REST Framework 3.18.3, Simple JWT 5.5.1 (login com token), django-cors-headers 4.9.0, psycopg 3.3.6 |
+| Banco | PostgreSQL 16 (imagem `postgres:16-alpine`) |
+| Frontend | Node 24 (imagem `node:24-alpine`), React 19.3.1, React Router 8.4.0, TypeScript 6.0.3, Vite 8.3.4; ESLint 10.13.0, Vitest 5.0.5, Testing Library 16.3.3 e jsdom 30.1.3 só no desenvolvimento |
 | Execução | Docker e Docker Compose |
 
-As versões exatas estão em `src/backend/requirements.txt`, `src/backend/requirements-dev.txt` e `src/frontend/package-lock.json`.
+As versões das bibliotecas são fixas em `src/backend/requirements.txt` e `src/frontend/package-lock.json`. As imagens fixam só a versão principal; o grupo testou com Python 3.12.16, PostgreSQL 16.15 e Node 24.22.0.
 
 ## Como executar
 
-### Pré-requisito
+### Pré-requisitos
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (inclui o Docker Compose).
+- **Docker Desktop** instalado e **aberto** (no Windows, com o WSL 2, a opção padrão da instalação). Ele já traz o Docker Compose. Nada mais precisa ser instalado: Python, Node e PostgreSQL rodam dentro dos containers.
+- **Conferir que o Docker está pronto**, em qualquer terminal:
+
+  ```bash
+  docker compose version
+  ```
+
+  ```bash
+  docker version
+  ```
+
+  O primeiro mostra a versão do Compose; o segundo precisa mostrar também a parte **Server**. Se ele terminar com `failed to connect to the docker API`, o Docker Desktop está fechado: abra-o e espere ficar "running".
+- **Portas livres no seu computador:** 5173 (tela), 8000 (API) e 5432 (banco). Se alguma estiver ocupada, troque-a no passo 1 (veja [Problemas comuns](#problemas-comuns)).
+- Testado pelo grupo com Docker Desktop 4.91.0 (Docker Engine 29.8.0, Docker Compose 5.5.1) no Windows 10 Pro com WSL 2.
 
 ### Passo a passo
 
-1. Na raiz do repositório, crie o arquivo de variáveis de ambiente a partir do exemplo (se `src/.env` já existir, mantenha o seu):
+Os comandos valem para Git Bash, Linux e macOS; onde o Windows muda, há a versão para o PowerShell e o Prompt de Comando.
+
+0. **Obtenha o projeto:** extraia o ZIP **ou** clone o repositório. Abra um terminal na pasta do projeto, a que tem `README.md`, `src/` e `docs/`.
+
+1. **Crie o arquivo de configuração** a partir do exemplo (só na primeira vez; se `src/.env` já existir, mantenha o seu):
 
    ```bash
    cp src/.env.example src/.env
    ```
 
-   No Prompt de Comando do Windows:
+   No PowerShell ou no Prompt de Comando do Windows:
 
    ```bat
    copy src\.env.example src\.env
    ```
 
-   Se já existir um PostgreSQL rodando na porta 5432 do seu computador, mude só `DB_PORT_HOST` (ex.: `5433`). `DB_PORT` é a porta usada pelo Django dentro da rede do Docker e deve continuar `5432`. O que faz cada variável: [README de `src`](src/README.md#variáveis-de-ambiente-env).
+   Os valores do exemplo já funcionam como estão. Só mude uma porta se ela estiver ocupada, no `src/.env`:
 
-2. Entre na pasta `src` e suba os três serviços (banco, backend e frontend):
+   | Porta ocupada | O que mudar (ex.) |
+   |---|---|
+   | 5432 (banco) | `DB_PORT_HOST=5433` (`DB_PORT` continua `5432`) |
+   | 8000 (API) | `BACKEND_PORT_HOST=8001` **e** `VITE_API_URL=http://localhost:8001/api` |
+   | 5173 (tela) | `FRONTEND_PORT_HOST=5174` **e** `CORS_ALLOWED_ORIGINS=http://localhost:5174,http://127.0.0.1:5174`; a tela passa a ser http://localhost:5174 |
+
+   O que faz cada variável: [README de `src`](src/README.md#variáveis-de-ambiente-env).
+
+2. **Entre em `src` e suba os três serviços** (banco, API e tela):
 
    ```bash
    cd src
    docker compose up --build
    ```
 
-   As migrations do banco são aplicadas automaticamente quando o backend sobe.
+   A primeira vez leva alguns minutos: o grupo mediu cerca de 4 minutos com as imagens base já baixadas (3 min de build e menos de 1 min até a API responder), mais o tempo de baixar as imagens. As tabelas do banco são criadas sozinhas. A API está pronta quando aparecer `Starting development server at http://0.0.0.0:8000/`; a tela (`Local: http://localhost:5173/`) costuma ficar pronta antes. Deixe este terminal aberto: ele mostra os registros dos serviços.
 
-3. Com os serviços no ar, em outro terminal dentro de `src`, carregue os dados de exemplo (usuários, espaços e reservas; veja [Dados de exemplo](#dados-de-exemplo)):
+3. **Carregue os dados de exemplo.** Em **outro terminal**, também dentro de `src`:
 
    ```bash
    docker compose exec backend python manage.py carregar_dados_exemplo
    ```
 
-4. Acesse:
-   - Aplicação (frontend): http://localhost:5173 — entre com um dos [usuários de exemplo](#dados-de-exemplo) em http://localhost:5173/entrar ou crie uma conta em http://localhost:5173/cadastro. O que cada tela faz e quem acessa: [README do frontend](src/frontend/README.md#rotas-e-telas).
-   - API: http://localhost:8000 — endpoints e exemplos com `curl` no [README do backend](src/backend/README.md).
-   - Saúde da API: http://localhost:8000/api/health/
-   - Admin do Django: http://localhost:8000/admin/ — com a gestora de exemplo ou um [superusuário](src/backend/README.md#criar-um-superusuário-acesso-ao-admin).
+   Ele termina mostrando os usuários e o horário de conflito com a data (veja [Dados de exemplo](#dados-de-exemplo)).
+
+4. **Entre no sistema:** abra http://localhost:5173/entrar e entre como Bruno (`bruno.lima@exemplo.com`, senha `Rede-Alta-73`). A tela "Minhas reservas" mostra três reservas.
+
+Outros endereços: a API em http://localhost:8000 (endpoints e exemplos com `curl` no [README do backend](src/backend/README.md)); o admin do Django em http://localhost:8000/admin/, com a gestora de exemplo ou um [superusuário](src/backend/README.md#criar-um-superusuário-acesso-ao-admin). O que cada tela faz: [README do frontend](src/frontend/README.md#rotas-e-telas).
 
 ### Verificar se a API está no ar
 
-`GET /api/health/` testa a conexão com o banco:
+Abra http://localhost:8000/api/health/, que testa a conexão com o banco:
 
 - **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}`
 - **503** — `{"erro": {"codigo": "BANCO_INDISPONIVEL", "mensagem": "Não foi possível conectar ao banco de dados."}}`
@@ -80,7 +111,7 @@ As versões exatas estão em `src/backend/requirements.txt`, `src/backend/requir
 docker compose exec backend python manage.py carregar_dados_exemplo
 ```
 
-O comando cria usuários, espaços e reservas passando pelas mesmas regras do sistema (casos de uso e entidades do domínio): se um dado de exemplo violasse uma regra, o comando falharia sem gravar nada. Pode ser executado mais de uma vez: o que já existe (usuário pelo e-mail, espaço pelo nome) não é criado de novo, e as reservas só são criadas se os solicitantes de exemplo ainda não tiverem nenhuma. Ele só roda com `DJANGO_DEBUG=True` (o valor do `.env.example`), porque cria usuários com senhas conhecidas. Como ele funciona por dentro: [README de exemplos](src/backend/exemplos/README.md).
+O comando cria usuários, espaços e reservas passando pelas mesmas regras do sistema: se um dado de exemplo violasse uma regra, o comando falharia sem gravar nada. Pode ser executado mais de uma vez: o que já existe (usuário pelo e-mail, espaço pelo nome) não é criado de novo, e as reservas só são criadas se os solicitantes de exemplo ainda não tiverem nenhuma (a saída diz "0 criados, 3 já existiam"). Ele só roda com `DJANGO_DEBUG=True` (o valor do `.env.example`), porque cria usuários com senhas conhecidas. Como ele funciona por dentro: [README de exemplos](src/backend/exemplos/README.md).
 
 **Usuários de exemplo.** As senhas são fictícias e servem **só para teste local**:
 
@@ -122,21 +153,17 @@ O mesmo roteiro com `curl`, no [README do backend](src/backend/README.md#roteiro
 
 ## Parar e recomeçar do zero
 
-Dentro de `src`:
+Dentro de `src`, para parar os serviços **mantendo os dados** (no terminal do passo 2, `Ctrl+C` também para):
 
 ```bash
 docker compose down
 ```
 
-Para parar **e apagar os dados do banco**:
-
-```bash
-docker compose down -v
-```
+Para subir de novo, `docker compose up` (sem `--build`, que só é preciso na primeira vez ou depois de mudar dependências).
 
 ### Recomeçar do zero
 
-Para apagar tudo (inclusive o que foi cadastrado à mão) e carregar os dados de novo, dentro de `src`. Faça isso também se o seu banco foi criado antes do histórico de situação (RES-07): as reservas antigas não têm histórico, porque a migration não reconstrói o passado.
+Para **apagar todos os dados** (inclusive o que foi cadastrado à mão) e carregar os de exemplo de novo, dentro de `src`:
 
 ```bash
 docker compose down -v
@@ -150,19 +177,41 @@ docker compose up -d
 docker compose exec backend python manage.py carregar_dados_exemplo
 ```
 
+O `-d` sobe os serviços em segundo plano; espere a [verificação da API](#verificar-se-a-api-está-no-ar) responder 200 antes do último comando.
+
 ## Persistência
 
-PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `postgres_data` e se mantêm entre execuções até um `docker compose down -v`.
+Os dados ficam no PostgreSQL 16, no serviço `db` (imagem `postgres:16-alpine`), guardados no volume Docker **`conecta-campus_postgres_data`** (o Compose acrescenta o nome do projeto, `conecta-campus`, ao volume `postgres_data`). Eles se mantêm quando os serviços param (`Ctrl+C`, `docker compose stop` ou `docker compose down`) e quando o computador reinicia. Só são apagados com `docker compose down -v` ou removendo o volume. Rodar o comando de dados de exemplo de novo não duplica nada.
+
+Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (outro clone ou outro ZIP extraído) usa **os mesmos containers e o mesmo banco**: rode uma cópia de cada vez, e lembre que um `docker compose down -v` em qualquer uma delas apaga os dados das duas.
+
+## Problemas comuns
+
+- **`failed to connect to the docker API` ao rodar qualquer comando:** o Docker Desktop está fechado ou ainda iniciando. Abra-o, espere ficar "running" e repita.
+- **`ports are not available: exposing port TCP 0.0.0.0:8000 ... bind: Normalmente é permitida apenas uma utilização de cada endereço de soquete`** (em inglês, `Only one usage of each socket address` ou `port is already allocated`): outro programa usa a porta citada. Feche-o ou troque a porta no `src/.env` como na tabela do passo 1, e rode `docker compose up -d` de novo.
+- **`required variable DB_PASSWORD is missing a value: defina DB_PASSWORD no .env`** (ou outra variável): falta o `src/.env` ou ele está incompleto. Refaça o passo 1, dentro da pasta do projeto, e rode o comando a partir de `src`. Depois de mudar o `.env`, rode `docker compose up -d` (um `restart` não relê o arquivo).
+- **`CommandError: Os dados de exemplo só podem ser carregados com DJANGO_DEBUG=True...`:** o `src/.env` tem `DJANGO_DEBUG=False`. Volte para `True`, rode `docker compose up -d` e repita o comando.
+- **"E-mail ou senha incorretos." com os usuários de exemplo:** os dados de exemplo não foram carregados neste banco (ou foram apagados com `down -v`). Rode o passo 3.
+- **A tela mostra "Não foi possível conectar ao servidor. Verifique se a API está em execução.":** a API ainda está subindo (espere a mensagem do passo 2), ou uma porta foi trocada só pela metade: `VITE_API_URL` precisa usar a porta de `BACKEND_PORT_HOST`, e `CORS_ALLOWED_ORIGINS`, a de `FRONTEND_PORT_HOST`. Corrija o `src/.env` e rode `docker compose up -d`.
+- **Finais de linha no Windows:** não é preciso converter nada. O grupo testou uma cópia com os arquivos em formato Windows (CRLF), inclusive o `.env`, o `docker-compose.yml` e os `Dockerfile`, e ela sobe igual.
 
 ## Limitações conhecidas
 
-- **Sem revogação de tokens:** não há lista de tokens revogados. Sair é descartar os tokens no cliente; um `access` roubado continua valendo até expirar (30 minutos) e um `refresh`, até 1 dia. A exceção é desativar ou excluir o usuário: a partir daí, nem o `access` nem o `refresh` dele são aceitos (401).
-- **Sem limite de tentativas de login:** `POST /api/auth/login/` não limita tentativas, então não há proteção contra força bruta de senhas. A evolução natural é o throttling do DRF (`ScopedRateThrottle` com um escopo próprio para o login, ou `AnonRateThrottle`), que responde 429 depois de N tentativas por minuto.
-- **Sessão no `localStorage`:** o frontend guarda os tokens e os dados do usuário no `localStorage` do navegador (chave `conecta-campus:sessao`), para o login sobreviver ao recarregar e a abas novas. Um script malicioso injetado na página (XSS) poderia ler esses tokens; cookies `HttpOnly` evitariam isso, mas exigiriam mudar a autenticação da API. Se o navegador recusar o `localStorage` (navegação privada), o login vale só até recarregar.
-- **Perfil na interface:** esconder o formulário de espaços e os botões de editar, desativar e reativar de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
-- **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, só a primeira é gravada; a segunda recebe 409 `RESERVA_DESATUALIZADA` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
-- **Alterações simultâneas no mesmo espaço:** se dois gestores editarem, desativarem ou reativarem o mesmo espaço ao mesmo tempo, só a primeira alteração é gravada; a segunda recebe 409 `ESPACO_DESATUALIZADO` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
-- **Histórico só das mudanças aceitas:** o histórico da reserva registra a criação e cada mudança de situação efetiva. Tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas em nenhum lugar, nem na linha do tempo do detalhe da reserva.
+- **Configuração de desenvolvimento, não de produção:** a API roda no servidor de desenvolvimento do Django e a tela no do Vite, com o modo de depuração ligado, e o `.env.example` traz uma senha de banco e uma chave de exemplo. Serve para avaliar e demonstrar localmente, não para publicar.
+- **Troca de porta em duas variáveis:** trocar a porta da API ou da tela exige ajustar também `VITE_API_URL` ou `CORS_ALLOWED_ORIGINS` (passo 1); o sistema não deduz uma da outra.
+- **Fuso horário fixo:** datas e horários são sempre os de Brasília (America/Sao_Paulo), independentemente do fuso do computador.
+- **Regras de agenda iguais para todos os espaços:** funcionamento das 07:00 às 22:00, duração de 30 minutos a 3 horas e até 30 dias de antecedência valem para todos; não há horário próprio por espaço.
+- **Situação e horário da reserva independentes:** o Gestor pode concluir uma reserva antes do horário terminar e confirmar ou recusar depois de ele começar, qualquer um pode cancelar depois do uso, e uma reserva Solicitada que ninguém decidiu continua ocupando o horário mesmo depois da data.
+- **Lista de reservas sem paginação:** a consulta devolve todas as reservas de uma vez. O grupo mediu 378 ms (p95) com 1.000 reservas e 1.743 ms com 5.000, então a lista fica lenta a partir de alguns milhares.
+- **Matrícula não conferida com a instituição:** qualquer texto de até 20 caracteres, sem espaços, é aceito no cadastro.
+- **Sem recuperação de senha nem troca de perfil pela tela:** quem esquecer a senha, ou precisar virar Gestor, depende da administração (admin do Django).
+- **Desativar um espaço não cancela as reservas dele:** novas reservas ficam bloqueadas, mas as existentes continuam valendo, e o Gestor decide se cancela alguma.
+- **Sem revogação de tokens:** sair é descartar os tokens no navegador; um token de acesso roubado continua valendo até expirar (30 minutos) e o de renovação, até 1 dia. A exceção é desativar ou excluir o usuário: a partir daí, nenhum token dele é aceito.
+- **Sem limite de tentativas de login:** não há proteção contra quem tenta adivinhar senhas repetindo o login.
+- **Sessão no `localStorage`:** a tela guarda os tokens no `localStorage` do navegador, para o login sobreviver ao recarregar. Um script malicioso injetado na página poderia lê-los. Na navegação privada que bloqueia o `localStorage`, o login vale só até recarregar.
+- **Perfil na interface:** esconder o formulário e os botões de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
+- **Alterações simultâneas:** se duas pessoas mudarem ao mesmo tempo a situação da mesma reserva, ou o mesmo espaço, só a primeira é gravada; a segunda recebe 409 e precisa atualizar a lista e decidir de novo.
+- **Histórico só das mudanças aceitas:** a linha do tempo registra a criação e cada mudança de situação efetiva; tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas.
 
 ## Mapa da documentação
 
@@ -176,5 +225,5 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 | Compartilhado | [`src/backend/compartilhado/README.md`](src/backend/compartilhado/README.md) | Erros de domínio, formato das respostas, tratador de erros e permissão de gestor. |
 | Exemplos | [`src/backend/exemplos/README.md`](src/backend/exemplos/README.md) | Como o comando de dados de exemplo funciona. |
 | Frontend | [`src/frontend/README.md`](src/frontend/README.md) | Pastas, rotas e telas, cliente da API e sessão, convenções e comandos. |
-| Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) (gerado na entrega) | Visão do sistema, modelo do domínio, fluxo principal e decisões técnicas. |
-| Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) (gerado na entrega) | Quem fez cada parte do trabalho. |
+| Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) | Visão do sistema, modelo do domínio, fluxo principal e decisões técnicas. |
+| Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) | Quem fez cada parte do trabalho. |
