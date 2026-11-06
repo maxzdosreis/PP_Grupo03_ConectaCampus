@@ -63,7 +63,7 @@ O cenário de cadastro de item é de `espacos` e está em `testes_de_espacos.md`
 
 ## 4. Mutação: resultado e mutantes equivalentes
 
-Escopo: `reservas/domain/` e `reservas/application/`, só com os testes sem banco (`-m "not django_db"`), rodando só reservas com `mutmut run "reservas.*"`. Comandos no README ("Qualidade do código").
+Escopo: `reservas/domain/` e `reservas/application/`, só com os testes sem banco (`-m "not django_db"`), rodando só reservas com `mutmut run "reservas.*"`. Comandos no [README do backend](../../src/backend/README.md#comandos).
 
 | Rodada | Mutantes | Mortos | Sobreviventes | Timeout | Tempo |
 |---|---|---|---|---|---|

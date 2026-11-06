@@ -2,12 +2,27 @@
 
 Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, solicitar reservas e acompanhar a situação de cada reserva.
 
+## O que o sistema faz
+
+1. **Espaços:** o Gestor cadastra, lista, edita, desativa e reativa quadras e espaços (espaço nunca é excluído).
+2. **Solicitar reserva:** quem está logado pede um espaço numa data e horário, com finalidade; a reserva nasce **Solicitada**.
+3. **Consultar:** reservas filtradas por espaço, situação, data, solicitante e "somente minhas", combináveis; detalhe com o histórico.
+4. **Alterar a situação:** Solicitada → Confirmada, Recusada ou Cancelada; Confirmada → Concluída ou Cancelada (recusar e cancelar pedem motivo).
+5. **Bloquear operações inválidas:** campos vazios, espaço inexistente ou inativo, horário que já passou, conflito de horário, fora do horário de funcionamento e transição proibida.
+6. **Mensagens claras** de sucesso e de erro, vindas da API e mostradas na tela.
+
+**Login e perfis (extra):** entrar com e-mail e senha (token JWT). O **Solicitante** pede reservas e cancela as próprias; o **Gestor** cuida dos espaços e confirma, recusa, conclui ou cancela qualquer reserva.
+
 ## Tecnologias
 
-- Python 3.12, Django 5.2 LTS, Django REST Framework 3.18, Simple JWT 5.5 (login com token)
-- PostgreSQL 16 (driver psycopg 3)
-- Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10; testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento)
-- Docker e Docker Compose
+| Parte | Tecnologia e versão |
+|---|---|
+| Backend | Python 3.12, Django 5.2 LTS (5.2.18), Django REST Framework 3.18, Simple JWT 5.5 (login com token), django-cors-headers 4.9 |
+| Banco | PostgreSQL 16 (driver psycopg 3) |
+| Frontend | Node 24, React 19.3, TypeScript 6.0, Vite 8.3, React Router 8.4, ESLint 10; testes com Vitest 5, Testing Library 16 e jsdom 30 (só desenvolvimento) |
+| Execução | Docker e Docker Compose |
+
+As versões exatas estão em `src/backend/requirements.txt`, `src/backend/requirements-dev.txt` e `src/frontend/package-lock.json`.
 
 ## Como executar
 
@@ -17,7 +32,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 
 ### Passo a passo
 
-1. Na raiz do repositório, crie o arquivo de variáveis de ambiente a partir do exemplo:
+1. Na raiz do repositório, crie o arquivo de variáveis de ambiente a partir do exemplo (se `src/.env` já existir, mantenha o seu):
 
    ```bash
    cp src/.env.example src/.env
@@ -29,7 +44,7 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    copy src\.env.example src\.env
    ```
 
-   Se já existir um PostgreSQL rodando na porta 5432 do seu computador, mude só `DB_PORT_HOST` (ex.: `5433`). `DB_PORT` é a porta usada pelo Django dentro da rede do Docker e deve continuar `5432`.
+   Se já existir um PostgreSQL rodando na porta 5432 do seu computador, mude só `DB_PORT_HOST` (ex.: `5433`). `DB_PORT` é a porta usada pelo Django dentro da rede do Docker e deve continuar `5432`. O que faz cada variável: [README de `src`](src/README.md#variáveis-de-ambiente-env).
 
 2. Entre na pasta `src` e suba os três serviços (banco, backend e frontend):
 
@@ -47,25 +62,25 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
    ```
 
 4. Acesse:
-   - Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.") e os atalhos "Entrar" e "Criar conta" (ou "Ir para minhas reservas", com login).
-   - Entrar: http://localhost:5173/entrar (ou "Entrar" no cabeçalho) — com o e-mail e a senha de um dos [usuários de exemplo](#dados-de-exemplo). Espaços e reservas exigem login: quem abre uma dessas telas sem login vai para a tela de entrar e volta para ela depois. O login continua valendo ao recarregar a página e em abas novas, e o token é renovado sozinho enquanto o refresh for válido (1 dia). O cabeçalho mostra quem está logado ("Nome · Perfil") e o botão "Sair".
-   - Criar conta: http://localhost:5173/cadastro (ou "Cadastre-se" no cabeçalho) — cadastrar um solicitante com nome, matrícula, e-mail e senha; a conta já entra sozinha e abre a tela de nova reserva.
-   - Tela de espaços: http://localhost:5173/espacos (ou o item "Espaços" do menu) — listar os espaços, com filtro por tipo e "Somente ativos"; o formulário de cadastro aparece só para o Gestor. Os filtros ficam no endereço da página, então recarregar mantém o filtro.
-   - Tela de nova reserva: http://localhost:5173/reservas/nova (ou o item "Nova reserva" do menu, ou o link "Reservar" de um espaço ativo na tela de espaços, que já traz o espaço selecionado) — mostra quem está solicitando (nome e matrícula), solicitar uma reserva e ver o resumo com a situação "Solicitada".
-   - Tela de consulta de reservas: http://localhost:5173/reservas (ou o item "Reservas" do menu, ou o link "Ver minhas reservas" do resumo de uma reserva solicitada) — listar as reservas com filtros por espaço, situação, data, solicitante (nome ou matrícula) e "Somente minhas reservas", que se combinam. O Gestor vê todas. O Solicitante vê só as próprias, e para ele a tela (e o item do menu) se chama "Minhas reservas", sem os filtros de solicitante e "Somente minhas reservas", que não mudariam nada. Os filtros ficam no endereço da página; por exemplo, dois critérios combinados: http://localhost:5173/reservas?espaco=1&situacao=SOLICITADA.
-   - Detalhe de uma reserva: clicar na data e horário de uma linha da lista (ou em "Ver reserva", no resumo de uma reserva recém-solicitada) abre http://localhost:5173/reservas/ID — os dados da reserva, os mesmos botões de ação da lista e a **linha do tempo do histórico**: a criação e cada mudança de situação, com data e hora, quem fez e o motivo. Depois de uma ação, a reserva e a linha do tempo são recarregadas. "Voltar para as reservas" devolve à lista com os mesmos filtros de antes. Uma reserva que não existe, ou de outra pessoa para um Solicitante, aparece como "Reserva não encontrada".
-   - Alterar a situação de uma reserva, na mesma tela: cada linha tem um botão para cada mudança permitida a partir da situação atual e ao perfil de quem está logado (para o Gestor, uma solicitada mostra "Confirmar", "Recusar" e "Cancelar" e uma confirmada, "Cancelar" e "Concluir"; o Solicitante só vê "Cancelar" nas próprias; as concluídas, recusadas e canceladas não têm ações). O botão abre um diálogo com o resumo da reserva; para recusar ou cancelar, ele pede o motivo, que o solicitante verá. Confirme no botão do diálogo (ex.: "Recusar reserva") ou feche com "Voltar" ou Esc sem alterar nada. Depois da mudança, a mensagem aparece no canto da tela e a lista é recarregada. Se outra pessoa já tiver mudado a reserva, o diálogo explica o motivo e oferece "Atualizar lista". As ações disponíveis vêm da API (`acoes_disponiveis` em cada reserva).
-   - API: http://localhost:8000
+   - Aplicação (frontend): http://localhost:5173 — entre com um dos [usuários de exemplo](#dados-de-exemplo) em http://localhost:5173/entrar ou crie uma conta em http://localhost:5173/cadastro. O que cada tela faz e quem acessa: [README do frontend](src/frontend/README.md#rotas-e-telas).
+   - API: http://localhost:8000 — endpoints e exemplos com `curl` no [README do backend](src/backend/README.md).
    - Saúde da API: http://localhost:8000/api/health/
-   - Admin do Django: http://localhost:8000/admin/
+   - Admin do Django: http://localhost:8000/admin/ — com a gestora de exemplo ou um [superusuário](src/backend/README.md#criar-um-superusuário-acesso-ao-admin).
 
-### Dados de exemplo
+### Verificar se a API está no ar
+
+`GET /api/health/` testa a conexão com o banco:
+
+- **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}`
+- **503** — `{"erro": {"codigo": "BANCO_INDISPONIVEL", "mensagem": "Não foi possível conectar ao banco de dados."}}`
+
+## Dados de exemplo
 
 ```bash
 docker compose exec backend python manage.py carregar_dados_exemplo
 ```
 
-O comando cria usuários, espaços e reservas passando pelas mesmas regras do sistema (casos de uso e entidades do domínio): se um dado de exemplo violasse uma regra, o comando falharia sem gravar nada. Pode ser executado mais de uma vez: o que já existe (usuário pelo e-mail, espaço pelo nome) não é criado de novo, e as reservas só são criadas se os solicitantes de exemplo ainda não tiverem nenhuma. Ele só roda com `DJANGO_DEBUG=True` (o valor do `.env.example`), porque cria usuários com senhas conhecidas.
+O comando cria usuários, espaços e reservas passando pelas mesmas regras do sistema (casos de uso e entidades do domínio): se um dado de exemplo violasse uma regra, o comando falharia sem gravar nada. Pode ser executado mais de uma vez: o que já existe (usuário pelo e-mail, espaço pelo nome) não é criado de novo, e as reservas só são criadas se os solicitantes de exemplo ainda não tiverem nenhuma. Ele só roda com `DJANGO_DEBUG=True` (o valor do `.env.example`), porque cria usuários com senhas conhecidas. Como ele funciona por dentro: [README de exemplos](src/backend/exemplos/README.md).
 
 **Usuários de exemplo.** As senhas são fictícias e servem **só para teste local**:
 
@@ -89,13 +104,13 @@ O comando cria usuários, espaços e reservas passando pelas mesmas regras do si
 
 **Horário para demonstrar o conflito:** Quadra Poliesportiva Central, **amanhã, 10:30–11:30** — sobrepõe a reserva Solicitada e responde **409** `CONFLITO_DE_HORARIO`. O próprio comando imprime esse horário com a data no fim da saída.
 
-#### Roteiro da demonstração
+## Roteiro da demonstração
 
 Pela tela, em http://localhost:5173, com os usuários de exemplo:
 
 1. **Entrar como solicitante.** Abrir http://localhost:5173/reservas sem login: a aplicação leva para a tela de entrar. Entrar como Bruno (`bruno.lima@exemplo.com`, `Rede-Alta-73`); depois do login, ela volta para as reservas. O cabeçalho mostra "Bruno Lima · Solicitante".
 2. **Consultar.** O menu mostra "Minhas reservas", e Bruno vê só as próprias reservas (Solicitada, Recusada e Concluída), sem os filtros de solicitante. Filtrar por espaço "Quadra Poliesportiva Central" e situação "Solicitada" (dois critérios combinados). Só a Solicitada tem ação, e só "Cancelar". Limpar os filtros e clicar na data da reserva Concluída (ontem, Quadra de Tênis 1): a linha do tempo mostra as três etapas — "Solicitada por Bruno Lima", "Confirmada por Carla Mendes" e "Concluída por Carla Mendes", cada uma com data e hora.
-3. **Agenda do dia e entrada inválida.** Em "Nova reserva", que mostra "Solicitante: Bruno Lima (2026101)", escolher a Quadra Poliesportiva Central e a data de **amanhã**: a [agenda do dia](#agenda-do-dia) mostra **10:00–11:00** em "Ocupados" (Solicitada) e as janelas livres 07:00–10:00 e 11:00–22:00, sem dizer de quem é a reserva. Mesmo assim, insistir em **10:30–11:30**, com qualquer finalidade: o aviso no topo do formulário explica o conflito de horário (**409** `CONFLITO_DE_HORARIO`), os valores continuam preenchidos e a agenda é recarregada. Outras entradas inválidas prontas: uma data de ontem, explicada embaixo do campo Data (a agenda avisa "Não é possível reservar um horário que já passou."); uma data daqui a 40 dias (a agenda mostra a data limite); um término antes do início; e **22:00–23:00**, fora do horário de funcionamento, com a mensagem "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período." embaixo do campo Término. Acima de Data, a dica mostra as [regras de agenda](#regras-de-agenda) que vêm da API.
+3. **Agenda do dia e entrada inválida.** Em "Nova reserva", que mostra "Solicitante: Bruno Lima (2026101)", escolher a Quadra Poliesportiva Central e a data de **amanhã**: a [agenda do dia](src/backend/reservas/README.md#agenda-do-dia) mostra **10:00–11:00** em "Ocupados" (Solicitada) e as janelas livres 07:00–10:00 e 11:00–22:00, sem dizer de quem é a reserva. Mesmo assim, insistir em **10:30–11:30**, com qualquer finalidade: o aviso no topo do formulário explica o conflito de horário (**409** `CONFLITO_DE_HORARIO`), os valores continuam preenchidos e a agenda é recarregada. Outras entradas inválidas prontas: uma data de ontem, explicada embaixo do campo Data (a agenda avisa "Não é possível reservar um horário que já passou."); uma data daqui a 40 dias (a agenda mostra a data limite); um término antes do início; e **22:00–23:00**, fora do horário de funcionamento, com a mensagem "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período." embaixo do campo Término. Acima de Data, a dica mostra as [regras de agenda](src/backend/reservas/README.md#regras-de-agenda) que vêm da API.
 4. **Solicitar.** Voltar a data para amanhã e, em "Livres", clicar em "Usar este horário" na janela **11:00–22:00**: Início vira 11:00 e Término 14:00 (a duração máxima de 3 h vem da API), e o foco vai para Término. Enviar: a mensagem de sucesso aparece e o resumo mostra a situação "Solicitada". "Ver minhas reservas" leva à lista com a nova reserva.
 5. **Cancelar.** Em "Minhas reservas", abrir a reserva Solicitada de amanhã às 10:00 (a dos dados de exemplo) e cancelá-la pelo detalhe: o diálogo pede o motivo, e sem motivo o erro aparece embaixo do campo. Com o motivo, a reserva passa a "Cancelada" e a linha do tempo ganha o item "Cancelada por Bruno Lima" com o motivo.
 6. **Sem permissão.** Em "Espaços", Bruno vê a lista e o aviso "Somente o gestor cadastra espaços.", sem o formulário. Sair (botão "Sair" no cabeçalho).
@@ -103,69 +118,23 @@ Pela tela, em http://localhost:5173, com os usuários de exemplo:
 8. **Confirmar e concluir.** Em "Reservas", Carla vê as reservas de todos. Filtrar por situação "Solicitada", abrir a reserva das 11:00 do Bruno pela data, confirmá-la e depois concluí-la no próprio detalhe: cada mudança mostra a mensagem da API ("Reserva confirmada com sucesso.", "Reserva concluída com sucesso."), a linha do tempo ganha um item para cada uma, e a reserva concluída fica sem ações. "Voltar para as reservas" volta à lista ainda filtrada por "Solicitada".
 9. **Desativar um espaço (operação inválida bloqueada).** Numa janela anônima ou em outro navegador (a sessão fica no navegador, então cada janela precisa da sua), entrar como Bruno, abrir "Nova reserva" e preencher o Campo de Futebol Principal, amanhã, 10:00–11:00. Na janela da Carla, em "Espaços", clicar em "Desativar" no Campo de Futebol Principal: o diálogo avisa que novas reservas ficarão bloqueadas e que as existentes continuam valendo. Confirmar. De volta à janela do Bruno, enviar o pedido: o aviso no topo do formulário mostra **409** "Este espaço está inativo e não aceita reservas.". Ao recarregar a página, o espaço nem aparece mais entre as opções. Em "Reservas", a Carla ainda vê a reserva Confirmada da Daniela nesse espaço, com "Concluir" e "Cancelar". Por fim, "Reativar" o espaço em "Espaços": o pedido do Bruno volta a ser aceito.
 
-O mesmo roteiro com `curl`, na seção a seguir, mostra também o **403** de um solicitante tentando confirmar, que a tela não oferece.
+O mesmo roteiro com `curl`, no [README do backend](src/backend/README.md#roteiro-alternativo-com-curl), mostra também o **403** de um solicitante tentando confirmar, que a tela não oferece.
 
-#### Roteiro alternativo com `curl`
+## Parar e recomeçar do zero
 
-Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/espacos/` (num banco recém-criado, a Quadra Poliesportiva Central é o espaço `1`). Os comandos de Windows seguem o padrão dos [exemplos de uso da API](#exemplos-de-uso-da-api).
+Dentro de `src`:
 
-1. Entrar como o solicitante Bruno e guardar o `access` em `ACCESS`, como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token):
+```bash
+docker compose down
+```
 
-   ```bash
-   curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d '{"email": "bruno.lima@exemplo.com", "senha": "Rede-Alta-73"}'
-   ```
+Para parar **e apagar os dados do banco**:
 
-2. Consultar as reservas e filtrar por dois critérios. Como Solicitante, o Bruno só vê as próprias (Solicitada, Recusada e Concluída), e `acoes_disponiveis` só traz "Cancelar" na Solicitada:
+```bash
+docker compose down -v
+```
 
-   ```bash
-   curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
-   ```
-
-3. Entrada inválida: pedir o horário de conflito → **409** `CONFLITO_DE_HORARIO`:
-
-   ```bash
-   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "10:30", "hora_fim": "11:30", "finalidade": "Treino de futsal"}'
-   ```
-
-   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`; 22:00–23:00 → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_fim`; 10:00–14:00 → **400** `DURACAO_INVALIDA`; uma data daqui a 40 dias → **400** `ANTECEDENCIA_EXCEDIDA` (ver [Regras de agenda](#regras-de-agenda)).
-
-4. Solicitar um horário livre (amanhã, 16:00–17:00) → **201**, situação `SOLICITADA`; anote o `id` da resposta:
-
-   ```bash
-   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "16:00", "hora_fim": "17:00", "finalidade": "Treino de futsal"}'
-   ```
-
-5. Ação sem permissão: ainda como Bruno, tentar confirmar a reserva do passo 4 (troque `ID`) → **403** `ACAO_NAO_PERMITIDA`, `"Somente o gestor pode confirmar reservas."`, e a reserva continua Solicitada:
-
-   ```bash
-   curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
-   ```
-
-6. Entrar como a gestora Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), guardar o novo `access` em `ACCESS` e repetir o mesmo comando → **200** `"Reserva confirmada com sucesso."`. A gestora vê as reservas de todos.
-
-7. Concluir a mesma reserva → **200** `"Reserva concluída com sucesso."`, com `acoes_disponiveis` vazia:
-
-   ```bash
-   curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONCLUIDA"}'
-   ```
-
-   Tentar voltá-la para `SOLICITADA` responde **409** `TRANSICAO_DE_SITUACAO_INVALIDA`.
-
-8. Ainda como Carla, desativar o Campo de Futebol Principal (espaço `2` num banco recém-criado) → **200**; repetir o comando responde **409** `ESPACO_JA_INATIVO`:
-
-   ```bash
-   curl -X POST http://localhost:8000/api/espacos/2/desativar/ -H "Authorization: Bearer $ACCESS"
-   ```
-
-9. Entrar de novo como Bruno e pedir esse espaço → **409** `ESPACO_INATIVO`, "Este espaço está inativo e não aceita reservas.". A reserva Confirmada da Daniela nesse espaço continua valendo:
-
-   ```bash
-   curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 2, "data": "AAAA-MM-DD", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de futebol"}'
-   ```
-
-10. Como Carla, reativar o espaço (`POST /api/espacos/2/ativar/`) → **200** `"Espaço reativado."`; o pedido do passo 9 passa a ser aceito (**201**).
-
-#### Recomeçar do zero
+### Recomeçar do zero
 
 Para apagar tudo (inclusive o que foi cadastrado à mão) e carregar os dados de novo, dentro de `src`. Faça isso também se o seu banco foi criado antes do histórico de situação (RES-07): as reservas antigas não têm histórico, porque a migration não reconstrói o passado.
 
@@ -181,576 +150,6 @@ docker compose up -d
 docker compose exec backend python manage.py carregar_dados_exemplo
 ```
 
-### Verificar se a API está no ar
-
-`GET /api/health/` testa a conexão com o banco:
-
-- **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}`
-- **503** — `{"erro": {"codigo": "BANCO_INDISPONIVEL", "mensagem": "Não foi possível conectar ao banco de dados."}}`
-
-### Exemplos de uso da API
-
-Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/`, `GET /api/reservas/situacoes/` e `GET /api/reservas/regras-de-agenda/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Para os exemplos de espaços, entre como a gestora de exemplo Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), porque só o Gestor cadastra espaços, e guarde o `access` em `ACCESS` como em [Entrar (login) e usar o token](#entrar-login-e-usar-o-token). Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro.
-
-Tipos aceitos em `tipo`: `QUADRA_POLIESPORTIVA`, `CAMPO_DE_FUTEBOL`, `GINASIO`, `QUADRA_DE_AREIA`, `QUADRA_DE_TENIS`. A mesma lista, com os rótulos, sai de `GET /api/espacos/tipos/` (é dela que o frontend monta os seletores):
-
-```bash
-curl http://localhost:8000/api/espacos/tipos/
-```
-
-```json
-{"mensagem": "Tipos de espaço disponíveis.", "dados": [{"valor": "QUADRA_POLIESPORTIVA", "rotulo": "Quadra poliesportiva"}, {"valor": "CAMPO_DE_FUTEBOL", "rotulo": "Campo de futebol"}, {"valor": "GINASIO", "rotulo": "Ginásio"}, {"valor": "QUADRA_DE_AREIA", "rotulo": "Quadra de areia"}, {"valor": "QUADRA_DE_TENIS", "rotulo": "Quadra de tênis"}]}
-```
-
-Cadastrar um espaço (`POST /api/espacos/`, só Gestor):
-
-```bash
-curl -X POST http://localhost:8000/api/espacos/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "capacidade": 20}'
-```
-
-No Prompt de Comando do Windows, as aspas internas são escapadas:
-
-```bat
-curl -X POST http://localhost:8000/api/espacos/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"nome\": \"Quadra Central\", \"tipo\": \"QUADRA_POLIESPORTIVA\", \"capacidade\": 20}"
-```
-
-Resposta **201**:
-
-```json
-{"mensagem": "Espaço cadastrado com sucesso.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 20, "ativo": true}}
-```
-
-Repetir o mesmo cadastro responde **409**:
-
-```json
-{"erro": {"codigo": "NOME_DE_ESPACO_JA_CADASTRADO", "mensagem": "Já existe um espaço com este nome.", "campos": {"nome": ["Já existe um espaço com este nome."]}}}
-```
-
-Outros erros de cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; tipo fora da lista → **400** `TIPO_DE_ESPACO_INVALIDO`; nome vazio → **400** `CAMPO_OBRIGATORIO_AUSENTE`; token de um Solicitante → **403**:
-
-```json
-{"erro": {"codigo": "ACAO_NAO_PERMITIDA", "mensagem": "Você não tem permissão para realizar esta ação."}}
-```
-
-> No Windows, nomes com acento passados direto no `-d` podem chegar fora de UTF-8 e a API responde `JSON_INVALIDO`. Nesse caso, salve o corpo num arquivo UTF-8 e envie com `--data-binary @espaco.json`.
-
-Listar os espaços (`GET /api/espacos/`, qualquer usuário logado), ordenados por nome. Filtros opcionais: `apenas_ativos=true` e `tipo=<TIPO>`, combináveis:
-
-```bash
-curl "http://localhost:8000/api/espacos/?tipo=QUADRA_POLIESPORTIVA&apenas_ativos=true" -H "Authorization: Bearer $ACCESS"
-```
-
-```json
-{"mensagem": "1 espaço encontrado.", "dados": [{"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 20, "ativo": true}]}
-```
-
-Obter um espaço (`GET /api/espacos/{id}/`):
-
-```bash
-curl http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer $ACCESS"
-```
-
-Um id inexistente responde **404**:
-
-```json
-{"erro": {"codigo": "ESPACO_NAO_ENCONTRADO", "mensagem": "Espaço de código 9999 não encontrado."}}
-```
-
-Editar um espaço (`PATCH /api/espacos/{id}/`, só Gestor). Aceita qualquer combinação de `nome`, `tipo` e `capacidade`, mas pelo menos um; `ativo` no corpo é ignorado, porque ativar e desativar têm rotas próprias:
-
-```bash
-curl -X PATCH http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"capacidade": 25}'
-```
-
-```bat
-curl -X PATCH http://localhost:8000/api/espacos/1/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"capacidade\": 25}"
-```
-
-```json
-{"mensagem": "Espaço atualizado com sucesso.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": true}}
-```
-
-Corpo vazio (`{}`) → **400** `NENHUMA_ALTERACAO_INFORMADA` ("Informe ao menos um campo para alterar."). Os outros erros são os do cadastro: capacidade `0` → **400** `CAPACIDADE_INVALIDA`; nome de outro espaço → **409** `NOME_DE_ESPACO_JA_CADASTRADO`, sempre com o campo em `campos`. Espaço alterado por outra pessoa depois que você o leu → **409** `ESPACO_DESATUALIZADO` (nada é gravado; atualize a lista e tente de novo).
-
-Desativar e reativar (`POST /api/espacos/{id}/desativar/` e `POST /api/espacos/{id}/ativar/`, só Gestor, sem corpo). Espaço nunca é excluído: desativar só bloqueia **novas** reservas, e as já existentes continuam valendo (o gestor cancela alguma pela tela de reservas, se precisar):
-
-```bash
-curl -X POST http://localhost:8000/api/espacos/1/desativar/ -H "Authorization: Bearer $ACCESS"
-```
-
-```bat
-curl -X POST http://localhost:8000/api/espacos/1/desativar/ -H "Authorization: Bearer %ACCESS%"
-```
-
-```json
-{"mensagem": "Espaço desativado. Novas reservas ficam bloqueadas; as existentes continuam valendo.", "dados": {"id": 1, "nome": "Quadra Central", "tipo": "QUADRA_POLIESPORTIVA", "tipo_rotulo": "Quadra poliesportiva", "capacidade": 25, "ativo": false}}
-```
-
-Desativar de novo responde **409** `ESPACO_JA_INATIVO` (ou `ESPACO_DESATUALIZADO`, se outra pessoa o alterou ao mesmo tempo), e pedir uma reserva nesse espaço responde **409** `ESPACO_INATIVO`. Para reativar:
-
-```bash
-curl -X POST http://localhost:8000/api/espacos/1/ativar/ -H "Authorization: Bearer $ACCESS"
-```
-
-A resposta é **200** `"Espaço reativado."`; ativar um espaço já ativo responde **409** `ESPACO_JA_ATIVO`. Com o token de um Solicitante, editar, desativar e ativar respondem **403** `ACAO_NAO_PERMITIDA`, e nada muda.
-
-#### Entrar (login) e usar o token
-
-As reservas exigem login com token JWT. O login devolve dois tokens: o `access`, enviado em cada pedido no cabeçalho `Authorization: Bearer <access>` e válido por 30 minutos, e o `refresh`, que gera um `access` novo e vale 1 dia (os dois prazos mudam em `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` no `.env`).
-
-Primeiro cadastre um usuário (`POST /api/auth/cadastro/`, público). O cadastro cria sempre um **Solicitante**: `perfil`, `is_staff` ou `is_superuser` enviados no corpo são ignorados. Um Gestor só nasce pelo `createsuperuser` (veja a seção abaixo) ou pelo admin. A senha precisa ter pelo menos 8 caracteres, não pode ser comum, só números nem parecida com o e-mail, o nome ou a matrícula. A matrícula tem até 20 caracteres, sem espaços.
-
-```bash
-curl -X POST http://localhost:8000/api/auth/cadastro/ -H "Content-Type: application/json" -d '{"nome": "Ana Souza", "matricula": "2026001", "email": "ana@exemplo.com", "senha": "senha-de-teste-123"}'
-```
-
-No Prompt de Comando do Windows:
-
-```bat
-curl -X POST http://localhost:8000/api/auth/cadastro/ -H "Content-Type: application/json" -d "{\"nome\": \"Ana Souza\", \"matricula\": \"2026001\", \"email\": \"ana@exemplo.com\", \"senha\": \"senha-de-teste-123\"}"
-```
-
-Resposta **201** (o cadastro não faz login nem devolve tokens):
-
-```json
-{"mensagem": "Cadastro realizado com sucesso. Faça login para continuar.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}
-```
-
-Cadastrar de novo o mesmo e-mail (mesmo em outra caixa, como `ANA@exemplo.com`) responde **409**:
-
-```json
-{"erro": {"codigo": "EMAIL_JA_CADASTRADO", "mensagem": "Já existe um usuário com este e-mail.", "campos": {"email": ["Já existe um usuário com este e-mail."]}}}
-```
-
-Outros erros de cadastro: matrícula repetida → **409** `MATRICULA_JA_CADASTRADA`; senha `12345678` → **400** `SENHA_FRACA` ("Esta senha é muito comum. Esta senha é inteiramente numérica."); matrícula com espaço ou com mais de 20 caracteres → **400** `MATRICULA_INVALIDA`; e-mail malformado → **400** `DADOS_INVALIDOS`; nome em branco → **400** `CAMPO_OBRIGATORIO_AUSENTE`.
-
-Entrar (`POST /api/auth/login/`) com `email` e `senha`:
-
-```bash
-curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d '{"email": "ana@exemplo.com", "senha": "senha-de-teste-123"}'
-```
-
-No Prompt de Comando do Windows:
-
-```bat
-curl -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d "{\"email\": \"ana@exemplo.com\", \"senha\": \"senha-de-teste-123\"}"
-```
-
-Resposta **200** (tokens encurtados aqui):
-
-```json
-{"mensagem": "Login realizado com sucesso.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi...", "usuario": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}}
-```
-
-E-mail ou senha errados (ou usuário desativado) respondem sempre igual, **401**:
-
-```json
-{"erro": {"codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha incorretos."}}
-```
-
-Copie o valor de `access` para uma variável e use-o nos exemplos seguintes:
-
-```bash
-ACCESS="cole-aqui-o-access"
-```
-
-No Prompt de Comando do Windows (sem aspas):
-
-```bat
-set ACCESS=cole-aqui-o-access
-```
-
-Ver o usuário logado (`GET /api/auth/me/`):
-
-```bash
-curl http://localhost:8000/api/auth/me/ -H "Authorization: Bearer $ACCESS"
-```
-
-```json
-{"mensagem": "Usuário autenticado.", "dados": {"id": 1, "nome": "Ana Souza", "email": "ana@exemplo.com", "matricula": "2026001", "perfil": "SOLICITANTE", "perfil_rotulo": "Solicitante", "eh_gestor": false}}
-```
-
-Quando o `access` expira, os pedidos respondem **401** `NAO_AUTENTICADO`. Gere outro com o `refresh` (`POST /api/auth/refresh/`):
-
-```bash
-curl -X POST http://localhost:8000/api/auth/refresh/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
-```
-
-```json
-{"mensagem": "Token renovado.", "dados": {"access": "eyJhbGciOi..."}}
-```
-
-Um `refresh` inválido ou expirado responde **401** `NAO_AUTENTICADO`; aí é preciso entrar de novo. Para sair, basta descartar os dois tokens.
-
-#### Solicitar uma reserva
-
-Solicitar uma reserva exige o token do login. O solicitante é sempre o usuário logado; um `solicitante` enviado no corpo é ignorado.
-
-Solicitar a reserva (`POST /api/reservas/`), com data no formato `AAAA-MM-DD` e horas em `HH:MM`, usando o id de um espaço cadastrado:
-
-```bash
-curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei"}'
-```
-
-No Prompt de Comando do Windows:
-
-```bat
-curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"espaco_id\": 1, \"data\": \"2026-11-10\", \"hora_inicio\": \"10:00\", \"hora_fim\": \"11:00\", \"finalidade\": \"Treino de volei\"}"
-```
-
-Resposta **201**, com a reserva na situação inicial `SOLICITADA` (a resposta traz `espaco_id`; o nome do espaço vem da listagem de espaços):
-
-```json
-{"mensagem": "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}}
-```
-
-`acoes_disponiveis` depende de quem pergunta: a Ana é Solicitante e, na própria reserva Solicitada, só pode cancelar. A mesma reserva vista por um Gestor traz Confirmar, Recusar e Cancelar.
-
-Repetir o pedido no mesmo horário responde **409**:
-
-```json
-{"erro": {"codigo": "CONFLITO_DE_HORARIO", "mensagem": "Este espaço já tem uma reserva Solicitada em 10/11/2026 10:00–11:00. Escolha outro horário."}}
-```
-
-Outros erros: sem token → **401** `NAO_AUTENTICADO`; espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; espaço inativo → **409** `ESPACO_INATIVO`; término igual ou antes do início → **400** `HORARIO_INVALIDO`; horário que já passou → **400** `DATA_RETROATIVA`; fora das [regras de agenda](#regras-de-agenda) → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO`, `DURACAO_INVALIDA` ou `ANTECEDENCIA_EXCEDIDA`; campo ausente ou data inválida → **400** `DADOS_INVALIDOS` com o campo em `campos`.
-
-#### Regras de agenda
-
-Toda nova solicitação precisa respeitar estes limites, iguais para todos os espaços:
-
-| Regra | Valor | Erro (400) e campo |
-|---|---|---|
-| Horário de funcionamento | início a partir das **07:00** e término até as **22:00** | `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_inicio` (antes da abertura) ou `hora_fim` (depois do fechamento) |
-| Duração | de **30 minutos** a **3 horas**, com as bordas incluídas | `DURACAO_INVALIDA` em `hora_fim` |
-| Antecedência máxima | até **30 dias** a partir de hoje (fuso de São Paulo) | `ANTECEDENCIA_EXCEDIDA` em `data`, com a data limite na mensagem |
-
-As regras valem só ao solicitar. Reservas já gravadas continuam válidas se os limites mudarem. Por exemplo, pedir 06:00–07:00 responde:
-
-```json
-{"erro": {"codigo": "FORA_DO_HORARIO_DE_FUNCIONAMENTO", "mensagem": "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período.", "campos": {"hora_inicio": ["Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período."]}}}
-```
-
-Os valores vigentes saem de `GET /api/reservas/regras-de-agenda/`, que não exige login. É deles que a tela de nova reserva monta a dica acima dos campos de data e horário:
-
-```bash
-curl http://localhost:8000/api/reservas/regras-de-agenda/
-```
-
-```json
-{"mensagem": "Regras de agenda.", "dados": {"horario_de_abertura": "07:00", "horario_de_fechamento": "22:00", "duracao_minima_em_minutos": 30, "duracao_maxima_em_minutos": 180, "antecedencia_maxima_em_dias": 30, "data_limite": "2026-11-29"}}
-```
-
-`data_limite` é hoje + 30 dias e muda a cada dia.
-
-#### Agenda do dia
-
-`GET /api/reservas/ocupacao/?espaco=<id>&data=<AAAA-MM-DD>` (login obrigatório, qualquer perfil) mostra os horários ocupados de um espaço num dia e as janelas livres. É a única forma de um Solicitante ver horários de reservas que não são dele, por isso a resposta traz **só** o intervalo e a situação: nunca nome, matrícula, id, finalidade nem motivo de quem reservou. Os livres são calculados no backend com as [regras de agenda](#regras-de-agenda): janelas menores que a duração mínima não aparecem e, para hoje, elas começam no próximo múltiplo de 5 minutos. É ajuda, não regra: a solicitação continua sendo validada só ao enviar.
-
-```bash
-curl "http://localhost:8000/api/reservas/ocupacao/?espaco=1&data=AAAA-MM-DD" -H "Authorization: Bearer $ACCESS"
-```
-
-```json
-{"mensagem": "1 horário ocupado neste dia.", "dados": {"data": "2026-10-31", "horario_de_abertura": "07:00", "horario_de_fechamento": "22:00", "reservavel": true, "motivo_indisponivel": null, "ocupados": [{"hora_inicio": "10:00", "hora_fim": "11:00", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada"}], "livres": [{"hora_inicio": "07:00", "hora_fim": "10:00"}, {"hora_inicio": "11:00", "hora_fim": "22:00"}]}}
-```
-
-Para uma data em que não é possível reservar (ontem, hoje depois das 22:00 ou além da antecedência máxima), `reservavel` é `false`, `livres` vem vazio e `motivo_indisponivel` traz a mesma mensagem que a solicitação receberia (ex.: "Não é possível reservar um horário que já passou."). Espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; inativo → **409** `ESPACO_INATIVO`; sem `espaco` ou `data` → **400** `DADOS_INVALIDOS` com o campo em `campos`.
-
-#### Consultar reservas
-
-Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas ordenadas pelo início. Filtros opcionais, que funcionam sozinhos ou combinados:
-
-| Parâmetro | Exemplo | Efeito |
-|---|---|---|
-| `espaco` | `espaco=1` | reservas do espaço com esse id (um id inexistente devolve lista vazia) |
-| `situacao` | `situacao=SOLICITADA` | `SOLICITADA`, `CONFIRMADA`, `RECUSADA`, `CANCELADA` ou `CONCLUIDA` |
-| `data` | `data=2026-11-10` | reservas desse dia (`AAAA-MM-DD`) |
-| `solicitante` | `solicitante=souza` | trecho do nome ou da matrícula, sem diferenciar maiúsculas |
-| `minhas` | `minhas=true` | só as reservas do usuário logado |
-
-> O Solicitante só vê as próprias reservas, qualquer que seja o filtro (inclusive `minhas=false` ou `solicitante=` com o nome de outra pessoa). O Gestor vê todas e pode filtrar por solicitante.
-
-Por um critério:
-
-```bash
-curl "http://localhost:8000/api/reservas/?situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
-```
-
-Por dois critérios combinados:
-
-```bash
-curl "http://localhost:8000/api/reservas/?espaco=1&situacao=SOLICITADA" -H "Authorization: Bearer $ACCESS"
-```
-
-Só as reservas do usuário logado:
-
-```bash
-curl "http://localhost:8000/api/reservas/?minhas=true" -H "Authorization: Bearer $ACCESS"
-```
-
-Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
-
-```json
-{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
-```
-
-Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
-
-As situações aceitas no filtro, com o rótulo exibido (`GET /api/reservas/situacoes/`, não exige login):
-
-```bash
-curl http://localhost:8000/api/reservas/situacoes/
-```
-
-```json
-{"mensagem": "Situações de reserva disponíveis.", "dados": [{"valor": "SOLICITADA", "rotulo": "Solicitada"}, {"valor": "CONFIRMADA", "rotulo": "Confirmada"}, {"valor": "RECUSADA", "rotulo": "Recusada"}, {"valor": "CANCELADA", "rotulo": "Cancelada"}, {"valor": "CONCLUIDA", "rotulo": "Concluída"}]}
-```
-
-Obter uma reserva (`GET /api/reservas/{id}/`), no mesmo formato da criação:
-
-```bash
-curl http://localhost:8000/api/reservas/1/ -H "Authorization: Bearer $ACCESS"
-```
-
-Um id inexistente responde **404**:
-
-```json
-{"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 9999 não encontrada."}}
-```
-
-Para um Solicitante, a reserva de outra pessoa também responde **404**, e não 403, para não revelar que ela existe. Com os dados de exemplo, logado como Bruno, pedir a reserva Confirmada da Daniela (troque `ID_DA_DANIELA` pelo id que a gestora vê em `GET /api/reservas/`):
-
-```bash
-curl http://localhost:8000/api/reservas/ID_DA_DANIELA/ -H "Authorization: Bearer $ACCESS"
-```
-
-```json
-{"erro": {"codigo": "RESERVA_NAO_ENCONTRADA", "mensagem": "Reserva de código 2 não encontrada."}}
-```
-
-#### Alterar a situação de uma reserva
-
-Alterar a situação (`PATCH /api/reservas/{id}/situacao/`) exige login. Cada reserva devolvida pela API traz `acoes_disponiveis`, com as mudanças aceitas a partir da situação atual, o texto do botão e se exigem motivo. O corpo leva `situacao` e, para recusar ou cancelar, um `motivo`. Só estas mudanças são aceitas:
-
-| Situação atual | Pode ir para |
-|---|---|
-| `SOLICITADA` | `CONFIRMADA`, `RECUSADA` (com motivo), `CANCELADA` (com motivo) |
-| `CONFIRMADA` | `CONCLUIDA`, `CANCELADA` (com motivo) |
-| `CONCLUIDA`, `RECUSADA`, `CANCELADA` | nenhuma (situações finais) |
-
-Quem pode fazer cada mudança:
-
-| Perfil | Pode levar para |
-|---|---|
-| Gestor | `CONFIRMADA`, `RECUSADA`, `CONCLUIDA`, `CANCELADA`, em qualquer reserva |
-| Solicitante | só `CANCELADA`, e só nas próprias reservas |
-
-Um Solicitante que tenta confirmar, recusar ou concluir recebe **403**, mesmo que a mudança fosse inválida pela tabela de situações, e a reserva fica como estava. Com o token do Bruno, confirmar a própria reserva:
-
-```json
-{"erro": {"codigo": "ACAO_NAO_PERMITIDA", "mensagem": "Somente o gestor pode confirmar reservas."}}
-```
-
-Mudar a situação da reserva de outra pessoa responde **404** `RESERVA_NAO_ENCONTRADA`, como no detalhe.
-
-Confirmar a reserva (com o token de um Gestor):
-
-```bash
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONFIRMADA"}'
-```
-
-No Prompt de Comando do Windows:
-
-```bat
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer %ACCESS%" -H "Content-Type: application/json" -d "{\"situacao\": \"CONFIRMADA\"}"
-```
-
-Resposta **200**, com a reserva atualizada (a mensagem acompanha a nova situação: confirmada, recusada, cancelada ou concluída):
-
-```json
-{"mensagem": "Reserva confirmada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CONFIRMADA", "situacao_rotulo": "Confirmada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}, {"situacao": "CONCLUIDA", "rotulo": "Concluir", "exige_motivo": false}]}}
-```
-
-Uma mudança fora da tabela (por exemplo, voltar a confirmada para `SOLICITADA`) responde **409** e a reserva fica como estava:
-
-```json
-{"erro": {"codigo": "TRANSICAO_DE_SITUACAO_INVALIDA", "mensagem": "Não é possível alterar uma reserva Confirmada para Solicitada."}}
-```
-
-Cancelar com motivo (o horário fica livre para outra reserva):
-
-```bash
-curl -X PATCH http://localhost:8000/api/reservas/1/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CANCELADA", "motivo": "Chuva forte"}'
-```
-
-```json
-{"mensagem": "Reserva cancelada com sucesso.", "dados": {"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "CANCELADA", "situacao_rotulo": "Cancelada", "motivo_da_situacao": "Chuva forte", "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": []}}
-```
-
-Outros erros: recusar ou cancelar sem motivo → **400** `MOTIVO_OBRIGATORIO`; situação fora da lista → **400** `SITUACAO_INVALIDA`; corpo sem `situacao` → **400** `DADOS_INVALIDOS`; reserva inexistente → **404** `RESERVA_NAO_ENCONTRADA`; reserva alterada por outra pessoa enquanto você decidia → **409** `RESERVA_DESATUALIZADA` (nada é gravado; atualize a lista e decida de novo); sem token → **401** `NAO_AUTENTICADO`; outro método além de `PATCH` → **405** `METODO_NAO_PERMITIDO`.
-
-#### Histórico de uma reserva
-
-`GET /api/reservas/{id}/historico/` exige login e lista a criação e cada mudança de situação aceita, da mais antiga para a mais recente: data e hora, quem fez, situação anterior (`null` na criação), situação nova e motivo. Tentativas recusadas (403, 409, 400) não entram, porque não mudaram nada. O histórico só recebe registros novos: não há como alterá-lo nem excluí-lo.
-
-Com os dados de exemplo e o token da Carla (gestora), o histórico da reserva Concluída, que é a de id 5 num banco recém-criado (confira em `GET /api/reservas/`):
-
-```bash
-curl http://localhost:8000/api/reservas/5/historico/ -H "Authorization: Bearer $ACCESS"
-```
-
-No Prompt de Comando do Windows:
-
-```bat
-curl http://localhost:8000/api/reservas/5/historico/ -H "Authorization: Bearer %ACCESS%"
-```
-
-Resposta **200**:
-
-```json
-{"mensagem": "Histórico da reserva.", "dados": [{"situacao_anterior": null, "situacao_anterior_rotulo": null, "situacao_nova": "SOLICITADA", "situacao_nova_rotulo": "Solicitada", "motivo": null, "autor": {"nome": "Bruno Lima"}, "registrado_em": "2026-10-25T17:28:21.892426-03:00"}, {"situacao_anterior": "SOLICITADA", "situacao_anterior_rotulo": "Solicitada", "situacao_nova": "CONFIRMADA", "situacao_nova_rotulo": "Confirmada", "motivo": null, "autor": {"nome": "Carla Mendes"}, "registrado_em": "2026-10-26T17:28:21.892426-03:00"}, {"situacao_anterior": "CONFIRMADA", "situacao_anterior_rotulo": "Confirmada", "situacao_nova": "CONCLUIDA", "situacao_nova_rotulo": "Concluída", "motivo": null, "autor": {"nome": "Carla Mendes"}, "registrado_em": "2026-10-28T17:28:21.892426-03:00"}]}
-```
-
-Num cancelamento ou numa recusa, o registro traz o motivo (`"motivo": "Previsão de chuva forte."`). Para um Solicitante, o histórico da reserva de outra pessoa responde **404** `RESERVA_NAO_ENCONTRADA`, como no detalhe; sem token, **401** `NAO_AUTENTICADO`; outro método além de `GET` → **405** `METODO_NAO_PERMITIDO`.
-
-Se o banco foi criado antes desta versão, as reservas antigas aparecem com o histórico vazio. Recrie o banco como em [Recomeçar do zero](#recomeçar-do-zero).
-
-### Criar um superusuário (acesso ao admin)
-
-Com os serviços no ar, em outro terminal dentro de `src`:
-
-```bash
-docker compose exec backend python manage.py createsuperuser
-```
-
-O comando pede **e-mail, nome, matrícula e senha**. O login no admin é feito com o e-mail, e o superusuário é criado com o perfil **Gestor**.
-
-> **Quem subiu o banco antes da AUT-02:** a migration `contas.0002` remove o `username` e torna nome e matrícula obrigatórios, partindo de uma tabela de usuários vazia. Apague o banco local uma vez antes de subir de novo:
->
-> ```bash
-> docker compose down -v
-> ```
-
-### Frontend: lint, testes e build
-
-Com os serviços no ar, dentro de `src`:
-
-```bash
-docker compose exec frontend npm run lint
-```
-
-Testes (Vitest e Testing Library, em jsdom):
-
-```bash
-docker compose exec frontend npm test -- --run
-```
-
-```bash
-docker compose exec frontend npm run build
-```
-
-As dependências do frontend ficam num volume próprio do container (`/app/node_modules`). Ao mudar o `package.json` (instalar, remover ou atualizar pacotes), recrie esse volume:
-
-```bash
-docker compose up --build -V frontend
-```
-
-### Qualidade do código (backend)
-
-Com os serviços no ar, dentro de `src`. As configurações ficam em `src/backend/pyproject.toml`.
-
-Testes (pytest):
-
-```bash
-docker compose exec backend pytest
-```
-
-Cobertura de testes (linhas e ramos) dos contextos `espacos`, `reservas` e `contas`, do pacote `compartilhado` e do app `exemplos`. Falha abaixo de 99% no total (`fail_under` em `pyproject.toml`; proposta de cobertura-alvo ainda pendente de decisão do grupo):
-
-```bash
-docker compose exec backend pytest --cov
-```
-
-Cobertura por camada: exige 100% de linhas e ramos no domínio e na aplicação de `espacos` e de `reservas` (troque o `--include` para ver outra camada, por exemplo `reservas/infrastructure/*`):
-
-```bash
-docker compose exec backend sh -c "pytest --cov && coverage report --include='espacos/domain/*,espacos/application/*,reservas/domain/*,reservas/application/*' --fail-under=100"
-```
-
-Testes por propriedade (Hypothesis): `espacos/tests/test_propriedades_do_espaco.py` e, em reservas, `test_propriedades_da_reserva.py` (a máquina de estados da reserva: gestor, dona e outra pessoa tentam mudar a situação em sequências geradas, e depois de cada passo o teste confere as invariantes, entre elas que os botões de ação da tela são exatamente as mudanças que o backend aceita), `test_propriedades_do_horario.py` e `test_propriedades_da_agenda.py`. No dia a dia rodam com o perfil `rapido` (50 exemplos por propriedade, sempre os mesmos). Antes da entrega, rode o perfil `exaustivo` (2.000 exemplos aleatórios por propriedade):
-
-```bash
-docker compose exec -e HYPOTHESIS_PROFILE=exaustivo backend sh -c "pytest espacos/tests/test_propriedades_do_espaco.py reservas/tests/test_propriedades_*.py --durations=0"
-```
-
-Para ver um passo a passo gerado pela máquina de estados da reserva:
-
-```bash
-docker compose exec backend pytest reservas/tests/test_propriedades_da_reserva.py -s --hypothesis-verbosity=debug
-```
-
-Testes de mutação (mutmut), em `domain` e `application` de `espacos` e de `reservas`. O mutmut altera o código de propósito (troca `<` por `<=`, apaga argumentos, muda textos) e confere se algum teste falha. Leva vários minutos (cerca de meia hora para `reservas` no Docker do Windows), por isso fica fora da verificação de cada PR; rode antes da entrega, um contexto de cada vez. Os mutantes que sobrevivem e são equivalentes estão justificados em `docs/fontes/testes_de_espacos.md` e `docs/fontes/testes_de_reservas.md`:
-
-```bash
-docker compose exec backend sh -c "rm -rf mutants && mutmut run 'reservas.*'"
-```
-
-```bash
-docker compose exec backend sh -c "rm -rf mutants && mutmut run 'espacos.*'"
-```
-
-```bash
-docker compose exec backend mutmut results
-```
-
-Para ver a mudança de um mutante (o nome sai do `mutmut results`):
-
-```bash
-docker compose exec backend mutmut show "reservas.domain.regras_de_agenda.x__janelas_entre__mutmut_2"
-```
-
-Só a matriz de acesso (quem pode chamar cada rota da API, com login JWT de verdade, em `src/backend/config/tests/test_matriz_de_acesso.py`) e os outros testes de segurança de `config/`:
-
-```bash
-docker compose exec backend pytest config/tests -v
-```
-
-Linter e formatação (ruff):
-
-```bash
-docker compose exec backend sh -c "ruff check . && ruff format --check ."
-```
-
-Regra de dependência entre camadas e contextos (import-linter):
-
-```bash
-docker compose exec backend lint-imports
-```
-
-Verificação completa, antes de cada PR:
-
-```bash
-docker compose exec backend sh -c "ruff check . && ruff format --check . && lint-imports && pytest --cov"
-```
-
-Ao mudar o `requirements.txt` ou o `requirements-dev.txt`, reconstrua a imagem do backend:
-
-```bash
-docker compose up --build -d backend
-```
-
-### Parar a aplicação
-
-```bash
-docker compose down
-```
-
-Para parar **e apagar os dados do banco**:
-
-```bash
-docker compose down -v
-```
-
 ## Persistência
 
 PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `postgres_data` e se mantêm entre execuções até um `docker compose down -v`.
@@ -764,3 +163,18 @@ PostgreSQL 16, executado no container `db`. Os dados ficam no volume Docker `pos
 - **Alterações simultâneas na mesma reserva:** se duas pessoas mudarem a situação da mesma reserva ao mesmo tempo, só a primeira é gravada; a segunda recebe 409 `RESERVA_DESATUALIZADA` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
 - **Alterações simultâneas no mesmo espaço:** se dois gestores editarem, desativarem ou reativarem o mesmo espaço ao mesmo tempo, só a primeira alteração é gravada; a segunda recebe 409 `ESPACO_DESATUALIZADO` e precisa atualizar a lista e decidir de novo. Não há nova tentativa automática.
 - **Histórico só das mudanças aceitas:** o histórico da reserva registra a criação e cada mudança de situação efetiva. Tentativas recusadas (sem permissão, transição inválida, motivo ausente) não ficam registradas em nenhum lugar, nem na linha do tempo do detalhe da reserva.
+
+## Mapa da documentação
+
+| Módulo | README | O que está lá |
+|---|---|---|
+| Execução | [`src/README.md`](src/README.md) | Serviços do Docker Compose, portas, volumes e cada variável do `.env.example`. |
+| Backend | [`src/backend/README.md`](src/backend/README.md) | Organização em contextos e camadas, regra de dependência, formato das respostas, autenticação JWT, superusuário, comandos de teste e qualidade, roteiro com `curl`. |
+| Contas | [`src/backend/contas/README.md`](src/backend/contas/README.md) | Perfis, regras de cadastro e senha, endpoints de cadastro, login e usuário logado. |
+| Espaços | [`src/backend/espacos/README.md`](src/backend/espacos/README.md) | Regras dos espaços e endpoints de cadastrar, listar, editar, desativar e reativar. |
+| Reservas | [`src/backend/reservas/README.md`](src/backend/reservas/README.md) | Regras de reserva, agenda, conflito, situações, permissões e histórico, com os endpoints. |
+| Compartilhado | [`src/backend/compartilhado/README.md`](src/backend/compartilhado/README.md) | Erros de domínio, formato das respostas, tratador de erros e permissão de gestor. |
+| Exemplos | [`src/backend/exemplos/README.md`](src/backend/exemplos/README.md) | Como o comando de dados de exemplo funciona. |
+| Frontend | [`src/frontend/README.md`](src/frontend/README.md) | Pastas, rotas e telas, cliente da API e sessão, convenções e comandos. |
+| Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) (gerado na entrega) | Visão do sistema, modelo do domínio, fluxo principal e decisões técnicas. |
+| Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) (gerado na entrega) | Quem fez cada parte do trabalho. |

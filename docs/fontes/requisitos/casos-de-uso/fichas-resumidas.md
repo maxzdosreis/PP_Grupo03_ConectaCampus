@@ -14,6 +14,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: UC-01, UC-03, UC-06 a UC-09, UC-15 e UC-16 e o bloco de apoio UC-20 a UC-22 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" em cada caso de uso (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Bloco de apoio aponta para o README da raiz e o do backend, com a divisão do README (DOC-09). Mudança editorial, sem mudar o fluxo. Sem aprovação. |
 
 ## Sumário
 
@@ -310,7 +311,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 # Apoio (diagrama UCD-02, Equipe de TI)
 
-Casos de uso de instalação e operação, fora do negócio ([decisão e](README.md#decisao-e)). O ator é a [Equipe de TI](../glossario.md#equipe-de-ti), que age pelos comandos de administração descritos no README do projeto.
+Casos de uso de instalação e operação, fora do negócio ([decisão e](README.md#decisao-e)). O ator é a [Equipe de TI](../glossario.md#equipe-de-ti), que age pelos comandos de administração descritos no README da raiz e no [README do backend](../../../../src/backend/README.md#comandos).
 
 ## <a id="uc-20"></a>UC-20 · Criar usuário Gestor
 

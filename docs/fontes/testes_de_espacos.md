@@ -45,7 +45,7 @@ Os cenários de solicitação e de transição de situação da matriz são de `
 
 ## 3. Mutação: resultado e mutantes equivalentes
 
-Escopo: `espacos/domain/` e `espacos/application/`, só com os testes sem banco (`-m "not django_db"`). Comandos no README ("Qualidade do código").
+Escopo: `espacos/domain/` e `espacos/application/`, só com os testes sem banco (`-m "not django_db"`). Comandos no [README do backend](../../src/backend/README.md#comandos).
 
 | Rodada | Mutantes | Mortos | Sobreviventes | Sem teste | Tempo |
 |---|---|---|---|---|---|
