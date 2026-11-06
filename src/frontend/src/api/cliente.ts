@@ -5,8 +5,8 @@ const URL_BASE: string = import.meta.env.VITE_API_URL ?? ''
 
 if (!URL_BASE) {
   console.error(
-    'VITE_API_URL não está definida. Copie src/.env.example para src/.env, ' +
-      'preencha VITE_API_URL e reinicie o frontend.',
+    'VITE_API_URL não está definida. Ela vem do docker-compose.yml, a partir de ' +
+      'BACKEND_PORT_HOST: suba o frontend com docker compose up.',
   )
 }
 
@@ -14,7 +14,7 @@ const MENSAGEM_SEM_CONEXAO =
   'Não foi possível conectar ao servidor. Verifique se a API está em execução.'
 export const MENSAGEM_ERRO_INESPERADO = 'Ocorreu um erro inesperado. Tente novamente.'
 const MENSAGEM_API_NAO_CONFIGURADA =
-  'O endereço da API não foi configurado. Defina VITE_API_URL no arquivo .env.'
+  'O endereço da API não foi configurado. Suba o frontend pelo Docker Compose.'
 export const MENSAGEM_SESSAO_EXPIRADA = 'Sua sessão expirou. Faça login novamente.'
 
 const CAMINHO_DA_RENOVACAO = '/auth/refresh/'

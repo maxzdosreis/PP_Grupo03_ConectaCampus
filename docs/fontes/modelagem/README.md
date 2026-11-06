@@ -400,7 +400,7 @@ Saída de `python scripts/verificar_visao_do_sistema.py` em 05/11/2026 (as três
 | regras-de-dependencia.mmd | espacos.publico → espacos.application | depende | espacos/publico.py:3 |
 | regras-de-dependencia.mmd | espacos.publico → espacos.infrastructure | depende | espacos/publico.py:4 |
 | visao-geral.mmd | páginas, componentes e hooks → api/ | depende | src/frontend/src/components/espacos/DialogoDeAtivacao.tsx:2; src/frontend/src/components/espacos/DialogoDeEdicaoDeEspaco.tsx:2; src/frontend/src/components/espacos/FormularioDeEspaco.tsx:2 (+20) |
-| visao-geral.mmd | páginas, componentes e hooks → Vite :5173 | rede | sem import: src/docker-compose.yml:33 `npm run dev` |
+| visao-geral.mmd | páginas, componentes e hooks → Vite :5173 | rede | sem import: src/docker-compose.yml:36 `npm run dev` |
 | visao-geral.mmd | api/ → config | rede | sem import: src/frontend/src/api/cliente.ts:56 `Bearer ${access}` |
 | visao-geral.mmd | config → espacos.api | depende | sem import: src/backend/config/urls.py:10 `include("espacos.api.urls")` |
 | visao-geral.mmd | config → reservas.api | depende | sem import: src/backend/config/urls.py:11 `include("reservas.api.urls")` |
