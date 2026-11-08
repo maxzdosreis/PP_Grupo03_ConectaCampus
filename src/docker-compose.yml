@@ -21,6 +21,7 @@ services:
     env_file: .env
     environment:
       CORS_ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT_HOST:-5173},http://127.0.0.1:${FRONTEND_PORT_HOST:-5173}
+      REDIS_URL: redis://redis:6379/0
     command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
@@ -28,6 +29,8 @@ services:
       - "${BACKEND_PORT_HOST:-8000}:8000"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -43,6 +46,14 @@ services:
       - "${FRONTEND_PORT_HOST:-5173}:5173"
     depends_on:
       - backend
+
+  redis:
+    image: redis:8-alpine
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
 
 volumes:
   postgres_data:

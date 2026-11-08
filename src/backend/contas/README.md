@@ -20,6 +20,7 @@ Guarda quem usa o sistema e com qual perfil, cadastra novos solicitantes e faz o
 - **Caso de uso** `CadastrarSolicitante`: valida os dados, a senha, depois confere e-mail e matrícula repetidos e só então cria. Dados inválidos são recusados antes de qualquer consulta ao banco. O banco também garante a unicidade, e o repositório traduz a violação para as mesmas exceções.
 - O cadastro público cria sempre um `SOLICITANTE`: `perfil`, `is_staff` ou `is_superuser` enviados no corpo são ignorados. O cadastro não faz login; o frontend chama o login logo depois.
 - **Login:** senha errada, e-mail inexistente e usuário desativado dão a mesma resposta (`CREDENCIAIS_INVALIDAS`), para não revelar quais e-mails existem. Usuário desativado ou excluído também perde o `access` e o `refresh` que já tinha (401).
+- **Limite de tentativas** (AUT-08, `api/limites.py`): ver [Limite de tentativas](#limite-de-tentativas).
 
 ## Endpoints
 
@@ -27,8 +28,8 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`.
 
 | Método e caminho | Quem pode | Sucesso | Erros principais |
 |---|---|---|---|
-| `POST /api/auth/cadastro/` | público | 201 | 400 `CAMPO_OBRIGATORIO_AUSENTE`, `TEXTO_MUITO_LONGO`, `MATRICULA_INVALIDA`, `SENHA_FRACA`, `DADOS_INVALIDOS`; 409 `EMAIL_JA_CADASTRADO`, `MATRICULA_JA_CADASTRADA` |
-| `POST /api/auth/login/` | público | 200 | 401 `CREDENCIAIS_INVALIDAS`; 400 `DADOS_INVALIDOS` |
+| `POST /api/auth/cadastro/` | público | 201 | 400 `CAMPO_OBRIGATORIO_AUSENTE`, `TEXTO_MUITO_LONGO`, `MATRICULA_INVALIDA`, `SENHA_FRACA`, `DADOS_INVALIDOS`; 409 `EMAIL_JA_CADASTRADO`, `MATRICULA_JA_CADASTRADA`; 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
+| `POST /api/auth/login/` | público | 200 | 401 `CREDENCIAIS_INVALIDAS`; 400 `DADOS_INVALIDOS`; 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
 | `POST /api/auth/refresh/` | público, com o `refresh` | 200 | 401 `NAO_AUTENTICADO` (inválido, expirado, de usuário inativo ou excluído); 400 `DADOS_INVALIDOS` sem `refresh` |
 | `GET /api/auth/me/` | logado | 200 | 401 `NAO_AUTENTICADO` |
 
@@ -72,6 +73,50 @@ E-mail ou senha errados (ou usuário desativado) respondem sempre igual, **401**
 {"erro": {"codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha incorretos."}}
 ```
 
+## Limite de tentativas
+
+Para ninguém adivinhar uma senha repetindo o login, o login e o cadastro têm limite de tentativas (throttles do DRF em `api/limites.py`, AUT-08):
+
+| Onde | Chave | Padrão | Variável |
+|---|---|---|---|
+| Login | e-mail do corpo, normalizado como no login (minúsculas, sem espaços nas pontas) | 5 por minuto | `LIMITE_LOGIN_POR_EMAIL` |
+| Login | IP da conexão | 20 por minuto | `LIMITE_LOGIN_POR_IP` |
+| Cadastro | IP da conexão | 10 por hora | `LIMITE_CADASTRO_POR_IP` |
+
+- **Toda tentativa conta**, com acerto ou erro, numa janela deslizante, inclusive as simultâneas. A contagem é um script Lua no Redis (`_REGISTRAR_TENTATIVA`), que limpa as tentativas que saíram da janela, conta, decide e registra numa só operação, sobre um sorted set por chave. O get/set do `SimpleRateThrottle` do DRF não é usado: em operações separadas, tentativas ao mesmo tempo liam o mesmo total e passavam juntas (achado da revisão do PR; `test_tentativas_simultaneas_nao_passam_do_limite` dispara 30 de uma vez e só 5 passam). Acima do limite, a resposta é **429** `LIMITE_DE_TENTATIVAS` com o tempo de espera na mensagem e no cabeçalho `Retry-After`, sem dizer qual limite foi atingido nem se o e-mail existe (a mesma regra das credenciais inválidas). A tentativa recusada não conta.
+- **O limite vem antes de tudo:** o DRF confere os throttles antes da validação do corpo e da senha. Depois de excedido, até a senha certa é recusada até o tempo passar.
+- **Por e-mail e por IP:** o por e-mail protege uma conta; o por IP pega quem testa muitos e-mails e é mais folgado, porque no Docker todos os acessos do computador chegam com o mesmo IP. Sem um e-mail válido no corpo, vale só o por IP (um corpo que não é JSON continua 400 `JSON_INVALIDO` e conta no por IP).
+- **IP confiável:** `REST_FRAMEWORK["NUM_PROXIES"] = 0` faz o DRF usar o `REMOTE_ADDR` e ignorar o `X-Forwarded-For`, que o próprio cliente escreve. Atrás de um proxy, esse valor teria de mudar.
+- **A renovação do token não tem limite:** o `refresh` é assinado, não há o que adivinhar.
+- **As taxas são lidas das settings a cada requisição** (`LimiteDeTentativas.get_rate`), e não da constante de classe do DRF, lida uma vez só na importação; assim `override_settings` funciona nos testes. Um valor fora do formato `N/s|min|hour|day` impede o backend de subir.
+- **Contador no Redis** (`CACHES` com o `RedisCache` do Django, serviço `redis` do Compose): vale para todos os processos do backend e não zera ao reiniciar o backend. O Redis roda sem persistência, então a contagem zera quando ele reinicia (limitação no [README da raiz](../../../README.md#limitações-conhecidas)).
+- **Redis fora do ar → 503:** `LimiteDeTentativas.allow_request` transforma o `RedisError` em `ServicoIndisponivel`, e login e cadastro respondem **503** `SERVICO_INDISPONIVEL` ("Serviço temporariamente indisponível. Tente de novo em alguns instantes.") antes de conferir qualquer dado: nenhuma tentativa passa sem contagem. Os timeouts do Redis são de 1 s, para a recusa ser rápida.
+
+Seis tentativas seguidas com senha errada:
+
+```bash
+for i in 1 2 3 4 5 6; do
+  curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8000/api/auth/login/ \
+    -H "Content-Type: application/json" -d '{"email": "ana@exemplo.com", "senha": "errada"}'
+done
+```
+
+As cinco primeiras respondem `401` e a sexta, `429`. A próxima, mesmo com a senha certa, também:
+
+```bash
+curl -i -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" -d '{"email": "ana@exemplo.com", "senha": "senha-de-teste-123"}'
+```
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 57
+```
+
+```json
+{"erro": {"codigo": "LIMITE_DE_TENTATIVAS", "mensagem": "Muitas tentativas. Tente de novo em 57 segundos."}}
+```
+
 ## Ver o usuário logado
 
 Ver o usuário logado (`GET /api/auth/me/`):
@@ -96,6 +141,7 @@ Sem token, com token malformado ou expirado → **401** `NAO_AUTENTICADO`.
 | Política de senha | `infrastructure/politica_de_senha.py` e `AUTH_PASSWORD_VALIDATORS` no `config/settings.py` |
 | Model, manager e unicidade | `infrastructure/models.py` e `infrastructure/repositorio_django.py` |
 | Rotas, login, refresh e `me` | `api/views.py`, `api/serializers.py`, `api/urls.py` |
+| Limites de tentativas | `api/limites.py` e `LIMITE_*`, `NUM_PROXIES` e `CACHES` no `config/settings.py` |
 | Admin do Django | `admin.py` |
 
 Testes em `contas/tests/`: domínio sem banco, `CadastrarSolicitante` com os fakes de `fakes.py`, o contrato do repositório (contra o Django e o fake) e a API (`test_api_cadastro.py`, `test_api_autenticacao.py`, com os casos de token adulterado, expirado e de usuário desativado).

@@ -11,6 +11,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -48,7 +49,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema cria 1 Gestor e 2 Solicitantes, um espaço de cada tipo mais um inativo e uma reserva de cada situação, todas com o histórico coerente, sem sobreposição entre as que ocupam horário e com as reservas em aberto no futuro, e mostra o resumo do que foi criado
 - **Origem:** [UC-21 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc21-p1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-150](#ta-150)
+- **TA:** [TA-151](#ta-151)
 
 #### <a id="us-18-ca-02"></a>US-18 · CA-02 · Pronta para a demonstração (sucesso)
 
@@ -57,7 +58,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** cada usuário de exemplo entra com a senha documentada, e o horário de conflito documentado é recusado por conflito no pedido e aparece ocupado na agenda do dia
 - **Origem:** [UC-21 passo 3](../casos-de-uso/fichas-resumidas.md#uc21-p3)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-151](#ta-151)
+- **TA:** [TA-152](#ta-152)
 
 #### <a id="us-18-ca-03"></a>US-18 · CA-03 · Carga repetida (alternativa)
 
@@ -66,7 +67,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** nada é duplicado (usuário pelo e-mail, espaço pelo nome, reservas dos usuários de exemplo), e o resumo informa que os dados já existiam
 - **Origem:** [UC-21 A3.1](../casos-de-uso/fichas-resumidas.md#uc21-a3-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-152](#ta-152)
+- **TA:** [TA-153](#ta-153)
 
 #### <a id="us-18-ca-04"></a>US-18 · CA-04 · Fora do modo de desenvolvimento (exceção)
 
@@ -75,7 +76,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** a carga é recusada, porque criaria usuários com senhas conhecidas, e nada é criado
 - **Origem:** [UC-21 E2.1](../casos-de-uso/fichas-resumidas.md#uc21-e2-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-153](#ta-153)
+- **TA:** [TA-154](#ta-154)
 
 #### <a id="us-18-ca-05"></a>US-18 · CA-05 · Dado de exemplo que viola uma regra (exceção)
 
@@ -84,7 +85,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema informa "Dado de exemplo inválido: «mensagem da regra»" (no caso da regra) e a carga inteira é desfeita: nada fica pela metade
 - **Origem:** [UC-21 E3.1](../casos-de-uso/fichas-resumidas.md#uc21-e3-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-154](#ta-154)
+- **TA:** [TA-155](#ta-155)
 
 ## Testes de aceite
 
@@ -92,8 +93,8 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-150"></a>TA-150 | [CA-01](#us-18-ca-01) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_espaco_de_cada_tipo_e_um_inativo`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_uma_reserva_de_cada_situacao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_todas_as_reservas_de_exemplo_tem_historico_coerente`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_que_ocupam_horario_nao_se_sobrepoem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_em_aberto_sao_futuras_e_a_concluida_e_passada`; `exemplos/tests/test_carregar_dados_exemplo.py::test_primeira_execucao_informa_o_que_foi_criado` |
-| <a id="ta-151"></a>TA-151 | [CA-02](#us-18-ca-02) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_responde_409`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia`; `exemplos/tests/test_carregar_dados_exemplo.py::test_nenhum_dado_de_exemplo_usa_o_usuario_do_readme` |
-| <a id="ta-152"></a>TA-152 | [CA-03](#us-18-ca-03) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
-| <a id="ta-153"></a>TA-153 | [CA-04](#us-18-ca-04) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_com_debug_desligado_recusa_sem_criar_nada` |
-| <a id="ta-154"></a>TA-154 | [CA-05](#us-18-ca-05) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_dado_de_exemplo_que_viola_regra_faz_o_comando_falhar`; `exemplos/tests/test_carregar_dados_exemplo.py::test_falha_no_meio_da_carga_nao_deixa_nada_gravado` |
+| <a id="ta-151"></a>TA-151 | [CA-01](#us-18-ca-01) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_espaco_de_cada_tipo_e_um_inativo`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_uma_reserva_de_cada_situacao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_todas_as_reservas_de_exemplo_tem_historico_coerente`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_que_ocupam_horario_nao_se_sobrepoem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_em_aberto_sao_futuras_e_a_concluida_e_passada`; `exemplos/tests/test_carregar_dados_exemplo.py::test_primeira_execucao_informa_o_que_foi_criado` |
+| <a id="ta-152"></a>TA-152 | [CA-02](#us-18-ca-02) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_responde_409`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia`; `exemplos/tests/test_carregar_dados_exemplo.py::test_nenhum_dado_de_exemplo_usa_o_usuario_do_readme` |
+| <a id="ta-153"></a>TA-153 | [CA-03](#us-18-ca-03) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
+| <a id="ta-154"></a>TA-154 | [CA-04](#us-18-ca-04) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_com_debug_desligado_recusa_sem_criar_nada` |
+| <a id="ta-155"></a>TA-155 | [CA-05](#us-18-ca-05) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_dado_de_exemplo_que_viola_regra_faz_o_comando_falhar`; `exemplos/tests/test_carregar_dados_exemplo.py::test_falha_no_meio_da_carga_nao_deixa_nada_gravado` |

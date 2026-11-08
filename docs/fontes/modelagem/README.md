@@ -17,6 +17,8 @@
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Revisão: passos antes do `alt` sem o dado que separa os cenários (horário pedido na Figura 5, situação lida na Figura 6), que agora fica só nas guardas |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Decisão f da seção 3 aponta para o README de reservas, onde ficou o exemplo da transição inválida com a divisão do README (DOC-09). Mudança editorial. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Plano do PDF: a capa sai da folga, porque não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md), Aula 7; GES-02). Mudança editorial. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Serviço `redis` (AUT-08): Figura 1, seção 1, componentes, relações e relações sem import; evidência seta → import gerada de novo. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Relação `contas.api` → `redis`: a contagem de tentativas é um script atômico no Redis (AUT-08, achado da revisão do PR). |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -332,6 +334,7 @@ Estas tabelas saíram do `01-visao-do-sistema.md` para a seção 1 caber no orç
 | `compartilhado` | `domain`: `ErroDeDominio` e 4 categorias; `api`: respostas, tratador de erros, `ApenasGestor` · não conhece contextos | Um formato de erro e de resposta |
 | `exemplos` | Dados de exemplo pelos casos de uso · ninguém o importa | Demonstração com as regras reais |
 | `db` | Dados e restrições finais (nome único, sem sobreposição) | Defesa contra corridas |
+| `redis` | Cache do Django (`CACHES`): os contadores do limite de tentativas de `contas.api`, só em memória · não guarda dado de negócio | Contador compartilhado e fora do processo do backend (AUT-08) |
 
 `contas` tem as quatro camadas porque tem regra própria: `DadosDeCadastro` (domínio) e `CadastrarSolicitante`, que depende das portas `RepositorioUsuarios` e `PoliticaDeSenha` e é testado com fakes; o `Usuario` do Django fica na infraestrutura.
 
@@ -348,6 +351,7 @@ Estas tabelas saíram do `01-visao-do-sistema.md` para a seção 1 caber no orç
 | Qualquer outra entre contextos | proibida | contratos `espacos não depende de outros contextos`, `contas não depende de outros contextos`, `reservas não importa contas` |
 | `exemplos` → contextos | depende: `api/dependencias.py` e o `Usuario` | contrato `Nenhum contexto depende dos dados de exemplo` |
 | `infrastructure` → `db` | rede: SQL pelo ORM | `DATABASES` no `settings.py` |
+| `contas.api` → `redis` | rede: os throttles do DRF leem e gravam pelo cache do Django; Redis fora do ar → 503 | `contas/tests/test_limites_de_tentativas.py`; `config/tests/test_health.py` |
 
 ## Relações sem import
 
@@ -359,6 +363,7 @@ Estas tabelas saíram do `01-visao-do-sistema.md` para a seção 1 caber no orç
 | `config` → `compartilhado.api` | `src/backend/config/settings.py`: `"EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao"` | O DRF carrega o tratador pelo texto (há também um import real em `config/views.py`) |
 | `config` → `contas.infrastructure` | `src/backend/config/settings.py`: `AUTH_USER_MODEL = "contas.Usuario"` | O Django resolve o model do usuário pelo texto; a API lê `request.user.eh_gestor` por duck typing (`compartilhado/api/permissoes.py`, `reservas/api/autenticacao.py`), sem importar `contas` |
 | `<contexto>.infrastructure` → `db` | `src/backend/config/settings.py`: `"ENGINE": "django.db.backends.postgresql"` | Rede: SQL pelo ORM |
+| `contas.api` → `redis` | `src/backend/config/settings.py`: `"BACKEND": "django.core.cache.backends.redis.RedisCache"` | Rede: o throttle usa o cache do Django, configurado pelo texto; `contas.api` roda o script de contagem pelo cliente Redis do cache do Django e importa do pacote `redis` só a exceção (`RedisError`), para responder 503 |
 
 ## Exceções da verificação
 
@@ -381,7 +386,7 @@ A verificação da DOC-01 não achou import que viole a arquitetura. Duas depend
 
 ## Evidência: seta → import
 
-Saída de `python scripts/verificar_visao_do_sistema.py` em 05/11/2026 (as três primeiras ocorrências de cada seta; `(+N)` = quantas mais):
+Saída de `python scripts/verificar_visao_do_sistema.py` em 07/11/2026 (as três primeiras ocorrências de cada seta; `(+N)` = quantas mais):
 
 | Figura | Seta | Tipo | Sustentada por (arquivo:linha) |
 |---|---|---|---|
@@ -391,27 +396,28 @@ Saída de `python scripts/verificar_visao_do_sistema.py` em 05/11/2026 (as três
 | regras-de-dependencia.mmd | ‹contexto›.application → ‹contexto›.domain | depende | contas/application/casos_de_uso.py:7; contas/application/casos_de_uso.py:8; contas/application/portas.py:4 (+18) |
 | regras-de-dependencia.mmd | ‹contexto›.infrastructure → ‹contexto›.application | implementa | espacos/infrastructure/repositorio_django.py:14 RepositorioEspacosDjango(RepositorioEspacos); reservas/infrastructure/consulta_de_espacos.py:5 ConsultaDeEspacosViaFachada(ConsultaDeEspacos); reservas/infrastructure/repositorio_django.py:21 RepositorioReservasDjango(RepositorioReservas) (+7) |
 | regras-de-dependencia.mmd | ‹contexto›.infrastructure → ‹contexto›.domain | depende | contas/infrastructure/models.py:5; contas/infrastructure/models.py:11; contas/infrastructure/models.py:12 (+19) |
-| regras-de-dependencia.mmd | ‹contexto›.api → compartilhado.api | depende | contas/api/views.py:11; espacos/api/views.py:5; espacos/api/views.py:6 (+1) |
+| regras-de-dependencia.mmd | ‹contexto›.api → compartilhado.api | depende | contas/api/limites.py:10; contas/api/views.py:11; espacos/api/views.py:5 (+2) |
 | regras-de-dependencia.mmd | ‹contexto›.application → compartilhado.domain | depende | contas/application/casos_de_uso.py:1 |
 | regras-de-dependencia.mmd | ‹contexto›.domain → compartilhado.domain | depende | contas/domain/cadastro.py:3; contas/domain/excecoes.py:3; espacos/domain/espaco_esportivo.py:3 (+6) |
-| regras-de-dependencia.mmd | compartilhado.api → compartilhado.domain | depende | compartilhado/api/tratador_de_erros.py:10 |
+| regras-de-dependencia.mmd | compartilhado.api → compartilhado.domain | depende | compartilhado/api/tratador_de_erros.py:12 |
 | regras-de-dependencia.mmd | reservas.infrastructure → reservas.application | implementa | reservas/infrastructure/consulta_de_espacos.py:5 ConsultaDeEspacosViaFachada(ConsultaDeEspacos); reservas/infrastructure/repositorio_django.py:21 RepositorioReservasDjango(RepositorioReservas); reservas/infrastructure/consulta_de_espacos.py:2 (+1) |
 | regras-de-dependencia.mmd | reservas.infrastructure → espacos.publico | depende | reservas/infrastructure/consulta_de_espacos.py:1 |
 | regras-de-dependencia.mmd | espacos.publico → espacos.application | depende | espacos/publico.py:3 |
 | regras-de-dependencia.mmd | espacos.publico → espacos.infrastructure | depende | espacos/publico.py:4 |
 | visao-geral.mmd | páginas, componentes e hooks → api/ | depende | src/frontend/src/components/espacos/DialogoDeAtivacao.tsx:2; src/frontend/src/components/espacos/DialogoDeEdicaoDeEspaco.tsx:2; src/frontend/src/components/espacos/FormularioDeEspaco.tsx:2 (+20) |
-| visao-geral.mmd | páginas, componentes e hooks → Vite :5173 | rede | sem import: src/docker-compose.yml:36 `npm run dev` |
+| visao-geral.mmd | páginas, componentes e hooks → Vite :5173 | rede | sem import: src/docker-compose.yml:38 `npm run dev` |
 | visao-geral.mmd | api/ → config | rede | sem import: src/frontend/src/api/cliente.ts:56 `Bearer ${access}` |
 | visao-geral.mmd | config → espacos.api | depende | sem import: src/backend/config/urls.py:10 `include("espacos.api.urls")` |
 | visao-geral.mmd | config → reservas.api | depende | sem import: src/backend/config/urls.py:11 `include("reservas.api.urls")` |
 | visao-geral.mmd | config → contas.api | depende | sem import: src/backend/config/urls.py:9 `include("contas.api.urls")` |
-| visao-geral.mmd | config → contas.infrastructure | depende | sem import: src/backend/config/settings.py:108 `AUTH_USER_MODEL = "contas.Usuario"` |
-| visao-geral.mmd | config → compartilhado.api | depende | sem import: src/backend/config/settings.py:143 `"EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao"`; config/views.py:10 |
+| visao-geral.mmd | config → contas.infrastructure | depende | sem import: src/backend/config/settings.py:141 `AUTH_USER_MODEL = "contas.Usuario"` |
+| visao-geral.mmd | config → compartilhado.api | depende | sem import: src/backend/config/settings.py:176 `"EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao"`; config/views.py:12 |
 | visao-geral.mmd | exemplos → [contextos] | depende | exemplos/carga.py:5; exemplos/carga.py:6; exemplos/carga.py:7 (+11) |
 | visao-geral.mmd | exemplos → compartilhado.domain | depende | exemplos/management/commands/carregar_dados_exemplo.py:8 |
-| visao-geral.mmd | espacos.infrastructure → db | rede | sem import: src/backend/config/settings.py:98 `"ENGINE": "django.db.backends.postgresql"` |
-| visao-geral.mmd | reservas.infrastructure → db | rede | sem import: src/backend/config/settings.py:98 `"ENGINE": "django.db.backends.postgresql"` |
-| visao-geral.mmd | contas.infrastructure → db | rede | sem import: src/backend/config/settings.py:98 `"ENGINE": "django.db.backends.postgresql"` |
+| visao-geral.mmd | espacos.infrastructure → db | rede | sem import: src/backend/config/settings.py:120 `"ENGINE": "django.db.backends.postgresql"` |
+| visao-geral.mmd | reservas.infrastructure → db | rede | sem import: src/backend/config/settings.py:120 `"ENGINE": "django.db.backends.postgresql"` |
+| visao-geral.mmd | contas.infrastructure → db | rede | sem import: src/backend/config/settings.py:120 `"ENGINE": "django.db.backends.postgresql"` |
+| visao-geral.mmd | contas.api → redis | rede | sem import: src/backend/config/settings.py:134 `"BACKEND": "django.core.cache.backends.redis.RedisCache"` |
 
 ## Evidência: elemento do diagrama → código (seção 2)
 

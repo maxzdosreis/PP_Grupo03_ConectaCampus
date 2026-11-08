@@ -30,7 +30,7 @@ O único lugar que monta o corpo das respostas:
 `tratar_excecao` é o `EXCEPTION_HANDLER` do DRF (ligado por texto no `config/settings.py`). Ele responde:
 
 - **Exceções de domínio:** o status da categoria, com `codigo`, `mensagem` e, se houver, o `campo` em `campos`.
-- **Exceções do DRF e do Django**, no mesmo formato: `ValidationError` → 400 `DADOS_INVALIDOS` (com cada campo em `campos`); `ParseError` → 400 `JSON_INVALIDO`; `NotAuthenticated` e `AuthenticationFailed` → 401 `NAO_AUTENTICADO` ("Faça login para continuar."); `PermissionDenied` → 403 `ACAO_NAO_PERMITIDA`; `NotFound` e `Http404` → 404 `NAO_ENCONTRADO`; `MethodNotAllowed` → 405 `METODO_NAO_PERMITIDO`.
+- **Exceções do DRF e do Django**, no mesmo formato: `ValidationError` → 400 `DADOS_INVALIDOS` (com cada campo em `campos`); `ParseError` → 400 `JSON_INVALIDO`; `NotAuthenticated` e `AuthenticationFailed` → 401 `NAO_AUTENTICADO` ("Faça login para continuar."); `PermissionDenied` → 403 `ACAO_NAO_PERMITIDA`; `NotFound` e `Http404` → 404 `NAO_ENCONTRADO`; `MethodNotAllowed` → 405 `METODO_NAO_PERMITIDO`; `ServicoIndisponivel` (`api/excecoes.py`; um serviço de apoio, como o Redis, fora do ar) → 503 `SERVICO_INDISPONIVEL` ("Serviço temporariamente indisponível. Tente de novo em alguns instantes."); `Throttled` (limite de tentativas, AUT-08) → 429 `LIMITE_DE_TENTATIVAS` ("Muitas tentativas. Tente de novo em N segundos.", com o `Retry-After` do DRF; sem o tempo, "em alguns instantes").
 - **Qualquer outra exceção:** vai para o log e sai como 500 `ERRO_INTERNO` ("Ocorreu um erro inesperado. Tente novamente."), sem detalhes internos.
 
 ## Permissão (`api/permissoes.py`)

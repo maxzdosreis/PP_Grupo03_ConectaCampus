@@ -12,6 +12,7 @@ Matriz de rastreabilidade do Conecta Campus, nos dois sentidos, da necessidade a
 |---|---|---|---|
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Criação: matriz, cobertura, sentido inverso, RNF e mapa de impacto por DEC, gerados por `scripts/gerar_rastreabilidade.py`; decisões a) a f) e o exemplo de NS-04 (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Decisão b aponta para a [DEC-16](../decisoes/DEC-16.md) (rastreabilidade até o código confirmada na Aula 7; GES-02). A frase "(ponto 13 em aberto)" no topo do `matriz.md` é escrita pelo script e só muda numa tarefa que altere o `scripts/gerar_rastreabilidade.py`. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Arquivos
 
@@ -37,7 +38,7 @@ Só este README é escrito à mão. Os demais são **gerados** e começam com o 
 
 ## Exemplo de cadeia completa: NS-04 "Nunca dois usos no mesmo período"
 
-É o exemplo da apresentação, o equivalente do `NS-01 → RF-04 → UC-01 → US-07 → CA-01…04 / TA-18…21` do professor.
+É o exemplo da apresentação, o equivalente do `NS-01 → RF-04 → UC-01 → US-07 → CA-01…04 / TA-19…21` do professor.
 
 | Elo | Artefato | O que diz |
 |---|---|---|
@@ -46,7 +47,7 @@ Só este README é escrito à mão. Os demais são **gerados** e começam com o 
 | Caso de uso | [UC-05 Verificar disponibilidade do horário](../casos-de-uso/README.md#uc-05), incluído por UC-04: exceções [E9.1](../casos-de-uso/UC-04-solicitar-reserva.md#e9-1) (conflito com uma reserva que ocupa o horário) e [E10.1](../casos-de-uso/UC-04-solicitar-reserva.md#e10-1) (conflito descoberto na gravação, por um pedido simultâneo) | A meta não é alcançada; nenhuma reserva é criada. |
 | História | [US-08 Solicitar reserva](../historias/US-08-solicitar-reserva.md) | "Como Solicitante, quero pedir um espaço … sem chocar com outro pedido." |
 | Critérios de aceite | [US-08 · CA-18](../historias/US-08-solicitar-reserva.md#us-08-ca-18) e [US-08 · CA-19](../historias/US-08-solicitar-reserva.md#us-08-ca-19) | Dado/Quando/Então do conflito e do pedido simultâneo. |
-| Testes de aceite | [TA-75](../historias/US-08-solicitar-reserva.md#ta-75) e [TA-76](../historias/US-08-solicitar-reserva.md#ta-76) | Automatizados. |
+| Testes de aceite | [TA-76](../historias/US-08-solicitar-reserva.md#ta-76) e [TA-77](../historias/US-08-solicitar-reserva.md#ta-77) | Automatizados. |
 | Endpoint e tela (complementar) | `POST /api/reservas/` → 409 `CONFLITO_DE_HORARIO`; tela `/reservas/nova` | A [agenda do dia](../requisitos/rf-agenda.md#rf-29) mostra o período ocupado antes do envio. |
 | Código (complementar) | `reservas/domain/conflito_de_horario.py::garantir_horario_livre` (a regra pura), `reservas/domain/intervalo_de_horario.py::IntervaloDeHorario.sobrepoe` (intervalo semiaberto: encostar não é conflito), `reservas/application/casos_de_uso.py::CriarReserva.executar` (consulta as reservas do dia e aplica a regra antes de gravar), `reservas/infrastructure/models.py::ReservaModel` (restrição de exclusão `reservas_reserva_sem_sobreposicao_no_espaco` no banco) e `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.salvar` (traduz a violação da restrição para o mesmo erro do domínio) | Defesa em profundidade: a regra no domínio e a garantia final no banco, contra dois pedidos simultâneos. |
 | Testes (a partir de `src/backend/`) | `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas`, `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_ocupa_horario_e_conflito`, `reservas/tests/test_repositorio_reservas.py::test_banco_barra_sobreposicao_que_escapou_da_checagem_em_codigo` e `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_responde_409` | O último é o conflito da demonstração. A lacuna [L-07](../requisitos/srs.md#l-07) registra que o pedido simultâneo é provado por uma corrida simulada, não por duas threads. |

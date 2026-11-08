@@ -7,10 +7,12 @@ from rest_framework.exceptions import (
     NotAuthenticated,
     ParseError,
     PermissionDenied,
+    Throttled,
     UnsupportedMediaType,
     ValidationError,
 )
 
+from compartilhado.api.excecoes import ServicoIndisponivel
 from compartilhado.api.tratador_de_erros import MENSAGEM_ERRO_GENERICO, tratar_excecao
 from compartilhado.domain.erros import (
     AcaoNaoPermitida,
@@ -200,6 +202,55 @@ def test_nao_autenticado_mantem_o_header_www_authenticate():
     assert resposta.headers["WWW-Authenticate"] == 'Bearer realm="api"'
     assert resposta.data == {
         "erro": {"codigo": "NAO_AUTENTICADO", "mensagem": "Faça login para continuar."}
+    }
+
+
+@pytest.mark.parametrize(
+    ("espera", "mensagem", "retry_after"),
+    [
+        (57.3, "Muitas tentativas. Tente de novo em 58 segundos.", "58"),
+        (0.2, "Muitas tentativas. Tente de novo em 1 segundo.", "1"),
+    ],
+)
+def test_limite_de_tentativas_vira_429_com_a_espera_e_o_retry_after(
+    espera, mensagem, retry_after
+):
+    # Act
+    resposta = tratar_excecao(Throttled(wait=espera), {})
+
+    # Assert
+    assert resposta.status_code == 429
+    assert resposta.headers["Retry-After"] == retry_after
+    assert resposta.data == {
+        "erro": {"codigo": "LIMITE_DE_TENTATIVAS", "mensagem": mensagem}
+    }
+
+
+def test_limite_de_tentativas_sem_tempo_conhecido_nao_cita_numero():
+    # Act
+    resposta = tratar_excecao(Throttled(), {})
+
+    # Assert
+    assert resposta.status_code == 429
+    assert "Retry-After" not in resposta.headers
+    assert _erro(resposta) == {
+        "codigo": "LIMITE_DE_TENTATIVAS",
+        "mensagem": "Muitas tentativas. Tente de novo em alguns instantes.",
+    }
+
+
+def test_servico_indisponivel_vira_503_sem_detalhes():
+    # Act
+    resposta = tratar_excecao(ServicoIndisponivel(), {})
+
+    # Assert
+    assert resposta.status_code == 503
+    assert resposta.data == {
+        "erro": {
+            "codigo": "SERVICO_INDISPONIVEL",
+            "mensagem": "Serviço temporariamente indisponível. "
+            "Tente de novo em alguns instantes.",
+        }
     }
 
 

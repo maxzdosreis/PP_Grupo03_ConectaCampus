@@ -15,6 +15,8 @@ Diagrama UML de casos de uso do Conecta Campus, índice dos casos de uso (UC-xx)
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Coluna Histórias no índice, linha "Histórias derivadas" nas fichas e ponteiro para as histórias (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Link para a [matriz de rastreabilidade gerada](../rastreabilidade/matriz.md), que lê a tabela RF → UC; a SRS 6.4 não repete mais o UC (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Pontos 4 e 5 das Pendências e a decisão i apontam para as respostas da Aula 7 ([DEC-19](../decisoes/DEC-19.md) e [DEC-14](../decisoes/DEC-14.md)) (GES-02). Os pontos 2 e 3 não foram perguntados e seguem adotados provisoriamente. Nenhum diagrama, ficha ou fluxo muda. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RF → UC: RF-33.2 em UC-02 E3.1 e RF-33.1 em E3.3, renumerada (AUT-08). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Meta de UC-22 com o cache (AUT-08). Sem aprovação. |
 
 ## Sumário
 
@@ -155,7 +157,7 @@ Nível: **objetivo** = objetivo do usuário (o "nível do mar"); **subfunção**
 | <a id="uc-19"></a>UC-19 | Concluir reserva | Registrar que o uso confirmado aconteceu. | Gestor | — | objetivo | [RF-19](../requisitos/rf-reservas.md#rf-19) | [US-16 Concluir uma reserva](../historias/US-16-concluir-uma-reserva.md) | Variação na ficha completa de UC-10 ([Concluir](UC-10-alterar-situacao-da-reserva.md#v-uc-19)) |
 | <a id="uc-20"></a>UC-20 | Criar usuário Gestor | Dar a uma pessoa do setor dos espaços o perfil Gestor. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-37](../requisitos/rf-contas.md#rf-37) | [US-17 Criar o primeiro Gestor](../historias/US-17-criar-o-primeiro-gestor.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-20) |
 | <a id="uc-21"></a>UC-21 | Carregar dados de exemplo | Ter usuários, espaços e reservas coerentes para demonstrar o sistema, com um comando. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-39](../requisitos/rf-gerais.md#rf-39) | [US-18 Carregar os dados de exemplo](../historias/US-18-carregar-os-dados-de-exemplo.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-21) |
-| <a id="uc-22"></a>UC-22 | Verificar se o sistema está no ar | Saber se o sistema e o banco de dados respondem, antes de usar ou demonstrar. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-40](../requisitos/rf-gerais.md#rf-40) | [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-22) |
+| <a id="uc-22"></a>UC-22 | Verificar se o sistema está no ar | Saber se o sistema, o banco de dados e o cache respondem, antes de usar ou demonstrar. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-40](../requisitos/rf-gerais.md#rf-40) | [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-22) |
 
 ## Rastreabilidade RF → UC
 
@@ -214,7 +216,8 @@ Todos os 60 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "C
 | [RF-32.2](../requisitos/rf-contas.md#rf-32-2) | Recusar senha fraca | [UC-01 Cadastrar-se](#uc-01) | exceção — [UC-01 E3.2](fichas-resumidas.md#uc01-e3-2) | — |
 | [RF-32.3](../requisitos/rf-contas.md#rf-32-3) | Recusar e-mail ou matrícula já cadastrados | [UC-01 Cadastrar-se](#uc-01) | exceção — [UC-01 E3.3](fichas-resumidas.md#uc01-e3-3) | — |
 | [RF-33](../requisitos/rf-contas.md#rf-33) | Entrar com e-mail e senha | [UC-02 Autenticar](#uc-02) | fluxo principal — [UC-02 passos 1 a 4](UC-02-autenticar.md#p1) | — |
-| [RF-33.1](../requisitos/rf-contas.md#rf-33-1) | Recusar credenciais inválidas | [UC-02 Autenticar](#uc-02) | exceção — [UC-02 E3.2](UC-02-autenticar.md#e3-2) | — |
+| [RF-33.1](../requisitos/rf-contas.md#rf-33-1) | Recusar credenciais inválidas | [UC-02 Autenticar](#uc-02) | exceção — [UC-02 E3.3](UC-02-autenticar.md#e3-3) | — |
+| [RF-33.2](../requisitos/rf-contas.md#rf-33-2) | Recusar tentativas de entrada em excesso | [UC-02 Autenticar](#uc-02) | exceção — [UC-02 E3.1](UC-02-autenticar.md#e3-1) | — |
 | [RF-34](../requisitos/rf-contas.md#rf-34) | Continuar identificado sem informar a senha de novo | [UC-02 Autenticar](#uc-02) | alternativa (continuar identificado) — [UC-02 A4.1](UC-02-autenticar.md#a4-1) | — |
 | [RF-34.1](../requisitos/rf-contas.md#rf-34-1) | Encerrar a sessão expirada | [UC-02 Autenticar](#uc-02) | exceção (sessão expirada) — [UC-02 E4.1](UC-02-autenticar.md#e4-1), [E4.2](UC-02-autenticar.md#e4-2) | — |
 | [RF-35](../requisitos/rf-contas.md#rf-35) | Consultar os próprios dados | [UC-02 Autenticar](#uc-02) | alternativa (confirmar a identificação ao voltar) — [UC-02 A4.2](UC-02-autenticar.md#a4-2) | — |

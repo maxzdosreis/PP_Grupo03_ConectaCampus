@@ -11,6 +11,9 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação: RNF-F01 a RNF-S06 e restrições (REQ-02). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RNF-F12 · Limite de tentativas de entrada e de cadastro, que fecha a lacuna L-03 (AUT-08). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RNF-F12: o contador fica no Redis, sem persistência, e o Redis fora do ar recusa a tentativa com 503 (AUT-08). Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F12: o limite vale também para tentativas simultâneas (contagem atômica no Redis), com o teste de concorrência na verificação (AUT-08, achado da revisão do PR). Sem aprovação. |
 
 ## Como ler
 
@@ -142,6 +145,17 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | **Métrica e valor-alvo** | Origem configurada (`CORS_ALLOWED_ORIGINS`) recebe a autorização; qualquer outra, 0 autorizações. |
 | **Como verificar** | `config/tests/test_cors.py::test_origem_configurada_recebe_access_control_allow_origin`, `::test_origem_desconhecida_nao_recebe_access_control_allow_origin` |
 | **Origem** | NS-14 (sem NS direta; ver lacuna [L-10](srs.md#lacunas)) |
+| **O cliente não pediria** | ✔ |
+| **Revisão / estado** | 0.1 • Rascunho |
+
+### <a id="rnf-f12"></a>RNF-F12 · Limite de tentativas de entrada e de cadastro
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema limita as tentativas de entrada por e-mail e por origem, e os pedidos de cadastro por origem, numa janela de tempo. A tentativa acima do limite é recusada antes de qualquer outra conferência, com o tempo de espera, e a origem é o endereço da conexão, nunca um dado que o próprio pedido informa. |
+| **Métrica e valor-alvo** | Entrada: 5 tentativas por minuto por e-mail (sem diferenciar maiúsculas de minúsculas nem espaços nas pontas) e 20 por minuto por origem; cadastro: 10 por hora por origem; janela deslizante, contando acertos e erros. 100% das tentativas acima do limite recusadas, inclusive com a senha certa e com tentativas simultâneas, com o tempo de espera em segundos; 0 tentativas escapam trocando o cabeçalho de origem do pedido; a renovação da sessão não tem limite. Valores configuráveis por variável de ambiente, conferidos na subida. Contador no Redis, sem persistência: vale para todos os processos do backend e zera quando o Redis reinicia. Com o Redis fora do ar, 100% das tentativas são recusadas (503), nunca liberadas sem contagem. |
+| **Como verificar** | `contas/tests/test_limites_de_tentativas.py::test_sexta_tentativa_com_o_mesmo_email_responde_429_com_a_espera`, `::test_senha_certa_tambem_e_recusada_depois_do_limite`, `::test_email_com_caixa_e_espacos_diferentes_conta_como_o_mesmo`, `::test_limite_por_ip_vale_para_varios_emails`, `::test_x_forwarded_for_diferente_nao_escapa_do_limite_por_ip`, `::test_cadastro_acima_do_limite_por_ip_responde_429`, `::test_depois_da_janela_o_login_volta_a_ser_aceito`, `::test_renovar_o_token_nao_tem_limite_de_tentativas`, `::test_redis_fora_do_ar_recusa_o_login_com_503_sem_conferir_a_senha`, `::test_redis_fora_do_ar_recusa_o_cadastro_com_503`, `::test_tentativas_simultaneas_nao_passam_do_limite [x]`; `config/tests/test_configuracao_de_limites.py::test_taxa_invalida_impede_a_subida_com_mensagem_clara [x]` |
+| **Origem** | NS-11, NS-14 |
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho |
 

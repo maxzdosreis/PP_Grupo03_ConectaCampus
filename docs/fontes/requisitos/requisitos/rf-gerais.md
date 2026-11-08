@@ -17,6 +17,8 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: o passo, a alternativa ou a exceção exata de cada RF nas [fichas de caso de uso](../casos-de-uso/README.md#fichas-dos-casos-de-uso); US e CA ficam para a REQ-05 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RF-40 confere também o cache (Redis, AUT-08): nova resposta "Não foi possível conectar ao cache." e a evidência do teste dela. Sem aprovação. |
 
 ## Mensagens
 
@@ -47,7 +49,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-16 |
 | **Funcionalidade** | Extra (INF-06) |
 | **Prioridade (QFD)** | Esperado — o professor avalia executando o sistema; sem dados, a demonstração começaria do zero. |
-| **Vínculos** | UC: [UC-21 Carregar dados de exemplo](../casos-de-uso/README.md#uc-21) (fluxo principal) — na ficha: [UC-21 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc21-p1) · US/CA: [US-18 · CA-01](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-01) (TA-150), [US-18 · CA-02](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-02) (TA-151), [US-18 · CA-03](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-03) (TA-152), [US-18 · CA-04](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-04) (TA-153), [US-18 · CA-05](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-05) (TA-154) |
+| **Vínculos** | UC: [UC-21 Carregar dados de exemplo](../casos-de-uso/README.md#uc-21) (fluxo principal) — na ficha: [UC-21 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc21-p1) · US/CA: [US-18 · CA-01](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-01) (TA-151), [US-18 · CA-02](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-02) (TA-152), [US-18 · CA-03](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-03) (TA-153), [US-18 · CA-04](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-04) (TA-154), [US-18 · CA-05](../historias/US-18-carregar-os-dados-de-exemplo.md#us-18-ca-05) (TA-155) |
 | **Evidência (complementar)** | `python manage.py carregar_dados_exemplo`. `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`, `::test_cria_um_espaco_de_cada_tipo_e_um_inativo`, `::test_cria_uma_reserva_de_cada_situacao`, `::test_primeira_execucao_informa_o_que_foi_criado`, `::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam`, `::test_com_debug_desligado_recusa_sem_criar_nada` |
 | **Código (complementar)** | `exemplos/management/commands/carregar_dados_exemplo.py::Command`, `exemplos/carga.py::garantir_reservas` |
 | **Regras de negócio** | [Dados de exemplo](../glossario.md#dados-de-exemplo); os dados passam pelas mesmas regras de todas as fichas acima. |
@@ -60,12 +62,12 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | O sistema deve permitir ao visitante verificar se o sistema está em funcionamento e ver "API no ar." quando o banco de dados responde, ou "Não foi possível conectar ao banco de dados." quando não responde. |
+| **Enunciado** | O sistema deve permitir ao visitante verificar se o sistema está em funcionamento e ver "API no ar." quando o banco de dados e o cache respondem, "Não foi possível conectar ao banco de dados." quando o banco não responde, ou "Não foi possível conectar ao cache." quando o cache não responde. |
 | **Origem** | NS-16 |
 | **Funcionalidade** | Extra |
 | **Prioridade (QFD)** | Esperado — quem instala precisa saber se terminou antes de abrir as telas. |
-| **Vínculos** | UC: [UC-22 Verificar se o sistema está no ar](../casos-de-uso/README.md#uc-22) (fluxo principal) — na ficha: [UC-22 passos 1 a 3](../casos-de-uso/fichas-resumidas.md#uc22-p1) · US/CA: [US-19 · CA-01](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-01) (TA-155), [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-156) |
-| **Evidência (complementar)** | `GET /api/health/` (sem login): 200 ou 503 `BANCO_INDISPONIVEL`; situação da API na página inicial `/`. `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` (`health`). **Sem teste do 503** (lacuna [L-08](srs.md#lacunas)). |
+| **Vínculos** | UC: [UC-22 Verificar se o sistema está no ar](../casos-de-uso/README.md#uc-22) (fluxo principal) — na ficha: [UC-22 passos 1 a 3](../casos-de-uso/fichas-resumidas.md#uc22-p1) · US/CA: [US-19 · CA-01](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-01) (TA-156), [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-157), [US-19 · CA-03](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-03) (TA-158) |
+| **Evidência (complementar)** | `GET /api/health/` (sem login): 200 ou 503 `BANCO_INDISPONIVEL` ou `CACHE_INDISPONIVEL`; situação da API na página inicial `/`. `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`; `config/tests/test_health.py::test_health_confere_o_banco_e_o_cache`; `config/tests/test_health.py::test_health_com_o_redis_fora_do_ar_responde_503`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` (`health`). **Sem teste do 503 do banco** (lacuna [L-08](srs.md#lacunas)); o do cache tem. |
 | **Código (complementar)** | `config/views.py::health` |
 | **Regras de negócio** | — |
 | **Decisões** | — |

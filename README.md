@@ -25,10 +25,11 @@ Sistema para a comunidade acadêmica cadastrar quadras e espaços esportivos, so
 |---|---|
 | Backend | Python 3.12 (imagem `python:3.12-slim`), Django 5.2.18 LTS, Django REST Framework 3.18.3, Simple JWT 5.5.1 (login com token), django-cors-headers 4.9.0, psycopg 3.3.6 |
 | Banco | PostgreSQL 16 (imagem `postgres:16-alpine`) |
+| Cache | Redis 8 (imagem `redis:8-alpine`), com o cliente redis-py 8.1.0: guarda a contagem do limite de tentativas de login e de cadastro |
 | Frontend | Node 24 (imagem `node:24-alpine`), React 19.3.1, React Router 8.4.0, TypeScript 6.0.3, Vite 8.3.4; ESLint 10.13.0, Vitest 5.0.5, Testing Library 16.3.3 e jsdom 30.1.3 só no desenvolvimento |
 | Execução | Docker e Docker Compose |
 
-As versões das bibliotecas são fixas em `src/backend/requirements.txt` e `src/frontend/package-lock.json`. As imagens fixam só a versão principal; o grupo testou com Python 3.12.16, PostgreSQL 16.15 e Node 24.22.0.
+As versões das bibliotecas são fixas em `src/backend/requirements.txt` e `src/frontend/package-lock.json`. As imagens fixam só a versão principal; o grupo testou com Python 3.12.16, PostgreSQL 16.15, Redis 8.10.3 e Node 24.22.0.
 
 ## Como executar
 
@@ -77,7 +78,7 @@ Os comandos valem para Git Bash, Linux e macOS; onde o Windows muda, há a vers�
 
    O que faz cada variável: [README de `src`](src/README.md#variáveis-de-ambiente-env).
 
-2. **Entre em `src` e suba os três serviços** (banco, API e tela):
+2. **Entre em `src` e suba os quatro serviços** (banco, cache, API e tela):
 
    ```bash
    cd src
@@ -100,10 +101,11 @@ Outros endereços: a API em http://localhost:8000 (endpoints e exemplos com `cur
 
 ### Verificar se a API está no ar
 
-Abra http://localhost:8000/api/health/, que testa a conexão com o banco:
+Abra http://localhost:8000/api/health/, que testa a conexão com o banco e com o cache (Redis), nessa ordem:
 
-- **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}`
+- **200** — `{"mensagem": "API no ar.", "dados": {"banco": "ok", "cache": "ok"}}`
 - **503** — `{"erro": {"codigo": "BANCO_INDISPONIVEL", "mensagem": "Não foi possível conectar ao banco de dados."}}`
+- **503** — `{"erro": {"codigo": "CACHE_INDISPONIVEL", "mensagem": "Não foi possível conectar ao cache."}}`
 
 ## Dados de exemplo
 
@@ -191,6 +193,8 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 - **`ports are not available: exposing port TCP 0.0.0.0:8000 ... bind: Normalmente é permitida apenas uma utilização de cada endereço de soquete`** (em inglês, `Only one usage of each socket address` ou `port is already allocated`): outro programa usa a porta citada. Feche-o ou troque a porta no `src/.env` como na tabela do passo 1, e rode `docker compose up -d` de novo.
 - **`required variable DB_PASSWORD is missing a value: defina DB_PASSWORD no .env`** (ou outra variável): falta o `src/.env` ou ele está incompleto. Refaça o passo 1, dentro da pasta do projeto, e rode o comando a partir de `src`. Depois de mudar o `.env`, rode `docker compose up -d` (um `restart` não relê o arquivo).
 - **`CommandError: Os dados de exemplo só podem ser carregados com DJANGO_DEBUG=True...`:** o `src/.env` tem `DJANGO_DEBUG=False`. Volte para `True`, rode `docker compose up -d` e repita o comando.
+- **"Muitas tentativas. Tente de novo em N segundos." ao entrar ou se cadastrar:** foram muitas tentativas seguidas (no login, 5 por minuto com o mesmo e-mail ou 20 por minuto do mesmo computador; no cadastro, 10 por hora). Espere o tempo indicado; até lá, nem a senha certa é aceita. No ambiente local, `docker compose restart redis` zera a contagem na hora (reiniciar o backend não zera: a contagem fica no Redis).
+- **"Serviço temporariamente indisponível. Tente de novo em alguns instantes." ao entrar ou se cadastrar:** o Redis, que conta as tentativas, está fora do ar, e o sistema recusa em vez de deixar entrar sem contar. Rode `docker compose up -d redis` e tente de novo; o `/api/health/` mostra `CACHE_INDISPONIVEL` enquanto ele estiver parado.
 - **"E-mail ou senha incorretos." com os usuários de exemplo:** os dados de exemplo não foram carregados neste banco (ou foram apagados com `down -v`). Rode o passo 3.
 - **A tela mostra "Não foi possível conectar ao servidor. Verifique se a API está em execução.":** a API ainda está subindo (espere a mensagem do passo 2). Se você trocou uma porta no `src/.env`, rode `docker compose up -d` para ela valer e abra a tela na porta da `FRONTEND_PORT_HOST`. Um `src/.env` antigo, que ainda tenha `VITE_API_URL` ou `CORS_ALLOWED_ORIGINS`, pode continuar como está: o Compose ignora essas duas e as calcula a partir das portas.
 - **Finais de linha no Windows:** não é preciso converter nada. O grupo testou uma cópia com os arquivos em formato Windows (CRLF), inclusive o `.env`, o `docker-compose.yml` e os `Dockerfile`, e ela sobe igual.
@@ -206,7 +210,7 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 - **Sem recuperação de senha nem troca de perfil pela tela:** quem esquecer a senha, ou precisar virar Gestor, depende da administração (admin do Django).
 - **Desativar um espaço não cancela as reservas dele:** novas reservas ficam bloqueadas, mas as existentes continuam valendo, e o Gestor decide se cancela alguma.
 - **Sem revogação de tokens:** sair é descartar os tokens no navegador; um token de acesso roubado continua valendo até expirar (30 minutos) e o de renovação, até 1 dia. A exceção é desativar ou excluir o usuário: a partir daí, nenhum token dele é aceito.
-- **Sem limite de tentativas de login:** não há proteção contra quem tenta adivinhar senhas repetindo o login.
+- **Contador de tentativas sem persistência:** o limite de tentativas de login (5 por minuto por e-mail, 20 por minuto por computador) e de cadastro (10 por hora) é contado no Redis, só em memória: zera quando o Redis reinicia. Com o Redis parado, entrar e cadastrar-se ficam indisponíveis (503) até ele voltar.
 - **Sessão no `localStorage`:** a tela guarda os tokens no `localStorage` do navegador, para o login sobreviver ao recarregar. Um script malicioso injetado na página poderia lê-los. Na navegação privada que bloqueia o `localStorage`, o login vale só até recarregar.
 - **Perfil na interface:** esconder o formulário e os botões de espaços de quem não é Gestor é só conveniência; quem garante as permissões é a API (403 `ACAO_NAO_PERMITIDA`).
 - **Alterações simultâneas:** se duas pessoas mudarem ao mesmo tempo a situação da mesma reserva, ou o mesmo espaço, só a primeira é gravada; a segunda recebe 409 e precisa atualizar a lista e decidir de novo.

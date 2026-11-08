@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -48,7 +49,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra todos, ordenados pelo nome (maiúsculas antes das minúsculas, letras acentuadas no fim), cada um com nome, tipo, capacidade e se está ativo, e informa quantos foram encontrados
 - **Origem:** [UC-03 passo 2](../casos-de-uso/fichas-resumidas.md#uc03-p2)
 - **RF:** [RF-01](../requisitos/rf-espacos.md#rf-01)
-- **TA:** [TA-20](#ta-20)
+- **TA:** [TA-21](#ta-21)
 
 #### <a id="us-04-ca-02"></a>US-04 · CA-02 · Escolher um espaço para reservar (sucesso)
 
@@ -57,7 +58,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema abre o pedido de reserva com esse espaço já escolhido; os espaços inativos não oferecem essa opção
 - **Origem:** [UC-03 passo 3](../casos-de-uso/fichas-resumidas.md#uc03-p3)
 - **RF:** [RF-01](../requisitos/rf-espacos.md#rf-01)
-- **TA:** [TA-21](#ta-21)
+- **TA:** [TA-22](#ta-22)
 
 #### <a id="us-04-ca-03"></a>US-04 · CA-03 · Filtrar por tipo e por ativos (alternativa)
 
@@ -66,7 +67,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra só os espaços que atendem a todos os critérios escolhidos, com a quantidade, e os critérios continuam aplicados se a pessoa recarregar ou voltar à lista
 - **Origem:** [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1)
 - **RF:** [RF-02](../requisitos/rf-espacos.md#rf-02), [RF-04](../requisitos/rf-espacos.md#rf-04)
-- **TA:** [TA-22](#ta-22)
+- **TA:** [TA-23](#ta-23)
 
 #### <a id="us-04-ca-04"></a>US-04 · CA-04 · Filtro sem resultado (alternativa)
 
@@ -75,7 +76,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Nenhum espaço encontrado." e oferece limpar os critérios, que volta à lista completa
 - **Origem:** [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1)
 - **RF:** [RF-02](../requisitos/rf-espacos.md#rf-02)
-- **TA:** [TA-23](#ta-23)
+- **TA:** [TA-24](#ta-24)
 
 #### <a id="us-04-ca-05"></a>US-04 · CA-05 · Ver um espaço (alternativa)
 
@@ -84,7 +85,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra o nome, o tipo, a capacidade e se ele está ativo
 - **Origem:** [UC-03 A2.2](../casos-de-uso/fichas-resumidas.md#uc03-a2-2)
 - **RF:** [RF-03](../requisitos/rf-espacos.md#rf-03)
-- **TA:** [TA-24](#ta-24)
+- **TA:** [TA-25](#ta-25)
 
 #### <a id="us-04-ca-06"></a>US-04 · CA-06 · Tipo desconhecido no filtro (exceção)
 
@@ -93,7 +94,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa, no critério tipo, que o valor não é aceito; a lista não é filtrada e nenhum espaço muda
 - **Origem:** [UC-03 E2.1](../casos-de-uso/fichas-resumidas.md#uc03-e2-1)
 - **RF:** [RF-02.1](../requisitos/rf-espacos.md#rf-02-1)
-- **TA:** [TA-25](#ta-25)
+- **TA:** [TA-26](#ta-26)
 
 #### <a id="us-04-ca-07"></a>US-04 · CA-07 · Espaço inexistente (exceção)
 
@@ -102,7 +103,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço de código «n» não encontrado." e nenhum espaço muda
 - **Origem:** [UC-03 E2.2](../casos-de-uso/fichas-resumidas.md#uc03-e2-2)
 - **RF:** [RF-09](../requisitos/rf-espacos.md#rf-09)
-- **TA:** [TA-26](#ta-26)
+- **TA:** [TA-27](#ta-27)
 
 #### <a id="us-04-ca-08"></a>US-04 · CA-08 · Só o Gestor mantém espaços; sem identificação, nada (acesso)
 
@@ -111,7 +112,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o Solicitante vê a lista sem nenhuma opção de cadastrar, editar, desativar ou reativar (essas ficam só com o Gestor), e quem não entrou não vê nenhum espaço e é levado a se identificar
 - **Origem:** [UC-03 A2.3](../casos-de-uso/fichas-resumidas.md#uc03-a2-3)
 - **RF:** [RF-01](../requisitos/rf-espacos.md#rf-01), [RF-10](../requisitos/rf-espacos.md#rf-10)
-- **TA:** [TA-27](#ta-27)
+- **TA:** [TA-28](#ta-28)
 
 ## Testes de aceite
 
@@ -119,11 +120,11 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-20"></a>TA-20 | [CA-01](#us-04-ca-01) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_ordena_por_nome`; `espacos/tests/test_api_espacos.py::test_listar_informa_a_quantidade_encontrada [x]`; `espacos/tests/test_api_espacos.py::test_solicitante_lista_espacos`; `pages/PaginaEspacos.test.tsx`: `mostra a mensagem de contagem e os espaços na tabela` |
-| <a id="ta-21"></a>TA-21 | [CA-02](#us-04-ca-02) | automatizado | `components/espacos/TabelaDeEspacos.test.tsx`: `mostra "Reservar" só nos espaços ativos, apontando para a nova reserva` |
-| <a id="ta-22"></a>TA-22 | [CA-03](#us-04-ca-03) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string [x]`; `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum`; `pages/PaginaEspacos.test.tsx`: `mudar os filtros grava na URL e busca com eles` |
-| <a id="ta-23"></a>TA-23 | [CA-04](#us-04-ca-04) | automatizado | `pages/PaginaEspacos.test.tsx`: `lê os filtros da URL e, sem resultado, "Limpar filtros" limpa a URL e busca de novo` |
-| <a id="ta-24"></a>TA-24 | [CA-05](#us-04-ca-05) | automatizado | `espacos/tests/test_api_espacos.py::test_obter_espaco_existente_responde_200_com_o_espaco`; `espacos/tests/test_api_espacos.py::test_solicitante_obtem_o_detalhe_de_um_espaco` |
-| <a id="ta-25"></a>TA-25 | [CA-06](#us-04-ca-06) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_com_tipo_desconhecido_no_filtro_responde_400` |
-| <a id="ta-26"></a>TA-26 | [CA-07](#us-04-ca-07) | automatizado | `espacos/tests/test_api_espacos.py::test_obter_espaco_inexistente_responde_404` |
-| <a id="ta-27"></a>TA-27 | [CA-08](#us-04-ca-08) | automatizado | `pages/PaginaEspacos.test.tsx`: `para o solicitante, a tabela não tem editar, desativar nem reativar`; `pages/PaginaEspacos.test.tsx`: `para o solicitante, troca o formulário por um aviso e lista os espaços`; `espacos/tests/test_api_espacos.py::test_consultar_espacos_sem_login_responde_401`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-21"></a>TA-21 | [CA-01](#us-04-ca-01) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_ordena_por_nome`; `espacos/tests/test_api_espacos.py::test_listar_informa_a_quantidade_encontrada [x]`; `espacos/tests/test_api_espacos.py::test_solicitante_lista_espacos`; `pages/PaginaEspacos.test.tsx`: `mostra a mensagem de contagem e os espaços na tabela` |
+| <a id="ta-22"></a>TA-22 | [CA-02](#us-04-ca-02) | automatizado | `components/espacos/TabelaDeEspacos.test.tsx`: `mostra "Reservar" só nos espaços ativos, apontando para a nova reserva` |
+| <a id="ta-23"></a>TA-23 | [CA-03](#us-04-ca-03) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string [x]`; `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum`; `pages/PaginaEspacos.test.tsx`: `mudar os filtros grava na URL e busca com eles` |
+| <a id="ta-24"></a>TA-24 | [CA-04](#us-04-ca-04) | automatizado | `pages/PaginaEspacos.test.tsx`: `lê os filtros da URL e, sem resultado, "Limpar filtros" limpa a URL e busca de novo` |
+| <a id="ta-25"></a>TA-25 | [CA-05](#us-04-ca-05) | automatizado | `espacos/tests/test_api_espacos.py::test_obter_espaco_existente_responde_200_com_o_espaco`; `espacos/tests/test_api_espacos.py::test_solicitante_obtem_o_detalhe_de_um_espaco` |
+| <a id="ta-26"></a>TA-26 | [CA-06](#us-04-ca-06) | automatizado | `espacos/tests/test_api_espacos.py::test_listar_com_tipo_desconhecido_no_filtro_responde_400` |
+| <a id="ta-27"></a>TA-27 | [CA-07](#us-04-ca-07) | automatizado | `espacos/tests/test_api_espacos.py::test_obter_espaco_inexistente_responde_404` |
+| <a id="ta-28"></a>TA-28 | [CA-08](#us-04-ca-08) | automatizado | `pages/PaginaEspacos.test.tsx`: `para o solicitante, a tabela não tem editar, desativar nem reativar`; `pages/PaginaEspacos.test.tsx`: `para o solicitante, troca o formulário por um aviso e lista os espaços`; `espacos/tests/test_api_espacos.py::test_consultar_espacos_sem_login_responde_401`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

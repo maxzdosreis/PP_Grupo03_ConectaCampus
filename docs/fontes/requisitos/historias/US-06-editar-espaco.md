@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço atualizado com sucesso.", grava só os dados alterados, mantém os outros como estavam e a lista passa a mostrar o espaço atualizado
 - **Origem:** [UC-15 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc15-p1)
 - **RF:** [RF-06](../requisitos/rf-espacos.md#rf-06), [RF-04](../requisitos/rf-espacos.md#rf-04)
-- **TA:** [TA-39](#ta-39)
+- **TA:** [TA-40](#ta-40)
 
 #### <a id="us-06-ca-02"></a>US-06 · CA-02 · Manter o próprio nome ou só trocar maiúsculas (alternativa)
 
@@ -58,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema não acusa nome repetido e grava a edição
 - **Origem:** [UC-15 A3.1](../casos-de-uso/fichas-resumidas.md#uc15-a3-1)
 - **RF:** [RF-06](../requisitos/rf-espacos.md#rf-06), [RF-05.2](../requisitos/rf-espacos.md#rf-05-2)
-- **TA:** [TA-40](#ta-40)
+- **TA:** [TA-41](#ta-41)
 
 #### <a id="us-06-ca-03"></a>US-06 · CA-03 · Ativo ou inativo no pedido de edição (alternativa)
 
@@ -67,7 +68,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema ignora essa parte: o espaço continua ativo, e ativar ou desativar só acontece pela [US-07](US-07-desativar-e-reativar-espaco.md)
 - **Origem:** [UC-15 A3.2](../casos-de-uso/fichas-resumidas.md#uc15-a3-2)
 - **RF:** [RF-06](../requisitos/rf-espacos.md#rf-06)
-- **TA:** [TA-41](#ta-41)
+- **TA:** [TA-42](#ta-42)
 
 #### <a id="us-06-ca-04"></a>US-06 · CA-04 · Capacidade em formato inválido (exceção)
 
@@ -76,7 +77,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Verifique os dados informados." com o problema junto à capacidade, e o espaço não muda
 - **Origem:** [UC-15 E4.1](../casos-de-uso/fichas-resumidas.md#uc15-e4-1)
 - **RF:** [RF-06.2](../requisitos/rf-espacos.md#rf-06-2)
-- **TA:** [TA-42](#ta-42)
+- **TA:** [TA-43](#ta-43)
 
 #### <a id="us-06-ca-05"></a>US-06 · CA-05 · Espaço inexistente (exceção)
 
@@ -85,7 +86,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço de código «n» não encontrado." e nenhum espaço muda
 - **Origem:** [UC-15 E4.2](../casos-de-uso/fichas-resumidas.md#uc15-e4-2)
 - **RF:** [RF-09](../requisitos/rf-espacos.md#rf-09)
-- **TA:** [TA-43](#ta-43)
+- **TA:** [TA-44](#ta-44)
 
 #### <a id="us-06-ca-06"></a>US-06 · CA-06 · Nenhum dado alterado (exceção)
 
@@ -94,7 +95,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Informe ao menos um campo para alterar." e o espaço não muda
 - **Origem:** [UC-15 E4.3](../casos-de-uso/fichas-resumidas.md#uc15-e4-3)
 - **RF:** [RF-06.1](../requisitos/rf-espacos.md#rf-06-1)
-- **TA:** [TA-44](#ta-44)
+- **TA:** [TA-45](#ta-45)
 
 #### <a id="us-06-ca-07"></a>US-06 · CA-07 · Dado fora das regras do cadastro (exceção)
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra, junto ao dado, a mesma mensagem do cadastro ([US-05 · CA-05 a CA-08](US-05-cadastrar-espaco.md#us-05-ca-05)), e nenhum dado do espaço muda, nem o válido do mesmo pedido
 - **Origem:** [UC-15 E4.4](../casos-de-uso/fichas-resumidas.md#uc15-e4-4)
 - **RF:** [RF-06.2](../requisitos/rf-espacos.md#rf-06-2)
-- **TA:** [TA-45](#ta-45)
+- **TA:** [TA-46](#ta-46)
 
 #### <a id="us-06-ca-08"></a>US-06 · CA-08 · Nome de outro espaço (exceção)
 
@@ -112,7 +113,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa, junto ao nome, "Já existe um espaço com este nome.", e nenhum dos dois espaços muda
 - **Origem:** [UC-15 E4.5](../casos-de-uso/fichas-resumidas.md#uc15-e4-5)
 - **RF:** [RF-05.2](../requisitos/rf-espacos.md#rf-05-2), [RF-06.2](../requisitos/rf-espacos.md#rf-06-2)
-- **TA:** [TA-46](#ta-46)
+- **TA:** [TA-47](#ta-47)
 - **Depende de:** [DEC-10](../decisoes/DEC-10.md) (decidida)
 
 #### <a id="us-06-ca-09"></a>US-06 · CA-09 · Espaço alterado por outra pessoa (exceção)
@@ -122,7 +123,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Este espaço foi alterado por outra pessoa enquanto você decidia. Atualize a lista e tente de novo." e oferece atualizar a lista; vale só a primeira alteração, e o espaço não volta a ficar ativo por engano
 - **Origem:** [UC-15 E5.1](../casos-de-uso/fichas-resumidas.md#uc15-e5-1)
 - **RF:** [RF-06](../requisitos/rf-espacos.md#rf-06) (a garantia é o [RNF-R04](../requisitos/rnf.md#rnf-r04))
-- **TA:** [TA-47](#ta-47)
+- **TA:** [TA-48](#ta-48)
 
 #### <a id="us-06-ca-10"></a>US-06 · CA-10 · Só o Gestor edita (acesso)
 
@@ -131,7 +132,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Você não tem permissão para realizar esta ação.", o espaço não muda e a lista do Solicitante nem oferece editar
 - **Origem:** [UC-15 E1.1](../casos-de-uso/fichas-resumidas.md#uc15-e1-1)
 - **RF:** [RF-10](../requisitos/rf-espacos.md#rf-10)
-- **TA:** [TA-48](#ta-48)
+- **TA:** [TA-49](#ta-49)
 
 ## Testes de aceite
 
@@ -139,13 +140,13 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-39"></a>TA-39 | [CA-01](#us-06-ca-01) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos`; `espacos/tests/test_api_edicao_de_espaco.py::test_editar_so_a_capacidade_mantem_os_outros_campos`; `espacos/tests/test_casos_de_uso.py::test_editar_o_tipo_grava_o_tipo_novo_e_mantem_o_resto`; `pages/PaginaEspacos.test.tsx`: `envia só o campo alterado; no sucesso, mostra o toast, fecha e recarrega a lista` |
-| <a id="ta-40"></a>TA-40 | [CA-02](#us-06-ca-02) | automatizado | `espacos/tests/test_casos_de_uso.py::test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade [x]` |
-| <a id="ta-41"></a>TA-41 | [CA-03](#us-06-ca-03) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativo_no_corpo_do_patch_e_ignorado` |
-| <a id="ta-42"></a>TA-42 | [CA-04](#us-06-ca-04) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`; `pages/PaginaEspacos.test.tsx`: `a capacidade inválida aparece embaixo do campo, que recebe o foco` |
-| <a id="ta-43"></a>TA-43 | [CA-05](#us-06-ca-05) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404 [x]`; `espacos/tests/test_casos_de_uso.py::test_acoes_em_espaco_inexistente_lancam_espaco_nao_encontrado [x]` |
-| <a id="ta-44"></a>TA-44 | [CA-06](#us-06-ca-06) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_sem_nenhum_campo_responde_400`; `espacos/tests/test_api_edicao_de_espaco.py::test_so_ativo_no_corpo_do_patch_conta_como_nenhuma_alteracao`; `pages/PaginaEspacos.test.tsx`: `sem mudança, envia um corpo vazio e mostra a mensagem da API num aviso` |
-| <a id="ta-45"></a>TA-45 | [CA-07](#us-06-ca-07) | automatizado | `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`; `espacos/tests/test_casos_de_uso.py::test_editar_com_dado_invalido_nao_grava`; `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]` |
-| <a id="ta-46"></a>TA-46 | [CA-08](#us-06-ca-08) | automatizado | `espacos/tests/test_casos_de_uso.py::test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar`; `pages/PaginaEspacos.test.tsx`: `o nome repetido aparece no campo Nome` |
-| <a id="ta-47"></a>TA-47 | [CA-09](#us-06-ca-09) | automatizado | `espacos/tests/test_concorrencia_de_espaco.py::test_edicao_e_desativacao_simultaneas_gravam_so_uma`; `espacos/tests/test_repositorio_espacos.py::test_edicao_sobre_leitura_anterior_a_uma_desativacao_e_recusada`; `pages/PaginaEspacos.test.tsx`: `se outra pessoa alterou o espaço, mostra o aviso e "Atualizar lista", que recarrega` |
-| <a id="ta-48"></a>TA-48 | [CA-10](#us-06-ca-10) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `pages/PaginaEspacos.test.tsx`: `para o solicitante, a tabela não tem editar, desativar nem reativar`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-40"></a>TA-40 | [CA-01](#us-06-ca-01) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos`; `espacos/tests/test_api_edicao_de_espaco.py::test_editar_so_a_capacidade_mantem_os_outros_campos`; `espacos/tests/test_casos_de_uso.py::test_editar_o_tipo_grava_o_tipo_novo_e_mantem_o_resto`; `pages/PaginaEspacos.test.tsx`: `envia só o campo alterado; no sucesso, mostra o toast, fecha e recarrega a lista` |
+| <a id="ta-41"></a>TA-41 | [CA-02](#us-06-ca-02) | automatizado | `espacos/tests/test_casos_de_uso.py::test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade [x]` |
+| <a id="ta-42"></a>TA-42 | [CA-03](#us-06-ca-03) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativo_no_corpo_do_patch_e_ignorado` |
+| <a id="ta-43"></a>TA-43 | [CA-04](#us-06-ca-04) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`; `pages/PaginaEspacos.test.tsx`: `a capacidade inválida aparece embaixo do campo, que recebe o foco` |
+| <a id="ta-44"></a>TA-44 | [CA-05](#us-06-ca-05) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404 [x]`; `espacos/tests/test_casos_de_uso.py::test_acoes_em_espaco_inexistente_lancam_espaco_nao_encontrado [x]` |
+| <a id="ta-45"></a>TA-45 | [CA-06](#us-06-ca-06) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_editar_sem_nenhum_campo_responde_400`; `espacos/tests/test_api_edicao_de_espaco.py::test_so_ativo_no_corpo_do_patch_conta_como_nenhuma_alteracao`; `pages/PaginaEspacos.test.tsx`: `sem mudança, envia um corpo vazio e mostra a mensagem da API num aviso` |
+| <a id="ta-46"></a>TA-46 | [CA-07](#us-06-ca-07) | automatizado | `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`; `espacos/tests/test_casos_de_uso.py::test_editar_com_dado_invalido_nao_grava`; `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]` |
+| <a id="ta-47"></a>TA-47 | [CA-08](#us-06-ca-08) | automatizado | `espacos/tests/test_casos_de_uso.py::test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar`; `pages/PaginaEspacos.test.tsx`: `o nome repetido aparece no campo Nome` |
+| <a id="ta-48"></a>TA-48 | [CA-09](#us-06-ca-09) | automatizado | `espacos/tests/test_concorrencia_de_espaco.py::test_edicao_e_desativacao_simultaneas_gravam_so_uma`; `espacos/tests/test_repositorio_espacos.py::test_edicao_sobre_leitura_anterior_a_uma_desativacao_e_recusada`; `pages/PaginaEspacos.test.tsx`: `se outra pessoa alterou o espaço, mostra o aviso e "Atualizar lista", que recarrega` |
+| <a id="ta-49"></a>TA-49 | [CA-10](#us-06-ca-10) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `pages/PaginaEspacos.test.tsx`: `para o solicitante, a tabela não tem editar, desativar nem reativar`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

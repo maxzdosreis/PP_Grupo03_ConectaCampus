@@ -15,6 +15,8 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Criação (REQ-01; data do commit, o arquivo não tinha histórico). As REQ-02 a REQ-05 acrescentaram as próprias decisões de organização. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Cabeçalho completado (REQ-06). Estrutura com [`rastreabilidade/`](rastreabilidade/README.md); identificadores de documento IND, RAS, PAU, MCR e BL; rastreabilidade descrita até o código, com link para a matriz gerada; decisões de organização da REQ-06. Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): estrutura com DEC-01 a DEC-23 e CR-01 a CR-04; decisões c (REQ-01) e c (REQ-02), a rastreabilidade e os pontos a confirmar apontam para as DEC-14 a DEC-19. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Contagens de RF (61), RNF (32), CAs (157) e TAs (TA-01 a TA-157) atualizadas; renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Contagem de CAs (158) e TAs (TA-01 a TA-158), com o CA-03 da US-19 (AUT-08). Sem aprovação. |
 
 ## Estrutura
 
@@ -22,9 +24,9 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 |---|---|---|
 | [`visao.md`](visao.md) | **VIS-01**, Documento de Visão (RUP, 4 quadrantes): problema, stakeholders, necessidades NS-xx, escopo, premissas, critérios de sucesso e riscos. | 0.1 • Rascunho (REQ-01) |
 | [`glossario.md`](glossario.md) | **GLO-01**, termos do domínio com definição única e o nome correspondente no código. | 0.1 • Rascunho (REQ-01) |
-| [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (60 fichas, por área) e RNF-F01 a RNF-S06 (31, por FURPS). | 0.1 • Rascunho (REQ-02) |
+| [`requisitos/`](requisitos/README.md) | **SRS-01** ([`srs.md`](requisitos/srs.md)) e as fichas A4·s9: RF-01 a RF-40 (61 fichas, por área) e RNF-F01 a RNF-S06 (32, por FURPS). | 0.1 • Rascunho (REQ-02) |
 | [`casos-de-uso/`](casos-de-uso/README.md) | **UCD-01** (diagrama do negócio, UC-01 a UC-19) e **UCD-02** (diagrama de apoio "Administração", UC-20 a UC-22) em PlantUML, com as imagens geradas, o índice dos UCs e a rastreabilidade RF → UC (REQ-03); fichas Cockburn completas de UC-02, UC-04, UC-10 e UC-14, resumidas dos demais e o fluxo de decisão de UC-04 (REQ-04). | 0.1 • Rascunho (REQ-03, REQ-04) |
-| [`historias/`](historias/README.md) | **HIS-01**: histórias US-01 a US-19 (Index Card e INVEST), 156 critérios de aceite CA-xx em Dado/Quando/Então e os testes de aceite TA-01 a TA-156 ligados aos testes que existem, com a cobertura UC → US/CA e a rastreabilidade RF → US/CA. | 0.1 • Rascunho (REQ-05) |
+| [`historias/`](historias/README.md) | **HIS-01**: histórias US-01 a US-19 (Index Card e INVEST), 158 critérios de aceite CA-xx em Dado/Quando/Então e os testes de aceite TA-01 a TA-158 ligados aos testes que existem, com a cobertura UC → US/CA e a rastreabilidade RF → US/CA. | 0.1 • Rascunho (REQ-05) |
 | [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice e a [pauta da Aula 7](decisoes/pauta-aula-7.md). | DEC-01 a DEC-23, todas decididas (Aula 7) |
 | [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança, e o [modelo de CR](mudancas/modelo-cr.md). | CR-01 a CR-04 aprovados, aguardando implementação (GES-02) |
 | [`baselines/`](baselines/README.md) | Manifestos de baseline (conjunto aprovado de versões). | [candidata à 1.0](baselines/conecta-campus-1.0-candidata.md), aguardando aprovação (REQ-06) |

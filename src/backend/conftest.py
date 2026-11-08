@@ -1,7 +1,9 @@
 import os
+from urllib.parse import urlsplit
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.urls import reverse
 from hypothesis import settings
 from rest_framework.test import APIClient
@@ -11,6 +13,31 @@ SENHA_DE_TESTE = "senha-de-teste-123"
 settings.register_profile("rapido", max_examples=50, derandomize=True, deadline=None)
 settings.register_profile("exaustivo", max_examples=2000, deadline=None)
 settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "rapido"))
+
+
+BANCO_DO_REDIS_DE_TESTE = 1
+_FIXTURES_DE_BANCO = {"db", "transactional_db"}
+
+
+def _usa_banco(request):
+    marcado = request.node.get_closest_marker("django_db") is not None
+    return marcado or bool(_FIXTURES_DE_BANCO & set(request.fixturenames))
+
+
+def _redis_de_teste(url):
+    return urlsplit(url)._replace(path=f"/{BANCO_DO_REDIS_DE_TESTE}").geturl()
+
+
+@pytest.fixture(autouse=True)
+def _contadores_de_tentativas_zerados(request):
+    if not _usa_banco(request):
+        return
+    configuracao = request.getfixturevalue("settings")
+    atual = configuracao.CACHES["default"]
+    configuracao.CACHES = {
+        "default": {**atual, "LOCATION": _redis_de_teste(atual["LOCATION"])}
+    }
+    cache.clear()
 
 
 def _cliente_de(usuario):

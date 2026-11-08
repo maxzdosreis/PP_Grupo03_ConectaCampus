@@ -261,4 +261,58 @@ describe('cliente da API', () => {
     expect(autorizacao(chamadas()[0])).toBeUndefined()
     expect(lerSessao()?.access).toBe('access-1')
   })
+  const LIMITE_DE_TENTATIVAS = resposta(429, {
+    erro: { codigo: 'LIMITE_DE_TENTATIVAS', mensagem: 'Muitas tentativas. Tente de novo em 42 segundos.' },
+  })
+
+  it('429 LIMITE_DE_TENTATIVAS no login vira o erro com a mensagem do servidor, sem renovar', async () => {
+    fetchFalso.mockResolvedValue(LIMITE_DE_TENTATIVAS)
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const erro = await erroDe(entrar({ email: 'bruno.lima@exemplo.com', senha: 'errada' }))
+    cancelar()
+
+    expect(erro.status).toBe(429)
+    expect(erro.codigo).toBe('LIMITE_DE_TENTATIVAS')
+    expect(erro.message).toBe('Muitas tentativas. Tente de novo em 42 segundos.')
+    expect(chamadas()).toHaveLength(1)
+    expect(ouvinte).not.toHaveBeenCalled()
+    expect(lerSessao()?.access).toBe('access-1')
+  })
+
+  it('429 numa requisição autenticada não renova o token nem limpa a sessão', async () => {
+    fetchFalso.mockResolvedValue(LIMITE_DE_TENTATIVAS)
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const erro = await erroDe(requisitar('/reservas/'))
+    cancelar()
+
+    expect(erro.status).toBe(429)
+    expect(chamadasDeRenovacao()).toHaveLength(0)
+    expect(ouvinte).not.toHaveBeenCalled()
+    expect(lerSessao()).toMatchObject({ access: 'access-1', refresh: 'refresh-1' })
+  })
+  it('503 SERVICO_INDISPONIVEL no login vira o erro com a mensagem do servidor, sem renovar nem limpar a sessão', async () => {
+    fetchFalso.mockResolvedValue(
+      resposta(503, {
+        erro: {
+          codigo: 'SERVICO_INDISPONIVEL',
+          mensagem: 'Serviço temporariamente indisponível. Tente de novo em alguns instantes.',
+        },
+      }),
+    )
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const erro = await erroDe(entrar({ email: 'bruno.lima@exemplo.com', senha: 'errada' }))
+    cancelar()
+
+    expect(erro.status).toBe(503)
+    expect(erro.codigo).toBe('SERVICO_INDISPONIVEL')
+    expect(chamadas()).toHaveLength(1)
+    expect(ouvinte).not.toHaveBeenCalled()
+    expect(lerSessao()?.access).toBe('access-1')
+  })
 })

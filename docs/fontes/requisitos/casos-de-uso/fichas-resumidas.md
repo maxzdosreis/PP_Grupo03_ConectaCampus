@@ -15,6 +15,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: UC-01, UC-03, UC-06 a UC-09, UC-15 e UC-16 e o bloco de apoio UC-20 a UC-22 (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" em cada caso de uso (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Bloco de apoio aponta para o README da raiz e o do backend, com a divisão do README (DOC-09). Mudança editorial, sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-01: nota do limite de pedidos de cadastro por origem (RNF-F12, AUT-08), sem exceção nem RF novos. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-22: confere também o cache, com a exceção E2.2 · Cache fora do ar; UC-01: a recusa com o serviço de contagem fora do ar (Redis, AUT-08). Sem aprovação. |
 
 ## Sumário
 
@@ -51,6 +53,8 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | <a id="uc01-e3-1"></a>E3.1 · Dados ausentes ou inválidos | Falta um dado; o nome só tem espaços ou passa de 150 caracteres; a matrícula passa de 20 caracteres ou tem espaço; o e-mail está mal formado. | A regra violada junto a cada dado (por exemplo, 'O campo "Nome" é obrigatório.'). | Nenhuma conta é criada. | [RF-32.1](../requisitos/rf-contas.md#rf-32-1) ([DEC-09](../decisoes/DEC-09.md)) |
 | <a id="uc01-e3-2"></a>E3.2 · Senha fraca | A senha é curta (menos de 8 caracteres), comum, só de números ou parecida com o nome, o e-mail ou a matrícula. | Junto à senha, cada motivo da recusa. | Nenhuma conta é criada. | [RF-32.2](../requisitos/rf-contas.md#rf-32-2) |
 | <a id="uc01-e3-3"></a>E3.3 · E-mail ou matrícula já usados | O e-mail (sem diferenciar maiúsculas) ou a matrícula já pertencem a outra conta. | Junto ao dado, que ele já está cadastrado; a pessoa pode entrar ([UC-02](UC-02-autenticar.md)) se a conta for dela. | Nenhuma conta é criada; a outra conta não muda. | [RF-32.3](../requisitos/rf-contas.md#rf-32-3) |
+
+**Fora das exceções:** antes do passo 3, o sistema também limita os pedidos de cadastro a partir da mesma origem; acima do limite, informa "Muitas tentativas. Tente de novo em N segundos." e não cria a conta ([RNF-F12](../requisitos/rnf.md#rnf-f12)); se o serviço que conta os pedidos estiver fora do ar, informa "Serviço temporariamente indisponível. Tente de novo em alguns instantes." e também não cria. É uma garantia de segurança, sem RF de recusa próprio.
 
 **RFs cobertos:** [RF-32](../requisitos/rf-contas.md#rf-32) → [passos 1 a 4](#uc01-p1) · [RF-32.1](../requisitos/rf-contas.md#rf-32-1) → [E3.1](#uc01-e3-1) · [RF-32.2](../requisitos/rf-contas.md#rf-32-2) → [E3.2](#uc01-e3-2) · [RF-32.3](../requisitos/rf-contas.md#rf-32-3) → [E3.3](#uc01-e3-3)
 
@@ -379,14 +383,14 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 | Campo | Conteúdo |
 |---|---|
 | **Ator primário** | Equipe de TI (qualquer visitante pode fazer a mesma verificação) |
-| **Meta** | Saber se o sistema e o banco de dados respondem, antes de usar ou demonstrar. |
+| **Meta** | Saber se o sistema, o banco de dados e o cache respondem, antes de usar ou demonstrar. |
 | **Precondição** | Nenhuma (não exige identificação). |
 | **Ficha completa relacionada** | — |
 
 **Fluxo principal**
 
 1. <a id="uc22-p1"></a>A Equipe de TI pede a verificação do sistema.
-2. <a id="uc22-p2"></a>O sistema confere se o banco de dados responde.
+2. <a id="uc22-p2"></a>O sistema confere, nesta ordem, se o banco de dados e o cache respondem.
 3. <a id="uc22-p3"></a>O sistema informa "API no ar."
 
 **Exceções**
@@ -394,7 +398,8 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 | Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
 |---|---|---|---|---|
 | <a id="uc22-e2-1"></a>E2.1 · Banco de dados fora do ar | O banco de dados não responde. | "Não foi possível conectar ao banco de dados." | Nada muda. | [RF-40](../requisitos/rf-gerais.md#rf-40) (sem teste: [lacuna L-08](../requisitos/srs.md#l-08)) |
+| <a id="uc22-e2-2"></a>E2.2 · Cache fora do ar | O banco responde, mas o cache não. | "Não foi possível conectar ao cache." Enquanto ele estiver fora do ar, entrar e cadastrar-se são recusados ([RNF-F12](../requisitos/rnf.md#rnf-f12)). | Nada muda. | [RF-40](../requisitos/rf-gerais.md#rf-40) |
 
-**RFs cobertos:** [RF-40](../requisitos/rf-gerais.md#rf-40) → [passos 1 a 3](#uc22-p1), [E2.1](#uc22-e2-1)
+**RFs cobertos:** [RF-40](../requisitos/rf-gerais.md#rf-40) → [passos 1 a 3](#uc22-p1), [E2.1](#uc22-e2-1), [E2.2](#uc22-e2-2)
 
 **Histórias derivadas:** [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md)

@@ -100,6 +100,21 @@ describe('PaginaCadastro', () => {
     expect(entrar).not.toHaveBeenCalled()
   })
 
+  it('muitas tentativas mostram a mensagem do servidor no aviso do topo e não entram', async () => {
+    vi.mocked(cadastrar).mockRejectedValue(
+      new ErroDaApi(429, 'LIMITE_DE_TENTATIVAS', 'Muitas tentativas. Tente de novo em 42 segundos.'),
+    )
+    renderizarComSessaoReal(ROTAS, '/cadastro')
+
+    await preencherEEnviar()
+
+    const aviso = await screen.findByRole('alert')
+    expect(aviso.textContent).toContain('Muitas tentativas. Tente de novo em 42 segundos.')
+    await waitFor(() => expect(document.activeElement?.contains(aviso)).toBe(true))
+    expect(entrar).not.toHaveBeenCalled()
+    expect(screen.queryByTestId('local')).toBeNull()
+  })
+
   it('senha fraca aparece embaixo da senha', async () => {
     vi.mocked(cadastrar).mockRejectedValue(
       new ErroDaApi(400, 'SENHA_FRACA', 'Esta senha é muito comum.', {

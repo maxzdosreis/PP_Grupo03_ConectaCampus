@@ -1,6 +1,6 @@
 ## 1. Visão do sistema
 
-Três serviços do Docker Compose: `frontend` entrega o app React, `backend` expõe a API Django/DRF e `db` é o PostgreSQL 16. No `backend`, cada contexto (`espacos`, `reservas`, `contas`) tem as mesmas quatro camadas.
+Quatro serviços do Docker Compose: `frontend` entrega o app React, `backend` expõe a API Django/DRF, `db` é o PostgreSQL 16 e `redis` guarda, só em memória, os contadores do limite de tentativas de `contas.api` (login e cadastro; AUT-08). No `backend`, cada contexto (`espacos`, `reservas`, `contas`) tem as mesmas quatro camadas.
 
 ![Figura 1 — Visão geral](visao-geral.png)
 

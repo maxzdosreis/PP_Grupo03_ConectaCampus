@@ -9,7 +9,8 @@ O projeto se chama `conecta-campus` no Compose (`name:` do `docker-compose.yml`)
 | Serviço | Imagem / build | Porta no seu computador | O que faz |
 |---|---|---|---|
 | `db` | `postgres:16-alpine` | `DB_PORT_HOST` → 5432 (padrão 5432) | Banco PostgreSQL. Tem `healthcheck` com `pg_isready`, a cada 5 s, até 10 tentativas. |
-| `backend` | `backend/Dockerfile` (`python:3.12-slim`, instala `requirements.txt` e `requirements-dev.txt`) | `BACKEND_PORT_HOST` → 8000 (padrão 8000) | Ao subir, roda `python manage.py migrate --noinput` e depois `python manage.py runserver 0.0.0.0:8000`. Só sobe quando o `db` está saudável (`condition: service_healthy`). Lê as variáveis do `.env` (`env_file`) e recebe do Compose `CORS_ALLOWED_ORIGINS`, [derivada da porta da tela](#derivadas-pelo-compose-a-partir-das-portas). |
+| `backend` | `backend/Dockerfile` (`python:3.12-slim`, instala `requirements.txt` e `requirements-dev.txt`) | `BACKEND_PORT_HOST` → 8000 (padrão 8000) | Ao subir, roda `python manage.py migrate --noinput` e depois `python manage.py runserver 0.0.0.0:8000`. Só sobe quando o `db` e o `redis` estão saudáveis (`condition: service_healthy`). Lê as variáveis do `.env` (`env_file`) e recebe do Compose `CORS_ALLOWED_ORIGINS`, [derivada da porta da tela](#derivadas-pelo-compose-a-partir-das-portas), e `REDIS_URL`. |
+| `redis` | `redis:8-alpine` | nenhuma (só a rede interna do Compose) | Cache do backend: guarda a contagem do limite de tentativas de login e de cadastro. Roda com `redis-server --save "" --appendonly no`, só em memória (sem volume): a contagem zera quando ele reinicia. Tem `healthcheck` com `redis-cli ping`, a cada 5 s, até 10 tentativas. |
 | `frontend` | `frontend/Dockerfile` (`node:24-alpine`, `npm ci`) | `FRONTEND_PORT_HOST` → 5173 (padrão 5173) | Servidor de desenvolvimento do Vite (`npm run dev -- --host 0.0.0.0`). Recebe só `VITE_API_URL`, [derivada da porta da API](#derivadas-pelo-compose-a-partir-das-portas), e `CHOKIDAR_USEPOLLING=true`. Sobe depois do `backend`. |
 
 ## Volumes
@@ -40,10 +41,13 @@ O `.env` é criado a partir do `.env.example` (passo 1 do [README da raiz](../RE
 | `DJANGO_ALLOWED_HOSTS` | `localhost,127.0.0.1,backend` | Hosts aceitos pelo Django, separados por vírgula. |
 | `JWT_ACCESS_MINUTES` | `30` | Validade do token de acesso, em minutos. |
 | `JWT_REFRESH_DAYS` | `1` | Validade do token de renovação, em dias. |
+| `LIMITE_LOGIN_POR_EMAIL` | `5/min` | Tentativas de login com o mesmo e-mail, no formato `N/s`, `N/min`, `N/hour` ou `N/day`. Um valor fora do formato impede o backend de subir (`ImproperlyConfigured`, com o nome da variável). Ausente, vale o do exemplo. |
+| `LIMITE_LOGIN_POR_IP` | `20/min` | Tentativas de login do mesmo computador (endereço da conexão), com qualquer e-mail. Mesmo formato. |
+| `LIMITE_CADASTRO_POR_IP` | `10/hour` | Pedidos de cadastro do mesmo computador. Mesmo formato. A renovação do token não tem limite. |
 
 ### Derivadas pelo Compose a partir das portas
 
-Estas duas **não ficam no `.env`**: o `docker-compose.yml` as monta a partir das portas, para a troca de uma porta valer numa variável só.
+Estas duas **não ficam no `.env`**: o `docker-compose.yml` as monta a partir das portas, para a troca de uma porta valer numa variável só. O `backend` recebe do Compose também `REDIS_URL: redis://redis:6379/0` (o serviço `redis` pela rede interna, banco 0); sem ela, o backend não sobe (`ImproperlyConfigured`). Os testes usam o banco 1 do mesmo Redis, limpo antes de cada teste, e nunca mexem no banco 0.
 
 | Variável | Serviço | Fórmula no `docker-compose.yml` | Com as portas padrão |
 |---|---|---|---|

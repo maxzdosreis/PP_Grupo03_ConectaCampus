@@ -1,4 +1,5 @@
 import logging
+import math
 
 from django.core.exceptions import PermissionDenied as PermissaoNegadaDoDjango
 from django.http import Http404
@@ -6,6 +7,7 @@ from rest_framework import exceptions, status
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler, set_rollback
 
+from compartilhado.api.excecoes import ServicoIndisponivel
 from compartilhado.api.respostas import corpo_de_erro, resposta_erro
 from compartilhado.domain.erros import (
     AcaoNaoPermitida,
@@ -95,6 +97,18 @@ def _traducao_fixa(codigo, mensagem):
     return traduzir
 
 
+def _traduzir_limite(exc):
+    return corpo_de_erro("LIMITE_DE_TENTATIVAS", _mensagem_de_espera(exc.wait))
+
+
+def _mensagem_de_espera(espera):
+    if espera is None:
+        return "Muitas tentativas. Tente de novo em alguns instantes."
+    segundos = max(1, math.ceil(espera))
+    unidade = "segundo" if segundos == 1 else "segundos"
+    return f"Muitas tentativas. Tente de novo em {segundos} {unidade}."
+
+
 def _traduzir_generico(exc):
     codigo = getattr(exc, "default_code", "erro").upper()
     return corpo_de_erro(codigo, MENSAGEM_ERRO_GENERICO)
@@ -121,5 +135,10 @@ _TRADUTORES = {
     Http404: _NAO_ENCONTRADO,
     exceptions.MethodNotAllowed: _traducao_fixa(
         "METODO_NAO_PERMITIDO", "Método não permitido para este endereço."
+    ),
+    exceptions.Throttled: _traduzir_limite,
+    ServicoIndisponivel: _traducao_fixa(
+        "SERVICO_INDISPONIVEL",
+        "Serviço temporariamente indisponível. Tente de novo em alguns instantes.",
     ),
 }

@@ -7,6 +7,8 @@ flowchart TB
 %% servico: SVC_BACK = backend
 %% servico: PG = db
 %% imagem: db = postgres:16-alpine
+%% servico: REDIS = redis
+%% imagem: redis = redis:8-alpine
 %% caminho: VITE = src/frontend/vite.config.ts
 %% caminho: FE_UI = src/frontend/src - src/frontend/src/api
 %% caminho: FE_API = src/frontend/src/api
@@ -37,6 +39,7 @@ flowchart TB
 %% sem-import: ESP_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
 %% sem-import: RES_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
 %% sem-import: CON_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
+%% sem-import: CON_API -> REDIS | src/backend/config/settings.py | "BACKEND": "django.core.cache.backends.redis.RedisCache"
 %% As setas entre as camadas de um mesmo contexto, as de cada contexto para compartilhado e a única
 %% ligação entre contextos (reservas.infrastructure → espacos.publico) estão na Figura 2
 %% (regras-de-dependencia.mmd); aqui elas cruzariam a figura toda e dobrariam a altura.
@@ -87,6 +90,7 @@ flowchart TB
     end
 
     PG[("db<br/>PostgreSQL 16")]:::externo
+    REDIS[("redis<br/>Redis 8 (cache)")]:::externo
   end
 
   ESP_API ~~~ ESP_APP
@@ -114,6 +118,7 @@ flowchart TB
   ESP_INFRA ==>|"SQL (ORM)"| PG
   RES_INFRA ==>|"SQL (ORM)"| PG
   CON_INFRA ==>|"SQL (ORM)"| PG
+  CON_API ==>|"contadores de tentativas"| REDIS
 
   subgraph LEGENDA["Legenda"]
     LEG_A["api"]:::api
