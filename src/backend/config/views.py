@@ -1,4 +1,6 @@
+from django.core.cache import cache
 from django.db import DatabaseError, connection
+from redis.exceptions import RedisError
 from rest_framework import status
 from rest_framework.decorators import (
     api_view,
@@ -8,6 +10,8 @@ from rest_framework.decorators import (
 from rest_framework.permissions import AllowAny
 
 from compartilhado.api.respostas import resposta_erro, resposta_sucesso
+
+CHAVE_DA_VERIFICACAO = "health"
 
 
 @api_view(["GET"])
@@ -23,4 +27,12 @@ def health(request):
             "Não foi possível conectar ao banco de dados.",
             status.HTTP_503_SERVICE_UNAVAILABLE,
         )
-    return resposta_sucesso("API no ar.", {"banco": "ok"})
+    try:
+        cache.get(CHAVE_DA_VERIFICACAO)
+    except RedisError:
+        return resposta_erro(
+            "CACHE_INDISPONIVEL",
+            "Não foi possível conectar ao cache.",
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    return resposta_sucesso("API no ar.", {"banco": "ok", "cache": "ok"})

@@ -12,6 +12,8 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, alternativas da sessão, exceções, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Nova exceção E3.1 · Tentativas de entrada em excesso, a primeira conferência do passo 3 (RF-33.2, RNF-F12); as antigas E3.1 e E3.2 passam a E3.2 e E3.3, seguindo a ordem real ([decisão h](README.md#decisao-h)); sai a lacuna L-03, resolvida (AUT-08). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | "Fora das exceções": com o serviço que conta as tentativas (Redis) fora do ar, a entrada é recusada sem conferir nada (AUT-08). Sem aprovação. |
 
 ## Sumário
 
@@ -45,13 +47,13 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 |---|---|
 | **Solicitante** | Entrar sem atrito, com o e-mail e a senha de sempre; não precisar informar a senha de novo durante o uso do dia; ser levado de volta ao que estava fazendo; sair num computador compartilhado sem que a próxima pessoa aja em nome dele. |
 | **Gestor** | O mesmo, e ter o perfil Gestor reconhecido logo ao entrar, para ver as ações de decisão; perder o perfil na hora se a Equipe de TI o retirar. |
-| **Cliente** (instituição) | Só quem tem autoridade decide sobre os pedidos; saber quem pediu e quem decidiu cada reserva; que uma tentativa de entrada não revele quais e-mails estão cadastrados; que uma conta desativada perca o acesso na hora. |
+| **Cliente** (instituição) | Só quem tem autoridade decide sobre os pedidos; saber quem pediu e quem decidiu cada reserva; que uma tentativa de entrada não revele quais e-mails estão cadastrados; que ninguém adivinhe uma senha repetindo tentativas; que uma conta desativada perca o acesso na hora. |
 
 ## Fluxo principal
 
 1. <a id="p1"></a>O Visitante pede para entrar.
 2. <a id="p2"></a>O Visitante informa o e-mail e a senha.
-3. <a id="p3"></a>O sistema confere que os dois foram informados, que o e-mail está num formato válido (sem diferenciar maiúsculas de minúsculas e sem espaços nas pontas) e que o e-mail e a senha são de uma conta ativa.
+3. <a id="p3"></a>O sistema confere, nesta ordem, que não houve tentativas de entrada demais no último minuto, que os dois foram informados, que o e-mail está num formato válido (sem diferenciar maiúsculas de minúsculas e sem espaços nas pontas) e que o e-mail e a senha são de uma conta ativa.
 4. <a id="p4"></a>O sistema inicia a sessão, informa "Login realizado com sucesso." e passa a mostrar quem está identificado, pelo nome e pelo perfil (por exemplo, "«nome» · Gestor"); o usuário segue para onde queria ir ou, sem destino, para as próprias reservas.
 
 ## Alternativas
@@ -82,14 +84,21 @@ Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema ence
 
 A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 
-#### <a id="e3-1"></a>E3.1 · E-mail ou senha não informados, ou e-mail mal formado
+#### <a id="e3-1"></a>E3.1 · Tentativas de entrada em excesso
+
+- **Condição:** no passo 3, antes de qualquer outra conferência, já houve 5 tentativas de entrada com o mesmo e-mail (sem diferenciar maiúsculas de minúsculas nem espaços nas pontas), ou 20 a partir da mesma origem, no último minuto, com acerto ou erro.
+- **Resultado para o ator:** "Muitas tentativas. Tente de novo em N segundos.", com o tempo que falta; a mesma resposta para qualquer e-mail e qualquer limite, sem revelar qual foi atingido nem se o e-mail existe. Até esse tempo passar, nem a senha certa é aceita; depois, o visitante tenta de novo.
+- **Estado depois:** nenhuma sessão é iniciada; os dados e as credenciais nem são conferidos; o último acesso da conta não muda, e a tentativa recusada não conta para o limite.
+- **Requisito:** [RF-33.2](../requisitos/rf-contas.md#rf-33-2) e [RNF-F12](../requisitos/rnf.md#rnf-f12).
+
+#### <a id="e3-2"></a>E3.2 · E-mail ou senha não informados, ou e-mail mal formado
 
 - **Condição:** no passo 3, falta o e-mail ou a senha, ou o e-mail não está num formato de e-mail.
 - **Resultado para o ator:** "Verifique os dados informados.", com a indicação, junto a cada dado, do que falta ou está mal formado. As credenciais nem são conferidas.
 - **Estado depois:** nenhuma sessão é iniciada; nada na conta muda.
 - **Requisito:** nenhum RF descreve esta recusa ([lacuna L-14](../requisitos/srs.md#l-14)); é a forma de [RF-33](../requisitos/rf-contas.md#rf-33) recusar dados incompletos, com a mensagem de [RF-38](../requisitos/rf-gerais.md#rf-38).
 
-#### <a id="e3-2"></a>E3.2 · Credenciais inválidas
+#### <a id="e3-3"></a>E3.3 · Credenciais inválidas
 
 - **Condição:** no passo 3, o e-mail não está cadastrado, a senha está errada ou a conta está desativada.
 - **Resultado para o ator:** "E-mail ou senha incorretos." — a **mesma** resposta nos três casos, para não revelar quais e-mails existem. O visitante confere o e-mail e a senha e tenta de novo, ou se cadastra ([A1.2](#a1-2)).
@@ -106,11 +115,11 @@ A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 #### <a id="e4-2"></a>E4.2 · Conta desativada ou excluída durante a sessão
 
 - **Condição:** depois do passo 4, a Equipe de TI desativa ou exclui a conta.
-- **Resultado para o ator:** a próxima operação é recusada e a sessão termina como em [E4.1](#e4-1) ("Sua sessão expirou. Faça login novamente."); uma nova entrada cai em [E3.2](#e3-2).
+- **Resultado para o ator:** a próxima operação é recusada e a sessão termina como em [E4.1](#e4-1) ("Sua sessão expirou. Faça login novamente."); uma nova entrada cai em [E3.3](#e3-3).
 - **Estado depois:** a conta perde o acesso na hora, mesmo com a credencial ainda dentro do prazo; nada é gravado em nome dela depois disso.
 - **Requisito:** [RF-34.1](../requisitos/rf-contas.md#rf-34-1) e [RNF-F07](../requisitos/rnf.md#rnf-f07).
 
-**Fora das exceções:** credenciais forjadas, adulteradas ou fora do padrão são tratadas como ausência de identificação ([RNF-F10](../requisitos/rnf.md#rnf-f10)); o perfil nunca vem do pedido, sempre da conta ([RNF-F09](../requisitos/rnf.md#rnf-f09)). Não há limite de tentativas de entrada ([lacuna L-03](../requisitos/srs.md#l-03)).
+**Fora das exceções:** credenciais forjadas, adulteradas ou fora do padrão são tratadas como ausência de identificação ([RNF-F10](../requisitos/rnf.md#rnf-f10)); o perfil nunca vem do pedido, sempre da conta ([RNF-F09](../requisitos/rnf.md#rnf-f09)). A renovação da credencial ([A4.1](#a4-1)) não tem limite de tentativas: ela não depende de senha e não há o que adivinhar ([RNF-F12](../requisitos/rnf.md#rnf-f12)). Se o serviço que conta as tentativas estiver fora do ar, a entrada é recusada antes de qualquer conferência, com "Serviço temporariamente indisponível. Tente de novo em alguns instantes.": nenhuma tentativa é conferida sem contagem ([UC-22 E2.2](fichas-resumidas.md#uc22-e2-2)).
 
 ## Pós-condições e garantias
 
@@ -118,7 +127,7 @@ A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 |---|---|
 | **Pós-condições (sucesso)** | Existe uma sessão para a conta neste navegador, válida por 1 dia; o último acesso da conta foi atualizado; todo caso de uso que o usuário iniciar a seguir o reconhece com o perfil atual da conta. Depois de [A4.3](#a4-3), não há sessão neste navegador. |
 | **Garantia de sucesso** | O usuário age com o próprio nome, matrícula e perfil, que o sistema lê da conta (nunca do pedido) a cada operação. |
-| **Garantia mínima** | Mesmo quando a meta falha: nenhuma sessão é iniciada; a resposta não revela se o e-mail existe; a senha não é mostrada e só é guardada como hash ([RNF-F01](../requisitos/rnf.md#rnf-f01)); uma conta desativada não age. |
+| **Garantia mínima** | Mesmo quando a meta falha: nenhuma sessão é iniciada; a resposta não revela se o e-mail existe nem, no excesso de tentativas, qual limite foi atingido; a senha não é mostrada e só é guardada como hash ([RNF-F01](../requisitos/rnf.md#rnf-f01)); uma conta desativada não age. |
 
 ## Regras de negócio
 
@@ -134,7 +143,8 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | RF | Título | Onde entra nesta ficha |
 |---|---|---|
 | [RF-33](../requisitos/rf-contas.md#rf-33) | Entrar com e-mail e senha | fluxo principal, [passos 1 a 4](#p1) |
-| [RF-33.1](../requisitos/rf-contas.md#rf-33-1) | Recusar credenciais inválidas | [E3.2](#e3-2) |
+| [RF-33.1](../requisitos/rf-contas.md#rf-33-1) | Recusar credenciais inválidas | [E3.3](#e3-3) |
+| [RF-33.2](../requisitos/rf-contas.md#rf-33-2) | Recusar tentativas de entrada em excesso | [E3.1](#e3-1) |
 | [RF-34](../requisitos/rf-contas.md#rf-34) | Continuar identificado sem informar a senha de novo | [A4.1](#a4-1) |
 | [RF-34.1](../requisitos/rf-contas.md#rf-34-1) | Encerrar a sessão expirada | [E4.1](#e4-1), [E4.2](#e4-2) |
 | [RF-35](../requisitos/rf-contas.md#rf-35) | Consultar os próprios dados | [A4.2](#a4-2) |
@@ -149,11 +159,12 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [RNF-F01](../requisitos/rnf.md#rnf-f01) · Senha guardada só como hash | garantia mínima |
 | [RNF-F03](../requisitos/rnf.md#rnf-f03) · Validade da sessão | [A4.1](#a4-1), [E4.1](#e4-1) |
 | [RNF-F04](../requisitos/rnf.md#rnf-f04) · Identificação obrigatória por padrão | disparador, [A1.1](#a1-1) |
-| [RNF-F05](../requisitos/rnf.md#rnf-f05) · Credenciais inválidas não revelam contas | [E3.2](#e3-2) |
+| [RNF-F05](../requisitos/rnf.md#rnf-f05) · Credenciais inválidas não revelam contas | [E3.3](#e3-3) |
 | [RNF-F07](../requisitos/rnf.md#rnf-f07) · Conta desativada perde o acesso na hora | [E4.2](#e4-2) |
 | [RNF-F08](../requisitos/rnf.md#rnf-f08) · Perfil relido a cada operação | [A4.2](#a4-2) |
 | [RNF-F09](../requisitos/rnf.md#rnf-f09) · Identidade e perfil nunca vêm do pedido | garantia de sucesso |
 | [RNF-F10](../requisitos/rnf.md#rnf-f10) · Credenciais forjadas recusadas | [E4.1](#e4-1) |
+| [RNF-F12](../requisitos/rnf.md#rnf-f12) · Limite de tentativas de entrada e de cadastro | [E3.1](#e3-1) |
 | [RNF-U01](../requisitos/rnf.md#rnf-u01) · Mensagens em português que orientam a correção | todas as exceções |
 
 ## Questões em aberto
@@ -162,9 +173,8 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 |---|---|
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Fixa a validade da sessão e que o cadastro público nunca cria Gestor. |
 | [DEC-09](../decisoes/DEC-09.md) · Formato da matrícula | A matrícula mostrada em [A4.2](#a4-2) não é conferida com a instituição. |
-| [Lacuna L-03](../requisitos/srs.md#l-03) | Sem limite de tentativas em [E3.2](#e3-2). |
 | [Lacuna L-04](../requisitos/srs.md#l-04) | Sair ([A4.3](#a4-3)) não invalida a credencial fora deste navegador. |
-| [Lacuna L-14](../requisitos/srs.md#l-14) | A recusa de [E3.1](#e3-1) não tem RF próprio. |
+| [Lacuna L-14](../requisitos/srs.md#l-14) | A recusa de [E3.2](#e3-2) não tem RF próprio. |
 
 ## Anexo — Evidência (complementar)
 
@@ -178,8 +188,9 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [A4.1](#a4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_access_dura_o_tempo_configurado`, `::test_refresh_dura_o_tempo_configurado`; `api/cliente.test.ts` (renovação no 401 e renovação compartilhada) |
 | [A4.2](#a4-2) | `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil`; `config/tests/test_perfil_lido_do_banco.py::test_gestor_rebaixado_perde_as_permissoes_com_o_mesmo_token`, `::test_solicitante_promovido_ganha_as_permissoes_com_o_mesmo_token`; `components/sessao/SessaoProvider.test.tsx` (restaura e confirma a sessão) |
 | [A4.3](#a4-3) | `components/sessao/SessaoProvider.test.tsx` (sair limpa a sessão e vai para o início); `api/sessao.test.ts` |
-| [E3.1](#e3-1) | `contas/tests/test_api_autenticacao.py::test_login_sem_campos_responde_400_com_cada_campo` |
-| [E3.2](#e3-2) | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` (credenciais inválidas no aviso do topo) |
+| [E3.1](#e3-1) | `contas/tests/test_limites_de_tentativas.py::test_sexta_tentativa_com_o_mesmo_email_responde_429_com_a_espera`, `::test_senha_certa_tambem_e_recusada_depois_do_limite`, `::test_email_com_caixa_e_espacos_diferentes_conta_como_o_mesmo`, `::test_limite_por_ip_vale_para_varios_emails`, `::test_x_forwarded_for_diferente_nao_escapa_do_limite_por_ip`, `::test_depois_da_janela_o_login_volta_a_ser_aceito`, `::test_resposta_429_nao_revela_o_limite_nem_se_o_email_existe`; `pages/PaginaEntrar.test.tsx` (muitas tentativas no aviso do topo); `api/cliente.test.ts` (o 429 não renova nem limpa a sessão) |
+| [E3.2](#e3-2) | `contas/tests/test_api_autenticacao.py::test_login_sem_campos_responde_400_com_cada_campo` |
+| [E3.3](#e3-3) | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` (credenciais inválidas no aviso do topo) |
 | [E4.1](#e4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_me_com_access_expirado_responde_401`, `::test_token_adulterado_responde_401 [x]`, `::test_access_usado_como_refresh_responde_401`; `api/cliente.test.ts` (renovação recusada lança a sessão expirada); `components/sessao/SessaoProvider.test.tsx` (expiração leva ao login com o caminho atual) |
 | [E4.2](#e4-2) | `contas/tests/test_api_autenticacao.py::test_access_de_usuario_desativado_depois_do_login_responde_401`, `::test_access_de_usuario_excluido_responde_401`, `::test_refresh_de_usuario_inativo_responde_401`, `::test_refresh_de_usuario_excluido_responde_401` |
 

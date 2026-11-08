@@ -55,8 +55,9 @@ Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"err
 | 404 | O que foi referenciado não existe (ou não é visível para quem pede) | `ESPACO_NAO_ENCONTRADO`, `RESERVA_NAO_ENCONTRADA`, `NAO_ENCONTRADO` |
 | 405 | Método que a rota não aceita | `METODO_NAO_PERMITIDO` |
 | 409 | A operação contradiz o estado atual | `CONFLITO_DE_HORARIO`, `TRANSICAO_DE_SITUACAO_INVALIDA`, `ESPACO_INATIVO` |
+| 429 | Tentativas de login ou de cadastro acima do limite (com o cabeçalho `Retry-After`, em segundos) | `LIMITE_DE_TENTATIVAS` |
 | 500 | Erro inesperado (vai para o log, sem detalhes na resposta) | `ERRO_INTERNO` |
-| 503 | Banco fora do ar (só em `GET /api/health/`) | `BANCO_INDISPONIVEL` |
+| 503 | Banco fora do ar (só em `GET /api/health/`); Redis fora do ar (`CACHE_INDISPONIVEL` no health, `SERVICO_INDISPONIVEL` no login e no cadastro) | `BANCO_INDISPONIVEL`, `CACHE_INDISPONIVEL`, `SERVICO_INDISPONIVEL` |
 
 Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/`, `GET /api/reservas/situacoes/` e `GET /api/reservas/regras-de-agenda/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Quem pode chamar cada rota está em cada contexto e é provado por `config/tests/test_matriz_de_acesso.py`.
 

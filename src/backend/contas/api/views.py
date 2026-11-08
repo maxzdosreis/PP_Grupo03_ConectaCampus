@@ -10,6 +10,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from compartilhado.api.respostas import resposta_erro, resposta_sucesso
 from contas.api import dependencias
+from contas.api.limites import (
+    LimiteDeCadastroPorIp,
+    LimiteDeLoginPorEmail,
+    LimiteDeLoginPorIp,
+)
 from contas.api.serializers import (
     CadastroSerializer,
     LoginSerializer,
@@ -31,6 +36,8 @@ class _SemAutenticacaoView(APIView):
 
 
 class CadastroView(_SemAutenticacaoView):
+    throttle_classes = [LimiteDeCadastroPorIp]
+
     def post(self, request):
         entrada = CadastroSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
@@ -45,6 +52,8 @@ class CadastroView(_SemAutenticacaoView):
 
 
 class LoginView(_SemAutenticacaoView):
+    throttle_classes = [LimiteDeLoginPorIp, LimiteDeLoginPorEmail]
+
     def post(self, request):
         entrada = LoginSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)

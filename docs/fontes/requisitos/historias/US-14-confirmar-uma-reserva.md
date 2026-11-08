@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
+| 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -48,7 +49,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Reserva confirmada com sucesso.", a reserva passa a Confirmada e passa a oferecer ao Gestor "Cancelar" e "Concluir" (e ao solicitante, só "Cancelar")
 - **Origem:** [UC-10 passos 1 a 8, variação UC-17](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-17)
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17)
-- **TA:** [TA-123](#ta-123)
+- **TA:** [TA-124](#ta-124)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (confirmar depois do início também é aceito hoje)
 
 #### <a id="us-14-ca-02"></a>US-14 · CA-02 · O horário continua ocupado (sucesso)
@@ -58,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o pedido é recusado por conflito de horário, como em [US-08 · CA-18](US-08-solicitar-reserva.md#us-08-ca-18): a confirmação não liberou o horário
 - **Origem:** [UC-10 variação UC-17](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-17)
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17)
-- **TA:** [TA-124](#ta-124)
+- **TA:** [TA-125](#ta-125)
 
 #### <a id="us-14-ca-03"></a>US-14 · CA-03 · Motivo opcional ao confirmar (alternativa)
 
@@ -67,7 +68,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a reserva fica Confirmada com o motivo "Uso aprovado pelo setor", e um motivo da situação anterior deixa de aparecer na reserva (continua no histórico)
 - **Origem:** [UC-10 A8.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#a8-1)
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17)
-- **TA:** [TA-125](#ta-125)
+- **TA:** [TA-126](#ta-126)
 
 #### <a id="us-14-ca-04"></a>US-14 · CA-04 · Pedido de mudança sem a situação nova (exceção)
 
@@ -76,7 +77,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Verifique os dados informados.", indicando junto à situação que ela é obrigatória, sem nem procurar a reserva; a reserva não muda
 - **Origem:** [UC-10 E6.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-1)
 - **RF:** [RF-25](../requisitos/rf-reservas.md#rf-25)
-- **TA:** [TA-126](#ta-126)
+- **TA:** [TA-127](#ta-127)
 
 #### <a id="us-14-ca-05"></a>US-14 · CA-05 · Situação desconhecida (exceção)
 
@@ -85,7 +86,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa, junto à situação, "Situação inválida. Escolha uma destas: Solicitada, Confirmada, Recusada, Cancelada, Concluída.", e a reserva não muda
 - **Origem:** [UC-10 E6.3](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-3)
 - **RF:** [RF-25](../requisitos/rf-reservas.md#rf-25)
-- **TA:** [TA-127](#ta-127)
+- **TA:** [TA-128](#ta-128)
 
 #### <a id="us-14-ca-06"></a>US-14 · CA-06 · Confirmar o que não está Solicitada (exceção)
 
@@ -94,7 +95,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Não é possível alterar uma reserva «situação atual» para Confirmada.", e a reserva continua na situação, com o motivo e o histórico que tinha
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
-- **TA:** [TA-128](#ta-128)
+- **TA:** [TA-129](#ta-129)
 
 #### <a id="us-14-ca-07"></a>US-14 · CA-07 · Motivo opcional longo demais (exceção)
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa, junto ao motivo, 'O campo "Motivo" deve ter no máximo 300 caracteres.', e a reserva continua Solicitada
 - **Origem:** [UC-10 E6.6](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-6)
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17) (o limite ao confirmar não está escrito no RF: [L-13](../requisitos/srs.md#l-13))
-- **TA:** [TA-129](#ta-129)
+- **TA:** [TA-130](#ta-130)
 
 #### <a id="us-14-ca-08"></a>US-14 · CA-08 · Dois gestores decidindo ao mesmo tempo (exceção)
 
@@ -112,7 +113,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** só a primeira decisão vale; o segundo recebe "Esta reserva já está Confirmada: ela foi alterada enquanto você decidia. Atualize a lista e tente de novo.", e o histórico tem um registro só, sem dois registros saindo da mesma situação
 - **Origem:** [UC-10 E7.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e7-1)
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17) (a garantia é o [RNF-R04](../requisitos/rnf.md#rnf-r04))
-- **TA:** [TA-130](#ta-130)
+- **TA:** [TA-131](#ta-131)
 
 #### <a id="us-14-ca-09"></a>US-14 · CA-09 · Confirmação registrada no histórico (registro)
 
@@ -121,7 +122,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o último registro é "Confirmada por Carla", da situação anterior Solicitada, com o momento da decisão e o motivo, se houver; uma confirmação recusada (CA-04 a CA-08, CA-10, CA-11) não gera registro — diferente do modelo do professor
 - **Origem:** [UC-10 passo 7](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p7)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-131](#ta-131)
+- **TA:** [TA-132](#ta-132)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
 
 #### <a id="us-14-ca-10"></a>US-14 · CA-10 · Só o Gestor confirma (acesso)
@@ -131,7 +132,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Somente o gestor pode confirmar reservas." — a mesma resposta qualquer que seja a situação atual —, a reserva não muda, e a opção de confirmar nem é oferecida a ele
 - **Origem:** [UC-10 E6.4](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-4)
 - **RF:** [RF-27](../requisitos/rf-reservas.md#rf-27)
-- **TA:** [TA-132](#ta-132)
+- **TA:** [TA-133](#ta-133)
 
 #### <a id="us-14-ca-11"></a>US-14 · CA-11 · Confirmar a reserva de outra pessoa sendo Solicitante (acesso)
 
@@ -140,7 +141,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema responde "Reserva de código «n» não encontrada.", e não "Somente o gestor…", para não revelar que a reserva existe; ela não muda
 - **Origem:** [UC-10 E6.2](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-2)
 - **RF:** [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-133](#ta-133)
+- **TA:** [TA-134](#ta-134)
 
 ## Testes de aceite
 
@@ -148,14 +149,14 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-123"></a>TA-123 | [CA-01](#us-14-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada`; `reservas/tests/test_api_permissoes.py::test_gestor_confirma`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_traz_cancelar_e_concluir`; `pages/PaginaReservas.test.tsx`: `"Confirmar" abre o diálogo com o resumo e sem campo de motivo`; `pages/PaginaReservas.test.tsx`: `confirmar envia só a situação, sem motivo` |
-| <a id="ta-124"></a>TA-124 | [CA-02](#us-14-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_ocupa_horario_e_conflito [x]`; `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` |
-| <a id="ta-125"></a>TA-125 | [CA-03](#us-14-ca-03) | automatizado | `reservas/tests/test_reserva.py::test_motivo_opcional_ao_confirmar_e_guardado_normalizado`; `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior` |
-| <a id="ta-126"></a>TA-126 | [CA-04](#us-14-ca-04) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]` |
-| <a id="ta-127"></a>TA-127 | [CA-05](#us-14-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]`; `reservas/tests/test_alterar_situacao.py::test_situacao_desconhecida_lanca_erro_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_situacao_desconhecida_e_recusada_e_nada_muda` |
-| <a id="ta-128"></a>TA-128 | [CA-06](#us-14-ca-06) | automatizado | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_permissoes_reserva.py::test_solicitada_como_destino_e_transicao_invalida_para_os_dois_papeis [x]` |
-| <a id="ta-129"></a>TA-129 | [CA-07](#us-14-ca-07) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` (motivo acima do limite em qualquer destino) |
-| <a id="ta-130"></a>TA-130 | [CA-08](#us-14-ca-08) | automatizado | `reservas/tests/test_concorrencia_de_situacao.py::test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente`; `reservas/tests/test_repositorio_reservas.py::test_salvar_entidade_que_ficou_para_tras_nao_regride_a_situacao`; `reservas/tests/test_repositorio_reservas.py::test_salvar_reserva_existente_bloqueia_a_linha` |
-| <a id="ta-131"></a>TA-131 | [CA-09](#us-14-ca-09) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_alterar_situacao.py::test_registro_da_mudanca_usa_o_relogio_injetado_e_o_ator`; `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]` |
-| <a id="ta-132"></a>TA-132 | [CA-10](#us-14-ca-10) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada`; `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |
-| <a id="ta-133"></a>TA-133 | [CA-11](#us-14-ca-11) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_quem_nao_ve_a_reserva_recebe_nao_encontrada_com_o_codigo_dela` |
+| <a id="ta-124"></a>TA-124 | [CA-01](#us-14-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada`; `reservas/tests/test_api_permissoes.py::test_gestor_confirma`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_traz_cancelar_e_concluir`; `pages/PaginaReservas.test.tsx`: `"Confirmar" abre o diálogo com o resumo e sem campo de motivo`; `pages/PaginaReservas.test.tsx`: `confirmar envia só a situação, sem motivo` |
+| <a id="ta-125"></a>TA-125 | [CA-02](#us-14-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_ocupa_horario_e_conflito [x]`; `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` |
+| <a id="ta-126"></a>TA-126 | [CA-03](#us-14-ca-03) | automatizado | `reservas/tests/test_reserva.py::test_motivo_opcional_ao_confirmar_e_guardado_normalizado`; `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior` |
+| <a id="ta-127"></a>TA-127 | [CA-04](#us-14-ca-04) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]` |
+| <a id="ta-128"></a>TA-128 | [CA-05](#us-14-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]`; `reservas/tests/test_alterar_situacao.py::test_situacao_desconhecida_lanca_erro_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_situacao_desconhecida_e_recusada_e_nada_muda` |
+| <a id="ta-129"></a>TA-129 | [CA-06](#us-14-ca-06) | automatizado | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_permissoes_reserva.py::test_solicitada_como_destino_e_transicao_invalida_para_os_dois_papeis [x]` |
+| <a id="ta-130"></a>TA-130 | [CA-07](#us-14-ca-07) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` (motivo acima do limite em qualquer destino) |
+| <a id="ta-131"></a>TA-131 | [CA-08](#us-14-ca-08) | automatizado | `reservas/tests/test_concorrencia_de_situacao.py::test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente`; `reservas/tests/test_repositorio_reservas.py::test_salvar_entidade_que_ficou_para_tras_nao_regride_a_situacao`; `reservas/tests/test_repositorio_reservas.py::test_salvar_reserva_existente_bloqueia_a_linha` |
+| <a id="ta-132"></a>TA-132 | [CA-09](#us-14-ca-09) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_alterar_situacao.py::test_registro_da_mudanca_usa_o_relogio_injetado_e_o_ator`; `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]` |
+| <a id="ta-133"></a>TA-133 | [CA-10](#us-14-ca-10) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada`; `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |
+| <a id="ta-134"></a>TA-134 | [CA-11](#us-14-ca-11) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_quem_nao_ve_a_reserva_recebe_nao_encontrada_com_o_codigo_dela` |

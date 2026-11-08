@@ -99,6 +99,21 @@ describe('PaginaEntrar', () => {
     expect(screen.queryByTestId('local')).toBeNull()
   })
 
+  it('muitas tentativas mostram a mensagem do servidor no aviso do topo, que recebe o foco', async () => {
+    vi.mocked(entrar).mockRejectedValue(
+      new ErroDaApi(429, 'LIMITE_DE_TENTATIVAS', 'Muitas tentativas. Tente de novo em 42 segundos.'),
+    )
+    renderizarComSessaoReal(ROTAS, '/entrar')
+
+    await entrarCom('bruno.lima@exemplo.com', 'errada')
+
+    const aviso = await screen.findByRole('alert')
+    expect(aviso.textContent).toContain('Muitas tentativas. Tente de novo em 42 segundos.')
+    await waitFor(() => expect(document.activeElement?.contains(aviso)).toBe(true))
+    expect(controle('E-mail').getAttribute('aria-invalid')).toBeNull()
+    expect(screen.queryByTestId('local')).toBeNull()
+  })
+
   it('erros de campo aparecem embaixo do campo, que recebe o foco', async () => {
     vi.mocked(entrar).mockRejectedValue(
       new ErroDaApi(400, 'DADOS_INVALIDOS', 'Verifique os dados informados.', {

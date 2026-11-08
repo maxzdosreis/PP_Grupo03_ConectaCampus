@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import timedelta
 from pathlib import Path
 
@@ -34,6 +35,27 @@ def _inteiro(nome, padrao):
         raise ImproperlyConfigured(
             f"A variável de ambiente {nome} precisa ser um número inteiro."
         ) from None
+
+
+def _taxa(nome, padrao):
+    valor = os.environ.get(nome, "").strip() or padrao
+    if not re.fullmatch(r"[1-9]\d*/(s|min|hour|day)", valor):
+        raise ImproperlyConfigured(
+            f"A variável de ambiente {nome} precisa estar no formato N/período, "
+            "com N inteiro positivo e período s, min, hour ou day "
+            f"(ex.: {padrao})."
+        )
+    return valor
+
+
+def _redis_url():
+    valor = os.environ.get("REDIS_URL", "").strip()
+    if not valor:
+        raise ImproperlyConfigured(
+            "A variável de ambiente REDIS_URL não está definida. Ela vem do "
+            "docker-compose.yml: suba o backend com docker compose up."
+        )
+    return valor
 
 
 def _lista(nome):
@@ -105,6 +127,15 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": _redis_url(),
+        "KEY_PREFIX": "conecta-campus",
+        "OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1},
+    }
+}
+
 AUTH_USER_MODEL = "contas.Usuario"
 
 MIGRATION_MODULES = {
@@ -141,7 +172,12 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao",
+    "NUM_PROXIES": 0,
 }
+
+LIMITE_LOGIN_POR_EMAIL = _taxa("LIMITE_LOGIN_POR_EMAIL", "5/min")
+LIMITE_LOGIN_POR_IP = _taxa("LIMITE_LOGIN_POR_IP", "20/min")
+LIMITE_CADASTRO_POR_IP = _taxa("LIMITE_CADASTRO_POR_IP", "10/hour")
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=_inteiro("JWT_ACCESS_MINUTES", 30)),
