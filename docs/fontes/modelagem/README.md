@@ -18,6 +18,7 @@
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Decisão f da seção 3 aponta para o README de reservas, onde ficou o exemplo da transição inválida com a divisão do README (DOC-09). Mudança editorial. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Plano do PDF: a capa sai da folga, porque não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md), Aula 7; GES-02). Mudança editorial. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Serviço `redis` (AUT-08): Figura 1, seção 1, componentes, relações e relações sem import; evidência seta → import gerada de novo. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Relação `contas.api` → `redis`: a contagem de tentativas é um script atômico no Redis (AUT-08, achado da revisão do PR). |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -362,7 +363,7 @@ Estas tabelas saíram do `01-visao-do-sistema.md` para a seção 1 caber no orç
 | `config` → `compartilhado.api` | `src/backend/config/settings.py`: `"EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao"` | O DRF carrega o tratador pelo texto (há também um import real em `config/views.py`) |
 | `config` → `contas.infrastructure` | `src/backend/config/settings.py`: `AUTH_USER_MODEL = "contas.Usuario"` | O Django resolve o model do usuário pelo texto; a API lê `request.user.eh_gestor` por duck typing (`compartilhado/api/permissoes.py`, `reservas/api/autenticacao.py`), sem importar `contas` |
 | `<contexto>.infrastructure` → `db` | `src/backend/config/settings.py`: `"ENGINE": "django.db.backends.postgresql"` | Rede: SQL pelo ORM |
-| `contas.api` → `redis` | `src/backend/config/settings.py`: `"BACKEND": "django.core.cache.backends.redis.RedisCache"` | Rede: o throttle usa o cache do Django, configurado pelo texto; `contas.api` importa do pacote `redis` só a exceção (`RedisError`) para responder 503 |
+| `contas.api` → `redis` | `src/backend/config/settings.py`: `"BACKEND": "django.core.cache.backends.redis.RedisCache"` | Rede: o throttle usa o cache do Django, configurado pelo texto; `contas.api` roda o script de contagem pelo cliente Redis do cache do Django e importa do pacote `redis` só a exceção (`RedisError`), para responder 503 |
 
 ## Exceções da verificação
 

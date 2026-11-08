@@ -1,8 +1,15 @@
+import threading
+from types import SimpleNamespace
+
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from contas.api.limites import LimiteDeTentativas
+from contas.api.limites import (
+    LimiteDeLoginPorEmail,
+    LimiteDeLoginPorIp,
+    LimiteDeTentativas,
+)
 from contas.infrastructure.models import Usuario
 
 pytestmark = pytest.mark.django_db
@@ -321,3 +328,66 @@ def test_renovar_o_token_nao_tem_limite_de_tentativas(usuario):
 
     # Assert
     assert {resposta.status_code for resposta in respostas} == {200}
+
+
+def _requisicao(email=EMAIL):
+    return SimpleNamespace(
+        data={"email": email}, headers={}, META={"REMOTE_ADDR": "10.0.0.7"}
+    )
+
+
+def _tentar_ao_mesmo_tempo(limite_da_classe, quantidade):
+    barreira = threading.Barrier(quantidade)
+    resultados = []
+
+    def tentar():
+        barreira.wait()
+        resultados.append(limite_da_classe().allow_request(_requisicao(), None))
+
+    threads = [threading.Thread(target=tentar) for _ in range(quantidade)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    return resultados
+
+
+@pytest.mark.parametrize(
+    ("limite_da_classe", "limite", "quantidade"),
+    [
+        (LimiteDeLoginPorEmail, LIMITE_POR_EMAIL, 30),
+        (LimiteDeLoginPorIp, LIMITE_POR_IP, 40),
+    ],
+    ids=["por-email", "por-ip"],
+)
+def test_tentativas_simultaneas_nao_passam_do_limite(
+    limite_da_classe, limite, quantidade
+):
+    # Act
+    resultados = _tentar_ao_mesmo_tempo(limite_da_classe, quantidade)
+
+    # Assert
+    assert len(resultados) == quantidade
+    assert resultados.count(True) == limite
+    assert resultados.count(False) == quantidade - limite
+
+
+def test_espera_com_limite_reduzido_e_a_da_tentativa_que_libera_a_vaga(
+    usuario, relogio, settings
+):
+    # Arrange
+    for _ in range(LIMITE_POR_EMAIL):
+        assert _login().status_code == 401
+        relogio.avancar(1)
+    relogio.avancar(-1)
+    settings.LIMITE_LOGIN_POR_EMAIL = "2/min"
+
+    # Act
+    resposta = _login()
+
+    # Assert
+    assert resposta.status_code == 429
+    assert resposta.data["erro"]["mensagem"] == (
+        "Muitas tentativas. Tente de novo em 59 segundos."
+    )
+    assert resposta["Retry-After"] == "59"

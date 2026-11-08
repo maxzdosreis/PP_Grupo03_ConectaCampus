@@ -29,7 +29,7 @@ Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + apro
 Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcadores abaixo; não edite à mão. O `--verificar` acusa qualquer artefato que mude depois do manifesto, e a versão acordada é a que tem este hash, não "o arquivo mais novo". Na aprovação, todos os documentos devem estar na versão e no estado aprovados (1.0 • Aprovado), e o manifesto é gerado de novo.
 
 <!-- manifesto:inicio -->
-78 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `868bbba2`.
+78 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `48ca938b`.
 
 | Artefato | ID | Versão | Estado | Caminho (a partir de `docs/fontes/requisitos/`) | SHA-256 |
 |---|---|---|---|---|---|
@@ -69,9 +69,9 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `71027319` |
 | Pauta para o professor — Aula 7 (06/11/2026) | PAU-01 | 0.1 | Rascunho | `decisoes/pauta-aula-7.md` | `6a927e94` |
 | Glossário do Conecta Campus | GLO-01 | 0.1 | Rascunho | `glossario.md` | `ec03dec4` |
-| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `7d9be396` |
+| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `9bde12db` |
 | US-01 · Criar minha conta | US-01 | 0.1 | Rascunho | `historias/US-01-criar-minha-conta.md` | `04d56eca` |
-| US-02 · Entrar no sistema | US-02 | 0.1 | Rascunho | `historias/US-02-entrar-no-sistema.md` | `c0952115` |
+| US-02 · Entrar no sistema | US-02 | 0.1 | Rascunho | `historias/US-02-entrar-no-sistema.md` | `574bd4d5` |
 | US-03 · Manter e encerrar a sessão | US-03 | 0.1 | Rascunho | `historias/US-03-manter-e-encerrar-a-sessao.md` | `9c6dfd36` |
 | US-04 · Consultar os espaços | US-04 | 0.1 | Rascunho | `historias/US-04-consultar-os-espacos.md` | `3eebf3a8` |
 | US-05 · Cadastrar espaço | US-05 | 0.1 | Rascunho | `historias/US-05-cadastrar-espaco.md` | `349127e4` |
@@ -100,7 +100,7 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | Mapa de impacto por decisão (DEC) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/impacto-por-dec.md` | `85c2ec48` |
 | Matriz de rastreabilidade (planilha, gerada) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.csv` | `d663bd30` |
 | Matriz de rastreabilidade (NS → RF → UC → US → CA/TA → endpoint ou tela → código) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.md` | `fe0ca1c2` |
-| Rastreabilidade dos RNF (RNF → NS, RF ou DEC → forma de verificação → evidência) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/rnf.md` | `17d94966` |
+| Rastreabilidade dos RNF (RNF → NS, RF ou DEC → forma de verificação → evidência) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/rnf.md` | `ec651857` |
 | Rastreabilidade no sentido inverso (rota ou tela → RF → NS) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/sentido-inverso.md` | `b37d636f` |
 | Requisitos funcionais e não funcionais | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/README.md` | `d5ad6cb3` |
 | Requisitos funcionais — Regras de agenda e agenda do dia | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-agenda.md` | `40ca0f3d` |
@@ -108,7 +108,7 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | Requisitos funcionais — Espaços | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-espacos.md` | `2e1cf2ba` |
 | Requisitos funcionais — Mensagens e operação | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-gerais.md` | `817c035f` |
 | Requisitos funcionais — Reservas | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-reservas.md` | `c26a01cd` |
-| Requisitos não funcionais (FURPS) e restrições | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rnf.md` | `4737886a` |
+| Requisitos não funcionais (FURPS) e restrições | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rnf.md` | `f2d7e900` |
 | Especificação de Requisitos de Software (SRS) — Conecta Campus | SRS-01 | 0.1 | Rascunho | `requisitos/srs.md` | `c6009e9e` |
 | Documento de Visão — Conecta Campus | VIS-01 | 0.1 | Rascunho | `visao.md` | `f75a238b` |
 <!-- manifesto:fim -->
