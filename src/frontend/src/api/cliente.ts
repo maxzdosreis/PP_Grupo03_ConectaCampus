@@ -1,5 +1,4 @@
 import {
-  aguardarSessaoDeOutraAba,
   atualizarTokens,
   lerSessao,
   limparSessao,
@@ -24,7 +23,7 @@ const MENSAGEM_API_NAO_CONFIGURADA =
 export const MENSAGEM_SESSAO_EXPIRADA = 'Sua sessão expirou. Faça login novamente.'
 
 const CAMINHO_DA_RENOVACAO = '/auth/refresh/'
-export const ESPERA_PELA_OUTRA_ABA_MS = 1000
+export const NOME_DA_TRAVA_DE_RENOVACAO = 'conecta-campus:renovacao'
 
 export type OpcoesDaRequisicao = RequestInit & {
   autenticar?: boolean
@@ -127,9 +126,15 @@ function refreshRecusado(erro: unknown): boolean {
 
 let renovacaoEmAndamento: Promise<string | null> | null = null
 
-async function renovar(): Promise<string | null> {
+function comTravaEntreAbas<T>(tarefa: () => Promise<T>): Promise<T> {
+  const travas = 'locks' in navigator ? navigator.locks : undefined
+  return travas ? travas.request(NOME_DA_TRAVA_DE_RENOVACAO, tarefa) : tarefa()
+}
+
+async function renovarSeAindaPreciso(accessRecusado: string): Promise<string | null> {
   const sessao = lerSessao()
   if (!sessao) return null
+  if (sessao.access !== accessRecusado) return sessao.access
   try {
     const { dados } = await requisitar<TokensDaSessao>(CAMINHO_DA_RENOVACAO, {
       method: 'POST',
@@ -144,18 +149,17 @@ async function renovar(): Promise<string | null> {
   }
 }
 
-async function accessDeOutraAba(refreshUsado: string): Promise<string | null> {
+function accessDeOutraAba(refreshUsado: string): string | null {
   const atual = lerSessao()
-  if (!atual) return null
-  if (atual.refresh !== refreshUsado) return atual.access
-  const nova = await aguardarSessaoDeOutraAba(refreshUsado, ESPERA_PELA_OUTRA_ABA_MS)
-  return nova?.access ?? null
+  return atual && atual.refresh !== refreshUsado ? atual.access : null
 }
 
 function tentarRenovar(accessRecusado: string): Promise<string | null> {
   const atual = lerSessao()?.access
   if (atual && atual !== accessRecusado) return Promise.resolve(atual)
-  renovacaoEmAndamento ??= renovar().finally(() => {
+  renovacaoEmAndamento ??= comTravaEntreAbas(() =>
+    renovarSeAindaPreciso(accessRecusado),
+  ).finally(() => {
     renovacaoEmAndamento = null
   })
   return renovacaoEmAndamento

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import { entrar } from './autenticacao.ts'
-import { ErroDaApi, ESPERA_PELA_OUTRA_ABA_MS, requisitar } from './cliente.ts'
+import { ErroDaApi, NOME_DA_TRAVA_DE_RENOVACAO, requisitar } from './cliente.ts'
 import {
   aoMudarSessao,
   CHAVE_DA_SESSAO,
@@ -53,21 +53,43 @@ function outraAbaGravou(sessao: unknown = SESSAO_DE_OUTRA_ABA) {
   return valor
 }
 
-function outraAbaAvisou(valor: string) {
-  window.dispatchEvent(new StorageEvent('storage', { key: CHAVE_DA_SESSAO, newValue: valor }))
-}
-
-async function depoisDaEsperaPelaOutraAba<T>(promessa: Promise<T>): Promise<T> {
-  await vi.advanceTimersByTimeAsync(ESPERA_PELA_OUTRA_ABA_MS)
-  return promessa
-}
-
 function deferido<T>() {
   let resolver!: (valor: T) => void
   const promessa = new Promise<T>((resolve) => {
     resolver = resolve
   })
   return { promessa, resolver }
+}
+
+function instalarTravasFalsas() {
+  const nomes: string[] = []
+  let ocupada = false
+  let fila: Promise<unknown> = Promise.resolve()
+  const travas = {
+    request(nome: string, tarefa: () => Promise<unknown>) {
+      nomes.push(nome)
+      const resultado = fila.then(async () => {
+        ocupada = true
+        try {
+          return await tarefa()
+        } finally {
+          ocupada = false
+        }
+      })
+      fila = resultado.catch(() => undefined)
+      return resultado
+    },
+  }
+  Object.defineProperty(navigator, 'locks', { value: travas, configurable: true })
+  return {
+    nomes,
+    ocupada: () => ocupada,
+    segurarComoOutraAba() {
+      const solta = deferido<void>()
+      travas.request(NOME_DA_TRAVA_DE_RENOVACAO, () => solta.promessa)
+      return () => solta.resolver()
+    },
+  }
 }
 
 const fetchFalso = vi.fn<(url: string, opcoes: RequestInit) => Promise<Response>>()
@@ -113,6 +135,7 @@ describe('cliente da API', () => {
     limparSessao()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+    Reflect.deleteProperty(navigator, 'locks')
   })
 
   it('envia o access da sessão no cabeçalho Authorization', async () => {
@@ -194,19 +217,40 @@ describe('cliente da API', () => {
     expect(ouvinte).not.toHaveBeenCalled()
   })
 
-  it('renovação recusada enquanto outra aba ainda grava a sessão nova espera o aviso dela e não desloga', async () => {
-    apiQueAceitaSo('access-9', () => {
-      setTimeout(() => outraAbaAvisou(outraAbaGravou()), 50)
-      return REFRESH_RECUSADO
+  it('a renovação roda dentro da trava entre abas', async () => {
+    const travas = instalarTravasFalsas()
+    let renovouComATrava = false
+    apiQueAceitaSo('access-2', () => {
+      renovouComATrava = travas.ocupada()
+      return renovado('access-2', 'refresh-2')
     })
+
+    await requisitar('/reservas/')
+
+    expect(travas.nomes).toEqual([NOME_DA_TRAVA_DE_RENOVACAO])
+    expect(renovouComATrava).toBe(true)
+    expect(lerSessao()?.refresh).toBe('refresh-2')
+  })
+
+  it('com a renovação de outra aba em andamento, espera a trava e usa a sessão nova sem renovar, por mais que ela demore', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const travas = instalarTravasFalsas()
+    const soltarOutraAba = travas.segurarComoOutraAba()
+    apiQueAceitaSo('access-9', () => REFRESH_RECUSADO)
     const ouvinte = vi.fn()
     const cancelar = aoMudarSessao(ouvinte)
 
-    const resultado = await requisitar('/reservas/')
+    const pedido = requisitar('/reservas/')
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(lerSessao()?.access).toBe('access-1')
+    outraAbaGravou()
+    soltarOutraAba()
+    const resultado = await pedido
     cancelar()
 
     expect(resultado).toEqual({ mensagem: 'ok', dados: [] })
-    expect(chamadasDeRenovacao()).toHaveLength(1)
+    expect(chamadasDeRenovacao()).toHaveLength(0)
+    expect(autorizacao(chamadas()[1])).toBe('Bearer access-9')
     expect(lerSessao()).toEqual(SESSAO_DE_OUTRA_ABA)
     expect(ouvinte).not.toHaveBeenCalled()
   })
@@ -238,15 +282,11 @@ describe('cliente da API', () => {
   })
 
   it('se a renovação falhar, limpa a sessão, avisa os ouvintes e lança SESSAO_EXPIRADA', async () => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     apiQueAceitaSo('access-2', () => REFRESH_RECUSADO)
     const ouvinte = vi.fn()
     const cancelar = aoMudarSessao(ouvinte)
 
-    const pedido = erroDe(requisitar('/reservas/'))
-    await vi.advanceTimersByTimeAsync(ESPERA_PELA_OUTRA_ABA_MS - 1)
-    expect(lerSessao()).not.toBeNull()
-    const erro = await depoisDaEsperaPelaOutraAba(pedido)
+    const erro = await erroDe(requisitar('/reservas/'))
     cancelar()
 
     expect(erro.status).toBe(401)
@@ -268,7 +308,6 @@ describe('cliente da API', () => {
   })
 
   it('refresh vazio recusado com 400 também encerra a sessão', async () => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     apiQueAceitaSo('access-2', () =>
       resposta(400, {
         erro: {
@@ -279,7 +318,7 @@ describe('cliente da API', () => {
       }),
     )
 
-    const erro = await depoisDaEsperaPelaOutraAba(erroDe(requisitar('/reservas/')))
+    const erro = await erroDe(requisitar('/reservas/'))
 
     expect(erro.codigo).toBe('SESSAO_EXPIRADA')
     expect(lerSessao()).toBeNull()

@@ -15,6 +15,7 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Nova exceção E3.1 · Tentativas de entrada em excesso, a primeira conferência do passo 3 (RF-33.2, RNF-F12); as antigas E3.1 e E3.2 passam a E3.2 e E3.3, seguindo a ordem real ([decisão h](README.md#decisao-h)); sai a lacuna L-03, resolvida (AUT-08). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | "Fora das exceções": com o serviço que conta as tentativas (Redis) fora do ar, a entrada é recusada sem conferir nada (AUT-08). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | A4.1 com a troca da credencial de renovação a cada uso e duas janelas renovando ao mesmo tempo; A4.3 encerra a sessão também no sistema (a credencial de renovação deixa de valer; a de acesso vale até expirar, lacuna L-04 reduzida); E4.1 inclui a credencial de renovação já trocada ou de uma sessão encerrada; pós-condições, RNF-F13 e anexo (AUT-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | A4.1: só uma janela renova, e a outra espera essa renovação terminar, sem tempo fixo (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
 
 ## Sumário
 
@@ -71,7 +72,7 @@ No passo 1, o visitante ainda não tem conta. Ele segue em [UC-01 Cadastrar-se](
 
 #### <a id="a4-1"></a>A4.1 · Continuar identificado
 
-Depois do passo 4, o usuário continua usando o sistema, inclusive depois de recarregar ou de abrir o sistema de novo em outra janela do mesmo navegador. Enquanto a sessão valer (1 dia desde a entrada), o sistema o mantém identificado sem pedir a senha e renova a credencial de acesso, que vale 30 minutos, sem que ele perceba. A cada renovação, a credencial de renovação também é trocada por outra, com o mesmo prazo final, e a usada deixa de valer ([RNF-F13](../requisitos/rnf.md#rnf-f13)). Se várias operações precisarem da renovação ao mesmo tempo, ela acontece uma vez só. Se duas janelas que dividem a sessão renovarem ao mesmo tempo, o sistema aceita uma e recusa a outra; a janela recusada passa a usar a credencial que a outra recebeu e refaz a operação uma vez, e as duas continuam identificadas.
+Depois do passo 4, o usuário continua usando o sistema, inclusive depois de recarregar ou de abrir o sistema de novo em outra janela do mesmo navegador. Enquanto a sessão valer (1 dia desde a entrada), o sistema o mantém identificado sem pedir a senha e renova a credencial de acesso, que vale 30 minutos, sem que ele perceba. A cada renovação, a credencial de renovação também é trocada por outra, com o mesmo prazo final, e a usada deixa de valer ([RNF-F13](../requisitos/rnf.md#rnf-f13)). Se várias operações precisarem da renovação ao mesmo tempo, ela acontece uma vez só. Se duas janelas que dividem a sessão precisarem renovar ao mesmo tempo, só uma renova; a outra espera essa renovação terminar, por mais que ela demore, passa a usar a credencial nova e refaz a operação uma vez, e as duas continuam identificadas.
 
 #### <a id="a4-2"></a>A4.2 · Confirmar a identificação ao voltar
 
