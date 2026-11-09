@@ -6,8 +6,8 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from reservas.application.repositorio import FiltrosDeReservas
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+from reservas.tests.fakes import todas_as_reservas
 
 pytestmark = pytest.mark.django_db
 
@@ -52,7 +52,7 @@ def _solicitar(cliente, corpo):
 
 
 def _quantidade_de_reservas():
-    return len(RepositorioReservasDjango().listar(FiltrosDeReservas()))
+    return len(todas_as_reservas(RepositorioReservasDjango()))
 
 
 def _solicitante_de(usuario):

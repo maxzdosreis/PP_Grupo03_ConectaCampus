@@ -1,0 +1,13 @@
+.paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-4);
+}
+
+.posicao {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}

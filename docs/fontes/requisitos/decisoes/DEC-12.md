@@ -25,3 +25,4 @@
 | 0.1 | 03/11/2026 | Max Zimmermann dos Reis | Registro da meta adotada na REQ-02. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-12) (REQ-06). Estado e opção sem mudança. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Decidida na Aula 7: resposta do professor registrada, confirmando a opção adotada (que passa ao campo Decisão); nenhum CR (GES-02). |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Medição nova depois da paginação da consulta (RES-10): com 1.000 e 5.000 reservas, inclusive a última página do Gestor sem critério, o pior p95 da consulta foi 45 ms (antes, 1.743 ms com 5.000); a meta não muda ([resultado e ambiente](../requisitos/rnf.md#medição); [L-05](../requisitos/srs.md#l-05) resolvida). |

@@ -4,7 +4,7 @@ import Campo from '../formulario/Campo.tsx'
 import estilos from './FiltrosDeReservas.module.css'
 import { rotuloDoEspacoDesconhecido } from './nomeDoEspaco.ts'
 
-export type ValoresDosFiltros = Required<FiltrosDaApi>
+export type ValoresDosFiltros = Required<Omit<FiltrosDaApi, 'pagina'>>
 
 type FiltroImediato = Exclude<keyof ValoresDosFiltros, 'solicitante'>
 

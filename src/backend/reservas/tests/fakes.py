@@ -8,7 +8,13 @@ from zoneinfo import ZoneInfo
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
-from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
+from reservas.application.repositorio import (
+    TAMANHO_MAXIMO_DA_PAGINA,
+    FiltrosDeReservas,
+    Paginacao,
+    PaginaDeReservas,
+    RepositorioReservas,
+)
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
@@ -144,11 +150,19 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         reserva = self._reservas.get(reserva_id)
         return _copiar(reserva, reserva_id) if reserva else None
 
-    def listar(self, filtros: FiltrosDeReservas) -> list[Reserva]:
-        return self._ordenadas(
+    def listar(
+        self, filtros: FiltrosDeReservas, paginacao: Paginacao
+    ) -> PaginaDeReservas:
+        encontradas = self._ordenadas(
             reserva
             for reserva in self._reservas.values()
             if _atende_aos_filtros(reserva, filtros)
+        )
+        inicio = paginacao.deslocamento()
+        return PaginaDeReservas(
+            itens=tuple(encontradas[inicio : inicio + paginacao.tamanho]),
+            total=len(encontradas),
+            paginacao=paginacao,
         )
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
@@ -170,6 +184,22 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         reserva_id = self._proximo_id
         self._proximo_id += 1
         return reserva_id
+
+
+def todas_as_reservas(
+    repositorio: RepositorioReservas, filtros: FiltrosDeReservas | None = None
+) -> list[Reserva]:
+    filtros = filtros or FiltrosDeReservas()
+    reservas: list[Reserva] = []
+    numero = 1
+    while True:
+        pagina = repositorio.listar(
+            filtros, Paginacao(numero=numero, tamanho=TAMANHO_MAXIMO_DA_PAGINA)
+        )
+        reservas.extend(pagina.itens)
+        if numero >= pagina.total_de_paginas():
+            return reservas
+        numero += 1
 
 
 def _atende_aos_filtros(reserva: Reserva, filtros: FiltrosDeReservas) -> bool:

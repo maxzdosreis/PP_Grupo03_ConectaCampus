@@ -22,7 +22,7 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`. "Logado" = qualquer perf
 | `GET /api/reservas/situacoes/` | público | 200 | — |
 | `GET /api/reservas/regras-de-agenda/` | público | 200 | — |
 | `POST /api/reservas/` | logado (em nome próprio) | 201 | 400 `DADOS_INVALIDOS`, `HORARIO_INVALIDO`, `DATA_RETROATIVA`, `FORA_DO_HORARIO_DE_FUNCIONAMENTO`, `DURACAO_INVALIDA`, `ANTECEDENCIA_EXCEDIDA`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO`, `CONFLITO_DE_HORARIO` |
-| `GET /api/reservas/?espaco=&situacao=&data=&solicitante=&minhas=` | logado (Solicitante: só as próprias) | 200 | 400 `DADOS_INVALIDOS` (filtro em formato inválido) |
+| `GET /api/reservas/?espaco=&situacao=&data=&solicitante=&minhas=&pagina=&tamanho=` | logado (Solicitante: só as próprias) | 200 | 400 `DADOS_INVALIDOS` (filtro, página ou tamanho em formato inválido) |
 | `GET /api/reservas/ocupacao/?espaco=&data=` | logado | 200 | 400 `DADOS_INVALIDOS`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO` |
 | `GET /api/reservas/{id}/` | Gestor; Solicitante só a própria | 200 | 404 `RESERVA_NAO_ENCONTRADA` |
 | `PATCH /api/reservas/{id}/situacao/` | Gestor; Solicitante só cancela a própria | 200 | 400 `MOTIVO_OBRIGATORIO`, `SITUACAO_INVALIDA`, `DADOS_INVALIDOS`; 403 `ACAO_NAO_PERMITIDA`; 404; 409 `TRANSICAO_DE_SITUACAO_INVALIDA`, `RESERVA_DESATUALIZADA` |
@@ -108,7 +108,7 @@ Para uma data em que não é possível reservar (ontem, hoje depois das 22:00 ou
 
 ## Consultar reservas
 
-Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas ordenadas pelo início. Filtros opcionais, que funcionam sozinhos ou combinados:
+Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas ordenadas pelo início (e, no empate, pelo id), em páginas. Filtros opcionais, que funcionam sozinhos ou combinados:
 
 | Parâmetro | Exemplo | Efeito |
 |---|---|---|
@@ -117,6 +117,8 @@ Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas orde
 | `data` | `data=2026-11-10` | reservas desse dia (`AAAA-MM-DD`) |
 | `solicitante` | `solicitante=souza` | trecho do nome ou da matrícula, sem diferenciar maiúsculas |
 | `minhas` | `minhas=true` | só as reservas do usuário logado |
+| `pagina` | `pagina=2` | a página do resultado, a partir de 1 (padrão 1) |
+| `tamanho` | `tamanho=50` | reservas por página, de 1 a 100 (padrão 20) |
 
 > O Solicitante só vê as próprias reservas, qualquer que seja o filtro (inclusive `minhas=false` ou `solicitante=` com o nome de outra pessoa). O Gestor vê todas e pode filtrar por solicitante.
 
@@ -138,13 +140,27 @@ Só as reservas do usuário logado:
 curl "http://localhost:8000/api/reservas/?minhas=true" -H "Authorization: Bearer $ACCESS"
 ```
 
-Resposta **200** (a mensagem informa a quantidade: "Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."):
+A segunda página, com duas reservas por página:
 
-```json
-{"mensagem": "1 reserva encontrada.", "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
+```bash
+curl "http://localhost:8000/api/reservas/?tamanho=2&pagina=2" -H "Authorization: Bearer $ACCESS"
 ```
 
-Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40` ou `espaco=abc`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`.
+Resposta **200**. A mensagem informa o **total** encontrado, e não só o da página ("Nenhuma reserva encontrada.", "1 reserva encontrada." ou "N reservas encontradas."); `dados` traz as reservas da página; e `paginacao` diz a página, o tamanho, o total e o número de páginas:
+
+```json
+{"mensagem": "1 reserva encontrada.", "paginacao": {"pagina": 1, "tamanho": 20, "total": 1, "total_de_paginas": 1}, "dados": [{"id": 1, "espaco_id": 1, "solicitante": {"usuario_id": 1, "nome": "Ana Souza", "matricula": "2026001"}, "data": "2026-11-10", "hora_inicio": "10:00", "hora_fim": "11:00", "finalidade": "Treino de volei", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-10-22T15:57:00.442650-03:00", "acoes_disponiveis": [{"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}]}
+```
+
+Um filtro em formato inválido (por exemplo, `situacao=XYZ`, `data=2026-13-40`, `espaco=abc`, `pagina=0` ou `tamanho=101`) responde **400** `DADOS_INVALIDOS`, com o parâmetro em `campos`. Em branco (`pagina=`), vale o padrão.
+
+**Paginação (RES-10):**
+
+- **a) Parâmetros na query string**, em português, como os filtros: `pagina` e `tamanho`. Os limites ficam uma vez só, em `application/repositorio.py` (`TAMANHO_PADRAO_DA_PAGINA` e `TAMANHO_MAXIMO_DA_PAGINA`), e o serializer os usa para responder 400 com o campo; `Paginacao` repete a checagem como erro de programação.
+- **b) Formato:** `dados` continua sendo a lista, e `paginacao` é uma chave nova no topo. Só esta consulta tem `paginacao`; as outras respostas não mudam.
+- **c) Página depois da última** (com total maior que zero) responde **200** com `dados` vazio e a `paginacao` certa, porque um filtro ou uma mudança de situação pode encolher o resultado entre duas chamadas: `total_de_paginas` diz onde está o fim, e a tela vai para a última. Sem reservas, `total_de_paginas` é 0 e `pagina` é a pedida.
+- **d) No banco:** o repositório faz o `COUNT` e busca só a página (`LIMIT`/`OFFSET`), na mesma consulta filtrada e ordenada por início e id. Depois da última página, ele nem busca, só conta, o que também evita um `OFFSET` gigante. A contagem e a página são duas consultas: uma reserva criada entre elas pode deixar o total uma unidade diferente da página por um instante, o que a decisão c já tolera.
+
 
 As situações aceitas no filtro, com o rótulo exibido (`GET /api/reservas/situacoes/`, não exige login):
 

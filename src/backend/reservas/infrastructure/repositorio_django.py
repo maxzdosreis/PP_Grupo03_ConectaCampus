@@ -3,7 +3,12 @@ from datetime import date
 from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
 
-from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
+from reservas.application.repositorio import (
+    FiltrosDeReservas,
+    Paginacao,
+    PaginaDeReservas,
+    RepositorioReservas,
+)
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
@@ -44,11 +49,22 @@ class RepositorioReservasDjango(RepositorioReservas):
         model = ReservaModel.objects.filter(pk=reserva_id).first()
         return _para_entidade(model) if model else None
 
-    def listar(self, filtros: FiltrosDeReservas) -> list[Reserva]:
+    def listar(
+        self, filtros: FiltrosDeReservas, paginacao: Paginacao
+    ) -> PaginaDeReservas:
         consulta = ReservaModel.objects.order_by("inicio", "id")
         for filtrar in _FILTROS:
             consulta = filtrar(consulta, filtros)
-        return [_para_entidade(model) for model in consulta]
+        total = consulta.count()
+        deslocamento = paginacao.deslocamento()
+        if deslocamento >= total:
+            return PaginaDeReservas(itens=(), total=total, paginacao=paginacao)
+        modelos = consulta[deslocamento : deslocamento + paginacao.tamanho]
+        return PaginaDeReservas(
+            itens=tuple(_para_entidade(model) for model in modelos),
+            total=total,
+            paginacao=paginacao,
+        )
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         consulta = ReservaModel.objects.filter(

@@ -28,7 +28,7 @@ from reservas.api.dependencias import (
     consultar_reservas,
     criar_reserva,
 )
-from reservas.application.repositorio import FiltrosDeReservas
+from reservas.application.repositorio import FiltrosDeReservas, Paginacao
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.solicitante import Solicitante
 
@@ -158,11 +158,11 @@ def _ator_do_gestor() -> Ator:
 def _contar_reservas_de(solicitantes: Iterable[Solicitante], gestor: Ator) -> int:
     consulta = consultar_reservas()
     return sum(
-        len(
-            consulta.executar(
-                FiltrosDeReservas(solicitante_usuario_id=s.usuario_id), ator=gestor
-            )
-        )
+        consulta.executar(
+            FiltrosDeReservas(solicitante_usuario_id=s.usuario_id),
+            Paginacao(numero=1, tamanho=1),
+            ator=gestor,
+        ).total
         for s in solicitantes
     )
 

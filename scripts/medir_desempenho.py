@@ -1,15 +1,3 @@
-"""Mede o tempo da consulta de reservas e da agenda do dia (RNF-P01 e RNF-P02, DEC-12).
-
-Roda dentro do container do backend, lendo o script pela entrada padrão (a pasta
-scripts/ não é montada no container). A partir de src/:
-
-    docker compose exec -T backend python - --reservas 1000 < ../scripts/medir_desempenho.py
-
-Cria um banco de teste separado (test_<nome do banco>), aplica as migrations, grava
-usuários, espaços e reservas, mede as consultas pela API com um token de acesso de
-verdade e apaga o banco no fim. O banco de desenvolvimento não é tocado.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -41,7 +29,7 @@ class Resultado:
     nome: str
     meta_ms: int
     amostras_ms: list[float]
-    itens: int
+    itens: str
     bytes_: int
     consultas_sql: int
 
@@ -173,10 +161,19 @@ def _medir(nome, meta_ms, cliente, url, parametros, contar, args) -> Resultado:
         nome=nome,
         meta_ms=meta_ms,
         amostras_ms=amostras,
-        itens=contar(resposta.data["dados"]),
+        itens=contar(resposta.data),
         bytes_=len(resposta.content),
         consultas_sql=len(consultas),
     )
+
+
+def _itens_da_pagina(corpo) -> str:
+    return f"{len(corpo['dados'])} de {corpo['paginacao']['total']}"
+
+
+def _ultima_pagina(cliente, url) -> dict:
+    paginacao = cliente.get(url).data["paginacao"]
+    return {"pagina": max(paginacao["total_de_paginas"], 1)}
 
 
 def _cenarios(cenario: Cenario, args) -> list[Resultado]:
@@ -186,17 +183,28 @@ def _cenarios(cenario: Cenario, args) -> list[Resultado]:
     solicitante = _cliente(cenario.solicitante)
     lista = reverse("reservas:lista")
     filtro = {"espaco": cenario.espaco_id, "data": cenario.data.isoformat()}
+    ultima = _ultima_pagina(gestor, lista)
+    consulta = META_DA_CONSULTA_MS
     return [
-        _medir("Consulta: Gestor, sem critério", META_DA_CONSULTA_MS, gestor, lista, {}, len, args),
-        _medir("Consulta: Gestor, espaço + data", META_DA_CONSULTA_MS, gestor, lista, filtro, len, args),
-        _medir("Consulta: Solicitante, só as próprias", META_DA_CONSULTA_MS, solicitante, lista, {}, len, args),
+        _medir("Consulta: Gestor, sem critério", consulta, gestor, lista, {}, _itens_da_pagina, args),
+        _medir(
+            f"Consulta: Gestor, sem critério, última página ({ultima['pagina']})",
+            consulta,
+            gestor,
+            lista,
+            ultima,
+            _itens_da_pagina,
+            args,
+        ),
+        _medir("Consulta: Gestor, espaço + data", consulta, gestor, lista, filtro, _itens_da_pagina, args),
+        _medir("Consulta: Solicitante, só as próprias", consulta, solicitante, lista, {}, _itens_da_pagina, args),
         _medir(
             "Agenda do dia (espaço + data)",
             META_DA_AGENDA_MS,
             solicitante,
             reverse("reservas:ocupacao"),
             filtro,
-            lambda dados: len(dados["ocupados"]),
+            lambda corpo: str(len(corpo["dados"]["ocupados"])),
             args,
         ),
     ]

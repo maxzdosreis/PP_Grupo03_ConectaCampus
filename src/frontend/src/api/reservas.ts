@@ -1,5 +1,6 @@
-import { requisitar } from './cliente.ts'
+import { ErroDaApi, MENSAGEM_ERRO_INESPERADO, requisitar } from './cliente.ts'
 import { comParametros } from './parametros.ts'
+import type { Paginacao, RespostaSucesso } from './tipos.ts'
 
 export type Solicitante = {
   usuario_id: number
@@ -47,6 +48,12 @@ export type FiltrosDeReservas = {
   data?: string
   solicitante?: string
   minhas?: boolean
+  pagina?: string
+}
+
+export type ListaDeReservas = {
+  reservas: Reserva[]
+  paginacao: Paginacao
 }
 
 export type SituacaoDeReserva = {
@@ -97,22 +104,26 @@ export function solicitarReserva(dados: DadosDaReserva) {
   return requisitar<Reserva>('/reservas/', { method: 'POST', body: JSON.stringify(dados) })
 }
 
-export function listarReservas({
+export async function listarReservas({
   espaco,
   situacao,
   data,
   solicitante,
   minhas,
-}: FiltrosDeReservas = {}) {
-  return requisitar<Reserva[]>(
+  pagina,
+}: FiltrosDeReservas = {}): Promise<RespostaSucesso<ListaDeReservas>> {
+  const { mensagem, dados, paginacao } = await requisitar<Reserva[]>(
     comParametros('/reservas/', {
       espaco,
       situacao,
       data,
       solicitante,
       minhas: minhas ? 'true' : undefined,
+      pagina,
     }),
   )
+  if (!paginacao) throw new ErroDaApi(200, 'ERRO_INESPERADO', MENSAGEM_ERRO_INESPERADO)
+  return { mensagem, dados: { reservas: dados, paginacao } }
 }
 
 export function obterReserva(id: number) {

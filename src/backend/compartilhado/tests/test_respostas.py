@@ -28,6 +28,22 @@ def test_resposta_sucesso_sem_dados_usa_status_200_e_dados_nulos():
     assert resposta.data == {"mensagem": "Tudo certo.", "dados": None}
 
 
+def test_resposta_sucesso_com_paginacao_acrescenta_a_chave_no_topo():
+    # Arrange
+    paginacao = {"pagina": 2, "tamanho": 20, "total": 42, "total_de_paginas": 3}
+
+    # Act
+    resposta = resposta_sucesso("42 reservas encontradas.", [], paginacao=paginacao)
+
+    # Assert
+    assert resposta.status_code == 200
+    assert resposta.data == {
+        "mensagem": "42 reservas encontradas.",
+        "dados": [],
+        "paginacao": paginacao,
+    }
+
+
 def test_corpo_de_erro_sem_campos_nao_inclui_a_chave_campos():
     # Act
     corpo = corpo_de_erro("CONFLITO_DE_HORARIO", "Horário ocupado.")

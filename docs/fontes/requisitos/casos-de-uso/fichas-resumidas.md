@@ -17,6 +17,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Bloco de apoio aponta para o README da raiz e o do backend, com a divisão do README (DOC-09). Mudança editorial, sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-01: nota do limite de pedidos de cadastro por origem (RNF-F12, AUT-08), sem exceção nem RF novos. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-22: confere também o cache, com a exceção E2.2 · Cache fora do ar; UC-01: a recusa com o serviço de contagem fora do ar (Redis, AUT-08). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | UC-07: a consulta em páginas, com o total, nos passos 2 e 4; alternativas novas A2.3 (ver outra página), A2.4 (página além da última) e A3.2 (mudar um critério recomeça da primeira página); a exceção E3.1 inclui a página e o tamanho inválidos; RF-12.2 nos RFs cobertos (RES-10). Sem aprovação. |
 
 ## Sumário
 
@@ -145,24 +146,27 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 **Fluxo principal**
 
 1. <a id="uc07-p1"></a>O ator pede para ver as reservas.
-2. <a id="uc07-p2"></a>O sistema mostra as reservas que o ator pode ver — o Gestor, todas; o Solicitante, só as próprias, como "Minhas reservas" —, ordenadas pelo início, com data e horário, espaço, solicitante, finalidade, situação com o motivo, as [ações disponíveis](../glossario.md#acao-disponivel) de cada uma e a quantidade encontrada.
+2. <a id="uc07-p2"></a>O sistema mostra as reservas que o ator pode ver — o Gestor, todas; o Solicitante, só as próprias, como "Minhas reservas" —, ordenadas pelo início, em páginas de até 20, com data e horário, espaço, solicitante, finalidade, situação com o motivo, as [ações disponíveis](../glossario.md#acao-disponivel) de cada uma, o total encontrado, a página atual e o número de páginas.
 3. <a id="uc07-p3"></a>O ator informa um ou mais critérios: espaço, situação (entre as situações de reserva, na ordem do ciclo de vida), data e, só para o Gestor, solicitante (trecho do nome ou da matrícula) e "somente as minhas".
-4. <a id="uc07-p4"></a>O sistema mostra só as reservas que atendem a todos os critérios, com a quantidade.
+4. <a id="uc07-p4"></a>O sistema mostra só as reservas que atendem a todos os critérios, a partir da primeira página, com a quantidade.
 
 **Alternativas**
 
 - <a id="uc07-a2-1"></a>**A2.1** · Escolher uma reserva para acompanhar: segue em [UC-08](#uc-08), e a volta mantém os critérios.
 - <a id="uc07-a2-2"></a>**A2.2** · Escolher uma ação de uma reserva: segue em [UC-10](UC-10-alterar-situacao-da-reserva.md); depois, a lista é consultada de novo com os mesmos critérios.
+- <a id="uc07-a2-3"></a>**A2.3** · Ver outra página: o ator pede a página seguinte ou a anterior, e o sistema mostra aquela página do mesmo resultado, com os mesmos critérios e o mesmo total; a volta de uma reserva acompanhada ([A2.1](#uc07-a2-1)) também mantém a página.
+- <a id="uc07-a2-4"></a>**A2.4** · Página além da última (o resultado encolheu entre duas consultas, por uma mudança de situação ou de critério): o sistema não recusa; informa que não há reservas naquela página, com o total e o número de páginas atuais, e o ator passa a ver a última página que existe.
 - <a id="uc07-a4-1"></a>**A4.1** · Nenhuma reserva atende: "Nenhuma reserva encontrada.", com a opção de limpar os critérios. Um espaço inexistente no critério também dá lista vazia, não erro.
 - <a id="uc07-a3-1"></a>**A3.1** · O Solicitante informa um solicitante ou "somente as minhas = não": o critério é ignorado, e ele continua vendo só as próprias.
+- <a id="uc07-a3-2"></a>**A3.2** · O ator muda um critério ou limpa os critérios quando está numa página que não é a primeira: o resultado novo começa da primeira página.
 
 **Exceções**
 
 | Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
 |---|---|---|---|---|
-| <a id="uc07-e3-1"></a>E3.1 · Critério em formato inválido | Situação fora da lista, data que não existe ou espaço que não é um número. | "Verifique os dados informados.", com o critério com problema. | Nenhuma reserva muda. | [RF-12.1](../requisitos/rf-reservas.md#rf-12-1) |
+| <a id="uc07-e3-1"></a>E3.1 · Critério em formato inválido | Situação fora da lista, data que não existe, espaço que não é um número, página que não é um número inteiro a partir de 1 ou tamanho de página fora de 1 a 100. | "Verifique os dados informados.", com o critério com problema. | Nenhuma reserva muda. | [RF-12.1](../requisitos/rf-reservas.md#rf-12-1) |
 
-**RFs cobertos:** [RF-12](../requisitos/rf-reservas.md#rf-12) → [passos 3 e 4](#uc07-p3) · [RF-12.1](../requisitos/rf-reservas.md#rf-12-1) → [E3.1](#uc07-e3-1) · [RF-13](../requisitos/rf-reservas.md#rf-13) → [passo 2](#uc07-p2), [A3.1](#uc07-a3-1) · [RF-15](../requisitos/rf-reservas.md#rf-15) → [passo 3](#uc07-p3) · [RF-16](../requisitos/rf-reservas.md#rf-16) → [passo 2](#uc07-p2)
+**RFs cobertos:** [RF-12](../requisitos/rf-reservas.md#rf-12) → [passos 3 e 4](#uc07-p3) · [RF-12.1](../requisitos/rf-reservas.md#rf-12-1) → [E3.1](#uc07-e3-1) · [RF-12.2](../requisitos/rf-reservas.md#rf-12-2) → [passo 2](#uc07-p2), [A2.3](#uc07-a2-3), [A2.4](#uc07-a2-4), [A3.2](#uc07-a3-2) · [RF-13](../requisitos/rf-reservas.md#rf-13) → [passo 2](#uc07-p2), [A3.1](#uc07-a3-1) · [RF-15](../requisitos/rf-reservas.md#rf-15) → [passo 3](#uc07-p3) · [RF-16](../requisitos/rf-reservas.md#rf-16) → [passo 2](#uc07-p2)
 
 **Histórias derivadas:** [US-10 Acompanhar minhas reservas](../historias/US-10-acompanhar-minhas-reservas.md), [US-11 Acompanhar todas as reservas](../historias/US-11-acompanhar-todas-as-reservas.md)
 

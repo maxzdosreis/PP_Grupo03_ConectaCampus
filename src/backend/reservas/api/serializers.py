@@ -2,7 +2,12 @@ from datetime import datetime, timedelta
 
 from rest_framework import serializers
 
-from reservas.application.repositorio import FiltrosDeReservas
+from reservas.application.repositorio import (
+    TAMANHO_MAXIMO_DA_PAGINA,
+    TAMANHO_PADRAO_DA_PAGINA,
+    FiltrosDeReservas,
+    Paginacao,
+)
 from reservas.domain.regras_de_agenda import (
     ANTECEDENCIA_MAXIMA_EM_DIAS,
     DURACAO_MAXIMA,
@@ -37,6 +42,13 @@ class FiltrosReservasSerializer(serializers.Serializer):
     data = serializers.DateField(required=False)
     solicitante = serializers.CharField(required=False, allow_blank=True)
     minhas = serializers.BooleanField(default=False)
+    pagina = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    tamanho = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+        min_value=1,
+        max_value=TAMANHO_MAXIMO_DA_PAGINA,
+    )
 
     def validate_situacao(self, valor):
         return SituacaoReserva(valor) if valor else None
@@ -53,6 +65,20 @@ class FiltrosReservasSerializer(serializers.Serializer):
             solicitante_usuario_id=usuario_id if dados["minhas"] else None,
             solicitante=dados.get("solicitante"),
         )
+
+    def para_paginacao(self) -> Paginacao:
+        dados = self.validated_data
+        return Paginacao(
+            numero=dados.get("pagina") or 1,
+            tamanho=dados.get("tamanho") or TAMANHO_PADRAO_DA_PAGINA,
+        )
+
+
+class PaginacaoSaidaSerializer(serializers.Serializer):
+    pagina = serializers.IntegerField(source="paginacao.numero")
+    tamanho = serializers.IntegerField(source="paginacao.tamanho")
+    total = serializers.IntegerField()
+    total_de_paginas = serializers.IntegerField()
 
 
 class FiltrosDeOcupacaoSerializer(serializers.Serializer):

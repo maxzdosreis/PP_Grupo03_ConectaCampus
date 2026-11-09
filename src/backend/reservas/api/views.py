@@ -11,6 +11,7 @@ from reservas.api.serializers import (
     FiltrosDeOcupacaoSerializer,
     FiltrosReservasSerializer,
     OcupacaoDoDiaSaidaSerializer,
+    PaginacaoSaidaSerializer,
     RegistroDeSituacaoSaidaSerializer,
     RegrasDeAgendaSaidaSerializer,
     ReservaEntradaSerializer,
@@ -25,17 +26,18 @@ class ReservasView(APIView):
         ator = ator_autenticado(request)
         filtros = FiltrosReservasSerializer(data=request.query_params)
         filtros.is_valid(raise_exception=True)
-        reservas = dependencias.consultar_reservas().executar(
-            filtros.para_filtros(ator.usuario_id), ator=ator
+        pagina = dependencias.consultar_reservas().executar(
+            filtros.para_filtros(ator.usuario_id), filtros.para_paginacao(), ator=ator
         )
         return resposta_sucesso(
             mensagem_de_contagem(
-                len(reservas),
+                pagina.total,
                 nenhum="Nenhuma reserva encontrada.",
                 um="1 reserva encontrada.",
                 varios="{total} reservas encontradas.",
             ),
-            _saida(reservas, ator, many=True),
+            _saida(pagina.itens, ator, many=True),
+            paginacao=PaginacaoSaidaSerializer(pagina).data,
         )
 
     def post(self, request):

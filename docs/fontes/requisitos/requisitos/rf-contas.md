@@ -20,6 +20,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RF-33.2 · Recusar tentativas de entrada em excesso, que fecha a lacuna L-03; vínculo do RF-33.1 passa a UC-02 E3.3, com a exceção nova antes dele; o CA de acesso da US-02 passa a CA-07 (TA-13) e os TAs seguintes andam uma posição (AUT-08). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RF-36 passa a encerrar a sessão também no sistema: depois de sair, a credencial de renovação é recusada (a de acesso vale até expirar, lacuna L-04); RF-34 com a troca da credencial de renovação a cada uso e as duas janelas; vínculos com US-03 · CA-06, CA-09 e CA-10 e os TAs renumerados (TA-19 e TA-20 passam a TA-20 e TA-21; TA-21 a TA-158 passam a TA-24 a TA-161) (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RF-34: evidência e código da trava entre janelas na renovação (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Cadastro
 
@@ -228,7 +229,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-11 |
 | **Funcionalidade** | Extra ([DEC-04](../decisoes/DEC-04.md)) |
 | **Prioridade (QFD)** | Normal — sem pelo menos um Gestor, nenhum espaço é cadastrado e nenhum pedido é decidido. |
-| **Vínculos** | UC: [UC-20 Criar usuário Gestor](../casos-de-uso/README.md#uc-20) (fluxo principal) — na ficha: [UC-20 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc20-p1) · US/CA: [US-17 · CA-01](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-01) (TA-151), [US-17 · CA-02](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-02) (TA-152), [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03) (TA-153) |
+| **Vínculos** | UC: [UC-20 Criar usuário Gestor](../casos-de-uso/README.md#uc-20) (fluxo principal) — na ficha: [UC-20 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc20-p1) · US/CA: [US-17 · CA-01](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-01) (TA-158), [US-17 · CA-02](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-02) (TA-159), [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03) (TA-160) |
 | **Evidência (complementar)** | `python manage.py createsuperuser`; administração em `/admin/`. `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser`, `::test_superusuario_e_gestor_e_usuario_comum_nao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes` |
 | **Código (complementar)** | `contas/infrastructure/models.py::UsuarioManager.create_superuser` |
 | **Regras de negócio** | [Gestor](../glossario.md#gestor), [Equipe de TI](../glossario.md#equipe-de-ti) |

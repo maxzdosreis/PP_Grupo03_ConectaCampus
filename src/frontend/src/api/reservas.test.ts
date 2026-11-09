@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { requisitar } from './cliente.ts'
+import { MENSAGEM_ERRO_INESPERADO, requisitar } from './cliente.ts'
 import {
   alterarSituacaoReserva,
   listarHistoricoDaReserva,
@@ -18,7 +18,11 @@ vi.mock('./cliente.ts', async (importarOriginal) => ({
 describe('api de reservas', () => {
   beforeEach(() => {
     vi.mocked(requisitar).mockReset()
-    vi.mocked(requisitar).mockResolvedValue({ mensagem: 'ok', dados: null })
+    vi.mocked(requisitar).mockResolvedValue({
+      mensagem: 'ok',
+      dados: null,
+      paginacao: { pagina: 1, tamanho: 20, total: 0, total_de_paginas: 0 },
+    })
   })
 
   it('solicitarReserva envia um POST com os dados como foram preenchidos', async () => {
@@ -42,6 +46,32 @@ describe('api de reservas', () => {
     await listarReservas()
 
     expect(requisitar).toHaveBeenCalledWith('/reservas/')
+  })
+
+  it('listarReservas devolve as reservas e a paginação da resposta', async () => {
+    const paginacao = { pagina: 2, tamanho: 20, total: 42, total_de_paginas: 3 }
+    vi.mocked(requisitar).mockResolvedValueOnce({
+      mensagem: '42 reservas encontradas.',
+      dados: [],
+      paginacao,
+    })
+
+    const resposta = await listarReservas({ pagina: '2' })
+
+    expect(requisitar).toHaveBeenCalledWith('/reservas/?pagina=2')
+    expect(resposta).toEqual({
+      mensagem: '42 reservas encontradas.',
+      dados: { reservas: [], paginacao },
+    })
+  })
+
+  it('listarReservas trata uma resposta sem paginação como inesperada', async () => {
+    vi.mocked(requisitar).mockResolvedValueOnce({ mensagem: 'ok', dados: [] })
+
+    await expect(listarReservas()).rejects.toMatchObject({
+      codigo: 'ERRO_INESPERADO',
+      message: MENSAGEM_ERRO_INESPERADO,
+    })
   })
 
   it.each([

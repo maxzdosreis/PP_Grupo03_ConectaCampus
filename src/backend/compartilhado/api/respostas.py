@@ -1,8 +1,11 @@
 from rest_framework.response import Response
 
 
-def resposta_sucesso(mensagem, dados=None, status=200):
-    return Response({"mensagem": mensagem, "dados": dados}, status=status)
+def resposta_sucesso(mensagem, dados=None, status=200, *, paginacao=None):
+    corpo = {"mensagem": mensagem, "dados": dados}
+    if paginacao is not None:
+        corpo["paginacao"] = paginacao
+    return Response(corpo, status=status)
 
 
 def mensagem_de_contagem(total, *, nenhum, um, varios):

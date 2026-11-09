@@ -21,7 +21,11 @@ from exemplos.dados import (
     EspacoDeExemplo,
 )
 from reservas.api.dependencias import consultar_reservas
-from reservas.application.repositorio import FiltrosDeReservas
+from reservas.application.repositorio import (
+    TAMANHO_MAXIMO_DA_PAGINA,
+    FiltrosDeReservas,
+    Paginacao,
+)
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.situacao import SituacaoReserva
@@ -50,7 +54,13 @@ def _carregar():
 
 
 def _reservas():
-    return consultar_reservas().executar(FiltrosDeReservas(), ator=QUALQUER_GESTOR)
+    pagina = consultar_reservas().executar(
+        FiltrosDeReservas(),
+        Paginacao(numero=1, tamanho=TAMANHO_MAXIMO_DA_PAGINA),
+        ator=QUALQUER_GESTOR,
+    )
+    assert pagina.total == len(pagina.itens)
+    return list(pagina.itens)
 
 
 def _espacos():
