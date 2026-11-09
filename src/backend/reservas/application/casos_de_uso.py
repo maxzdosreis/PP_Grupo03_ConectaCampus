@@ -4,7 +4,12 @@ from datetime import date, datetime, time
 
 from reservas.application.ocupacao_do_dia import HorarioOcupado, OcupacaoDoDia
 from reservas.application.portas import ConsultaDeEspacos
-from reservas.application.repositorio import FiltrosDeReservas, RepositorioReservas
+from reservas.application.repositorio import (
+    FiltrosDeReservas,
+    Paginacao,
+    PaginaDeReservas,
+    RepositorioReservas,
+)
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaNaoEncontrada
@@ -62,8 +67,10 @@ class ConsultarReservas:
     def __init__(self, repositorio: RepositorioReservas) -> None:
         self._repositorio = repositorio
 
-    def executar(self, filtros: FiltrosDeReservas, *, ator: Ator) -> list[Reserva]:
-        return self._repositorio.listar(_restringir_ao_ator(filtros, ator))
+    def executar(
+        self, filtros: FiltrosDeReservas, paginacao: Paginacao, *, ator: Ator
+    ) -> PaginaDeReservas:
+        return self._repositorio.listar(_restringir_ao_ator(filtros, ator), paginacao)
 
 
 class ObterReserva:

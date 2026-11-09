@@ -14,17 +14,17 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 |---|---|---|---|
 | NS com pelo menos um RF | 16 | 16 | 100% |
 | NS que chegam a um TA | 16 | 16 | 100% |
-| RF com NS de origem | 61 | 61 | 100% |
-| RF com UC (sem o transversal) | 60 | 60 | 100% |
-| RF com US e CA (sem o transversal) | 60 | 60 | 100% |
-| CA com TA | 161 | 161 | 100% |
-| TA automatizados | 158 | 161 | 98% |
-| TA manuais (roteiro) | 3 | 161 | 2% |
-| RF com endpoint ou tela | 60 | 61 | 98% |
-| RF com código citado | 61 | 61 | 100% |
-| RF com a cadeia completa | 60 | 61 | 98% |
+| RF com NS de origem | 62 | 62 | 100% |
+| RF com UC (sem o transversal) | 61 | 61 | 100% |
+| RF com US e CA (sem o transversal) | 61 | 61 | 100% |
+| CA com TA | 168 | 168 | 100% |
+| TA automatizados | 165 | 168 | 98% |
+| TA manuais (roteiro) | 3 | 168 | 2% |
+| RF com endpoint ou tela | 61 | 62 | 98% |
+| RF com código citado | 62 | 62 | 100% |
+| RF com a cadeia completa | 61 | 62 | 98% |
 
-TA manuais: TA-02, TA-153, TA-160 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
+TA manuais: TA-02, TA-160, TA-167 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
 
 ## Por necessidade (NS)
 
@@ -36,14 +36,14 @@ TA manuais: TA-02, TA-153, TA-160 (ver as lacunas de CA sem TA automatizado na [
 | [NS-04](../visao.md#ns-04) | 1 | 1 | 1 | 1 | 2 | 2 (0) |
 | [NS-05](../visao.md#ns-05) | 5 | 5 | 1 | 1 | 10 | 10 (0) |
 | [NS-06](../visao.md#ns-06) | 3 | 4 | 3 | 2 | 9 | 9 (0) |
-| [NS-07](../visao.md#ns-07) | 2 | 4 | 3 | 5 | 14 | 14 (0) |
-| [NS-08](../visao.md#ns-08) | 3 | 4 | 2 | 3 | 10 | 10 (0) |
+| [NS-07](../visao.md#ns-07) | 2 | 5 | 3 | 5 | 21 | 21 (0) |
+| [NS-08](../visao.md#ns-08) | 4 | 5 | 2 | 3 | 17 | 17 (0) |
 | [NS-09](../visao.md#ns-09) | 8 | 9 | 7 | 8 | 30 | 30 (0) |
 | [NS-10](../visao.md#ns-10) | 1 | 3 | 3 | 6 | 12 | 12 (0) |
 | [NS-11](../visao.md#ns-11) | 10 | 14 | 7 | 16 | 44 | 44 (1) |
 | [NS-12](../visao.md#ns-12) | 1 | 1 | 1 | 6 | 10 | 10 (0) |
 | [NS-13](../visao.md#ns-13) | 1 | 18 | 11 | 16 | 43 | 43 (0) |
-| [NS-14](../visao.md#ns-14) | 1 | 5 | 5 | 8 | 20 | 20 (0) |
+| [NS-14](../visao.md#ns-14) | 1 | 5 | 5 | 8 | 21 | 21 (0) |
 | [NS-15](../visao.md#ns-15) | 4 | 4 | 1 | 2 | 7 | 7 (1) |
 | [NS-16](../visao.md#ns-16) | 2 | 2 | 2 | 2 | 8 | 8 (1) |
 
@@ -53,7 +53,7 @@ TA manuais: TA-02, TA-153, TA-160 (ver as lacunas de CA sem TA automatizado na [
 |---|---|---|---|---|---|---|
 | F1 | Cadastrar e listar os espaços | 5 | 2 | 3 | 11 | 11 (0) |
 | F2 | Cadastrar a solicitação | 1 | 1 | 1 | 5 | 5 (0) |
-| F3 | Consultar por dois ou mais critérios | 4 | 2 | 3 | 14 | 14 (0) |
+| F3 | Consultar por dois ou mais critérios | 5 | 2 | 3 | 21 | 21 (0) |
 | F4 | Alterar a situação | 6 | 5 | 8 | 20 | 20 (0) |
 | F5 | Impedir operações inválidas | 28 | 13 | 16 | 70 | 70 (0) |
 | F6 | Mensagens de sucesso e erro | 1 | 0 | 0 | 0 | 0 (0) |

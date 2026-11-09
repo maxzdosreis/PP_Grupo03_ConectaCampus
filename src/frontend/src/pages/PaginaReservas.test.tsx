@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router'
+import { Link, MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ErroDaApi } from '../api/cliente.ts'
 import { listarEspacos, type Espaco } from '../api/espacos.ts'
@@ -9,13 +9,15 @@ import {
   listarReservas,
   listarSituacoesDeReserva,
   type FiltrosDeReservas,
+  type ListaDeReservas,
   type Reserva,
 } from '../api/reservas.ts'
-import type { RespostaSucesso } from '../api/tipos.ts'
+import type { Paginacao, RespostaSucesso } from '../api/tipos.ts'
 import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
 import { ContextoDeSessao } from '../components/sessao/contextoDeSessao.ts'
 import { valorDaSessao } from '../testes/renderizar.tsx'
 import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
+import { caminhoDeVolta } from '../navegacao.ts'
 import PaginaReservas, { ATRASO_DO_SOLICITANTE_MS } from './PaginaReservas.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -87,7 +89,32 @@ const CANCELADA: Reserva = {
 }
 
 function filtros(sobrescritas: FiltrosDeReservas = {}): Required<FiltrosDeReservas> {
-  return { espaco: '', situacao: '', data: '', solicitante: '', minhas: false, ...sobrescritas }
+  return {
+    espaco: '',
+    situacao: '',
+    data: '',
+    solicitante: '',
+    minhas: false,
+    pagina: '1',
+    ...sobrescritas,
+  }
+}
+
+function lista(
+  reservas: Reserva[],
+  paginacao: Partial<Paginacao> = {},
+): ListaDeReservas {
+  const total = paginacao.total ?? reservas.length
+  return {
+    reservas,
+    paginacao: {
+      pagina: 1,
+      tamanho: 20,
+      total,
+      total_de_paginas: Math.ceil(total / 20),
+      ...paginacao,
+    },
+  }
 }
 
 function BuscaAtual() {
@@ -150,7 +177,7 @@ describe('PaginaReservas', () => {
     })
     vi.mocked(listarReservas).mockResolvedValue({
       mensagem: '2 reservas encontradas.',
-      dados: [SOLICITADA, CANCELADA],
+      dados: lista([SOLICITADA, CANCELADA]),
     })
   })
 
@@ -332,7 +359,7 @@ describe('PaginaReservas', () => {
   it('sem filtros e sem reservas, convida a solicitar uma reserva', async () => {
     vi.mocked(listarReservas).mockResolvedValue({
       mensagem: 'Nenhuma reserva encontrada.',
-      dados: [],
+      dados: lista([]),
     })
 
     renderizar()
@@ -347,7 +374,7 @@ describe('PaginaReservas', () => {
   it('com filtros e sem reservas, oferece "Limpar filtros"', async () => {
     vi.mocked(listarReservas).mockResolvedValueOnce({
       mensagem: 'Nenhuma reserva encontrada.',
-      dados: [],
+      dados: lista([]),
     })
     renderizar('/reservas?situacao=CONFIRMADA')
 
@@ -425,7 +452,7 @@ describe('PaginaReservas — visão do solicitante', () => {
     })
     vi.mocked(listarReservas).mockResolvedValue({
       mensagem: '1 reserva encontrada.',
-      dados: [CANCELADA],
+      dados: lista([CANCELADA]),
     })
   })
 
@@ -460,7 +487,7 @@ describe('PaginaReservas — visão do solicitante', () => {
   it('sem filtros e sem reservas, mostra "Você ainda não tem reservas"', async () => {
     vi.mocked(listarReservas).mockResolvedValue({
       mensagem: 'Nenhuma reserva encontrada.',
-      dados: [],
+      dados: lista([]),
     })
 
     renderizar('/reservas', USUARIO_SOLICITANTE)
@@ -493,7 +520,7 @@ describe('PaginaReservas — ações de situação', () => {
     })
     vi.mocked(listarReservas).mockResolvedValue({
       mensagem: '2 reservas encontradas.',
-      dados: [SOLICITADA, CANCELADA],
+      dados: lista([SOLICITADA, CANCELADA]),
     })
     vi.mocked(alterarSituacaoReserva).mockResolvedValue(RESERVA_ALTERADA)
   })
@@ -642,5 +669,195 @@ describe('PaginaReservas — ações de situação', () => {
     resolver({ ...RESERVA_ALTERADA, mensagem: 'Reserva confirmada com sucesso.' })
     expect(await screen.findByText('Reserva confirmada com sucesso.')).toBeTruthy()
     expect(screen.queryByRole('dialog')).toBeNull()
+  })
+})
+
+describe('PaginaReservas — paginação', () => {
+  function VoltarNoHistorico() {
+    const navegar = useNavigate()
+    return (
+      <button type="button" onClick={() => navegar(-1)}>
+        Voltar no histórico
+      </button>
+    )
+  }
+
+  function DetalheDeTeste() {
+    const { state } = useLocation()
+    return <Link to={caminhoDeVolta(state)}>Voltar para as reservas</Link>
+  }
+
+  function renderizarComHistorico(entradas: string[]) {
+    render(
+      <MensagensProvider>
+        <MemoryRouter initialEntries={entradas} initialIndex={entradas.length - 1}>
+          <ContextoDeSessao.Provider value={valorDaSessao({ usuario: USUARIO_GESTOR })}>
+            <Routes>
+              <Route path="/inicio" element={<p>Página inicial</p>} />
+              <Route
+                path="/reservas"
+                element={
+                  <>
+                    <PaginaReservas />
+                    <BuscaAtual />
+                    <VoltarNoHistorico />
+                  </>
+                }
+              />
+              <Route path="/reservas/:reservaId" element={<DetalheDeTeste />} />
+            </Routes>
+          </ContextoDeSessao.Provider>
+        </MemoryRouter>
+      </MensagensProvider>,
+    )
+  }
+
+  function paginaDe(pagina: number) {
+    return lista([SOLICITADA, CANCELADA], { pagina, total: 45, total_de_paginas: 3 })
+  }
+
+  beforeEach(() => {
+    vi.mocked(listarEspacos).mockReset()
+    vi.mocked(listarSituacoesDeReserva).mockReset()
+    vi.mocked(listarReservas).mockReset()
+    vi.mocked(listarEspacos).mockResolvedValue({
+      mensagem: '2 espaços encontrados.',
+      dados: [GINASIO, QUADRA],
+    })
+    vi.mocked(listarSituacoesDeReserva).mockResolvedValue({
+      mensagem: 'Situações de reserva disponíveis.',
+      dados: SITUACOES,
+    })
+    vi.mocked(listarReservas).mockImplementation(async ({ pagina = '1' } = {}) => ({
+      mensagem: '45 reservas encontradas.',
+      dados: paginaDe(Number(pagina)),
+    }))
+  })
+
+  function botao(nome: string) {
+    return screen.getByRole('button', { name: nome }) as HTMLButtonElement
+  }
+
+  it('a navegação só aparece quando há mais de uma página', async () => {
+    vi.mocked(listarReservas).mockResolvedValue({
+      mensagem: '2 reservas encontradas.',
+      dados: lista([SOLICITADA, CANCELADA]),
+    })
+    renderizar()
+
+    await screen.findByRole('table')
+    expect(screen.queryByRole('navigation', { name: 'Paginação' })).toBeNull()
+  })
+
+  it('mostra "Página X de Y" com o total e desabilita "Anterior" na primeira página', async () => {
+    renderizar()
+
+    const navegacao = await screen.findByRole('navigation', { name: 'Paginação' })
+    expect(navegacao.textContent).toContain('Página 1 de 3 · 45 reservas')
+    expect(botao('Anterior').disabled).toBe(true)
+    expect(botao('Próxima').disabled).toBe(false)
+  })
+
+  it('desabilita "Próxima" na última página', async () => {
+    renderizar('/reservas?pagina=3')
+
+    await screen.findByRole('navigation', { name: 'Paginação' })
+    expect(botao('Próxima').disabled).toBe(true)
+    expect(botao('Anterior').disabled).toBe(false)
+  })
+
+  it('"Próxima" e "Anterior" mudam a página na URL e consultam com ela', async () => {
+    renderizar('/reservas?situacao=CONFIRMADA')
+
+    await screen.findByRole('navigation', { name: 'Paginação' })
+    await userEvent.click(botao('Próxima'))
+    await waitFor(() => expect(busca()).toBe('?situacao=CONFIRMADA&pagina=2'))
+    expect(listarReservas).toHaveBeenLastCalledWith(
+      filtros({ situacao: 'CONFIRMADA', pagina: '2' }),
+    )
+
+    await screen.findByText(/Página 2 de 3/)
+    await userEvent.click(botao('Anterior'))
+    await waitFor(() => expect(busca()).toBe('?situacao=CONFIRMADA'))
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros({ situacao: 'CONFIRMADA' }))
+  })
+
+  it('depois de mudar de página, o foco vai para a região da tabela', async () => {
+    renderizar()
+
+    await screen.findByRole('navigation', { name: 'Paginação' })
+    await userEvent.click(botao('Próxima'))
+
+    await screen.findByText(/Página 2 de 3/)
+    const regiao = screen.getByRole('region', { name: '45 reservas encontradas.' })
+    await waitFor(() => expect(document.activeElement).toBe(regiao))
+  })
+
+  it('mudar de página entra no histórico, e voltar no navegador volta à página anterior', async () => {
+    renderizarComHistorico(['/reservas'])
+
+    await screen.findByRole('navigation', { name: 'Paginação' })
+    await userEvent.click(botao('Próxima'))
+    await waitFor(() => expect(busca()).toBe('?pagina=2'))
+
+    await userEvent.click(botao('Voltar no histórico'))
+    await waitFor(() => expect(busca()).toBe(''))
+  })
+
+  it('trocar um filtro volta à primeira página', async () => {
+    renderizar('/reservas?pagina=3')
+
+    const situacao = await seletorCarregado('Situação')
+    await userEvent.selectOptions(situacao, 'CANCELADA')
+
+    await waitFor(() => expect(busca()).toBe('?situacao=CANCELADA'))
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros({ situacao: 'CANCELADA' }))
+  })
+
+  it('"Limpar filtros" também volta à primeira página', async () => {
+    renderizar('/reservas?situacao=CONFIRMADA&pagina=2')
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Limpar filtros' }))
+
+    await waitFor(() => expect(busca()).toBe(''))
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros())
+  })
+
+  it('uma página inválida na URL é ignorada e vale a primeira', async () => {
+    renderizar('/reservas?pagina=abc')
+
+    await screen.findByRole('table')
+    expect(listarReservas).toHaveBeenCalledWith(filtros())
+  })
+
+  it('uma página além da última troca para a última, sem empilhar no histórico', async () => {
+    vi.mocked(listarReservas).mockImplementation(async ({ pagina = '1' } = {}) => ({
+      mensagem: '45 reservas encontradas.',
+      dados:
+        Number(pagina) > 3
+          ? lista([], { pagina: Number(pagina), total: 45, total_de_paginas: 3 })
+          : paginaDe(Number(pagina)),
+    }))
+    renderizarComHistorico(['/inicio', '/reservas?pagina=7'])
+
+    await screen.findByText(/Página 3 de 3/)
+    expect(busca()).toBe('?pagina=3')
+    expect(screen.queryByText('Nenhuma reserva registrada')).toBeNull()
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros({ pagina: '3' }))
+
+    await userEvent.click(botao('Voltar no histórico'))
+    expect(await screen.findByText('Página inicial')).toBeTruthy()
+  })
+
+  it('abrir uma reserva da página 2 e voltar leva de novo à página 2', async () => {
+    renderizarComHistorico(['/reservas?pagina=2'])
+
+    await screen.findByText(/Página 2 de 3/)
+    await userEvent.click(screen.getAllByRole('link', { name: /ver detalhes$/ })[0])
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para as reservas' }))
+
+    await screen.findByText(/Página 2 de 3/)
+    expect(busca()).toBe('?pagina=2')
+    expect(listarReservas).toHaveBeenLastCalledWith(filtros({ pagina: '2' }))
   })
 })

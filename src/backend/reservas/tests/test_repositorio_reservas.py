@@ -5,7 +5,7 @@ from django.db import IntegrityError, connection
 from django.db.models import ProtectedError
 from django.test.utils import CaptureQueriesContext
 
-from reservas.application.repositorio import FiltrosDeReservas
+from reservas.application.repositorio import FiltrosDeReservas, Paginacao
 from reservas.domain.excecoes import (
     ConflitoDeHorario,
     ReservaDesatualizada,
@@ -29,6 +29,7 @@ from reservas.tests.fakes import (
     GESTOR,
     ID_INEXISTENTE,
     RepositorioReservasEmMemoria,
+    todas_as_reservas,
 )
 from reservas.tests.historico import verificar_historico_coerente
 
@@ -150,7 +151,7 @@ def test_salvar_reserva_existente_persiste_situacao_e_motivo(
     assert atualizada.id == salva.id
     assert obtida.situacao is situacao
     assert obtida.motivo_da_situacao == motivo_esperado
-    assert len(repositorio.listar(FiltrosDeReservas())) == 1
+    assert len(todas_as_reservas(repositorio)) == 1
 
 
 def test_salvar_com_id_inexistente_lanca_reserva_nao_encontrada(repositorio):
@@ -164,7 +165,7 @@ def test_salvar_com_id_inexistente_lanca_reserva_nao_encontrada(repositorio):
 
     # Assert
     assert erro.value.reserva_id == ID_INEXISTENTE
-    assert repositorio.listar(FiltrosDeReservas()) == []
+    assert todas_as_reservas(repositorio) == []
 
 
 def test_obter_por_id_inexistente_devolve_none(repositorio):
@@ -180,7 +181,7 @@ def test_listar_ordena_por_inicio_e_desempata_por_id(repositorio):
     _salvar_reservas_para_listagem(repositorio)
 
     # Act
-    reservas = repositorio.listar(FiltrosDeReservas())
+    reservas = todas_as_reservas(repositorio)
 
     # Assert
     assert _finalidades(reservas) == [
@@ -227,7 +228,7 @@ def test_listar_aplica_os_filtros(repositorio, filtros, finalidades_esperadas):
     _salvar_reservas_para_listagem(repositorio)
 
     # Act
-    reservas = repositorio.listar(filtros)
+    reservas = todas_as_reservas(repositorio, filtros)
 
     # Assert
     assert _finalidades(reservas) == finalidades_esperadas
@@ -266,7 +267,7 @@ def test_salvar_reserva_sobreposta_a_uma_solicitada_lanca_conflito(repositorio):
 
     # Assert
     assert erro.value.situacao is S.SOLICITADA
-    assert len(repositorio.listar(FiltrosDeReservas())) == 1
+    assert len(todas_as_reservas(repositorio)) == 1
 
 
 def test_salvar_reserva_sobreposta_a_uma_cancelada_salva_normalmente(repositorio):
@@ -279,7 +280,7 @@ def test_salvar_reserva_sobreposta_a_uma_cancelada_salva_normalmente(repositorio
 
     # Assert
     assert salva.id is not None
-    assert len(repositorio.listar(FiltrosDeReservas())) == 2
+    assert len(todas_as_reservas(repositorio)) == 2
 
 
 def test_salvar_reserva_encostada_salva_normalmente(repositorio):
@@ -331,7 +332,7 @@ def test_reserva_no_fim_do_dia_volta_na_mesma_data(repositorio):
 
     # Act
     obtida = repositorio.obter_por_id(salva.id)
-    do_dia = repositorio.listar(FiltrosDeReservas(data=DIA))
+    do_dia = todas_as_reservas(repositorio, FiltrosDeReservas(data=DIA))
 
     # Assert
     assert obtida.intervalo == IntervaloDeHorario(DIA, time(23, 30), time(23, 59))
@@ -344,7 +345,7 @@ def test_alterar_entidade_devolvida_nao_altera_o_repositorio(repositorio):
 
     # Act
     repositorio.obter_por_id(salva.id).finalidade = "Alterada fora"
-    repositorio.listar(FiltrosDeReservas())[0].situacao = S.CONFIRMADA
+    todas_as_reservas(repositorio)[0].situacao = S.CONFIRMADA
     salva.motivo_da_situacao = "Alterado fora do repositório"
 
     # Assert
@@ -557,7 +558,7 @@ def test_conflito_ao_salvar_nao_grava_registro_e_mantem_os_pendentes(repositorio
     # Assert
     assert len(sobreposta.registros_pendentes) == 1
     assert _pares(repositorio.listar_historico(ocupante.id)) == [(None, S.SOLICITADA)]
-    assert len(repositorio.listar(FiltrosDeReservas())) == 1
+    assert len(todas_as_reservas(repositorio)) == 1
 
 
 @pytest.mark.django_db
@@ -734,3 +735,138 @@ def test_salvar_reserva_existente_bloqueia_a_linha():
         'FROM "reservas_reserva"' in consulta["sql"] and "FOR UPDATE" in consulta["sql"]
         for consulta in consultas.captured_queries
     )
+
+
+def _salvar_sete_com_empates(repositorio):
+    """Sete reservas em três espaços; os pares de início igual se desempatam por id.
+
+    Devolve as finalidades na ordem esperada: início e, no empate, id.
+    """
+    horarios = [
+        (5, time(9, 0), "A"),
+        (3, time(8, 0), "B"),
+        (4, time(9, 0), "C"),
+        (3, time(9, 0), "D"),
+        (5, time(10, 0), "E"),
+        (4, time(8, 0), "F"),
+        (3, time(11, 0), "G"),
+    ]
+    for espaco_id, inicio, finalidade in horarios:
+        fim = (datetime.combine(DIA, inicio) + timedelta(minutes=30)).time()
+        repositorio.salvar(
+            _solicitar(
+                espaco_id=espaco_id,
+                hora_inicio=inicio,
+                hora_fim=fim,
+                finalidade=finalidade,
+                solicitante=BRUNO if finalidade in "AEG" else ANA,
+            )
+        )
+    return ["B", "F", "A", "C", "D", "E", "G"]
+
+
+@pytest.mark.parametrize(
+    ("numero", "esperadas"),
+    [
+        (1, ["B", "F", "A"]),
+        (2, ["C", "D", "E"]),
+        (3, ["G"]),
+        (4, []),
+        (99, []),
+    ],
+    ids=["primeira", "do-meio", "ultima-incompleta", "depois-do-fim", "muito-depois"],
+)
+def test_listar_devolve_a_pagina_pedida_com_o_total(repositorio, numero, esperadas):
+    # Arrange
+    _salvar_sete_com_empates(repositorio)
+
+    # Act
+    pagina = repositorio.listar(
+        FiltrosDeReservas(), Paginacao(numero=numero, tamanho=3)
+    )
+
+    # Assert
+    assert _finalidades(pagina.itens) == esperadas
+    assert isinstance(pagina.itens, tuple)
+    assert pagina.total == 7
+    assert pagina.total_de_paginas() == 3
+    assert pagina.paginacao == Paginacao(numero=numero, tamanho=3)
+
+
+@pytest.mark.parametrize(
+    ("filtros", "total", "primeira_pagina"),
+    [
+        (FiltrosDeReservas(), 7, ["B", "F"]),
+        (FiltrosDeReservas(espaco_id=3), 3, ["B", "D"]),
+        (FiltrosDeReservas(solicitante="bruno"), 3, ["A", "E"]),
+        (FiltrosDeReservas(espaco_id=4, solicitante="bruno"), 0, []),
+    ],
+    ids=["sem-filtros", "espaco", "solicitante", "sem-resultado"],
+)
+def test_listar_conta_o_total_com_os_filtros(
+    repositorio, filtros, total, primeira_pagina
+):
+    # Arrange
+    _salvar_sete_com_empates(repositorio)
+
+    # Act
+    pagina = repositorio.listar(filtros, Paginacao(numero=1, tamanho=2))
+
+    # Assert
+    assert pagina.total == total
+    assert _finalidades(pagina.itens) == primeira_pagina
+
+
+def test_listar_pagina_em_ordem_estavel_no_empate_de_inicio(repositorio):
+    # Arrange
+    esperadas = _salvar_sete_com_empates(repositorio)
+
+    # Act
+    paginas = [
+        repositorio.listar(FiltrosDeReservas(), Paginacao(numero=numero, tamanho=1))
+        for numero in range(1, 8)
+    ]
+
+    # Assert
+    assert [_finalidades(pagina.itens)[0] for pagina in paginas] == esperadas
+    assert _finalidades(todas_as_reservas(repositorio)) == esperadas
+
+
+@pytest.mark.django_db
+def test_listar_pagina_no_banco_com_count_e_limit():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    _salvar_sete_com_empates(repositorio)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.listar(FiltrosDeReservas(), Paginacao(numero=2, tamanho=3))
+
+    # Assert
+    sqls = [consulta["sql"] for consulta in consultas.captured_queries]
+    assert len(sqls) == 2
+    assert "COUNT(*)" in sqls[0]
+    assert "LIMIT 3 OFFSET 3" in sqls[1]
+    assert (
+        'ORDER BY "reservas_reserva"."inicio" ASC, "reservas_reserva"."id" ASC'
+        in (sqls[1])
+    )
+
+
+@pytest.mark.django_db
+def test_listar_pagina_depois_do_fim_so_conta():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    _salvar_sete_com_empates(repositorio)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        pagina = repositorio.listar(
+            FiltrosDeReservas(), Paginacao(numero=10**30, tamanho=100)
+        )
+
+    # Assert
+    assert pagina.itens == ()
+    assert pagina.total == 7
+    assert len(consultas.captured_queries) == 1
+    assert "COUNT(*)" in consultas.captured_queries[0]["sql"]

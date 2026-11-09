@@ -7,10 +7,10 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from reservas.api.serializers import ReservaSaidaSerializer
-from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+from reservas.tests.fakes import todas_as_reservas
 
 pytestmark = pytest.mark.django_db
 
@@ -124,7 +124,7 @@ def _ids_esperados(massa, nomes):
 
 
 def _retrato_das_reservas():
-    reservas = RepositorioReservasDjango().listar(FiltrosDeReservas())
+    reservas = todas_as_reservas(RepositorioReservasDjango())
     return ReservaSaidaSerializer(
         reservas, many=True, context={"ator": ATOR_GESTOR}
     ).data
@@ -253,7 +253,11 @@ def test_espaco_inexistente_no_filtro_devolve_lista_vazia(cliente, massa):
 
     # Assert
     assert resposta.status_code == 200
-    assert resposta.data == {"mensagem": "Nenhuma reserva encontrada.", "dados": []}
+    assert resposta.data == {
+        "mensagem": "Nenhuma reserva encontrada.",
+        "dados": [],
+        "paginacao": {"pagina": 1, "tamanho": 20, "total": 0, "total_de_paginas": 0},
+    }
 
 
 @pytest.mark.parametrize(

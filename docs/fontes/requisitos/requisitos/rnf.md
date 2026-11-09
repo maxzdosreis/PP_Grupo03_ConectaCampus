@@ -16,6 +16,7 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F12: o limite vale também para tentativas simultâneas (contagem atômica no Redis), com o teste de concorrência na verificação (AUT-08, achado da revisão do PR). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F13 · Revogação e troca da credencial de renovação; RNF-F03 cita que a troca mantém o prazo de 1 dia; RNF-F04 passa a 8 operações públicas, com sair (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RNF-F13: uma renovação só para as janelas da mesma sessão, com a outra esperando sem tempo fixo (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RNF-P01 com 1.000 e 5.000 reservas e o cenário da última página do Gestor sem critério, medido depois da paginação da consulta (RES-10); a medição de 04/11/2026 fica como "antes"; RNF-P02 com o resultado novo (a meta não muda). Sem aprovação. |
 
 ## Como ler
 
@@ -316,12 +317,12 @@ Metas da [DEC-12](../decisoes/DEC-12.md). Medição: `scripts/medir_desempenho.p
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | Com 1.000 reservas cadastradas, a consulta de reservas responde em até 1 s no percentil 95, nos três usos: Gestor sem critério (todas as reservas na resposta), Gestor com espaço e data, e Solicitante (só as próprias). |
-| **Métrica e valor-alvo** | p95 ≤ 1.000 ms em cada cenário, com 1.000 reservas, 50 repetições depois de 5 de aquecimento, medido dentro do container do backend (sem rede nem navegador). |
-| **Como verificar** | `docker compose exec -T backend python - --reservas 1000 < ../scripts/medir_desempenho.py` (a partir de `src/`; o script sai com código 1 se alguma meta falhar). Resultado em 04/11/2026: p95 de 378 ms (Gestor sem critério), 10 ms (Gestor com espaço e data) e 20 ms (Solicitante). [Medição](#medição). |
+| **Enunciado** | Com 1.000 e com 5.000 reservas cadastradas, a consulta de reservas responde em até 1 s no percentil 95, nos quatro usos: Gestor sem critério (primeira página), Gestor sem critério na última página (a mais cara de alcançar), Gestor com espaço e data, e Solicitante (só as próprias). |
+| **Métrica e valor-alvo** | p95 ≤ 1.000 ms em cada cenário, com 1.000 e com 5.000 reservas, 50 repetições depois de 5 de aquecimento, medido dentro do container do backend (sem rede nem navegador), com o tamanho de página padrão (20). |
+| **Como verificar** | `docker compose exec -T backend python - --reservas 1000 < ../scripts/medir_desempenho.py` e o mesmo com `--reservas 5000` (a partir de `src/`; o script sai com código 1 se alguma meta falhar). Resultado em 09/11/2026, com a consulta paginada (RES-10): com 1.000 reservas, p95 de 31 ms (Gestor sem critério), 28 ms (última página), 25 ms (espaço e data) e 34 ms (Solicitante); com 5.000, 33, 40, 33 e 45 ms. Antes da paginação (04/11/2026), a lista do Gestor sem critério levava 378 ms com 1.000 e 1.743 ms com 5.000. [Medição](#medição). |
 | **Origem** | NS-08, NS-07; [DEC-12](../decisoes/DEC-12.md) |
 | **O cliente não pediria** | ✔ |
-| **Revisão / estado** | 0.1 • Rascunho (atendido com 1.000 reservas; com 5.000, a lista sem critério passa de 1 s: lacuna [L-05](srs.md#l-05)) |
+| **Revisão / estado** | 0.1 • Rascunho (atendido com 1.000 e com 5.000 reservas desde a paginação; lacuna [L-05](srs.md#l-05) resolvida pela RES-10) |
 
 ### <a id="rnf-p02"></a>RNF-P02 · Tempo da agenda do dia
 
@@ -329,16 +330,44 @@ Metas da [DEC-12](../decisoes/DEC-12.md). Medição: `scripts/medir_desempenho.p
 |---|---|
 | **Enunciado** | Com 1.000 reservas cadastradas, a agenda do dia de um espaço num dia com horários ocupados responde em até 500 ms no percentil 95. |
 | **Métrica e valor-alvo** | p95 ≤ 500 ms, nas mesmas condições do [RNF-P01](#rnf-p01). |
-| **Como verificar** | O mesmo comando do RNF-P01. Resultado em 04/11/2026: p95 de 7 ms com 1.000 reservas (9 ms com 5.000). [Medição](#medição). |
+| **Como verificar** | O mesmo comando do RNF-P01. Resultado em 04/11/2026: p95 de 7 ms com 1.000 reservas (9 ms com 5.000); em 09/11/2026: 19 ms com 1.000 (26 ms com 5.000), a mesma ordem de grandeza. [Medição](#medição). |
 | **Origem** | NS-05; [DEC-12](../decisoes/DEC-12.md) |
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho (atendido) |
 
 ### Medição
 
-Feita em 04/11/2026 com `scripts/medir_desempenho.py`, na carga de referência da [DEC-12](../decisoes/DEC-12.md) (1.000 reservas) e, para ver a tendência, com 5.000.
+Duas rodadas com `scripts/medir_desempenho.py`, na carga de referência da [DEC-12](../decisoes/DEC-12.md) (1.000 reservas) e com 5.000: a de 09/11/2026, depois da paginação da consulta (RES-10), e a de 04/11/2026, antes dela, que mostrou a lacuna [L-05](srs.md#l-05).
 
 **Ambiente:** Windows 10 Pro com Docker Desktop (WSL 2); container do backend Linux 6.18 x86_64 com 4 CPUs visíveis; Python 3.12.16, Django 5.2.18, PostgreSQL 16.15 em outro container. Carga: 5 espaços, 20 solicitantes, reservas de 1 h das 08:00 às 18:00 a partir de amanhã, em cinco situações misturadas (Solicitada, Confirmada ×2, Cancelada, Recusada). 5 chamadas de aquecimento e 50 medidas por cenário, pela API em processo com token de acesso (sem rede nem navegador).
+
+#### Depois da paginação (09/11/2026)
+
+A consulta devolve uma página de 20 reservas (o tamanho padrão) e o total. "Itens" mostra as reservas da página e o total encontrado. A última página do Gestor sem critério é a do maior deslocamento (OFFSET), a mais cara de alcançar.
+
+**1.000 reservas:**
+
+| Cenário | Itens | Resposta | Consultas SQL | Mín | Mediana | p95 | Máx | Meta (p95) | Atende |
+|---|---|---|---|---|---|---|---|---|---|
+| Consulta: Gestor, sem critério | 20 de 1000 | 9 KiB | 3 | 11 ms | 19 ms | 31 ms | 44 ms | ≤ 1000 ms | ✔ |
+| Consulta: Gestor, sem critério, última página (50) | 20 de 1000 | 9 KiB | 3 | 9 ms | 15 ms | 28 ms | 33 ms | ≤ 1000 ms | ✔ |
+| Consulta: Gestor, espaço + data | 10 de 10 | 5 KiB | 3 | 9 ms | 15 ms | 25 ms | 29 ms | ≤ 1000 ms | ✔ |
+| Consulta: Solicitante, só as próprias | 20 de 50 | 8 KiB | 3 | 9 ms | 17 ms | 34 ms | 145 ms | ≤ 1000 ms | ✔ |
+| Agenda do dia (espaço + data) | 6 | 1 KiB | 3 | 6 ms | 11 ms | 19 ms | 27 ms | ≤ 500 ms | ✔ |
+
+**5.000 reservas:**
+
+| Cenário | Itens | Resposta | Consultas SQL | Mín | Mediana | p95 | Máx | Meta (p95) | Atende |
+|---|---|---|---|---|---|---|---|---|---|
+| Consulta: Gestor, sem critério | 20 de 5000 | 9 KiB | 3 | 10 ms | 23 ms | 33 ms | 38 ms | ≤ 1000 ms | ✔ |
+| Consulta: Gestor, sem critério, última página (250) | 20 de 5000 | 9 KiB | 3 | 14 ms | 26 ms | 40 ms | 63 ms | ≤ 1000 ms | ✔ |
+| Consulta: Gestor, espaço + data | 10 de 10 | 5 KiB | 3 | 11 ms | 22 ms | 33 ms | 49 ms | ≤ 1000 ms | ✔ |
+| Consulta: Solicitante, só as próprias | 20 de 250 | 8 KiB | 3 | 11 ms | 29 ms | 45 ms | 182 ms | ≤ 1000 ms | ✔ |
+| Agenda do dia (espaço + data) | 6 | 1 KiB | 3 | 8 ms | 16 ms | 26 ms | 27 ms | ≤ 500 ms | ✔ |
+
+**Leitura:** com a paginação, a resposta da lista tem sempre o tamanho de uma página (9 KiB, contra 2.246 KiB antes com 5.000 reservas), e o tempo deixa de crescer com a quantidade: o pior p95 da consulta passa de 1.743 ms para 45 ms com 5.000 reservas, e a última página (250) custa quase o mesmo que a primeira. As consultas SQL da lista passam de 2 para 3 (o usuário do token, a contagem e a página), um número fixo, sem consulta por item. Com estes tempos, nenhum índice novo foi necessário. As variações de poucos milissegundos entre as rodadas (como a agenda do dia, de 7 para 19 ms) são do ambiente.
+
+#### Antes da paginação (04/11/2026)
 
 **1.000 reservas (meta da DEC-12):**
 
@@ -349,7 +378,7 @@ Feita em 04/11/2026 com `scripts/medir_desempenho.py`, na carga de referência d
 | Consulta: Solicitante, só as próprias | 50 | 20 KiB | 2 | 12 ms | 14 ms | 20 ms | 81 ms | ≤ 1000 ms | ✔ |
 | Agenda do dia (espaço + data) | 6 | 1 KiB | 3 | 5 ms | 5 ms | 7 ms | 8 ms | ≤ 500 ms | ✔ |
 
-**5.000 reservas (tendência, fora da meta):**
+**5.000 reservas (tendência):**
 
 | Cenário | Itens | Resposta | Consultas SQL | Mín | Mediana | p95 | Máx | Meta (p95) | Atende |
 |---|---|---|---|---|---|---|---|---|---|
@@ -358,7 +387,7 @@ Feita em 04/11/2026 com `scripts/medir_desempenho.py`, na carga de referência d
 | Consulta: Solicitante, só as próprias | 250 | 99 KiB | 2 | 48 ms | 58 ms | 145 ms | 208 ms | ≤ 1000 ms | ✔ |
 | Agenda do dia (espaço + data) | 6 | 1 KiB | 3 | 5 ms | 7 ms | 9 ms | 11 ms | ≤ 500 ms | ✔ |
 
-**Leitura:** com 1.000 reservas, as duas metas são atingidas com folga (p95 de 378 ms na pior consulta e de 7 ms na agenda). O número de consultas SQL não cresce com as reservas (2 na lista, 3 na agenda): não há consulta por item. O tempo da lista do Gestor **sem critério** cresce com a quantidade de reservas, porque ela devolve todas (sem paginação): com 5.000, passa de 1 s. As consultas com critério e a agenda do dia quase não mudam. Isso confirma a lacuna [L-05](srs.md#l-05).
+**Leitura (04/11/2026):** a lista do Gestor sem critério devolvia todas as reservas, e o tempo crescia com elas: com 5.000, passava de 1 s ([L-05](srs.md#l-05), resolvida pela RES-10).
 
 ## 5. Suportabilidade (S)
 

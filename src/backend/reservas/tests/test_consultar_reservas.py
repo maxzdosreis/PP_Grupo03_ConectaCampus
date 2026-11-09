@@ -3,7 +3,7 @@ from datetime import time
 import pytest
 
 from reservas.application.casos_de_uso import ConsultarReservas, ObterReserva
-from reservas.application.repositorio import FiltrosDeReservas
+from reservas.application.repositorio import FiltrosDeReservas, Paginacao
 from reservas.domain.excecoes import ReservaNaoEncontrada
 from reservas.domain.situacao import SituacaoReserva
 from reservas.tests.fakes import (
@@ -14,6 +14,7 @@ from reservas.tests.fakes import (
     ID_INEXISTENTE,
     RepositorioReservasEmMemoria,
     reserva_solicitada,
+    todas_as_reservas,
 )
 
 QUADRA = 1
@@ -47,9 +48,16 @@ def _ids_de(reservas):
     return [reserva.id for reserva in reservas]
 
 
+def _consultar(repositorio, filtros, *, ator, paginacao=None):
+    pagina = ConsultarReservas(repositorio).executar(
+        filtros, paginacao or Paginacao(), ator=ator
+    )
+    return list(pagina.itens)
+
+
 def test_consultar_sem_filtros_devolve_todas_por_inicio(repositorio, ids):
     # Act
-    reservas = ConsultarReservas(repositorio).executar(FiltrosDeReservas(), ator=GESTOR)
+    reservas = _consultar(repositorio, FiltrosDeReservas(), ator=GESTOR)
 
     # Assert
     assert _ids_de(reservas) == [ids["manha"], ids["meio_dia"], ids["tarde"]]
@@ -67,16 +75,18 @@ def test_consultar_sem_filtros_devolve_todas_por_inicio(repositorio, ids):
 )
 def test_consultar_repassa_os_filtros_ao_repositorio(repositorio, ids, filtros):
     # Act
-    reservas = ConsultarReservas(repositorio).executar(filtros, ator=GESTOR)
+    reservas = _consultar(repositorio, filtros, ator=GESTOR)
 
     # Assert
-    assert _ids_de(reservas) == _ids_de(repositorio.listar(filtros))
+    assert _ids_de(reservas) == _ids_de(todas_as_reservas(repositorio, filtros))
 
 
 def test_consultar_combina_os_filtros(repositorio, ids):
     # Act
-    reservas = ConsultarReservas(repositorio).executar(
-        FiltrosDeReservas(espaco_id=QUADRA, solicitante="bruno"), ator=GESTOR
+    reservas = _consultar(
+        repositorio,
+        FiltrosDeReservas(espaco_id=QUADRA, solicitante="bruno"),
+        ator=GESTOR,
     )
 
     # Assert
@@ -115,7 +125,7 @@ def test_solicitante_so_ve_as_proprias_mesmo_filtrando_por_outro(
     repositorio, ids, filtros
 ):
     # Act
-    reservas = ConsultarReservas(repositorio).executar(filtros, ator=ATOR_ANA)
+    reservas = _consultar(repositorio, filtros, ator=ATOR_ANA)
 
     # Assert
     assert all(reserva.solicitante == ANA for reserva in reservas)
@@ -124,9 +134,7 @@ def test_solicitante_so_ve_as_proprias_mesmo_filtrando_por_outro(
 
 def test_solicitante_sem_filtros_ve_todas_as_proprias(repositorio, ids):
     # Act
-    reservas = ConsultarReservas(repositorio).executar(
-        FiltrosDeReservas(), ator=ATOR_ANA
-    )
+    reservas = _consultar(repositorio, FiltrosDeReservas(), ator=ATOR_ANA)
 
     # Assert
     assert _ids_de(reservas) == [ids["tarde"]]
@@ -134,8 +142,8 @@ def test_solicitante_sem_filtros_ve_todas_as_proprias(repositorio, ids):
 
 def test_gestor_filtra_pelo_nome_de_qualquer_solicitante(repositorio, ids):
     # Act
-    do_bruno = ConsultarReservas(repositorio).executar(
-        FiltrosDeReservas(solicitante="bruno"), ator=GESTOR
+    do_bruno = _consultar(
+        repositorio, FiltrosDeReservas(solicitante="bruno"), ator=GESTOR
     )
 
     # Assert
@@ -158,3 +166,41 @@ def test_obter_a_propria_reserva_como_solicitante(repositorio, ids):
 
     # Assert
     assert reserva.solicitante == ANA
+
+
+def test_consultar_devolve_a_pagina_pedida_com_o_total(repositorio, ids):
+    # Act
+    pagina = ConsultarReservas(repositorio).executar(
+        FiltrosDeReservas(), Paginacao(numero=2, tamanho=2), ator=GESTOR
+    )
+
+    # Assert
+    assert _ids_de(pagina.itens) == [ids["tarde"]]
+    assert pagina.total == 3
+    assert pagina.total_de_paginas() == 2
+    assert pagina.paginacao == Paginacao(numero=2, tamanho=2)
+
+
+def test_solicitante_conta_e_pagina_so_as_proprias_ate_a_ultima_pagina(repositorio):
+    # Arrange
+    for hora in range(8, 17):
+        solicitante = ANA if hora % 2 == 0 else BRUNO
+        _salvar(repositorio, QUADRA, solicitante, time(hora, 0), time(hora, 30))
+
+    # Act
+    paginas = [
+        ConsultarReservas(repositorio).executar(
+            FiltrosDeReservas(solicitante_usuario_id=BRUNO.usuario_id),
+            Paginacao(numero=numero, tamanho=2),
+            ator=ATOR_ANA,
+        )
+        for numero in (1, 2, 3, 4)
+    ]
+
+    # Assert
+    assert [pagina.total for pagina in paginas] == [5, 5, 5, 5]
+    assert [pagina.total_de_paginas() for pagina in paginas] == [3, 3, 3, 3]
+    assert [len(pagina.itens) for pagina in paginas] == [2, 2, 1, 0]
+    vistas = [reserva for pagina in paginas for reserva in pagina.itens]
+    assert all(reserva.solicitante == ANA for reserva in vistas)
+    assert [r.intervalo.hora_inicio.hour for r in vistas] == [8, 10, 12, 14, 16]

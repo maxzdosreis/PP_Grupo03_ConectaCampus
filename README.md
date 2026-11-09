@@ -205,7 +205,6 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 - **Fuso horário fixo:** datas e horários são sempre os de Brasília (America/Sao_Paulo), independentemente do fuso do computador.
 - **Regras de agenda iguais para todos os espaços:** funcionamento das 07:00 às 22:00, duração de 30 minutos a 3 horas e até 30 dias de antecedência valem para todos; não há horário próprio por espaço.
 - **Situação e horário da reserva independentes:** o Gestor pode concluir uma reserva antes do horário terminar e confirmar ou recusar depois de ele começar, qualquer um pode cancelar depois do uso, e uma reserva Solicitada que ninguém decidiu continua ocupando o horário mesmo depois da data.
-- **Lista de reservas sem paginação:** a consulta devolve todas as reservas de uma vez. O grupo mediu 378 ms (p95) com 1.000 reservas e 1.743 ms com 5.000, então a lista fica lenta a partir de alguns milhares.
 - **Matrícula não conferida com a instituição:** qualquer texto de até 20 caracteres, sem espaços, é aceito no cadastro.
 - **Sem recuperação de senha nem troca de perfil pela tela:** quem esquecer a senha, ou precisar virar Gestor, depende da administração (admin do Django).
 - **Desativar um espaço não cancela as reservas dele:** novas reservas ficam bloqueadas, mas as existentes continuam valendo, e o Gestor decide se cancela alguma.

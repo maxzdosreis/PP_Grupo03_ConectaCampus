@@ -45,7 +45,7 @@ Os contratos de `pyproject.toml` são conferidos por `lint-imports` ([comando](#
 
 ## Formato das respostas e dos erros
 
-Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro. `campos` aparece quando o erro é de um campo, com a lista de mensagens de cada um. Os detalhes (exceções de domínio, categorias e o tratador) estão no [README do compartilhado](compartilhado/README.md).
+Toda resposta segue o mesmo formato: `{"mensagem", "dados", "paginacao"?}` no sucesso e `{"erro": {"codigo", "mensagem", "campos"?}}` no erro. `paginacao` (`{"pagina", "tamanho", "total", "total_de_paginas"}`) só aparece na consulta de reservas, que é paginada ([reservas](reservas/README.md#consultar-reservas)); nela, `dados` é a lista da página e a mensagem conta o total. `campos` aparece quando o erro é de um campo, com a lista de mensagens de cada um. Os detalhes (exceções de domínio, categorias e o tratador) estão no [README do compartilhado](compartilhado/README.md).
 
 | Status | Quando | Exemplos de `codigo` |
 |---|---|---|

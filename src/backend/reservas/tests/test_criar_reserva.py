@@ -5,7 +5,6 @@ import pytest
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.casos_de_uso import CriarReserva
 from reservas.application.portas import EspacoReservavel
-from reservas.application.repositorio import FiltrosDeReservas
 from reservas.domain.excecoes import ConflitoDeHorario, DataRetroativa, HorarioInvalido
 from reservas.domain.situacao import SituacaoReserva
 from reservas.tests.fakes import (
@@ -17,6 +16,7 @@ from reservas.tests.fakes import (
     ConsultaDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
     reserva_reconstituida,
+    todas_as_reservas,
 )
 
 S = SituacaoReserva
@@ -68,7 +68,7 @@ def _salvar_existente(repositorio, situacao, *, espaco_id=QUADRA.id):
 
 
 def _todas(repositorio):
-    return repositorio.listar(FiltrosDeReservas())
+    return todas_as_reservas(repositorio)
 
 
 def test_solicitacao_valida_e_salva_como_solicitada(criar, repositorio):
