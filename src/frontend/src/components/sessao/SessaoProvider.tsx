@@ -11,6 +11,7 @@ import { useLocation, useNavigate } from 'react-router'
 import {
   cadastrar,
   entrar as entrarNaApi,
+  sair as sairNaApi,
   usuarioAtual,
   type DadosDeCadastro,
   type DadosDeLogin,
@@ -30,6 +31,13 @@ import {
 type Estado = {
   usuario: Usuario | null
   verificando: boolean
+}
+
+function revogarNaApi(refresh: string | undefined) {
+  if (!refresh) return
+  sairNaApi(refresh).catch((erro: unknown) => {
+    console.warn('Não foi possível revogar a sessão na API.', erro)
+  })
 }
 
 function estadoInicial(): Estado {
@@ -97,6 +105,7 @@ function SessaoProvider({ children }: { children: ReactNode }) {
   )
 
   const sair = useCallback(() => {
+    revogarNaApi(lerSessao()?.refresh)
     startTransition(() => {
       limparSessao()
       navegar('/')

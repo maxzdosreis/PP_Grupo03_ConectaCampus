@@ -1,8 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import { entrar } from './autenticacao.ts'
-import { ErroDaApi, requisitar } from './cliente.ts'
-import { aoMudarSessao, lerSessao, limparSessao, salvarSessao } from './sessao.ts'
+import { ErroDaApi, ESPERA_PELA_OUTRA_ABA_MS, requisitar } from './cliente.ts'
+import {
+  aoMudarSessao,
+  CHAVE_DA_SESSAO,
+  lerSessao,
+  limparSessao,
+  salvarSessao,
+} from './sessao.ts'
 
 const URL_DA_API = 'http://localhost:8000/api'
 const URL_DA_RENOVACAO = `${URL_DA_API}/auth/refresh/`
@@ -31,8 +37,29 @@ const REFRESH_RECUSADO = resposta(401, {
   erro: { codigo: 'NAO_AUTENTICADO', mensagem: 'Token inválido ou expirado.' },
 })
 
-function renovado(access: string) {
-  return resposta(200, { mensagem: 'Token renovado.', dados: { access } })
+function renovado(access: string, refresh = 'refresh-2') {
+  return resposta(200, { mensagem: 'Token renovado.', dados: { access, refresh } })
+}
+
+const SESSAO_DE_OUTRA_ABA = {
+  access: 'access-9',
+  refresh: 'refresh-9',
+  usuario: USUARIO_SOLICITANTE,
+}
+
+function outraAbaGravou(sessao: unknown = SESSAO_DE_OUTRA_ABA) {
+  const valor = JSON.stringify(sessao)
+  localStorage.setItem(CHAVE_DA_SESSAO, valor)
+  return valor
+}
+
+function outraAbaAvisou(valor: string) {
+  window.dispatchEvent(new StorageEvent('storage', { key: CHAVE_DA_SESSAO, newValue: valor }))
+}
+
+async function depoisDaEsperaPelaOutraAba<T>(promessa: Promise<T>): Promise<T> {
+  await vi.advanceTimersByTimeAsync(ESPERA_PELA_OUTRA_ABA_MS)
+  return promessa
 }
 
 function deferido<T>() {
@@ -85,6 +112,7 @@ describe('cliente da API', () => {
   afterEach(() => {
     limparSessao()
     vi.unstubAllGlobals()
+    vi.useRealTimers()
   })
 
   it('envia o access da sessão no cabeçalho Authorization', async () => {
@@ -132,6 +160,57 @@ describe('cliente da API', () => {
     expect(lerSessao()?.access).toBe('access-2')
   })
 
+  it('a renovação guarda o access e o refresh novos na sessão', async () => {
+    apiQueAceitaSo('access-2', () => renovado('access-2', 'refresh-2'))
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    await requisitar('/reservas/')
+    cancelar()
+
+    expect(lerSessao()).toEqual({
+      access: 'access-2',
+      refresh: 'refresh-2',
+      usuario: USUARIO_SOLICITANTE,
+    })
+    expect(ouvinte).toHaveBeenCalledWith(lerSessao(), 'atualizacao')
+  })
+
+  it('renovação recusada com outro refresh já salvo por outra aba repete com a sessão nova e não desloga', async () => {
+    apiQueAceitaSo('access-9', () => {
+      outraAbaGravou()
+      return REFRESH_RECUSADO
+    })
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const resultado = await requisitar('/reservas/')
+    cancelar()
+
+    expect(resultado).toEqual({ mensagem: 'ok', dados: [] })
+    expect(chamadasDeRenovacao()).toHaveLength(1)
+    expect(autorizacao(chamadas()[2])).toBe('Bearer access-9')
+    expect(lerSessao()).toEqual(SESSAO_DE_OUTRA_ABA)
+    expect(ouvinte).not.toHaveBeenCalled()
+  })
+
+  it('renovação recusada enquanto outra aba ainda grava a sessão nova espera o aviso dela e não desloga', async () => {
+    apiQueAceitaSo('access-9', () => {
+      setTimeout(() => outraAbaAvisou(outraAbaGravou()), 50)
+      return REFRESH_RECUSADO
+    })
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const resultado = await requisitar('/reservas/')
+    cancelar()
+
+    expect(resultado).toEqual({ mensagem: 'ok', dados: [] })
+    expect(chamadasDeRenovacao()).toHaveLength(1)
+    expect(lerSessao()).toEqual(SESSAO_DE_OUTRA_ABA)
+    expect(ouvinte).not.toHaveBeenCalled()
+  })
+
   it('duas requisições recebendo 401 ao mesmo tempo usam uma única renovação', async () => {
     const renovacao = deferido<Response>()
     apiQueAceitaSo('access-2', () => renovacao.promessa)
@@ -159,11 +238,15 @@ describe('cliente da API', () => {
   })
 
   it('se a renovação falhar, limpa a sessão, avisa os ouvintes e lança SESSAO_EXPIRADA', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     apiQueAceitaSo('access-2', () => REFRESH_RECUSADO)
     const ouvinte = vi.fn()
     const cancelar = aoMudarSessao(ouvinte)
 
-    const erro = await erroDe(requisitar('/reservas/'))
+    const pedido = erroDe(requisitar('/reservas/'))
+    await vi.advanceTimersByTimeAsync(ESPERA_PELA_OUTRA_ABA_MS - 1)
+    expect(lerSessao()).not.toBeNull()
+    const erro = await depoisDaEsperaPelaOutraAba(pedido)
     cancelar()
 
     expect(erro.status).toBe(401)
@@ -185,6 +268,7 @@ describe('cliente da API', () => {
   })
 
   it('refresh vazio recusado com 400 também encerra a sessão', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     apiQueAceitaSo('access-2', () =>
       resposta(400, {
         erro: {
@@ -195,7 +279,7 @@ describe('cliente da API', () => {
       }),
     )
 
-    const erro = await erroDe(requisitar('/reservas/'))
+    const erro = await depoisDaEsperaPelaOutraAba(erroDe(requisitar('/reservas/')))
 
     expect(erro.codigo).toBe('SESSAO_EXPIRADA')
     expect(lerSessao()).toBeNull()

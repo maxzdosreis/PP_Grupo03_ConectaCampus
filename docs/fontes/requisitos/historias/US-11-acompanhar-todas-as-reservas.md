@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra todas, sob o título "Reservas", ordenadas pelo início, cada uma com data e horário, espaço, solicitante (nome e matrícula), finalidade e situação, informa quantas foram encontradas, e a consulta não muda nenhuma reserva
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2)
 - **RF:** [RF-12](../requisitos/rf-reservas.md#rf-12)
-- **TA:** [TA-98](#ta-98)
+- **TA:** [TA-101](#ta-101)
 
 #### <a id="us-11-ca-02"></a>US-11 · CA-02 · Critérios combinados (sucesso)
 
@@ -58,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra só as reservas que atendem a todos os critérios, com a quantidade; o trecho do solicitante só é aplicado depois que ele para de digitar, numa consulta só
 - **Origem:** [UC-07 passos 3 e 4](../casos-de-uso/fichas-resumidas.md#uc07-p3)
 - **RF:** [RF-12](../requisitos/rf-reservas.md#rf-12), [RF-15](../requisitos/rf-reservas.md#rf-15)
-- **TA:** [TA-99](#ta-99)
+- **TA:** [TA-102](#ta-102)
 
 #### <a id="us-11-ca-03"></a>US-11 · CA-03 · As ações do Gestor em cada reserva (sucesso)
 
@@ -67,7 +68,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a Solicitada oferece "Confirmar", "Recusar" e "Cancelar"; a Confirmada, "Cancelar" e "Concluir"; e a Concluída, nenhuma ação
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2), [UC-10 A1.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#a1-1) (pela consulta)
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16)
-- **TA:** [TA-100](#ta-100)
+- **TA:** [TA-103](#ta-103)
 
 #### <a id="us-11-ca-04"></a>US-11 · CA-04 · Somente as minhas (alternativa)
 
@@ -76,7 +77,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra só as reservas em que ele é o solicitante
 - **Origem:** [UC-07 passo 3](../casos-de-uso/fichas-resumidas.md#uc07-p3)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13)
-- **TA:** [TA-101](#ta-101)
+- **TA:** [TA-104](#ta-104)
 
 #### <a id="us-11-ca-05"></a>US-11 · CA-05 · Nenhuma reserva atende (alternativa)
 
@@ -85,7 +86,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Nenhuma reserva encontrada." e oferece limpar os critérios, que só aparece quando há algum critério e volta à lista completa
 - **Origem:** [UC-07 A4.1](../casos-de-uso/fichas-resumidas.md#uc07-a4-1)
 - **RF:** [RF-12](../requisitos/rf-reservas.md#rf-12)
-- **TA:** [TA-102](#ta-102)
+- **TA:** [TA-105](#ta-105)
 
 #### <a id="us-11-ca-06"></a>US-11 · CA-06 · Critério em formato inválido (exceção)
 
@@ -94,7 +95,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Verifique os dados informados." apontando o critério com problema, e nenhuma reserva muda
 - **Origem:** [UC-07 E3.1](../casos-de-uso/fichas-resumidas.md#uc07-e3-1)
 - **RF:** [RF-12.1](../requisitos/rf-reservas.md#rf-12-1)
-- **TA:** [TA-103](#ta-103)
+- **TA:** [TA-106](#ta-106)
 
 #### <a id="us-11-ca-07"></a>US-11 · CA-07 · Ver todas depende do perfil atual (acesso)
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** ele passa a ver só as próprias, e a reserva de outra pessoa que via antes passa a ser tratada como inexistente
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13), [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-104](#ta-104)
+- **TA:** [TA-107](#ta-107)
 
 ## Testes de aceite
 
@@ -111,10 +112,10 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-98"></a>TA-98 | [CA-01](#us-11-ca-01) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_consulta_sem_filtros_devolve_todas_ordenadas_por_inicio`; `reservas/tests/test_api_consulta_reservas.py::test_consulta_nao_altera_as_reservas`; `reservas/tests/test_api_permissoes.py::test_gestor_lista_todas_e_filtra_por_solicitante`; `pages/PaginaReservas.test.tsx`: `mostra a contagem e cada reserva com data, espaço, solicitante e situação`; `pages/PaginaReservas.test.tsx`: `para o gestor, o título é "Reservas" e há os filtros de solicitante` |
-| <a id="ta-99"></a>TA-99 | [CA-02](#us-11-ca-02) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_criterios_combinados_se_somam`; `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes`; `reservas/tests/test_api_consulta_reservas.py::test_filtro_em_branco_e_ignorado`; `pages/PaginaReservas.test.tsx`: `combina espaço e situação numa mesma consulta`; `pages/PaginaReservas.test.tsx`: `o filtro de solicitante consulta uma vez só, depois que a pessoa para de digitar` |
-| <a id="ta-100"></a>TA-100 | [CA-03](#us-11-ca-03) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_solicitada_traz_confirmar_recusar_e_cancelar`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_traz_cancelar_e_concluir`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_api_permissoes.py::test_acoes_do_gestor_na_solicitada_sao_confirmar_recusar_e_cancelar` |
-| <a id="ta-101"></a>TA-101 | [CA-04](#us-11-ca-04) | automatizado | `pages/PaginaReservas.test.tsx`: `"Somente minhas reservas" consulta com minhas=true`; `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes` |
-| <a id="ta-102"></a>TA-102 | [CA-05](#us-11-ca-05) | automatizado | `pages/PaginaReservas.test.tsx`: `com filtros e sem reservas, oferece "Limpar filtros"`; `pages/PaginaReservas.test.tsx`: `"Limpar filtros" só aparece com filtro ativo e limpa a URL e os campos` |
-| <a id="ta-103"></a>TA-103 | [CA-06](#us-11-ca-06) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` |
-| <a id="ta-104"></a>TA-104 | [CA-07](#us-11-ca-07) | automatizado | `config/tests/test_perfil_lido_do_banco.py::test_gestor_rebaixado_deixa_de_ver_reserva_de_outra_pessoa` |
+| <a id="ta-101"></a>TA-101 | [CA-01](#us-11-ca-01) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_consulta_sem_filtros_devolve_todas_ordenadas_por_inicio`; `reservas/tests/test_api_consulta_reservas.py::test_consulta_nao_altera_as_reservas`; `reservas/tests/test_api_permissoes.py::test_gestor_lista_todas_e_filtra_por_solicitante`; `pages/PaginaReservas.test.tsx`: `mostra a contagem e cada reserva com data, espaço, solicitante e situação`; `pages/PaginaReservas.test.tsx`: `para o gestor, o título é "Reservas" e há os filtros de solicitante` |
+| <a id="ta-102"></a>TA-102 | [CA-02](#us-11-ca-02) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_criterios_combinados_se_somam`; `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes`; `reservas/tests/test_api_consulta_reservas.py::test_filtro_em_branco_e_ignorado`; `pages/PaginaReservas.test.tsx`: `combina espaço e situação numa mesma consulta`; `pages/PaginaReservas.test.tsx`: `o filtro de solicitante consulta uma vez só, depois que a pessoa para de digitar` |
+| <a id="ta-103"></a>TA-103 | [CA-03](#us-11-ca-03) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_solicitada_traz_confirmar_recusar_e_cancelar`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_traz_cancelar_e_concluir`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_api_permissoes.py::test_acoes_do_gestor_na_solicitada_sao_confirmar_recusar_e_cancelar` |
+| <a id="ta-104"></a>TA-104 | [CA-04](#us-11-ca-04) | automatizado | `pages/PaginaReservas.test.tsx`: `"Somente minhas reservas" consulta com minhas=true`; `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes` |
+| <a id="ta-105"></a>TA-105 | [CA-05](#us-11-ca-05) | automatizado | `pages/PaginaReservas.test.tsx`: `com filtros e sem reservas, oferece "Limpar filtros"`; `pages/PaginaReservas.test.tsx`: `"Limpar filtros" só aparece com filtro ativo e limpa a URL e os campos` |
+| <a id="ta-106"></a>TA-106 | [CA-06](#us-11-ca-06) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` |
+| <a id="ta-107"></a>TA-107 | [CA-07](#us-11-ca-07) | automatizado | `config/tests/test_perfil_lido_do_banco.py::test_gestor_rebaixado_deixa_de_ver_reserva_de_outra_pessoa` |

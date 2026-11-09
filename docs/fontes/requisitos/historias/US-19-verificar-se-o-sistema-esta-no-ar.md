@@ -13,6 +13,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | CA-03 · Cache fora do ar, com o TA-158 (automatizado); TA-156 cita o teste do health com banco e cache (Redis, AUT-08). Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -50,7 +51,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema informa "API no ar."
 - **Origem:** [UC-22 passos 1 a 3](../casos-de-uso/fichas-resumidas.md#uc22-p1)
 - **RF:** [RF-40](../requisitos/rf-gerais.md#rf-40)
-- **TA:** [TA-156](#ta-156)
+- **TA:** [TA-159](#ta-159)
 
 #### <a id="us-19-ca-02"></a>US-19 · CA-02 · Banco de dados fora do ar (exceção)
 
@@ -59,7 +60,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema informa "Não foi possível conectar ao banco de dados." e nada muda
 - **Origem:** [UC-22 E2.1](../casos-de-uso/fichas-resumidas.md#uc22-e2-1)
 - **RF:** [RF-40](../requisitos/rf-gerais.md#rf-40)
-- **TA:** [TA-157](#ta-157)
+- **TA:** [TA-160](#ta-160)
 
 #### <a id="us-19-ca-03"></a>US-19 · CA-03 · Cache fora do ar (exceção)
 
@@ -68,7 +69,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema informa "Não foi possível conectar ao cache." e nada muda
 - **Origem:** [UC-22 E2.2](../casos-de-uso/fichas-resumidas.md#uc22-e2-2)
 - **RF:** [RF-40](../requisitos/rf-gerais.md#rf-40)
-- **TA:** [TA-158](#ta-158)
+- **TA:** [TA-161](#ta-161)
 
 ## Testes de aceite
 
@@ -76,6 +77,6 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-156"></a>TA-156 | [CA-01](#us-19-ca-01) | automatizado | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`; `config/tests/test_health.py::test_health_confere_o_banco_e_o_cache`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
-| <a id="ta-157"></a>TA-157 | [CA-02](#us-19-ca-02) | manual | **Precondição:** sistema no ar pelo Docker Compose. **Passos:** parar só o serviço do banco de dados; pedir a verificação do sistema; religar o banco e pedir de novo. **Resultado esperado:** com o banco parado, "Não foi possível conectar ao banco de dados."; religado, "API no ar.". Sem teste automatizado: lacuna [L-08](../requisitos/srs.md#l-08). |
-| <a id="ta-158"></a>TA-158 | [CA-03](#us-19-ca-03) | automatizado | `config/tests/test_health.py::test_health_com_o_redis_fora_do_ar_responde_503` |
+| <a id="ta-159"></a>TA-159 | [CA-01](#us-19-ca-01) | automatizado | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`; `config/tests/test_health.py::test_health_confere_o_banco_e_o_cache`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-160"></a>TA-160 | [CA-02](#us-19-ca-02) | manual | **Precondição:** sistema no ar pelo Docker Compose. **Passos:** parar só o serviço do banco de dados; pedir a verificação do sistema; religar o banco e pedir de novo. **Resultado esperado:** com o banco parado, "Não foi possível conectar ao banco de dados."; religado, "API no ar.". Sem teste automatizado: lacuna [L-08](../requisitos/srs.md#l-08). |
+| <a id="ta-161"></a>TA-161 | [CA-03](#us-19-ca-03) | automatizado | `config/tests/test_health.py::test_health_com_o_redis_fora_do_ar_responde_503` |

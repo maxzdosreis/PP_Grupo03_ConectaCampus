@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra só as dele, sob o título "Minhas reservas", ordenadas pelo início, cada uma com data e horário, espaço, solicitante, finalidade e situação (com o motivo, quando houver), e informa quantas foram encontradas
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13)
-- **TA:** [TA-90](#ta-90)
+- **TA:** [TA-93](#ta-93)
 
 #### <a id="us-10-ca-02"></a>US-10 · CA-02 · O que ainda pode fazer em cada uma (sucesso)
 
@@ -58,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a Solicitada e a Confirmada oferecem só "Cancelar", e a Concluída não oferece nenhuma ação, indicando que não há ação disponível
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2)
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16)
-- **TA:** [TA-91](#ta-91)
+- **TA:** [TA-94](#ta-94)
 
 #### <a id="us-10-ca-03"></a>US-10 · CA-03 · Filtrar por espaço, situação e data (sucesso)
 
@@ -67,7 +68,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra só as reservas dele que atendem a todos os critérios, com a quantidade
 - **Origem:** [UC-07 passo 3](../casos-de-uso/fichas-resumidas.md#uc07-p3)
 - **RF:** [RF-12](../requisitos/rf-reservas.md#rf-12), [RF-15](../requisitos/rf-reservas.md#rf-15)
-- **TA:** [TA-92](#ta-92)
+- **TA:** [TA-95](#ta-95)
 
 #### <a id="us-10-ca-04"></a>US-10 · CA-04 · Critérios de solicitante ignorados (alternativa)
 
@@ -76,7 +77,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o critério é ignorado e ele continua vendo só as próprias reservas; os critérios de solicitante nem são oferecidos a ele
 - **Origem:** [UC-07 A3.1](../casos-de-uso/fichas-resumidas.md#uc07-a3-1)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13)
-- **TA:** [TA-93](#ta-93)
+- **TA:** [TA-96](#ta-96)
 
 #### <a id="us-10-ca-05"></a>US-10 · CA-05 · Nenhuma reserva atende aos critérios (alternativa)
 
@@ -85,7 +86,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Nenhuma reserva encontrada." e oferece limpar os critérios; um espaço inexistente no critério dá lista vazia, não recusa
 - **Origem:** [UC-07 A4.1](../casos-de-uso/fichas-resumidas.md#uc07-a4-1)
 - **RF:** [RF-12](../requisitos/rf-reservas.md#rf-12)
-- **TA:** [TA-94](#ta-94)
+- **TA:** [TA-97](#ta-97)
 
 #### <a id="us-10-ca-06"></a>US-10 · CA-06 · Ainda não tem reservas (alternativa)
 
@@ -94,7 +95,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Você ainda não tem reservas" e oferece solicitar uma reserva
 - **Origem:** [UC-07 A4.1](../casos-de-uso/fichas-resumidas.md#uc07-a4-1)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13)
-- **TA:** [TA-95](#ta-95)
+- **TA:** [TA-98](#ta-98)
 
 #### <a id="us-10-ca-07"></a>US-10 · CA-07 · Critério em formato inválido (exceção)
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Verifique os dados informados." apontando o critério com problema, e nenhuma reserva muda
 - **Origem:** [UC-07 E3.1](../casos-de-uso/fichas-resumidas.md#uc07-e3-1)
 - **RF:** [RF-12.1](../requisitos/rf-reservas.md#rf-12-1)
-- **TA:** [TA-96](#ta-96)
+- **TA:** [TA-99](#ta-99)
 
 #### <a id="us-10-ca-08"></a>US-10 · CA-08 · Reservas de outras pessoas nunca aparecem (acesso)
 
@@ -112,7 +113,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o Solicitante nunca vê reservas de outras pessoas, e a pessoa não identificada não vê nenhuma reserva e é orientada a entrar
 - **Origem:** [UC-07 passo 2](../casos-de-uso/fichas-resumidas.md#uc07-p2)
 - **RF:** [RF-13](../requisitos/rf-reservas.md#rf-13), [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-97](#ta-97)
+- **TA:** [TA-100](#ta-100)
 
 ## Testes de aceite
 
@@ -120,11 +121,11 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-90"></a>TA-90 | [CA-01](#us-10-ca-01) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias`; `reservas/tests/test_api_permissoes.py::test_solicitante_sem_filtros_ve_a_propria`; `reservas/tests/test_api_consulta_reservas.py::test_mensagem_informa_a_quantidade_encontrada`; `pages/PaginaReservas.test.tsx`: `o título é "Minhas reservas" e não há os filtros de solicitante`; `pages/PaginaReservas.test.tsx`: `mostra o motivo logo abaixo da situação de uma reserva cancelada`; `components/layout/Layout.test.tsx`: `logado como solicitante, o item das reservas se chama "Minhas reservas"` |
-| <a id="ta-91"></a>TA-91 | [CA-02](#us-10-ca-02) | automatizado | `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar`; `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes`; `components/reservas/TabelaDeReservas.test.tsx`: `mostra exatamente as ações recebidas da API`; `components/reservas/TabelaDeReservas.test.tsx`: `sem ações mostra "—" e "Nenhuma ação disponível" para leitor de tela` |
-| <a id="ta-92"></a>TA-92 | [CA-03](#us-10-ca-03) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes`; `reservas/tests/test_api_consulta_reservas.py::test_situacoes_de_reserva_listam_todas_na_ordem_do_enum_sem_login`; `pages/PaginaReservas.test.tsx`: `os outros filtros continuam valendo` |
-| <a id="ta-93"></a>TA-93 | [CA-04](#us-10-ca-04) | automatizado | `pages/PaginaReservas.test.tsx`: `ignora solicitante e minhas vindos da URL`; `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias` |
-| <a id="ta-94"></a>TA-94 | [CA-05](#us-10-ca-05) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_espaco_inexistente_no_filtro_devolve_lista_vazia`; `pages/PaginaReservas.test.tsx`: `com filtros e sem reservas, oferece "Limpar filtros"` |
-| <a id="ta-95"></a>TA-95 | [CA-06](#us-10-ca-06) | automatizado | `pages/PaginaReservas.test.tsx`: `sem filtros e sem reservas, mostra "Você ainda não tem reservas"` |
-| <a id="ta-96"></a>TA-96 | [CA-07](#us-10-ca-07) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` |
-| <a id="ta-97"></a>TA-97 | [CA-08](#us-10-ca-08) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias`; `reservas/tests/test_api_consulta_reservas.py::test_consulta_sem_login_responde_401`; `pages/PaginaReservas.test.tsx`: `sem login mostra a mensagem da API no lugar da tabela`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-93"></a>TA-93 | [CA-01](#us-10-ca-01) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias`; `reservas/tests/test_api_permissoes.py::test_solicitante_sem_filtros_ve_a_propria`; `reservas/tests/test_api_consulta_reservas.py::test_mensagem_informa_a_quantidade_encontrada`; `pages/PaginaReservas.test.tsx`: `o título é "Minhas reservas" e não há os filtros de solicitante`; `pages/PaginaReservas.test.tsx`: `mostra o motivo logo abaixo da situação de uma reserva cancelada`; `components/layout/Layout.test.tsx`: `logado como solicitante, o item das reservas se chama "Minhas reservas"` |
+| <a id="ta-94"></a>TA-94 | [CA-02](#us-10-ca-02) | automatizado | `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar`; `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes`; `components/reservas/TabelaDeReservas.test.tsx`: `mostra exatamente as ações recebidas da API`; `components/reservas/TabelaDeReservas.test.tsx`: `sem ações mostra "—" e "Nenhuma ação disponível" para leitor de tela` |
+| <a id="ta-95"></a>TA-95 | [CA-03](#us-10-ca-03) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_cada_criterio_sozinho_devolve_so_as_correspondentes`; `reservas/tests/test_api_consulta_reservas.py::test_situacoes_de_reserva_listam_todas_na_ordem_do_enum_sem_login`; `pages/PaginaReservas.test.tsx`: `os outros filtros continuam valendo` |
+| <a id="ta-96"></a>TA-96 | [CA-04](#us-10-ca-04) | automatizado | `pages/PaginaReservas.test.tsx`: `ignora solicitante e minhas vindos da URL`; `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias` |
+| <a id="ta-97"></a>TA-97 | [CA-05](#us-10-ca-05) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_espaco_inexistente_no_filtro_devolve_lista_vazia`; `pages/PaginaReservas.test.tsx`: `com filtros e sem reservas, oferece "Limpar filtros"` |
+| <a id="ta-98"></a>TA-98 | [CA-06](#us-10-ca-06) | automatizado | `pages/PaginaReservas.test.tsx`: `sem filtros e sem reservas, mostra "Você ainda não tem reservas"` |
+| <a id="ta-99"></a>TA-99 | [CA-07](#us-10-ca-07) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` |
+| <a id="ta-100"></a>TA-100 | [CA-08](#us-10-ca-08) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_so_lista_as_proprias`; `reservas/tests/test_api_consulta_reservas.py::test_consulta_sem_login_responde_401`; `pages/PaginaReservas.test.tsx`: `sem login mostra a mensagem da API no lugar da tabela`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

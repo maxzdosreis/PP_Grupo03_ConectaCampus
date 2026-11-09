@@ -60,9 +60,31 @@ export function salvarSessao(sessao: Sessao) {
   avisar(sessao, 'atualizacao')
 }
 
-export function atualizarAccess(access: string) {
+export type TokensDaSessao = Pick<Sessao, 'access' | 'refresh'>
+
+export function atualizarTokens({ access, refresh }: TokensDaSessao) {
   const atual = lerSessao()
-  if (atual) salvarSessao({ ...atual, access })
+  if (atual) salvarSessao({ ...atual, access, refresh })
+}
+
+export function aguardarSessaoDeOutraAba(
+  refreshRecusado: string,
+  esperaMs: number,
+): Promise<Sessao | null> {
+  return new Promise((resolver) => {
+    const terminar = (sessao: Sessao | null) => {
+      clearTimeout(tempo)
+      window.removeEventListener('storage', aoMudar)
+      resolver(sessao)
+    }
+    const aoMudar = (evento: StorageEvent) => {
+      if (evento.key !== CHAVE_DA_SESSAO) return
+      const sessao = interpretar(evento.newValue)
+      if (sessao === null || sessao.refresh !== refreshRecusado) terminar(sessao)
+    }
+    const tempo = setTimeout(() => terminar(null), esperaMs)
+    window.addEventListener('storage', aoMudar)
+  })
 }
 
 export function limparSessao({ expirou = false }: { expirou?: boolean } = {}) {

@@ -59,11 +59,11 @@ Toda resposta segue o mesmo formato: `{"mensagem", "dados"}` no sucesso e `{"err
 | 500 | Erro inesperado (vai para o log, sem detalhes na resposta) | `ERRO_INTERNO` |
 | 503 | Banco fora do ar (só em `GET /api/health/`); Redis fora do ar (`CACHE_INDISPONIVEL` no health, `SERVICO_INDISPONIVEL` no login e no cadastro) | `BANCO_INDISPONIVEL`, `CACHE_INDISPONIVEL`, `SERVICO_INDISPONIVEL` |
 
-Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh e os vocabulários `GET /api/espacos/tipos/`, `GET /api/reservas/situacoes/` e `GET /api/reservas/regras-de-agenda/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Quem pode chamar cada rota está em cada contexto e é provado por `config/tests/test_matriz_de_acesso.py`.
+Todo endpoint exige login com token JWT, exceto `GET /api/health/`, cadastro, login, refresh, logout e os vocabulários `GET /api/espacos/tipos/`, `GET /api/reservas/situacoes/` e `GET /api/reservas/regras-de-agenda/`. Sem token, a resposta é **401** `NAO_AUTENTICADO`. Quem pode chamar cada rota está em cada contexto e é provado por `config/tests/test_matriz_de_acesso.py`.
 
 ## Autenticação JWT
 
-O login devolve dois tokens: o `access`, enviado em cada pedido no cabeçalho `Authorization: Bearer <access>` e válido por 30 minutos, e o `refresh`, que gera um `access` novo e vale 1 dia (os dois prazos mudam em `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` no `.env`). O cadastro de usuários e o `GET /api/auth/me/` estão no [README de contas](contas/README.md).
+O login devolve dois tokens: o `access`, enviado em cada pedido no cabeçalho `Authorization: Bearer <access>` e válido por 30 minutos, e o `refresh`, que gera um `access` novo e vale 1 dia desde o login (os dois prazos mudam em `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` no `.env`). O `refresh` é de uso único: cada renovação devolve outro e revoga o usado, e sair o revoga (AUT-09). O cadastro de usuários e o `GET /api/auth/me/` estão no [README de contas](contas/README.md).
 
 ### Entrar (login) e usar o token
 
@@ -101,17 +101,39 @@ set ACCESS=cole-aqui-o-access
 
 ### Renovar e sair
 
-Quando o `access` expira, os pedidos respondem **401** `NAO_AUTENTICADO`. Gere outro com o `refresh` (`POST /api/auth/refresh/`):
+Quando o `access` expira, os pedidos respondem **401** `NAO_AUTENTICADO`. Gere outro com o `refresh` (`POST /api/auth/refresh/`). A resposta traz um `access` **e um `refresh` novos**; guarde os dois, porque o `refresh` enviado deixa de valer:
 
 ```bash
 curl -X POST http://localhost:8000/api/auth/refresh/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
 ```
 
 ```json
-{"mensagem": "Token renovado.", "dados": {"access": "eyJhbGciOi..."}}
+{"mensagem": "Token renovado.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi..."}}
 ```
 
-Um `refresh` inválido ou expirado responde **401** `NAO_AUTENTICADO`; aí é preciso entrar de novo. Para sair, basta descartar os dois tokens (não há revogação no servidor; veja as [limitações conhecidas](../../README.md#limitações-conhecidas)).
+O `refresh` novo vence no mesmo momento que o do login (1 dia depois de entrar): renovar não estende a sessão. Um `refresh` inválido, expirado, revogado ou já usado numa renovação responde **401** `NAO_AUTENTICADO`; aí é preciso entrar de novo.
+
+Para sair, revogue o `refresh` (`POST /api/auth/logout/`, sem precisar do `access`):
+
+```bash
+curl -X POST http://localhost:8000/api/auth/logout/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
+```
+
+```json
+{"mensagem": "Você saiu da sua conta.", "dados": null}
+```
+
+Depois disso, o `refresh` não renova mais. O `access` não é revogado e vale até expirar (veja as [limitações conhecidas](../../README.md#limitações-conhecidas)). Os detalhes do logout estão no [README de contas](contas/README.md#sair-logout).
+
+### Tokens guardados no banco
+
+A lista negra do Simple JWT (`rest_framework_simplejwt.token_blacklist`, em `INSTALLED_APPS`) guarda cada `refresh` emitido (`OutstandingToken`) e cada um revogado (`BlacklistedToken`); as duas tabelas aparecem no admin. Elas crescem a cada login e renovação. Para apagar os tokens já vencidos:
+
+```bash
+docker compose exec backend python manage.py flushexpiredtokens
+```
+
+Na avaliação local não é preciso rodá-lo. As tabelas são criadas pelo `migrate` que roda ao subir o backend; um `refresh` emitido antes delas existirem também pode ser renovado e revogado.
 
 ## Criar um superusuário (acesso ao admin)
 

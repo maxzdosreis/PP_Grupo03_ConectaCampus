@@ -18,6 +18,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Vínculos: as US e os CAs de cada RF, com o TA, no lugar de "a definir" ([histórias](../historias/README.md)) (REQ-05). Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Evidência do RF-36 passa a citar a tela de início, para onde "Sair" leva (correção editorial achada pela matriz). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RF-33.2 · Recusar tentativas de entrada em excesso, que fecha a lacuna L-03; vínculo do RF-33.1 passa a UC-02 E3.3, com a exceção nova antes dele; o CA de acesso da US-02 passa a CA-07 (TA-13) e os TAs seguintes andam uma posição (AUT-08). Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RF-36 passa a encerrar a sessão também no sistema: depois de sair, a credencial de renovação é recusada (a de acesso vale até expirar, lacuna L-04); RF-34 com a troca da credencial de renovação a cada uso e as duas janelas; vínculos com US-03 · CA-06, CA-09 e CA-10 e os TAs renumerados (TA-19 e TA-20 passam a TA-20 e TA-21; TA-21 a TA-158 passam a TA-24 a TA-161) (AUT-09). Sem aprovação. |
 
 ## Cadastro
 
@@ -155,9 +156,9 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-11 |
 | **Funcionalidade** | Extra (AUT-06) |
 | **Prioridade (QFD)** | Esperado — pedir a senha a cada 30 minutos de uso atrapalharia a operação do dia a dia. |
-| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.1](../casos-de-uso/UC-02-autenticar.md#a4-1) · US/CA: [US-03 · CA-01](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-01) (TA-14), [US-03 · CA-05](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-05) (TA-18) |
-| **Evidência (complementar)** | `POST /api/auth/refresh/` chamado pelo frontend no 401. `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_refresh_dura_o_tempo_configurado`; `api/cliente.test.ts` ("401 NAO_AUTENTICADO renova o access e repete a requisição com o novo"); `components/sessao/SessaoProvider.test.tsx` ("restaura a sessão salva e confirma com /me, que atualiza o usuário") |
-| **Código (complementar)** | `contas/api/views.py::RenovarTokenView.post`, `contas/api/views.py::_refresh_de_usuario_ativo` |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.1](../casos-de-uso/UC-02-autenticar.md#a4-1) · US/CA: [US-03 · CA-01](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-01) (TA-14), [US-03 · CA-05](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-05) (TA-18), [US-03 · CA-06](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-06) (TA-19) |
+| **Evidência (complementar)** | `POST /api/auth/refresh/` chamado pelo frontend no 401; cada renovação devolve também um `refresh` novo, com o mesmo prazo final, e revoga o usado (AUT-09). `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_refresh_dura_o_tempo_configurado`, `::test_refresh_trocado_mantem_o_prazo_final_da_entrada`, `::test_refresh_novo_renova_de_novo_em_cadeia`; `api/cliente.test.ts` ("renovação recusada com outro refresh já salvo por outra aba repete com a sessão nova e não desloga"); `api/cliente.test.ts` ("401 NAO_AUTENTICADO renova o access e repete a requisição com o novo"); `components/sessao/SessaoProvider.test.tsx` ("restaura a sessão salva e confirma com /me, que atualiza o usuário") |
+| **Código (complementar)** | `contas/api/views.py::RenovarTokenView.post`, `contas/api/views.py::_refresh_de_usuario_ativo`, `contas/api/views.py::_trocar_refresh`, `api/cliente.ts::accessDeOutraAba` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) |
 | **Revisão** | 0.1 |
@@ -173,8 +174,8 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-11 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — sem a explicação, as telas só passariam a falhar. |
-| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E4.1](../casos-de-uso/UC-02-autenticar.md#e4-1), [E4.2](../casos-de-uso/UC-02-autenticar.md#e4-2) · US/CA: [US-03 · CA-06](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-06) (TA-19), [US-03 · CA-07](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-07) (TA-20) |
-| **Evidência (complementar)** | `api/cliente.test.ts` ("se a renovação falhar, limpa a sessão, avisa os ouvintes e lança SESSAO_EXPIRADA"); `components/sessao/SessaoProvider.test.tsx` ("quando a sessão expira, avisa e leva para o login com o caminho atual"); `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao` |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E4.1](../casos-de-uso/UC-02-autenticar.md#e4-1), [E4.2](../casos-de-uso/UC-02-autenticar.md#e4-2) · US/CA: [US-03 · CA-07](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-07) (TA-20), [US-03 · CA-08](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-08) (TA-21), [US-03 · CA-10](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-10) (TA-23) |
+| **Evidência (complementar)** | `api/cliente.test.ts` ("se a renovação falhar, limpa a sessão, avisa os ouvintes e lança SESSAO_EXPIRADA"); `components/sessao/SessaoProvider.test.tsx` ("quando a sessão expira, avisa e leva para o login com o caminho atual"); `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado` |
 | **Código (complementar)** | `api/cliente.ts::tentarRenovar`, `api/cliente.ts::encerrarSessaoExpirada` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | — |
@@ -203,15 +204,15 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | O sistema deve permitir ao usuário autenticado sair e ver a página inicial sem nenhuma identificação, com a mensagem "Você saiu da sua conta.". |
+| **Enunciado** | O sistema deve permitir ao usuário autenticado sair e ver a página inicial sem nenhuma identificação, com a mensagem "Você saiu da sua conta."; depois de sair, a sessão não pode mais ser renovada, em nenhum lugar. |
 | **Origem** | NS-11 (principal); NS-14 |
 | **Funcionalidade** | Extra (AUT-06) |
 | **Prioridade (QFD)** | Esperado — num computador compartilhado, sem sair, a próxima pessoa agiria em nome da anterior. |
-| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.3](../casos-de-uso/UC-02-autenticar.md#a4-3) · US/CA: [US-03 · CA-02](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-02) (TA-15) |
-| **Evidência (complementar)** | Só no navegador (sem chamada à API: os tokens são descartados); "Sair" no cabeçalho de toda tela, que leva ao início `/`. `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início"); `api/sessao.test.ts` |
-| **Código (complementar)** | `components/sessao/SessaoProvider.tsx::SessaoProvider`, `api/sessao.ts::limparSessao` |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.3](../casos-de-uso/UC-02-autenticar.md#a4-3) · US/CA: [US-03 · CA-02](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-02) (TA-15), [US-03 · CA-09](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-09) (TA-22) |
+| **Evidência (complementar)** | `POST /api/auth/logout/` com o `refresh`, chamado pelo frontend sem esperar a resposta (AUT-09); "Sair" no cabeçalho de toda tela, que leva ao início `/`. `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_sair_de_novo_com_o_mesmo_refresh_responde_200`; `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início", "sair revoga o refresh na API sem esperar a resposta"); `api/sessao.test.ts` |
+| **Código (complementar)** | `contas/api/views.py::SairView.post`, `components/sessao/SessaoProvider.tsx::SessaoProvider`, `api/sessao.ts::limparSessao` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
-| **Decisões** | [DEC-04](../decisoes/DEC-04.md) (sem revogação de tokens: lacuna [L-04](srs.md#lacunas)) |
+| **Decisões** | [DEC-04](../decisoes/DEC-04.md) (a credencial de acesso não é revogada ao sair: lacuna [L-04](srs.md#lacunas)) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
@@ -226,7 +227,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Origem** | NS-11 |
 | **Funcionalidade** | Extra ([DEC-04](../decisoes/DEC-04.md)) |
 | **Prioridade (QFD)** | Normal — sem pelo menos um Gestor, nenhum espaço é cadastrado e nenhum pedido é decidido. |
-| **Vínculos** | UC: [UC-20 Criar usuário Gestor](../casos-de-uso/README.md#uc-20) (fluxo principal) — na ficha: [UC-20 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc20-p1) · US/CA: [US-17 · CA-01](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-01) (TA-148), [US-17 · CA-02](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-02) (TA-149), [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03) (TA-150) |
+| **Vínculos** | UC: [UC-20 Criar usuário Gestor](../casos-de-uso/README.md#uc-20) (fluxo principal) — na ficha: [UC-20 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc20-p1) · US/CA: [US-17 · CA-01](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-01) (TA-151), [US-17 · CA-02](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-02) (TA-152), [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03) (TA-153) |
 | **Evidência (complementar)** | `python manage.py createsuperuser`; administração em `/admin/`. `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser`, `::test_superusuario_e_gestor_e_usuario_comum_nao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes` |
 | **Código (complementar)** | `contas/infrastructure/models.py::UsuarioManager.create_superuser` |
 | **Regras de negócio** | [Gestor](../glossario.md#gestor), [Equipe de TI](../glossario.md#equipe-de-ti) |

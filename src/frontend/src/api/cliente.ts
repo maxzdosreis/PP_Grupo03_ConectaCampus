@@ -1,4 +1,10 @@
-import { atualizarAccess, lerSessao, limparSessao } from './sessao.ts'
+import {
+  aguardarSessaoDeOutraAba,
+  atualizarTokens,
+  lerSessao,
+  limparSessao,
+  type TokensDaSessao,
+} from './sessao.ts'
 import type { RespostaErro, RespostaSucesso } from './tipos.ts'
 
 const URL_BASE: string = import.meta.env.VITE_API_URL ?? ''
@@ -18,6 +24,7 @@ const MENSAGEM_API_NAO_CONFIGURADA =
 export const MENSAGEM_SESSAO_EXPIRADA = 'Sua sessão expirou. Faça login novamente.'
 
 const CAMINHO_DA_RENOVACAO = '/auth/refresh/'
+export const ESPERA_PELA_OUTRA_ABA_MS = 1000
 
 export type OpcoesDaRequisicao = RequestInit & {
   autenticar?: boolean
@@ -124,17 +131,25 @@ async function renovar(): Promise<string | null> {
   const sessao = lerSessao()
   if (!sessao) return null
   try {
-    const { dados } = await requisitar<{ access: string }>(CAMINHO_DA_RENOVACAO, {
+    const { dados } = await requisitar<TokensDaSessao>(CAMINHO_DA_RENOVACAO, {
       method: 'POST',
       body: JSON.stringify({ refresh: sessao.refresh }),
       autenticar: false,
     })
-    atualizarAccess(dados.access)
+    atualizarTokens(dados)
     return dados.access
   } catch (erro) {
-    if (refreshRecusado(erro)) return null
+    if (refreshRecusado(erro)) return accessDeOutraAba(sessao.refresh)
     throw erro
   }
+}
+
+async function accessDeOutraAba(refreshUsado: string): Promise<string | null> {
+  const atual = lerSessao()
+  if (!atual) return null
+  if (atual.refresh !== refreshUsado) return atual.access
+  const nova = await aguardarSessaoDeOutraAba(refreshUsado, ESPERA_PELA_OUTRA_ABA_MS)
+  return nova?.access ?? null
 }
 
 function tentarRenovar(accessRecusado: string): Promise<string | null> {

@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Reserva concluída com sucesso.", a reserva passa a Concluída, não oferece mais nenhuma ação e deixa de ocupar o horário
 - **Origem:** [UC-10 passos 1 a 8, variação UC-19](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-19)
 - **RF:** [RF-19](../requisitos/rf-reservas.md#rf-19)
-- **TA:** [TA-142](#ta-142)
+- **TA:** [TA-145](#ta-145)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (hoje é aceito mesmo antes do término do horário)
 
 #### <a id="us-16-ca-02"></a>US-16 · CA-02 · Motivo opcional ao concluir (alternativa)
@@ -59,7 +60,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a reserva fica Concluída com o motivo novo, sem espaços nas pontas nem repetidos, ou sem motivo; o motivo da confirmação deixa de aparecer na reserva e continua no histórico
 - **Origem:** [UC-10 A8.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#a8-1)
 - **RF:** [RF-19](../requisitos/rf-reservas.md#rf-19)
-- **TA:** [TA-143](#ta-143)
+- **TA:** [TA-146](#ta-146)
 
 #### <a id="us-16-ca-03"></a>US-16 · CA-03 · Nada mais a fazer numa reserva concluída (exceção)
 
@@ -68,7 +69,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** nenhuma ação é oferecida, e o pedido de cancelamento é recusado com "Não é possível alterar uma reserva Concluída para Cancelada."; a reserva continua Concluída
 - **Origem:** [UC-10 E2.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e2-1)
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16), [RF-24](../requisitos/rf-reservas.md#rf-24)
-- **TA:** [TA-144](#ta-144)
+- **TA:** [TA-147](#ta-147)
 
 #### <a id="us-16-ca-04"></a>US-16 · CA-04 · Concluir uma reserva que não foi confirmada (exceção)
 
@@ -77,7 +78,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Não é possível alterar uma reserva Solicitada para Concluída.", e a reserva continua Solicitada, com o mesmo histórico
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
-- **TA:** [TA-145](#ta-145)
+- **TA:** [TA-148](#ta-148)
 
 #### <a id="us-16-ca-05"></a>US-16 · CA-05 · Ciclo completo no histórico (registro)
 
@@ -86,7 +87,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** ele mostra três registros, em ordem — criação (Solicitada), Confirmada e Concluída —, cada um com o autor e o momento, formando um caminho permitido pela tabela de transições; uma conclusão recusada (CA-04, CA-06) não gera registro, diferente do modelo do professor
 - **Origem:** [UC-10 passo 7](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p7)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-146](#ta-146)
+- **TA:** [TA-149](#ta-149)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
 
 #### <a id="us-16-ca-06"></a>US-16 · CA-06 · Só o Gestor conclui (acesso)
@@ -96,7 +97,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Somente o gestor pode concluir reservas.", e não que a transição é inválida: a resposta não revela a situação da reserva, que não muda
 - **Origem:** [UC-10 E6.4](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-4)
 - **RF:** [RF-27](../requisitos/rf-reservas.md#rf-27)
-- **TA:** [TA-147](#ta-147)
+- **TA:** [TA-150](#ta-150)
 
 ## Testes de aceite
 
@@ -104,9 +105,9 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-142"></a>TA-142 | [CA-01](#us-16-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_alterar_situacao.py::test_ciclo_solicitada_confirmada_concluida`; `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
-| <a id="ta-143"></a>TA-143 | [CA-02](#us-16-ca-02) | automatizado | `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
-| <a id="ta-144"></a>TA-144 | [CA-03](#us-16-ca-03) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes` |
-| <a id="ta-145"></a>TA-145 | [CA-04](#us-16-ca-04) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]` |
-| <a id="ta-146"></a>TA-146 | [CA-05](#us-16-ca-05) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]` |
-| <a id="ta-147"></a>TA-147 | [CA-06](#us-16-ca-06) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` |
+| <a id="ta-145"></a>TA-145 | [CA-01](#us-16-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_alterar_situacao.py::test_ciclo_solicitada_confirmada_concluida`; `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
+| <a id="ta-146"></a>TA-146 | [CA-02](#us-16-ca-02) | automatizado | `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
+| <a id="ta-147"></a>TA-147 | [CA-03](#us-16-ca-03) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes` |
+| <a id="ta-148"></a>TA-148 | [CA-04](#us-16-ca-04) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]` |
+| <a id="ta-149"></a>TA-149 | [CA-05](#us-16-ca-05) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]` |
+| <a id="ta-150"></a>TA-150 | [CA-06](#us-16-ca-06) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` |

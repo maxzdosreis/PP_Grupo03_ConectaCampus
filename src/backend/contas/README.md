@@ -20,6 +20,7 @@ Guarda quem usa o sistema e com qual perfil, cadastra novos solicitantes e faz o
 - **Caso de uso** `CadastrarSolicitante`: valida os dados, a senha, depois confere e-mail e matrícula repetidos e só então cria. Dados inválidos são recusados antes de qualquer consulta ao banco. O banco também garante a unicidade, e o repositório traduz a violação para as mesmas exceções.
 - O cadastro público cria sempre um `SOLICITANTE`: `perfil`, `is_staff` ou `is_superuser` enviados no corpo são ignorados. O cadastro não faz login; o frontend chama o login logo depois.
 - **Login:** senha errada, e-mail inexistente e usuário desativado dão a mesma resposta (`CREDENCIAIS_INVALIDAS`), para não revelar quais e-mails existem. Usuário desativado ou excluído também perde o `access` e o `refresh` que já tinha (401).
+- **Sessão (AUT-09):** o `refresh` é de uso único. A renovação devolve um `access` e um `refresh` novos e revoga o usado, na mesma transação (`_trocar_refresh`); o novo mantém o vencimento do primeiro, 1 dia depois do login. Reusar um `refresh` já trocado dá 401, e duas renovações simultâneas com o mesmo `refresh` dão uma 200 e uma 401. Sair (`SairView`) revoga o `refresh`. O `access` não é revogado e vale até expirar (30 minutos), porque não há lista negra de `access` e conferi-la custaria uma consulta em cada pedido.
 - **Limite de tentativas** (AUT-08, `api/limites.py`): ver [Limite de tentativas](#limite-de-tentativas).
 
 ## Endpoints
@@ -30,10 +31,45 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`.
 |---|---|---|---|
 | `POST /api/auth/cadastro/` | público | 201 | 400 `CAMPO_OBRIGATORIO_AUSENTE`, `TEXTO_MUITO_LONGO`, `MATRICULA_INVALIDA`, `SENHA_FRACA`, `DADOS_INVALIDOS`; 409 `EMAIL_JA_CADASTRADO`, `MATRICULA_JA_CADASTRADA`; 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
 | `POST /api/auth/login/` | público | 200 | 401 `CREDENCIAIS_INVALIDAS`; 400 `DADOS_INVALIDOS`; 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
-| `POST /api/auth/refresh/` | público, com o `refresh` | 200 | 401 `NAO_AUTENTICADO` (inválido, expirado, de usuário inativo ou excluído); 400 `DADOS_INVALIDOS` sem `refresh` |
+| `POST /api/auth/refresh/` | público, com o `refresh` | 200 com `access` e `refresh` novos | 401 `NAO_AUTENTICADO` (inválido, expirado, revogado, já usado, de usuário inativo ou excluído); 400 `DADOS_INVALIDOS` sem `refresh` |
+| `POST /api/auth/logout/` | público, com o `refresh` | 200 (também com o `refresh` já revogado ou vencido) | 400 `DADOS_INVALIDOS` sem `refresh` ou com um texto que não é `refresh` (com `campos.refresh`) |
 | `GET /api/auth/me/` | logado | 200 | 401 `NAO_AUTENTICADO` |
 
 Os exemplos de login, de guardar o `access` e de renovar o token estão em [Autenticação JWT](../README.md#autenticação-jwt), porque todos os contextos usam o mesmo token.
+
+## Renovar o token
+
+`POST /api/auth/refresh/` troca o `refresh`: guarde o novo, porque o enviado deixa de valer.
+
+```bash
+curl -X POST http://localhost:8000/api/auth/refresh/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
+```
+
+```json
+{"mensagem": "Token renovado.", "dados": {"access": "eyJhbGciOi...", "refresh": "eyJhbGciOi..."}}
+```
+
+Repetir o mesmo comando com o `refresh` antigo responde **401**:
+
+```json
+{"erro": {"codigo": "NAO_AUTENTICADO", "mensagem": "Faça login para continuar."}}
+```
+
+## Sair (logout)
+
+`POST /api/auth/logout/` revoga o `refresh` no servidor. É público, porque a posse do `refresh` é a credencial e o `access` pode já ter vencido quando a pessoa sai; um `refresh` de outra pessoa é revogado do mesmo jeito, e a resposta não traz nada dela. Não tem limite de tentativas.
+
+```bash
+curl -X POST http://localhost:8000/api/auth/logout/ -H "Content-Type: application/json" -d '{"refresh": "cole-aqui-o-refresh"}'
+```
+
+```json
+{"mensagem": "Você saiu da sua conta.", "dados": null}
+```
+
+- Sair é idempotente: o mesmo `refresh` de novo, ou um já vencido, também responde **200**.
+- Sem `refresh`, ou com um texto que não é um `refresh` (formato ou assinatura inválidos, ou um `access`), responde **400** `DADOS_INVALIDOS` com `campos.refresh` ("Informe um token de renovação válido.").
+- O `access` emitido antes continua valendo até expirar (30 minutos).
 
 ## Cadastrar um solicitante
 
@@ -140,7 +176,7 @@ Sem token, com token malformado ou expirado → **401** `NAO_AUTENTICADO`.
 | Ordem do cadastro | `application/casos_de_uso.py` (`CadastrarSolicitante`) |
 | Política de senha | `infrastructure/politica_de_senha.py` e `AUTH_PASSWORD_VALIDATORS` no `config/settings.py` |
 | Model, manager e unicidade | `infrastructure/models.py` e `infrastructure/repositorio_django.py` |
-| Rotas, login, refresh e `me` | `api/views.py`, `api/serializers.py`, `api/urls.py` |
+| Rotas, login, refresh (com a troca do `refresh`), logout e `me` | `api/views.py`, `api/serializers.py`, `api/urls.py` |
 | Limites de tentativas | `api/limites.py` e `LIMITE_*`, `NUM_PROXIES` e `CACHES` no `config/settings.py` |
 | Admin do Django | `admin.py` |
 

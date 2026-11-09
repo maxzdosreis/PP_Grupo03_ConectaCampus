@@ -14,6 +14,7 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Nova exceção E3.1 · Tentativas de entrada em excesso, a primeira conferência do passo 3 (RF-33.2, RNF-F12); as antigas E3.1 e E3.2 passam a E3.2 e E3.3, seguindo a ordem real ([decisão h](README.md#decisao-h)); sai a lacuna L-03, resolvida (AUT-08). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | "Fora das exceções": com o serviço que conta as tentativas (Redis) fora do ar, a entrada é recusada sem conferir nada (AUT-08). Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | A4.1 com a troca da credencial de renovação a cada uso e duas janelas renovando ao mesmo tempo; A4.3 encerra a sessão também no sistema (a credencial de renovação deixa de valer; a de acesso vale até expirar, lacuna L-04 reduzida); E4.1 inclui a credencial de renovação já trocada ou de uma sessão encerrada; pós-condições, RNF-F13 e anexo (AUT-09). Sem aprovação. |
 
 ## Sumário
 
@@ -70,7 +71,7 @@ No passo 1, o visitante ainda não tem conta. Ele segue em [UC-01 Cadastrar-se](
 
 #### <a id="a4-1"></a>A4.1 · Continuar identificado
 
-Depois do passo 4, o usuário continua usando o sistema, inclusive depois de recarregar ou de abrir o sistema de novo em outra janela do mesmo navegador. Enquanto a sessão valer (1 dia desde a entrada), o sistema o mantém identificado sem pedir a senha e renova a credencial de acesso, que vale 30 minutos, sem que ele perceba. Se várias operações precisarem da renovação ao mesmo tempo, ela acontece uma vez só.
+Depois do passo 4, o usuário continua usando o sistema, inclusive depois de recarregar ou de abrir o sistema de novo em outra janela do mesmo navegador. Enquanto a sessão valer (1 dia desde a entrada), o sistema o mantém identificado sem pedir a senha e renova a credencial de acesso, que vale 30 minutos, sem que ele perceba. A cada renovação, a credencial de renovação também é trocada por outra, com o mesmo prazo final, e a usada deixa de valer ([RNF-F13](../requisitos/rnf.md#rnf-f13)). Se várias operações precisarem da renovação ao mesmo tempo, ela acontece uma vez só. Se duas janelas que dividem a sessão renovarem ao mesmo tempo, o sistema aceita uma e recusa a outra; a janela recusada passa a usar a credencial que a outra recebeu e refaz a operação uma vez, e as duas continuam identificadas.
 
 #### <a id="a4-2"></a>A4.2 · Confirmar a identificação ao voltar
 
@@ -78,7 +79,7 @@ Quando o usuário volta ao sistema com uma sessão guardada, o sistema confere o
 
 #### <a id="a4-3"></a>A4.3 · Sair
 
-Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema encerra a identificação neste navegador, informa "Você saiu da sua conta." e mostra a página inicial sem nenhuma identificação. A credencial já emitida não é invalidada fora deste navegador ([lacuna L-04](../requisitos/srs.md#l-04)).
+Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema encerra a identificação neste navegador e revoga a credencial de renovação da sessão: daí em diante, ela não renova em nenhum lugar, nem numa cópia. Informa "Você saiu da sua conta." e mostra a página inicial sem nenhuma identificação, mesmo que a revogação não possa ser confirmada no momento (por exemplo, sem conexão). Pedir para sair com uma credencial já revogada ou vencida tem a mesma resposta. A credencial de acesso já emitida não é revogada e vale até expirar, em até 30 minutos ([lacuna L-04](../requisitos/srs.md#l-04)).
 
 ## Exceções
 
@@ -107,10 +108,10 @@ A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 
 #### <a id="e4-1"></a>E4.1 · Sessão expirada
 
-- **Condição:** depois do passo 4, a sessão deixou de valer: passou 1 dia desde a entrada, ou a renovação da credencial foi recusada (credencial adulterada ou de outro sistema).
+- **Condição:** depois do passo 4, a sessão deixou de valer: passou 1 dia desde a entrada, ou a renovação da credencial foi recusada (credencial adulterada, de outro sistema, já trocada numa renovação anterior ou de uma sessão encerrada ao sair).
 - **Resultado para o ator:** "Sua sessão expirou. Faça login novamente."; o sistema o leva a entrar de novo (volta ao passo 1) e, depois, ao ponto em que estava ([A1.1](#a1-1)). Falta de conexão durante a renovação não encerra a sessão: a próxima operação tenta renovar de novo.
 - **Estado depois:** a sessão é encerrada neste navegador; nada do que a pessoa já tinha gravado muda, e a operação que estava em curso não é executada.
-- **Requisito:** [RF-34.1](../requisitos/rf-contas.md#rf-34-1) e [RNF-F03](../requisitos/rnf.md#rnf-f03).
+- **Requisito:** [RF-34.1](../requisitos/rf-contas.md#rf-34-1), [RNF-F03](../requisitos/rnf.md#rnf-f03) e [RNF-F13](../requisitos/rnf.md#rnf-f13).
 
 #### <a id="e4-2"></a>E4.2 · Conta desativada ou excluída durante a sessão
 
@@ -125,7 +126,7 @@ A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 
 | Campo | Conteúdo |
 |---|---|
-| **Pós-condições (sucesso)** | Existe uma sessão para a conta neste navegador, válida por 1 dia; o último acesso da conta foi atualizado; todo caso de uso que o usuário iniciar a seguir o reconhece com o perfil atual da conta. Depois de [A4.3](#a4-3), não há sessão neste navegador. |
+| **Pós-condições (sucesso)** | Existe uma sessão para a conta neste navegador, válida por 1 dia; o último acesso da conta foi atualizado; todo caso de uso que o usuário iniciar a seguir o reconhece com o perfil atual da conta. Depois de [A4.3](#a4-3), não há sessão neste navegador, e a credencial de renovação daquela sessão não renova em nenhum lugar. |
 | **Garantia de sucesso** | O usuário age com o próprio nome, matrícula e perfil, que o sistema lê da conta (nunca do pedido) a cada operação. |
 | **Garantia mínima** | Mesmo quando a meta falha: nenhuma sessão é iniciada; a resposta não revela se o e-mail existe nem, no excesso de tentativas, qual limite foi atingido; a senha não é mostrada e só é guardada como hash ([RNF-F01](../requisitos/rnf.md#rnf-f01)); uma conta desativada não age. |
 
@@ -165,6 +166,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [RNF-F09](../requisitos/rnf.md#rnf-f09) · Identidade e perfil nunca vêm do pedido | garantia de sucesso |
 | [RNF-F10](../requisitos/rnf.md#rnf-f10) · Credenciais forjadas recusadas | [E4.1](#e4-1) |
 | [RNF-F12](../requisitos/rnf.md#rnf-f12) · Limite de tentativas de entrada e de cadastro | [E3.1](#e3-1) |
+| [RNF-F13](../requisitos/rnf.md#rnf-f13) · Revogação e troca da credencial de renovação | [A4.1](#a4-1), [A4.3](#a4-3), [E4.1](#e4-1) |
 | [RNF-U01](../requisitos/rnf.md#rnf-u01) · Mensagens em português que orientam a correção | todas as exceções |
 
 ## Questões em aberto
@@ -173,7 +175,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 |---|---|
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Fixa a validade da sessão e que o cadastro público nunca cria Gestor. |
 | [DEC-09](../decisoes/DEC-09.md) · Formato da matrícula | A matrícula mostrada em [A4.2](#a4-2) não é conferida com a instituição. |
-| [Lacuna L-04](../requisitos/srs.md#l-04) | Sair ([A4.3](#a4-3)) não invalida a credencial fora deste navegador. |
+| [Lacuna L-04](../requisitos/srs.md#l-04) | Sair ([A4.3](#a4-3)) revoga a credencial de renovação, mas não a de acesso, que vale até expirar (até 30 minutos). |
 | [Lacuna L-14](../requisitos/srs.md#l-14) | A recusa de [E3.2](#e3-2) não tem RF próprio. |
 
 ## Anexo — Evidência (complementar)
@@ -185,13 +187,13 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [Fluxo principal](#p1) | `contas/tests/test_api_autenticacao.py::test_login_valido_devolve_tokens_e_usuario_sem_senha`, `::test_login_aceita_email_com_caixa_diferente_e_espacos`, `::test_login_preenche_last_login`; `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `pages/PaginaEntrar.test.tsx`; `components/layout/Layout.test.tsx` |
 | [A1.1](#a1-1) | `components/sessao/SessaoProvider.test.tsx` (volta ao caminho atual); `navegacao.test.ts` (`proximoSeguro`) |
 | [A1.2](#a1-2) | `contas/tests/test_api_cadastro.py::test_usuario_recem_cadastrado_consegue_fazer_login`; `pages/PaginaCadastro.test.tsx` |
-| [A4.1](#a4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_access_dura_o_tempo_configurado`, `::test_refresh_dura_o_tempo_configurado`; `api/cliente.test.ts` (renovação no 401 e renovação compartilhada) |
+| [A4.1](#a4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_valido_devolve_access_novo_que_funciona_no_me`, `::test_access_dura_o_tempo_configurado`, `::test_refresh_dura_o_tempo_configurado`; `api/cliente.test.ts` (renovação no 401 e renovação compartilhada); `contas/tests/test_api_autenticacao.py::test_refresh_trocado_mantem_o_prazo_final_da_entrada`, `::test_duas_trocas_do_mesmo_refresh_so_a_primeira_vale`; `api/cliente.test.ts` (a renovação guarda o refresh novo; duas abas não se encerram) |
 | [A4.2](#a4-2) | `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil`; `config/tests/test_perfil_lido_do_banco.py::test_gestor_rebaixado_perde_as_permissoes_com_o_mesmo_token`, `::test_solicitante_promovido_ganha_as_permissoes_com_o_mesmo_token`; `components/sessao/SessaoProvider.test.tsx` (restaura e confirma a sessão) |
-| [A4.3](#a4-3) | `components/sessao/SessaoProvider.test.tsx` (sair limpa a sessão e vai para o início); `api/sessao.test.ts` |
+| [A4.3](#a4-3) | `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_sair_de_novo_com_o_mesmo_refresh_responde_200`, `::test_sair_com_refresh_vencido_responde_200_sem_revogar`, `::test_access_emitido_antes_de_sair_continua_valendo_ate_expirar`; `components/sessao/SessaoProvider.test.tsx` (sair limpa a sessão e vai para o início, sem esperar a revogação; com a API fora do ar, sai do mesmo jeito); `api/sessao.test.ts` |
 | [E3.1](#e3-1) | `contas/tests/test_limites_de_tentativas.py::test_sexta_tentativa_com_o_mesmo_email_responde_429_com_a_espera`, `::test_senha_certa_tambem_e_recusada_depois_do_limite`, `::test_email_com_caixa_e_espacos_diferentes_conta_como_o_mesmo`, `::test_limite_por_ip_vale_para_varios_emails`, `::test_x_forwarded_for_diferente_nao_escapa_do_limite_por_ip`, `::test_depois_da_janela_o_login_volta_a_ser_aceito`, `::test_resposta_429_nao_revela_o_limite_nem_se_o_email_existe`; `pages/PaginaEntrar.test.tsx` (muitas tentativas no aviso do topo); `api/cliente.test.ts` (o 429 não renova nem limpa a sessão) |
 | [E3.2](#e3-2) | `contas/tests/test_api_autenticacao.py::test_login_sem_campos_responde_400_com_cada_campo` |
 | [E3.3](#e3-3) | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` (credenciais inválidas no aviso do topo) |
-| [E4.1](#e4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_me_com_access_expirado_responde_401`, `::test_token_adulterado_responde_401 [x]`, `::test_access_usado_como_refresh_responde_401`; `api/cliente.test.ts` (renovação recusada lança a sessão expirada); `components/sessao/SessaoProvider.test.tsx` (expiração leva ao login com o caminho atual) |
+| [E4.1](#e4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_me_com_access_expirado_responde_401`, `::test_token_adulterado_responde_401 [x]`, `::test_access_usado_como_refresh_responde_401`; `api/cliente.test.ts` (renovação recusada lança a sessão expirada); `components/sessao/SessaoProvider.test.tsx` (expiração leva ao login com o caminho atual); `contas/tests/test_api_autenticacao.py::test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado` |
 | [E4.2](#e4-2) | `contas/tests/test_api_autenticacao.py::test_access_de_usuario_desativado_depois_do_login_responde_401`, `::test_access_de_usuario_excluido_responde_401`, `::test_refresh_de_usuario_inativo_responde_401`, `::test_refresh_de_usuario_excluido_responde_401` |
 
 **Histórias derivadas:** [US-02 Entrar no sistema](../historias/US-02-entrar-no-sistema.md), [US-03 Manter e encerrar a sessão](../historias/US-03-manter-e-encerrar-a-sessao.md). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).
