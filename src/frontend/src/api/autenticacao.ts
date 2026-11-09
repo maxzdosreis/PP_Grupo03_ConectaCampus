@@ -44,6 +44,14 @@ export function cadastrar(dados: DadosDeCadastro) {
   })
 }
 
+export function sair(refresh: string) {
+  return requisitar<null>('/auth/logout/', {
+    method: 'POST',
+    body: JSON.stringify({ refresh }),
+    autenticar: false,
+  })
+}
+
 export function usuarioAtual() {
   return requisitar<Usuario>('/auth/me/')
 }

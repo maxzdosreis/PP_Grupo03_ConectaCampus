@@ -17,7 +17,12 @@
 |---|---|---|---|---|---|---|---|
 | `health` | `/api/health/` | GET | — | 200 | 200 | 200 | 200 |
 | `contas:login` | `/api/auth/login/` | POST | e-mail e senha válidos | livre | livre | livre | livre |
-| `contas:refresh` | `/api/auth/refresh/` | POST | refresh válido | livre | livre | livre | livre |
+| `contas:refresh` | `/api/auth/refresh/` | POST | refresh válido (trocado a cada uso, AUT-09) | livre | livre | livre | livre |
+| `contas:logout` | `/api/auth/logout/` | POST | refresh válido (do dono) | livre | livre | livre | livre |
+| `contas:logout` | `/api/auth/logout/` | GET | — | 405 | 405 | 405 | 405 |
+| `contas:logout` | `/api/auth/logout/` | PUT | — | 405 | 405 | 405 | 405 |
+| `contas:logout` | `/api/auth/logout/` | PATCH | — | 405 | 405 | 405 | 405 |
+| `contas:logout` | `/api/auth/logout/` | DELETE | — | 405 | 405 | 405 | 405 |
 | `contas:cadastro` | `/api/auth/cadastro/` | POST | novo usuário | livre | livre | livre | livre |
 | `contas:me` | `/api/auth/me/` | GET | — | 401 | 200 | 200 | 200 |
 | `espacos:lista` | `/api/espacos/` | GET | — | 401 | 200 | 200 | 200 |
@@ -44,8 +49,9 @@
 
 ## Leitura
 
-- **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`, `reservas:regras_de_agenda`) e login, refresh e cadastro.
+- **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`, `reservas:regras_de_agenda`) e login, refresh, logout e cadastro.
 - **Limite de tentativas (AUT-08):** login (por e-mail e por IP) e cadastro (por IP) recusam com 429 `LIMITE_DE_TENTATIVAS` o que passa do limite. Não é regra de acesso por perfil: a linha continua "livre" (não exige login) e vale igual para todas as personas. Cada caso da matriz faz no máximo cinco logins, com o contador zerado antes de cada teste (fixture do `conftest.py`), então nenhum caso chega ao limite. Provas em `contas/tests/test_limites_de_tentativas.py`.
+- **Sair (AUT-09):** `contas:logout` é livre para todos, porque a posse do refresh é a credencial e o access pode já ter vencido; um refresh de outra pessoa é revogado do mesmo jeito, sem nenhum dado dela na resposta. Não tem limite de tentativas. Os outros métodos respondem 405 até para o anônimo, porque a rota não autentica ninguém.
 - **403 x 404:** o solicitante recebe 403 quando a ação é proibida ao perfil numa reserva que ele vê (confirmar a própria), e 404 numa reserva de outra pessoa, para não revelar que ela existe.
 - **Sem exclusão:** `DELETE` não existe em espaços, em reservas nem no histórico (405 para quem está logado; o anônimo recebe 401 antes, porque a autenticação vem primeiro). Espaço é desativado, reserva muda de situação e o histórico só recebe registros novos (RES-07); nada é excluído.
 - **Gestão de espaços (ESP-04):** cadastrar, editar (`PATCH`), desativar e reativar são só do gestor; os dois solicitantes recebem 403. As rotas de ação só aceitam `POST`: um `GET` nelas responde 405 a quem está logado, porque a restrição ao gestor vale só para o método implementado.
@@ -60,6 +66,7 @@
 | Access de usuário desativado ou excluído → 401 | `::test_access_de_usuario_desativado_depois_do_login_responde_401`, `::test_access_de_usuario_excluido_responde_401` |
 | Token adulterado, outra chave, `alg: none`, refresh como access → 401 | `::test_token_adulterado_responde_401` |
 | `Authorization` fora do padrão → 401 | `::test_cabecalho_authorization_fora_do_padrao_responde_401`; Basic em `reservas/tests/test_api_reservas.py::test_autenticacao_basic_nao_e_mais_aceita` |
+| Refresh revogado ao sair ou já trocado numa renovação → 401; o access continua até expirar | `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_access_emitido_antes_de_sair_continua_valendo_ate_expirar`; `contas/tests/test_api_autenticacao.py::test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado`, `::test_duas_trocas_do_mesmo_refresh_so_a_primeira_vale` |
 | Perfil lido do banco a cada requisição | `config/tests/test_perfil_lido_do_banco.py` |
 | CORS só para a origem configurada | `config/tests/test_cors.py` |
 | Campos extras no PATCH de situação ignorados | `reservas/tests/test_api_situacao_reserva.py::test_campos_extras_no_corpo_nao_alteram_a_reserva` |

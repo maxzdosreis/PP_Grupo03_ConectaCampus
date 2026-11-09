@@ -1,4 +1,9 @@
-import { atualizarAccess, lerSessao, limparSessao } from './sessao.ts'
+import {
+  atualizarTokens,
+  lerSessao,
+  limparSessao,
+  type TokensDaSessao,
+} from './sessao.ts'
 import type { RespostaErro, RespostaSucesso } from './tipos.ts'
 
 const URL_BASE: string = import.meta.env.VITE_API_URL ?? ''
@@ -18,6 +23,7 @@ const MENSAGEM_API_NAO_CONFIGURADA =
 export const MENSAGEM_SESSAO_EXPIRADA = 'Sua sessão expirou. Faça login novamente.'
 
 const CAMINHO_DA_RENOVACAO = '/auth/refresh/'
+export const NOME_DA_TRAVA_DE_RENOVACAO = 'conecta-campus:renovacao'
 
 export type OpcoesDaRequisicao = RequestInit & {
   autenticar?: boolean
@@ -120,27 +126,40 @@ function refreshRecusado(erro: unknown): boolean {
 
 let renovacaoEmAndamento: Promise<string | null> | null = null
 
-async function renovar(): Promise<string | null> {
+function comTravaEntreAbas<T>(tarefa: () => Promise<T>): Promise<T> {
+  const travas = 'locks' in navigator ? navigator.locks : undefined
+  return travas ? travas.request(NOME_DA_TRAVA_DE_RENOVACAO, tarefa) : tarefa()
+}
+
+async function renovarSeAindaPreciso(accessRecusado: string): Promise<string | null> {
   const sessao = lerSessao()
   if (!sessao) return null
+  if (sessao.access !== accessRecusado) return sessao.access
   try {
-    const { dados } = await requisitar<{ access: string }>(CAMINHO_DA_RENOVACAO, {
+    const { dados } = await requisitar<TokensDaSessao>(CAMINHO_DA_RENOVACAO, {
       method: 'POST',
       body: JSON.stringify({ refresh: sessao.refresh }),
       autenticar: false,
     })
-    atualizarAccess(dados.access)
+    atualizarTokens(dados)
     return dados.access
   } catch (erro) {
-    if (refreshRecusado(erro)) return null
+    if (refreshRecusado(erro)) return accessDeOutraAba(sessao.refresh)
     throw erro
   }
+}
+
+function accessDeOutraAba(refreshUsado: string): string | null {
+  const atual = lerSessao()
+  return atual && atual.refresh !== refreshUsado ? atual.access : null
 }
 
 function tentarRenovar(accessRecusado: string): Promise<string | null> {
   const atual = lerSessao()?.access
   if (atual && atual !== accessRecusado) return Promise.resolve(atual)
-  renovacaoEmAndamento ??= renovar().finally(() => {
+  renovacaoEmAndamento ??= comTravaEntreAbas(() =>
+    renovarSeAindaPreciso(accessRecusado),
+  ).finally(() => {
     renovacaoEmAndamento = null
   })
   return renovacaoEmAndamento

@@ -2,7 +2,7 @@ import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cadastrar, entrar, usuarioAtual } from '../../api/autenticacao.ts'
+import { cadastrar, entrar, sair, usuarioAtual } from '../../api/autenticacao.ts'
 import { ErroDaApi } from '../../api/cliente.ts'
 import { lerSessao, limparSessao, salvarSessao, type Sessao } from '../../api/sessao.ts'
 import { useSessao } from '../../hooks/useSessao.ts'
@@ -14,6 +14,7 @@ import RotaProtegida from './RotaProtegida.tsx'
 vi.mock('../../api/autenticacao.ts', () => ({
   cadastrar: vi.fn(),
   entrar: vi.fn(),
+  sair: vi.fn(),
   usuarioAtual: vi.fn(),
 }))
 
@@ -89,6 +90,7 @@ describe('SessaoProvider', () => {
     vi.mocked(cadastrar).mockReset()
     vi.mocked(entrar).mockReset()
     vi.mocked(usuarioAtual).mockReset()
+    vi.mocked(sair).mockReset().mockResolvedValue({ mensagem: 'Você saiu da sua conta.', dados: null })
   })
 
   afterEach(() => {
@@ -181,6 +183,40 @@ describe('SessaoProvider', () => {
     expect(local()).toBe('/')
     expect(sessao()).toBe('sem sessão')
     expect(lerSessao()).toBeNull()
+    expect(sair).toHaveBeenCalledWith('refresh-1')
+  })
+
+  it('sair revoga o refresh na API sem esperar a resposta', async () => {
+    salvarSessao(SESSAO)
+    vi.mocked(usuarioAtual).mockResolvedValue({ mensagem: 'ok', dados: USUARIO_SOLICITANTE })
+    vi.mocked(sair).mockReturnValue(new Promise(() => {}))
+    renderizar('/reservas')
+    await waitFor(() => expect(sessao()).toBe('Bruno Lima'))
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sair' }))
+
+    expect(sair).toHaveBeenCalledWith('refresh-1')
+    expect(await screen.findByText('Você saiu da sua conta.')).toBeTruthy()
+    expect(local()).toBe('/')
+    expect(lerSessao()).toBeNull()
+  })
+
+  it('sair com a API fora do ar sai do mesmo jeito, só com um aviso no console', async () => {
+    salvarSessao(SESSAO)
+    vi.mocked(usuarioAtual).mockResolvedValue({ mensagem: 'ok', dados: USUARIO_SOLICITANTE })
+    const erro = new ErroDaApi(0, 'SEM_CONEXAO', 'Não foi possível conectar ao servidor.')
+    vi.mocked(sair).mockRejectedValue(erro)
+    const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    renderizar('/reservas')
+    await waitFor(() => expect(sessao()).toBe('Bruno Lima'))
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sair' }))
+
+    expect(await screen.findByText('Você saiu da sua conta.')).toBeTruthy()
+    expect(sessao()).toBe('sem sessão')
+    expect(lerSessao()).toBeNull()
+    await waitFor(() => expect(aviso).toHaveBeenCalledWith(expect.any(String), erro))
+    aviso.mockRestore()
   })
 
   it('quando a sessão expira, avisa e leva para o login com o caminho atual', async () => {

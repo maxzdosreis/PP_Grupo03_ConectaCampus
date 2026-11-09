@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -49,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra o espaço pelo nome, a data e o horário, o solicitante com a matrícula, o momento do pedido (no formato "28/10/2026 às 14:05"), a finalidade, a situação com o motivo e as ações disponíveis para ele (nenhuma, nesta)
 - **Origem:** [UC-08 passo 3](../casos-de-uso/fichas-resumidas.md#uc08-p3)
 - **RF:** [RF-14](../requisitos/rf-reservas.md#rf-14), [RF-16](../requisitos/rf-reservas.md#rf-16)
-- **TA:** [TA-105](#ta-105)
+- **TA:** [TA-108](#ta-108)
 
 #### <a id="us-12-ca-02"></a>US-12 · CA-02 · Linha do tempo (sucesso)
 
@@ -58,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema mostra, em ordem cronológica, "Solicitada por Ana…", "Confirmada por Carla…" e "Concluída por Carla…", cada um com data e hora no horário de Brasília, a situação anterior e a nova e o motivo, quando houver
 - **Origem:** [UC-09 passo 3](../casos-de-uso/fichas-resumidas.md#uc09-p3), [UC-08 A3.1](../casos-de-uso/fichas-resumidas.md#uc08-a3-1)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-106](#ta-106)
+- **TA:** [TA-109](#ta-109)
 
 #### <a id="us-12-ca-03"></a>US-12 · CA-03 · Decidir a partir do detalhe (alternativa)
 
@@ -67,7 +68,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o detalhe é mostrado de novo, já na situação nova, e o registro da mudança já aparece na linha do tempo; as ações oferecidas no detalhe são as mesmas da lista
 - **Origem:** [UC-08 A3.2](../casos-de-uso/fichas-resumidas.md#uc08-a3-2), [UC-10 A1.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#a1-1) (pelo detalhe)
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16), [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-107](#ta-107)
+- **TA:** [TA-110](#ta-110)
 
 #### <a id="us-12-ca-04"></a>US-12 · CA-04 · Voltar às reservas com os mesmos critérios (alternativa)
 
@@ -76,7 +77,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a lista volta com os mesmos critérios; quem abriu o detalhe direto, sem passar pela lista, volta para a lista sem critérios
 - **Origem:** [UC-08 A3.3](../casos-de-uso/fichas-resumidas.md#uc08-a3-3), [UC-07 A2.1](../casos-de-uso/fichas-resumidas.md#uc07-a2-1)
 - **RF:** [RF-14](../requisitos/rf-reservas.md#rf-14)
-- **TA:** [TA-108](#ta-108)
+- **TA:** [TA-111](#ta-111)
 
 #### <a id="us-12-ca-05"></a>US-12 · CA-05 · Reserva sem registros (alternativa)
 
@@ -85,7 +86,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Nenhuma mudança registrada." e o detalhe continua completo
 - **Origem:** [UC-09 A3.1](../casos-de-uso/fichas-resumidas.md#uc09-a3-1)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-109](#ta-109)
+- **TA:** [TA-112](#ta-112)
 
 #### <a id="us-12-ca-06"></a>US-12 · CA-06 · Reserva inexistente ou de outra pessoa (exceção)
 
@@ -94,7 +95,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema responde a mesma coisa nos três casos — "Reserva não encontrada", que ela não existe ou não está disponível para ele —, oferece voltar às reservas e não mostra nem o detalhe nem o histórico, sem revelar que a reserva da outra pessoa existe
 - **Origem:** [UC-08 E2.1](../casos-de-uso/fichas-resumidas.md#uc08-e2-1)
 - **RF:** [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-110](#ta-110)
+- **TA:** [TA-113](#ta-113)
 
 #### <a id="us-12-ca-07"></a>US-12 · CA-07 · Histórico de reserva inexistente ou de outra pessoa (exceção)
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema responde "Reserva de código «n» não encontrada." nos dois casos, e nenhum registro é mostrado
 - **Origem:** [UC-09 E2.1](../casos-de-uso/fichas-resumidas.md#uc09-e2-1)
 - **RF:** [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-111](#ta-111)
+- **TA:** [TA-114](#ta-114)
 
 #### <a id="us-12-ca-08"></a>US-12 · CA-08 · Histórico não pôde ser obtido (exceção)
 
@@ -112,7 +113,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o detalhe continua visível, a seção do histórico informa que não foi possível carregá-lo e oferece tentar de novo, e tentar de novo consulta só o histórico
 - **Origem:** [UC-09 E3.1](../casos-de-uso/fichas-resumidas.md#uc09-e3-1)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-112](#ta-112)
+- **TA:** [TA-115](#ta-115)
 
 #### <a id="us-12-ca-09"></a>US-12 · CA-09 · O histórico é um registro de fatos (registro)
 
@@ -121,7 +122,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** a tentativa recusada não aparece (só as mudanças aceitas são registradas, diferente do modelo do professor), nenhum registro pode ser alterado nem excluído, e o autor aparece só pelo nome, sem a identificação interna de outra pessoa
 - **Origem:** [UC-09 A3.2](../casos-de-uso/fichas-resumidas.md#uc09-a3-2)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-113](#ta-113)
+- **TA:** [TA-116](#ta-116)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
 
 #### <a id="us-12-ca-10"></a>US-12 · CA-10 · Quem vê o detalhe e o histórico (acesso)
@@ -131,7 +132,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o Gestor e o dono veem os dois; a pessoa não identificada não vê nada e é orientada a entrar
 - **Origem:** [UC-08 passo 2](../casos-de-uso/fichas-resumidas.md#uc08-p2), [UC-09 passo 2](../casos-de-uso/fichas-resumidas.md#uc09-p2)
 - **RF:** [RF-14](../requisitos/rf-reservas.md#rf-14), [RF-23](../requisitos/rf-reservas.md#rf-23)
-- **TA:** [TA-114](#ta-114)
+- **TA:** [TA-117](#ta-117)
 
 ## Testes de aceite
 
@@ -139,13 +140,13 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-105"></a>TA-105 | [CA-01](#us-12-ca-01) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao`; `pages/PaginaReserva.test.tsx`: `mostra os dados da reserva com o nome do espaço e as datas formatadas`; `pages/PaginaReserva.test.tsx`: `mostra o motivo junto da situação quando houver`; `pages/PaginaReserva.test.tsx`: `sem ações, não mostra nenhum botão` |
-| <a id="ta-106"></a>TA-106 | [CA-02](#us-12-ca-02) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `reservas/tests/test_api_historico.py::test_registrado_em_sai_em_iso_8601_no_fuso_de_sao_paulo`; `reservas/tests/test_api_historico.py::test_cancelamento_aparece_com_o_motivo`; `pages/PaginaReserva.test.tsx`: `mostra a linha do tempo em ordem, com data e hora, autor e motivo` |
-| <a id="ta-107"></a>TA-107 | [CA-03](#us-12-ca-03) | automatizado | `pages/PaginaReserva.test.tsx`: `os botões vêm de acoes_disponiveis, com nome acessível com contexto`; `pages/PaginaReserva.test.tsx`: `uma ação concluída recarrega a reserva e o histórico e põe o foco no título`; `pages/PaginaReserva.test.tsx`: `no 409, o diálogo oferece "Atualizar reserva", que recarrega o detalhe` |
-| <a id="ta-108"></a>TA-108 | [CA-04](#us-12-ca-04) | automatizado | `pages/PaginaReserva.test.tsx`: `"Voltar para as reservas" volta para a lista com os filtros de antes`; `pages/PaginaReserva.test.tsx`: `quem entrou direto pelo link volta para /reservas`; `components/reservas/TabelaDeReservas.test.tsx`: `o link leva no state a URL da lista com os filtros, para o "Voltar"` |
-| <a id="ta-109"></a>TA-109 | [CA-05](#us-12-ca-05) | automatizado | `pages/PaginaReserva.test.tsx`: `histórico vazio mostra "Nenhuma mudança registrada."` |
-| <a id="ta-110"></a>TA-110 | [CA-06](#us-12-ca-06) | automatizado | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_inexistente_responde_404`; `pages/PaginaReserva.test.tsx`: `404 mostra "Reserva não encontrada", sem detalhe nem histórico`; `pages/PaginaReserva.test.tsx`: `id "%s" na URL mostra o mesmo estado, sem chamar a API` |
-| <a id="ta-111"></a>TA-111 | [CA-07](#us-12-ca-07) | automatizado | `reservas/tests/test_api_historico.py::test_solicitante_pedindo_historico_de_outra_pessoa_recebe_404`; `reservas/tests/test_api_historico.py::test_historico_de_reserva_inexistente_responde_404` |
-| <a id="ta-112"></a>TA-112 | [CA-08](#us-12-ca-08) | automatizado | `pages/PaginaReserva.test.tsx`: `se o histórico falhar, o erro fica só na seção e "Tentar novamente" busca de novo` |
-| <a id="ta-113"></a>TA-113 | [CA-09](#us-12-ca-09) | automatizado | `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao`; `reservas/tests/test_api_historico.py::test_registro_nao_expoe_o_id_do_autor` |
-| <a id="ta-114"></a>TA-114 | [CA-10](#us-12-ca-10) | automatizado | `reservas/tests/test_api_permissoes.py::test_gestor_ve_o_detalhe_de_qualquer_reserva`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_sem_login_responde_401`; `reservas/tests/test_api_historico.py::test_historico_sem_login_responde_401`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-108"></a>TA-108 | [CA-01](#us-12-ca-01) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao`; `pages/PaginaReserva.test.tsx`: `mostra os dados da reserva com o nome do espaço e as datas formatadas`; `pages/PaginaReserva.test.tsx`: `mostra o motivo junto da situação quando houver`; `pages/PaginaReserva.test.tsx`: `sem ações, não mostra nenhum botão` |
+| <a id="ta-109"></a>TA-109 | [CA-02](#us-12-ca-02) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `reservas/tests/test_api_historico.py::test_registrado_em_sai_em_iso_8601_no_fuso_de_sao_paulo`; `reservas/tests/test_api_historico.py::test_cancelamento_aparece_com_o_motivo`; `pages/PaginaReserva.test.tsx`: `mostra a linha do tempo em ordem, com data e hora, autor e motivo` |
+| <a id="ta-110"></a>TA-110 | [CA-03](#us-12-ca-03) | automatizado | `pages/PaginaReserva.test.tsx`: `os botões vêm de acoes_disponiveis, com nome acessível com contexto`; `pages/PaginaReserva.test.tsx`: `uma ação concluída recarrega a reserva e o histórico e põe o foco no título`; `pages/PaginaReserva.test.tsx`: `no 409, o diálogo oferece "Atualizar reserva", que recarrega o detalhe` |
+| <a id="ta-111"></a>TA-111 | [CA-04](#us-12-ca-04) | automatizado | `pages/PaginaReserva.test.tsx`: `"Voltar para as reservas" volta para a lista com os filtros de antes`; `pages/PaginaReserva.test.tsx`: `quem entrou direto pelo link volta para /reservas`; `components/reservas/TabelaDeReservas.test.tsx`: `o link leva no state a URL da lista com os filtros, para o "Voltar"` |
+| <a id="ta-112"></a>TA-112 | [CA-05](#us-12-ca-05) | automatizado | `pages/PaginaReserva.test.tsx`: `histórico vazio mostra "Nenhuma mudança registrada."` |
+| <a id="ta-113"></a>TA-113 | [CA-06](#us-12-ca-06) | automatizado | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_inexistente_responde_404`; `pages/PaginaReserva.test.tsx`: `404 mostra "Reserva não encontrada", sem detalhe nem histórico`; `pages/PaginaReserva.test.tsx`: `id "%s" na URL mostra o mesmo estado, sem chamar a API` |
+| <a id="ta-114"></a>TA-114 | [CA-07](#us-12-ca-07) | automatizado | `reservas/tests/test_api_historico.py::test_solicitante_pedindo_historico_de_outra_pessoa_recebe_404`; `reservas/tests/test_api_historico.py::test_historico_de_reserva_inexistente_responde_404` |
+| <a id="ta-115"></a>TA-115 | [CA-08](#us-12-ca-08) | automatizado | `pages/PaginaReserva.test.tsx`: `se o histórico falhar, o erro fica só na seção e "Tentar novamente" busca de novo` |
+| <a id="ta-116"></a>TA-116 | [CA-09](#us-12-ca-09) | automatizado | `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao`; `reservas/tests/test_api_historico.py::test_registro_nao_expoe_o_id_do_autor` |
+| <a id="ta-117"></a>TA-117 | [CA-10](#us-12-ca-10) | automatizado | `reservas/tests/test_api_permissoes.py::test_gestor_ve_o_detalhe_de_qualquer_reserva`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_sem_login_responde_401`; `reservas/tests/test_api_historico.py::test_historico_sem_login_responde_401`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

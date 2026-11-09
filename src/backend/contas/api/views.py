@@ -1,12 +1,21 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
-from rest_framework import status
+from django.db import transaction
+from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.exceptions import (
+    ExpiredTokenError,
+    InvalidToken,
+    TokenError,
+)
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 
 from compartilhado.api.respostas import resposta_erro, resposta_sucesso
 from contas.api import dependencias
@@ -92,9 +101,12 @@ class RenovarTokenView(_SemAutenticacaoView):
     def post(self, request):
         entrada = RenovacaoDeTokenSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
-        refresh = _refresh_de_usuario_ativo(entrada.validated_data["refresh"])
+        refresh = _trocar_refresh(
+            _refresh_de_usuario_ativo(entrada.validated_data["refresh"])
+        )
         return resposta_sucesso(
-            "Token renovado.", {"access": str(refresh.access_token)}
+            "Token renovado.",
+            {"access": str(refresh.access_token), "refresh": str(refresh)},
         )
 
 
@@ -113,6 +125,54 @@ def _refresh_de_usuario_ativo(token):
     if not api_settings.USER_AUTHENTICATION_RULE(usuario):
         raise InvalidToken("Usuário inativo ou inexistente.")
     return refresh
+
+
+def _trocar_refresh(refresh):
+    with transaction.atomic():
+        _revogar_uma_vez(refresh)
+        refresh.set_jti()
+        refresh.set_iat()
+        refresh.outstand()
+    return refresh
+
+
+def _revogar_uma_vez(refresh):
+    refresh.outstand()
+    registro = OutstandingToken.objects.get(jti=refresh[api_settings.JTI_CLAIM])
+    _, revogado_agora = BlacklistedToken.objects.get_or_create(token=registro)
+    if not revogado_agora:
+        raise InvalidToken("Token de renovação já usado.")
+
+
+class SairView(_SemAutenticacaoView):
+    def post(self, request):
+        entrada = RenovacaoDeTokenSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        refresh = _refresh_para_revogar(entrada.validated_data["refresh"])
+        if refresh is not None:
+            refresh.blacklist()
+        return resposta_sucesso("Você saiu da sua conta.")
+
+
+def _refresh_para_revogar(texto):
+    try:
+        lido = UntypedToken(texto)
+    except ExpiredTokenError:
+        return None
+    except TokenError as erro:
+        raise _refresh_invalido() from erro
+    if lido.get(api_settings.TOKEN_TYPE_CLAIM) != RefreshToken.token_type:
+        raise _refresh_invalido()
+    try:
+        return RefreshToken(texto)
+    except TokenError:
+        return None
+
+
+def _refresh_invalido():
+    return serializers.ValidationError(
+        {"refresh": ["Informe um token de renovação válido."]}
+    )
 
 
 class UsuarioAtualView(APIView):

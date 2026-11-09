@@ -1,8 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import { entrar } from './autenticacao.ts'
-import { ErroDaApi, requisitar } from './cliente.ts'
-import { aoMudarSessao, lerSessao, limparSessao, salvarSessao } from './sessao.ts'
+import { ErroDaApi, NOME_DA_TRAVA_DE_RENOVACAO, requisitar } from './cliente.ts'
+import {
+  aoMudarSessao,
+  CHAVE_DA_SESSAO,
+  lerSessao,
+  limparSessao,
+  salvarSessao,
+} from './sessao.ts'
 
 const URL_DA_API = 'http://localhost:8000/api'
 const URL_DA_RENOVACAO = `${URL_DA_API}/auth/refresh/`
@@ -31,8 +37,20 @@ const REFRESH_RECUSADO = resposta(401, {
   erro: { codigo: 'NAO_AUTENTICADO', mensagem: 'Token inválido ou expirado.' },
 })
 
-function renovado(access: string) {
-  return resposta(200, { mensagem: 'Token renovado.', dados: { access } })
+function renovado(access: string, refresh = 'refresh-2') {
+  return resposta(200, { mensagem: 'Token renovado.', dados: { access, refresh } })
+}
+
+const SESSAO_DE_OUTRA_ABA = {
+  access: 'access-9',
+  refresh: 'refresh-9',
+  usuario: USUARIO_SOLICITANTE,
+}
+
+function outraAbaGravou(sessao: unknown = SESSAO_DE_OUTRA_ABA) {
+  const valor = JSON.stringify(sessao)
+  localStorage.setItem(CHAVE_DA_SESSAO, valor)
+  return valor
 }
 
 function deferido<T>() {
@@ -41,6 +59,37 @@ function deferido<T>() {
     resolver = resolve
   })
   return { promessa, resolver }
+}
+
+function instalarTravasFalsas() {
+  const nomes: string[] = []
+  let ocupada = false
+  let fila: Promise<unknown> = Promise.resolve()
+  const travas = {
+    request(nome: string, tarefa: () => Promise<unknown>) {
+      nomes.push(nome)
+      const resultado = fila.then(async () => {
+        ocupada = true
+        try {
+          return await tarefa()
+        } finally {
+          ocupada = false
+        }
+      })
+      fila = resultado.catch(() => undefined)
+      return resultado
+    },
+  }
+  Object.defineProperty(navigator, 'locks', { value: travas, configurable: true })
+  return {
+    nomes,
+    ocupada: () => ocupada,
+    segurarComoOutraAba() {
+      const solta = deferido<void>()
+      travas.request(NOME_DA_TRAVA_DE_RENOVACAO, () => solta.promessa)
+      return () => solta.resolver()
+    },
+  }
 }
 
 const fetchFalso = vi.fn<(url: string, opcoes: RequestInit) => Promise<Response>>()
@@ -85,6 +134,8 @@ describe('cliente da API', () => {
   afterEach(() => {
     limparSessao()
     vi.unstubAllGlobals()
+    vi.useRealTimers()
+    Reflect.deleteProperty(navigator, 'locks')
   })
 
   it('envia o access da sessão no cabeçalho Authorization', async () => {
@@ -130,6 +181,78 @@ describe('cliente da API', () => {
     expect(renovacao[1].body).toBe(JSON.stringify({ refresh: 'refresh-1' }))
     expect(autorizacao(repetida)).toBe('Bearer access-2')
     expect(lerSessao()?.access).toBe('access-2')
+  })
+
+  it('a renovação guarda o access e o refresh novos na sessão', async () => {
+    apiQueAceitaSo('access-2', () => renovado('access-2', 'refresh-2'))
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    await requisitar('/reservas/')
+    cancelar()
+
+    expect(lerSessao()).toEqual({
+      access: 'access-2',
+      refresh: 'refresh-2',
+      usuario: USUARIO_SOLICITANTE,
+    })
+    expect(ouvinte).toHaveBeenCalledWith(lerSessao(), 'atualizacao')
+  })
+
+  it('renovação recusada com outro refresh já salvo por outra aba repete com a sessão nova e não desloga', async () => {
+    apiQueAceitaSo('access-9', () => {
+      outraAbaGravou()
+      return REFRESH_RECUSADO
+    })
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const resultado = await requisitar('/reservas/')
+    cancelar()
+
+    expect(resultado).toEqual({ mensagem: 'ok', dados: [] })
+    expect(chamadasDeRenovacao()).toHaveLength(1)
+    expect(autorizacao(chamadas()[2])).toBe('Bearer access-9')
+    expect(lerSessao()).toEqual(SESSAO_DE_OUTRA_ABA)
+    expect(ouvinte).not.toHaveBeenCalled()
+  })
+
+  it('a renovação roda dentro da trava entre abas', async () => {
+    const travas = instalarTravasFalsas()
+    let renovouComATrava = false
+    apiQueAceitaSo('access-2', () => {
+      renovouComATrava = travas.ocupada()
+      return renovado('access-2', 'refresh-2')
+    })
+
+    await requisitar('/reservas/')
+
+    expect(travas.nomes).toEqual([NOME_DA_TRAVA_DE_RENOVACAO])
+    expect(renovouComATrava).toBe(true)
+    expect(lerSessao()?.refresh).toBe('refresh-2')
+  })
+
+  it('com a renovação de outra aba em andamento, espera a trava e usa a sessão nova sem renovar, por mais que ela demore', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const travas = instalarTravasFalsas()
+    const soltarOutraAba = travas.segurarComoOutraAba()
+    apiQueAceitaSo('access-9', () => REFRESH_RECUSADO)
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const pedido = requisitar('/reservas/')
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(lerSessao()?.access).toBe('access-1')
+    outraAbaGravou()
+    soltarOutraAba()
+    const resultado = await pedido
+    cancelar()
+
+    expect(resultado).toEqual({ mensagem: 'ok', dados: [] })
+    expect(chamadasDeRenovacao()).toHaveLength(0)
+    expect(autorizacao(chamadas()[1])).toBe('Bearer access-9')
+    expect(lerSessao()).toEqual(SESSAO_DE_OUTRA_ABA)
+    expect(ouvinte).not.toHaveBeenCalled()
   })
 
   it('duas requisições recebendo 401 ao mesmo tempo usam uma única renovação', async () => {

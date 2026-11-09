@@ -19,6 +19,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Campo **Código (complementar)** em cada ficha (caso de uso da aplicação e regra do domínio, como `arquivo::Símbolo`), lido pela [matriz de rastreabilidade](../rastreabilidade/matriz.md) (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Campo Decisões: a DEC-06 e a DEC-10 marcadas como decididas (Aula 7, 06/11/2026; GES-02). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Consulta de espaços
 
@@ -30,7 +31,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 |
 | **Funcionalidade** | F1 |
 | **Prioridade (QFD)** | Normal — "listar os itens do recorte" é a primeira funcionalidade do enunciado. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (fluxo principal) — na ficha: [UC-03 passo 2](../casos-de-uso/fichas-resumidas.md#uc03-p2) · US/CA: [US-04 · CA-01](../historias/US-04-consultar-os-espacos.md#us-04-ca-01) (TA-21), [US-04 · CA-02](../historias/US-04-consultar-os-espacos.md#us-04-ca-02) (TA-22), [US-04 · CA-08](../historias/US-04-consultar-os-espacos.md#us-04-ca-08) (TA-28) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (fluxo principal) — na ficha: [UC-03 passo 2](../casos-de-uso/fichas-resumidas.md#uc03-p2) · US/CA: [US-04 · CA-01](../historias/US-04-consultar-os-espacos.md#us-04-ca-01) (TA-24), [US-04 · CA-02](../historias/US-04-consultar-os-espacos.md#us-04-ca-02) (TA-25), [US-04 · CA-08](../historias/US-04-consultar-os-espacos.md#us-04-ca-08) (TA-31) |
 | **Evidência (complementar)** | `GET /api/espacos/`; tela `/espacos`. `espacos/tests/test_api_espacos.py::test_listar_ordena_por_nome`, `::test_espaco_cadastrado_aparece_na_listagem`, `::test_listar_informa_a_quantidade_encontrada [x]`, `::test_solicitante_lista_espacos` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::ListarEspacos.executar`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.listar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo), [tipo de espaço](../glossario.md#tipo-de-espaco), [capacidade](../glossario.md#capacidade), [espaço ativo](../glossario.md#espaco-ativo) |
@@ -47,7 +48,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 |
 | **Funcionalidade** | F1 |
 | **Prioridade (QFD)** | Esperado — o Solicitante procura onde pode reservar; sem o filtro, teria de percorrer espaços inativos. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa) — na ficha: [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1) · US/CA: [US-04 · CA-03](../historias/US-04-consultar-os-espacos.md#us-04-ca-03) (TA-23), [US-04 · CA-04](../historias/US-04-consultar-os-espacos.md#us-04-ca-04) (TA-24) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa) — na ficha: [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1) · US/CA: [US-04 · CA-03](../historias/US-04-consultar-os-espacos.md#us-04-ca-03) (TA-26), [US-04 · CA-04](../historias/US-04-consultar-os-espacos.md#us-04-ca-04) (TA-27) |
 | **Evidência (complementar)** | `GET /api/espacos/?tipo=&apenas_ativos=`; tela `/espacos` (filtros no endereço). `espacos/tests/test_api_espacos.py::test_listar_aplica_os_filtros_da_query_string [x]`; `espacos/tests/test_repositorio_espacos.py::test_listar_aplica_os_filtros [x]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::ListarEspacos.executar`, `espacos/api/serializers.py::FiltrosEspacosSerializer` |
 | **Regras de negócio** | [Tipo de espaço](../glossario.md#tipo-de-espaco), [espaço ativo](../glossario.md#espaco-ativo) |
@@ -65,7 +66,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — um filtro silenciosamente ignorado mostraria espaços que a pessoa não pediu. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (exceção) — na ficha: [UC-03 E2.1](../casos-de-uso/fichas-resumidas.md#uc03-e2-1) · US/CA: [US-04 · CA-06](../historias/US-04-consultar-os-espacos.md#us-04-ca-06) (TA-26) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (exceção) — na ficha: [UC-03 E2.1](../casos-de-uso/fichas-resumidas.md#uc03-e2-1) · US/CA: [US-04 · CA-06](../historias/US-04-consultar-os-espacos.md#us-04-ca-06) (TA-29) |
 | **Evidência (complementar)** | 400 `DADOS_INVALIDOS` com `campos.tipo`. `espacos/tests/test_api_espacos.py::test_listar_com_tipo_desconhecido_no_filtro_responde_400` |
 | **Código (complementar)** | `espacos/api/serializers.py::FiltrosEspacosSerializer.validate_tipo`, `espacos/domain/tipo_espaco.py::TipoEspaco` |
 | **Regras de negócio** | [Tipo de espaço](../glossario.md#tipo-de-espaco) |
@@ -82,7 +83,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 |
 | **Funcionalidade** | F1 |
 | **Prioridade (QFD)** | Normal — a reserva e o detalhe da reserva mostram o espaço pelo nome a partir desta consulta. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa) — na ficha: [UC-03 A2.2](../casos-de-uso/fichas-resumidas.md#uc03-a2-2) · US/CA: [US-04 · CA-05](../historias/US-04-consultar-os-espacos.md#us-04-ca-05) (TA-25) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa) — na ficha: [UC-03 A2.2](../casos-de-uso/fichas-resumidas.md#uc03-a2-2) · US/CA: [US-04 · CA-05](../historias/US-04-consultar-os-espacos.md#us-04-ca-05) (TA-28) |
 | **Evidência (complementar)** | `GET /api/espacos/{id}/`; detalhe da reserva `/reservas/:reservaId`. `espacos/tests/test_api_espacos.py::test_obter_espaco_existente_responde_200_com_o_espaco`, `::test_solicitante_obtem_o_detalhe_de_um_espaco` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::ObterEspaco.executar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
@@ -99,7 +100,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 |
 | **Funcionalidade** | F1 |
 | **Prioridade (QFD)** | Esperado — quem cadastra ou filtra escolhe o tipo de uma lista, sem digitar. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa); também em [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14), [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) — na ficha: [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1), [UC-14 passo 2](../casos-de-uso/UC-14-cadastrar-espaco.md#p2), [UC-15 passo 2](../casos-de-uso/fichas-resumidas.md#uc15-p2) · US/CA: [US-04 · CA-03](../historias/US-04-consultar-os-espacos.md#us-04-ca-03) (TA-23), [US-05 · CA-02](../historias/US-05-cadastrar-espaco.md#us-05-ca-02) (TA-30), [US-05 · CA-07](../historias/US-05-cadastrar-espaco.md#us-05-ca-07) (TA-35), [US-06 · CA-01](../historias/US-06-editar-espaco.md#us-06-ca-01) (TA-40) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (alternativa); também em [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14), [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) — na ficha: [UC-03 A2.1](../casos-de-uso/fichas-resumidas.md#uc03-a2-1), [UC-14 passo 2](../casos-de-uso/UC-14-cadastrar-espaco.md#p2), [UC-15 passo 2](../casos-de-uso/fichas-resumidas.md#uc15-p2) · US/CA: [US-04 · CA-03](../historias/US-04-consultar-os-espacos.md#us-04-ca-03) (TA-26), [US-05 · CA-02](../historias/US-05-cadastrar-espaco.md#us-05-ca-02) (TA-33), [US-05 · CA-07](../historias/US-05-cadastrar-espaco.md#us-05-ca-07) (TA-38), [US-06 · CA-01](../historias/US-06-editar-espaco.md#us-06-ca-01) (TA-43) |
 | **Evidência (complementar)** | `GET /api/espacos/tipos/` (sem login); seletor de tipo em `/espacos`. `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum`, `::test_tipos_de_espaco_nao_exigem_login` |
 | **Código (complementar)** | `espacos/domain/tipo_espaco.py::TipoEspaco`, `espacos/api/views.py::TiposDeEspacoView.get` |
 | **Regras de negócio** | [Tipo de espaço](../glossario.md#tipo-de-espaco), [vocabulário público](../glossario.md#vocabulario-publico) |
@@ -118,7 +119,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 |
 | **Funcionalidade** | F1 |
 | **Prioridade (QFD)** | Normal — "cadastrar os itens do recorte" é a primeira funcionalidade do enunciado. |
-| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (fluxo principal) — na ficha: [UC-14 passos 1 a 8](../casos-de-uso/UC-14-cadastrar-espaco.md#p1) · US/CA: [US-05 · CA-01](../historias/US-05-cadastrar-espaco.md#us-05-ca-01) (TA-29), [US-05 · CA-03](../historias/US-05-cadastrar-espaco.md#us-05-ca-03) (TA-31) |
+| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (fluxo principal) — na ficha: [UC-14 passos 1 a 8](../casos-de-uso/UC-14-cadastrar-espaco.md#p1) · US/CA: [US-05 · CA-01](../historias/US-05-cadastrar-espaco.md#us-05-ca-01) (TA-32), [US-05 · CA-03](../historias/US-05-cadastrar-espaco.md#us-05-ca-03) (TA-34) |
 | **Evidência (complementar)** | `POST /api/espacos/` → 201; formulário em `/espacos` (só para o Gestor). `espacos/tests/test_api_espacos.py::test_cadastrar_espaco_valido_responde_201_com_o_espaco`, `::test_espaco_cadastrado_aparece_na_listagem`; `espacos/tests/test_casos_de_uso.py::test_cadastrar_espaco_valido_devolve_com_id_e_aparece_na_listagem` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::CadastrarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo), [espaço ativo](../glossario.md#espaco-ativo) |
@@ -136,7 +137,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Normal — "campos obrigatórios vazios" é uma das operações inválidas do enunciado. |
-| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção) — na ficha: [UC-14 E5.1 a E5.5](../casos-de-uso/UC-14-cadastrar-espaco.md#e5-1) · US/CA: [US-05 · CA-04](../historias/US-05-cadastrar-espaco.md#us-05-ca-04) (TA-32), [US-05 · CA-05](../historias/US-05-cadastrar-espaco.md#us-05-ca-05) (TA-33), [US-05 · CA-06](../historias/US-05-cadastrar-espaco.md#us-05-ca-06) (TA-34), [US-05 · CA-07](../historias/US-05-cadastrar-espaco.md#us-05-ca-07) (TA-35), [US-05 · CA-08](../historias/US-05-cadastrar-espaco.md#us-05-ca-08) (TA-36) |
+| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção) — na ficha: [UC-14 E5.1 a E5.5](../casos-de-uso/UC-14-cadastrar-espaco.md#e5-1) · US/CA: [US-05 · CA-04](../historias/US-05-cadastrar-espaco.md#us-05-ca-04) (TA-35), [US-05 · CA-05](../historias/US-05-cadastrar-espaco.md#us-05-ca-05) (TA-36), [US-05 · CA-06](../historias/US-05-cadastrar-espaco.md#us-05-ca-06) (TA-37), [US-05 · CA-07](../historias/US-05-cadastrar-espaco.md#us-05-ca-07) (TA-38), [US-05 · CA-08](../historias/US-05-cadastrar-espaco.md#us-05-ca-08) (TA-39) |
 | **Evidência (complementar)** | 400 com `campos`. `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [x]`; `espacos/tests/test_espaco_esportivo.py::test_nome_vazio_e_recusado_como_campo_obrigatorio [x]`, `::test_nome_acima_do_limite_de_caracteres_e_recusado`, `::test_tipo_desconhecido_e_recusado_listando_os_tipos_aceitos`, `::test_capacidade_que_nao_e_inteiro_positivo_e_recusada [x]`; `espacos/tests/test_propriedades_do_espaco.py::test_entrada_invalida_lanca_so_o_erro_de_dominio_do_primeiro_campo_invalido` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::_normalizar_nome`, `espacos/domain/espaco_esportivo.py::_converter_tipo`, `espacos/domain/espaco_esportivo.py::_validar_capacidade`, `espacos/infrastructure/models.py::EspacoEsportivoModel` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) (nome normalizado, até 100 caracteres), [tipo de espaço](../glossario.md#tipo-de-espaco), [capacidade](../glossario.md#capacidade) |
@@ -154,7 +155,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-01 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — dois espaços com o mesmo nome tornariam a reserva ambígua para quem pede. |
-| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) — na ficha: [UC-14 E6.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e6-1), [UC-14 E7.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e7-1), [UC-15 E4.5](../casos-de-uso/fichas-resumidas.md#uc15-e4-5) · US/CA: [US-05 · CA-09](../historias/US-05-cadastrar-espaco.md#us-05-ca-09) (TA-37), [US-05 · CA-10](../historias/US-05-cadastrar-espaco.md#us-05-ca-10) (TA-38), [US-06 · CA-02](../historias/US-06-editar-espaco.md#us-06-ca-02) (TA-41), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-47) |
+| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) — na ficha: [UC-14 E6.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e6-1), [UC-14 E7.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e7-1), [UC-15 E4.5](../casos-de-uso/fichas-resumidas.md#uc15-e4-5) · US/CA: [US-05 · CA-09](../historias/US-05-cadastrar-espaco.md#us-05-ca-09) (TA-40), [US-05 · CA-10](../historias/US-05-cadastrar-espaco.md#us-05-ca-10) (TA-41), [US-06 · CA-02](../historias/US-06-editar-espaco.md#us-06-ca-02) (TA-44), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-50) |
 | **Evidência (complementar)** | 409 `NOME_DE_ESPACO_JA_CADASTRADO` com `campos.nome`. `espacos/tests/test_casos_de_uso.py::test_cadastrar_nome_repetido_com_caixa_e_espacos_diferentes_lanca_conflito`; `espacos/tests/test_repositorio_espacos.py::test_salvar_nome_repetido_com_caixa_diferente_lanca_nome_ja_cadastrado`; `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [nome-repetido]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::CadastrarEspaco.executar`, `espacos/application/repositorio.py::RepositorioEspacos.existe_com_nome`, `espacos/infrastructure/models.py::EspacoEsportivoModel`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) (nome único) |
@@ -171,7 +172,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 |
 | **Funcionalidade** | Extra (ESP-04) |
 | **Prioridade (QFD)** | Esperado — sem editar, um erro de digitação no cadastro só se corrigiria com outro espaço. |
-| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (fluxo principal) — na ficha: [UC-15 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc15-p1) · US/CA: [US-06 · CA-01](../historias/US-06-editar-espaco.md#us-06-ca-01) (TA-40), [US-06 · CA-02](../historias/US-06-editar-espaco.md#us-06-ca-02) (TA-41), [US-06 · CA-03](../historias/US-06-editar-espaco.md#us-06-ca-03) (TA-42), [US-06 · CA-09](../historias/US-06-editar-espaco.md#us-06-ca-09) (TA-48) |
+| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (fluxo principal) — na ficha: [UC-15 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc15-p1) · US/CA: [US-06 · CA-01](../historias/US-06-editar-espaco.md#us-06-ca-01) (TA-43), [US-06 · CA-02](../historias/US-06-editar-espaco.md#us-06-ca-02) (TA-44), [US-06 · CA-03](../historias/US-06-editar-espaco.md#us-06-ca-03) (TA-45), [US-06 · CA-09](../historias/US-06-editar-espaco.md#us-06-ca-09) (TA-51) |
 | **Evidência (complementar)** | `PATCH /api/espacos/{id}/`; diálogo "Editar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_responde_200_e_a_listagem_mostra_os_dados_novos`, `::test_editar_so_a_capacidade_mantem_os_outros_campos`, `::test_ativo_no_corpo_do_patch_e_ignorado`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_muda_so_os_campos_informados [x]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::EditarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo), [espaço desatualizado](../glossario.md#espaco-desatualizado) ([RNF-R04](rnf.md#rnf-r04)) |
@@ -189,7 +190,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — uma edição vazia que respondesse como aceita esconderia um erro de quem edita. |
-| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (exceção) — na ficha: [UC-15 E4.3](../casos-de-uso/fichas-resumidas.md#uc15-e4-3) · US/CA: [US-06 · CA-06](../historias/US-06-editar-espaco.md#us-06-ca-06) (TA-45) |
+| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (exceção) — na ficha: [UC-15 E4.3](../casos-de-uso/fichas-resumidas.md#uc15-e4-3) · US/CA: [US-06 · CA-06](../historias/US-06-editar-espaco.md#us-06-ca-06) (TA-48) |
 | **Evidência (complementar)** | 400 `NENHUMA_ALTERACAO_INFORMADA`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_sem_nenhum_campo_responde_400`, `::test_so_ativo_no_corpo_do_patch_conta_como_nenhuma_alteracao`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_sem_nenhum_campo_e_recusado` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/domain/excecoes.py::NenhumaAlteracaoInformada` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
@@ -207,7 +208,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — as regras do espaço precisam valer igual no cadastro e na edição. |
-| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (exceção) — na ficha: [UC-15 E4.1](../casos-de-uso/fichas-resumidas.md#uc15-e4-1), [UC-15 E4.4](../casos-de-uso/fichas-resumidas.md#uc15-e4-4) · US/CA: [US-06 · CA-04](../historias/US-06-editar-espaco.md#us-06-ca-04) (TA-43), [US-06 · CA-07](../historias/US-06-editar-espaco.md#us-06-ca-07) (TA-46), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-47) |
+| **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (exceção) — na ficha: [UC-15 E4.1](../casos-de-uso/fichas-resumidas.md#uc15-e4-1), [UC-15 E4.4](../casos-de-uso/fichas-resumidas.md#uc15-e4-4) · US/CA: [US-06 · CA-04](../historias/US-06-editar-espaco.md#us-06-ca-04) (TA-46), [US-06 · CA-07](../historias/US-06-editar-espaco.md#us-06-ca-07) (TA-49), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-50) |
 | **Evidência (complementar)** | 400 ou 409 com `campos`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`; `espacos/tests/test_casos_de_uso.py::test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar`, `::test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade [x]` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/application/casos_de_uso.py::EditarEspaco.executar` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
@@ -224,7 +225,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 |
 | **Funcionalidade** | Extra (ESP-04) |
 | **Prioridade (QFD)** | Esperado — retirar um espaço de uso (reforma, interdição) é parte de manter o cadastro igual à realidade, e o espaço nunca é excluído. |
-| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (fluxo principal) — na ficha: [UC-16 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc16-p1) · US/CA: [US-07 · CA-01](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-01) (TA-50), [US-07 · CA-03](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-03) (TA-52), [US-07 · CA-04](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-04) (TA-53), [US-07 · CA-08](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-08) (TA-57) |
+| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (fluxo principal) — na ficha: [UC-16 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc16-p1) · US/CA: [US-07 · CA-01](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-01) (TA-53), [US-07 · CA-03](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-03) (TA-55), [US-07 · CA-04](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-04) (TA-56), [US-07 · CA-08](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-08) (TA-60) |
 | **Evidência (complementar)** | `POST /api/espacos/{id}/desativar/`; diálogo "Desativar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`, `::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`, `::test_reserva_existente_pode_ser_confirmada_depois_de_desativar` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::DesativarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.desativar` |
 | **Regras de negócio** | [Espaço inativo](../glossario.md#espaco-inativo), [espaço reservável](../glossario.md#espaco-reservavel) |
@@ -242,7 +243,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — repetir a ação em silêncio esconderia que outra pessoa já a fez. |
-| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (exceção) — na ficha: [UC-16 E4.2](../casos-de-uso/fichas-resumidas.md#uc16-e4-2) · US/CA: [US-07 · CA-06](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-06) (TA-55) |
+| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (exceção) — na ficha: [UC-16 E4.2](../casos-de-uso/fichas-resumidas.md#uc16-e4-2) · US/CA: [US-07 · CA-06](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-06) (TA-58) |
 | **Evidência (complementar)** | 409 `ESPACO_JA_INATIVO`. `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo`; `espacos/tests/test_espaco_esportivo.py::test_desativar_espaco_ja_inativo_e_recusado` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.desativar`, `espacos/domain/excecoes.py::EspacoJaInativo` |
 | **Regras de negócio** | [Espaço inativo](../glossario.md#espaco-inativo) |
@@ -259,7 +260,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 |
 | **Funcionalidade** | Extra (ESP-04) |
 | **Prioridade (QFD)** | Esperado — sem reativar, o fim de uma interdição exigiria cadastrar o espaço de novo com outro nome. |
-| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (alternativa) — na ficha: [UC-16 A1.1](../casos-de-uso/fichas-resumidas.md#uc16-a1-1) · US/CA: [US-07 · CA-02](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-02) (TA-51) |
+| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (alternativa) — na ficha: [UC-16 A1.1](../casos-de-uso/fichas-resumidas.md#uc16-a1-1) · US/CA: [US-07 · CA-02](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-02) (TA-54) |
 | **Evidência (complementar)** | `POST /api/espacos/{id}/ativar/`; diálogo "Reativar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_inativo_responde_200_com_o_espaco_ativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::AtivarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.ativar` |
 | **Regras de negócio** | [Espaço ativo](../glossario.md#espaco-ativo) |
@@ -277,7 +278,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-02 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Esperado — mesmo motivo do [RF-07.1](#rf-07-1). |
-| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (exceção) — na ficha: [UC-16 E4.3](../casos-de-uso/fichas-resumidas.md#uc16-e4-3) · US/CA: [US-07 · CA-07](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-07) (TA-56) |
+| **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (exceção) — na ficha: [UC-16 E4.3](../casos-de-uso/fichas-resumidas.md#uc16-e4-3) · US/CA: [US-07 · CA-07](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-07) (TA-59) |
 | **Evidência (complementar)** | 409 `ESPACO_JA_ATIVO`. `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_ja_ativo_responde_409`; `espacos/tests/test_espaco_esportivo.py::test_ativar_espaco_ja_ativo_e_recusado` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.ativar`, `espacos/domain/excecoes.py::EspacoJaAtivo` |
 | **Regras de negócio** | [Espaço ativo](../glossario.md#espaco-ativo) |
@@ -297,7 +298,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-01 (principal); NS-13 |
 | **Funcionalidade** | F5 |
 | **Prioridade (QFD)** | Normal — "item inexistente" é uma das operações inválidas do enunciado. |
-| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15), [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) — na ficha: [UC-03 E2.2](../casos-de-uso/fichas-resumidas.md#uc03-e2-2), [UC-15 E4.2](../casos-de-uso/fichas-resumidas.md#uc15-e4-2), [UC-16 E4.1](../casos-de-uso/fichas-resumidas.md#uc16-e4-1) · US/CA: [US-04 · CA-07](../historias/US-04-consultar-os-espacos.md#us-04-ca-07) (TA-27), [US-06 · CA-05](../historias/US-06-editar-espaco.md#us-06-ca-05) (TA-44), [US-07 · CA-05](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-05) (TA-54) |
+| **Vínculos** | UC: [UC-03 Consultar espaços](../casos-de-uso/README.md#uc-03) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15), [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) — na ficha: [UC-03 E2.2](../casos-de-uso/fichas-resumidas.md#uc03-e2-2), [UC-15 E4.2](../casos-de-uso/fichas-resumidas.md#uc15-e4-2), [UC-16 E4.1](../casos-de-uso/fichas-resumidas.md#uc16-e4-1) · US/CA: [US-04 · CA-07](../historias/US-04-consultar-os-espacos.md#us-04-ca-07) (TA-30), [US-06 · CA-05](../historias/US-06-editar-espaco.md#us-06-ca-05) (TA-47), [US-07 · CA-05](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-05) (TA-57) |
 | **Evidência (complementar)** | 404 `ESPACO_NAO_ENCONTRADO`. `espacos/tests/test_api_espacos.py::test_obter_espaco_inexistente_responde_404`; `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404 [x]`; `espacos/tests/test_casos_de_uso.py::test_acoes_em_espaco_inexistente_lancam_espaco_nao_encontrado [x]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::_obter_ou_falhar`, `espacos/domain/excecoes.py::EspacoNaoEncontrado` |
 | **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
@@ -315,7 +316,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Origem** | NS-11 (principal); NS-02 |
 | **Funcionalidade** | F5 (regra do extra de perfis, [DEC-04](../decisoes/DEC-04.md)) |
 | **Prioridade (QFD)** | Esperado — a instituição não aceitaria que qualquer pessoa mude o cadastro de espaços. |
-| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15), [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) — na ficha: [UC-14 E1.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e1-1), [UC-15 E1.1](../casos-de-uso/fichas-resumidas.md#uc15-e1-1), [UC-16 E1.1](../casos-de-uso/fichas-resumidas.md#uc16-e1-1) · US/CA: [US-04 · CA-08](../historias/US-04-consultar-os-espacos.md#us-04-ca-08) (TA-28), [US-05 · CA-11](../historias/US-05-cadastrar-espaco.md#us-05-ca-11) (TA-39), [US-06 · CA-10](../historias/US-06-editar-espaco.md#us-06-ca-10) (TA-49), [US-07 · CA-09](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-09) (TA-58) |
+| **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15), [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) — na ficha: [UC-14 E1.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e1-1), [UC-15 E1.1](../casos-de-uso/fichas-resumidas.md#uc15-e1-1), [UC-16 E1.1](../casos-de-uso/fichas-resumidas.md#uc16-e1-1) · US/CA: [US-04 · CA-08](../historias/US-04-consultar-os-espacos.md#us-04-ca-08) (TA-31), [US-05 · CA-11](../historias/US-05-cadastrar-espaco.md#us-05-ca-11) (TA-42), [US-06 · CA-10](../historias/US-06-editar-espaco.md#us-06-ca-10) (TA-52), [US-07 · CA-09](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-09) (TA-61) |
 | **Evidência (complementar)** | 403 `ACAO_NAO_PERMITIDA`. `espacos/tests/test_api_espacos.py::test_solicitante_nao_cadastra_espaco_e_nada_e_gravado`; `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` (linhas de `espacos:lista` POST, `espacos:detalhe` PATCH, `espacos:desativar` e `espacos:ativar`) |
 | **Código (complementar)** | `compartilhado/api/permissoes.py::ApenasGestor`, `espacos/api/views.py::_ViewComMetodosDoGestor.get_permissions` |
 | **Regras de negócio** | [Perfil](../glossario.md#perfil), [Gestor](../glossario.md#gestor) |

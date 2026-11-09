@@ -14,7 +14,12 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 |---|---|---|---|---|
 | `GET /api/health/` | `health` | [RF-40](matriz.md#rf-40) | [NS-16](../visao.md#ns-16) | — |
 | `POST /api/auth/login/` | `contas:login` (corpo: e-mail e senha válidos) | [RF-33](matriz.md#rf-33) | [NS-11](../visao.md#ns-11) | — |
-| `POST /api/auth/refresh/` | `contas:refresh` (corpo: refresh válido) | [RF-34](matriz.md#rf-34) | [NS-11](../visao.md#ns-11) | — |
+| `POST /api/auth/refresh/` | `contas:refresh` (corpo: refresh válido (trocado a cada uso, AUT-09)) | [RF-34](matriz.md#rf-34) | [NS-11](../visao.md#ns-11) | — |
+| `POST /api/auth/logout/` | `contas:logout` (corpo: refresh válido (do dono)) | [RF-36](matriz.md#rf-36) | [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |
+| `GET /api/auth/logout/` | `contas:logout` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `PUT /api/auth/logout/` | `contas:logout` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `PATCH /api/auth/logout/` | `contas:logout` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `DELETE /api/auth/logout/` | `contas:logout` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
 | `POST /api/auth/cadastro/` | `contas:cadastro` (corpo: novo usuário) | [RF-32](matriz.md#rf-32) | [NS-15](../visao.md#ns-15) | — |
 | `GET /api/auth/me/` | `contas:me` | [RF-35](matriz.md#rf-35) | [NS-11](../visao.md#ns-11) | — |
 | `GET /api/espacos/` | `espacos:lista` | [RF-01](matriz.md#rf-01), [RF-02](matriz.md#rf-02) | [NS-01](../visao.md#ns-01) | — |

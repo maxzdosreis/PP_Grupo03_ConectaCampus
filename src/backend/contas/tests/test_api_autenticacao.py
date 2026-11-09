@@ -6,8 +6,11 @@ import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.backends import TokenBackend
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
+from contas.api.views import _trocar_refresh
 from contas.domain.perfil import PerfilUsuario
 from contas.infrastructure.models import Usuario
 
@@ -310,7 +313,7 @@ def test_refresh_valido_devolve_access_novo_que_funciona_no_me(usuario):
     # Assert
     assert resposta.status_code == 200
     assert resposta.data["mensagem"] == "Token renovado."
-    assert set(resposta.data["dados"]) == {"access"}
+    assert set(resposta.data["dados"]) == {"access", "refresh"}
     assert _me(resposta.data["dados"]["access"]).status_code == 200
 
 
@@ -371,3 +374,83 @@ def test_refresh_sem_campo_responde_400():
     # Assert
     assert resposta.status_code == 400
     assert "refresh" in resposta.data["erro"]["campos"]
+
+
+def test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+
+    # Act
+    novo = _renovar(refresh).data["dados"]["refresh"]
+    reuso = _renovar(refresh)
+
+    # Assert
+    assert novo != refresh
+    _assert_nao_autenticado(reuso)
+    assert reuso.data == {
+        "erro": {"codigo": "NAO_AUTENTICADO", "mensagem": "Faça login para continuar."}
+    }
+
+
+def test_refresh_novo_renova_de_novo_em_cadeia(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+    segundo = _renovar(refresh).data["dados"]["refresh"]
+
+    # Act
+    resposta = _renovar(segundo)
+
+    # Assert
+    assert resposta.status_code == 200
+    assert _me(resposta.data["dados"]["access"]).status_code == 200
+
+
+def test_refresh_trocado_mantem_o_prazo_final_da_entrada(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+
+    # Act
+    novo = _renovar(refresh).data["dados"]["refresh"]
+
+    # Assert
+    assert _payload(novo)["exp"] == _payload(refresh)["exp"]
+    assert _payload(novo)["jti"] != _payload(refresh)["jti"]
+
+
+def test_refresh_trocado_de_usuario_desativado_continua_recusado(usuario):
+    # Arrange
+    _, refresh = _tokens(_login())
+    novo = _renovar(refresh).data["dados"]["refresh"]
+    usuario.is_active = False
+    usuario.save()
+
+    # Act
+    resposta = _renovar(novo)
+
+    # Assert
+    _assert_nao_autenticado(resposta)
+
+
+def test_duas_trocas_do_mesmo_refresh_so_a_primeira_vale(usuario):
+    # Arrange: as duas já passaram pela checagem da lista negra
+    _, texto = _tokens(_login())
+    primeira, segunda = RefreshToken(texto), RefreshToken(texto)
+    _trocar_refresh(primeira)
+
+    # Act / Assert
+    with pytest.raises(InvalidToken):
+        _trocar_refresh(segunda)
+    assert OutstandingToken.objects.filter(user=usuario).count() == 2
+
+
+def test_refresh_emitido_antes_da_lista_negra_e_trocado_sem_erro(usuario):
+    # Arrange: sem registro, como os emitidos antes da AUT-09
+    _, refresh = _tokens(_login())
+    OutstandingToken.objects.filter(jti=_payload(refresh)["jti"]).delete()
+
+    # Act
+    resposta = _renovar(refresh)
+
+    # Assert
+    assert resposta.status_code == 200
+    _assert_nao_autenticado(_renovar(refresh))

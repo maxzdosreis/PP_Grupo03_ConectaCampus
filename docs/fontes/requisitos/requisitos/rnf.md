@@ -14,6 +14,8 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RNF-F12 · Limite de tentativas de entrada e de cadastro, que fecha a lacuna L-03 (AUT-08). Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | RNF-F12: o contador fica no Redis, sem persistência, e o Redis fora do ar recusa a tentativa com 503 (AUT-08). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F12: o limite vale também para tentativas simultâneas (contagem atômica no Redis), com o teste de concorrência na verificação (AUT-08, achado da revisão do PR). Sem aprovação. |
+| 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F13 · Revogação e troca da credencial de renovação; RNF-F03 cita que a troca mantém o prazo de 1 dia; RNF-F04 passa a 8 operações públicas, com sair (AUT-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RNF-F13: uma renovação só para as janelas da mesma sessão, com a outra esperando sem tempo fixo (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
 
 ## Como ler
 
@@ -54,8 +56,8 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | Campo | Conteúdo |
 |---|---|
 | **Enunciado** | A credencial de acesso de uma sessão vale 30 minutos e pode ser renovada sem senha por até 1 dia depois da entrada; depois disso, a pessoa precisa entrar de novo. Os dois prazos são configuráveis sem mudar o código. |
-| **Métrica e valor-alvo** | Acesso: 30 min. Renovação: 1 dia (`JWT_ACCESS_MINUTES` = 30, `JWT_REFRESH_DAYS` = 1 no `.env.example`). |
-| **Como verificar** | `contas/tests/test_api_autenticacao.py::test_access_dura_o_tempo_configurado`, `::test_refresh_dura_o_tempo_configurado`, `::test_me_com_access_expirado_responde_401` |
+| **Métrica e valor-alvo** | Acesso: 30 min. Renovação: 1 dia desde a entrada, mesmo com a credencial de renovação trocada a cada uso ([RNF-F13](#rnf-f13)) (`JWT_ACCESS_MINUTES` = 30, `JWT_REFRESH_DAYS` = 1 no `.env.example`). |
+| **Como verificar** | `contas/tests/test_api_autenticacao.py::test_access_dura_o_tempo_configurado`, `::test_refresh_dura_o_tempo_configurado`, `::test_refresh_trocado_mantem_o_prazo_final_da_entrada`, `::test_me_com_access_expirado_responde_401` |
 | **Origem** | NS-11; [DEC-04](../decisoes/DEC-04.md) |
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho |
@@ -64,8 +66,8 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | Toda operação exige um [usuário autenticado](../glossario.md#usuario-autenticado), exceto as sete operações públicas: verificar se o sistema está no ar, entrar, renovar a sessão, cadastrar-se e consultar os tipos de espaço, as situações de reserva e as regras de agenda. Toda operação tem a regra de acesso declarada e testada por perfil. |
-| **Métrica e valor-alvo** | 7 operações públicas, nenhuma outra; 100% das rotas e métodos da API com linha na matriz de acesso (a guarda de cobertura falha se faltar uma). |
+| **Enunciado** | Toda operação exige um [usuário autenticado](../glossario.md#usuario-autenticado), exceto as oito operações públicas: verificar se o sistema está no ar, entrar, renovar a sessão, sair, cadastrar-se e consultar os tipos de espaço, as situações de reserva e as regras de agenda. Toda operação tem a regra de acesso declarada e testada por perfil. |
+| **Métrica e valor-alvo** | 8 operações públicas, nenhuma outra; 100% das rotas e métodos da API com linha na matriz de acesso (a guarda de cobertura falha se faltar uma). |
 | **Como verificar** | `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]`, `::test_toda_rota_da_api_tem_regra_de_acesso_na_matriz`, `::test_todo_metodo_implementado_tem_regra_de_acesso_na_matriz`; `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login [x]`. Comando: `docker compose exec backend pytest config/tests -v` |
 | **Origem** | NS-11, NS-14; [DEC-04](../decisoes/DEC-04.md) |
 | **O cliente não pediria** | — (o cliente pede "só quem tem autoridade"; a matriz é a forma de medir) |
@@ -156,6 +158,17 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | **Métrica e valor-alvo** | Entrada: 5 tentativas por minuto por e-mail (sem diferenciar maiúsculas de minúsculas nem espaços nas pontas) e 20 por minuto por origem; cadastro: 10 por hora por origem; janela deslizante, contando acertos e erros. 100% das tentativas acima do limite recusadas, inclusive com a senha certa e com tentativas simultâneas, com o tempo de espera em segundos; 0 tentativas escapam trocando o cabeçalho de origem do pedido; a renovação da sessão não tem limite. Valores configuráveis por variável de ambiente, conferidos na subida. Contador no Redis, sem persistência: vale para todos os processos do backend e zera quando o Redis reinicia. Com o Redis fora do ar, 100% das tentativas são recusadas (503), nunca liberadas sem contagem. |
 | **Como verificar** | `contas/tests/test_limites_de_tentativas.py::test_sexta_tentativa_com_o_mesmo_email_responde_429_com_a_espera`, `::test_senha_certa_tambem_e_recusada_depois_do_limite`, `::test_email_com_caixa_e_espacos_diferentes_conta_como_o_mesmo`, `::test_limite_por_ip_vale_para_varios_emails`, `::test_x_forwarded_for_diferente_nao_escapa_do_limite_por_ip`, `::test_cadastro_acima_do_limite_por_ip_responde_429`, `::test_depois_da_janela_o_login_volta_a_ser_aceito`, `::test_renovar_o_token_nao_tem_limite_de_tentativas`, `::test_redis_fora_do_ar_recusa_o_login_com_503_sem_conferir_a_senha`, `::test_redis_fora_do_ar_recusa_o_cadastro_com_503`, `::test_tentativas_simultaneas_nao_passam_do_limite [x]`; `config/tests/test_configuracao_de_limites.py::test_taxa_invalida_impede_a_subida_com_mensagem_clara [x]` |
 | **Origem** | NS-11, NS-14 |
+| **O cliente não pediria** | ✔ |
+| **Revisão / estado** | 0.1 • Rascunho |
+
+### <a id="rnf-f13"></a>RNF-F13 · Revogação e troca da credencial de renovação
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | Sair revoga no servidor a credencial de renovação da sessão, e cada renovação a troca por outra e revoga a usada, na mesma gravação. Uma credencial de renovação revogada ou já trocada nunca renova de novo, em nenhum lugar. A credencial de acesso não é revogada: vale até expirar. Duas janelas que dividem a sessão e precisam renovar ao mesmo tempo continuam identificadas: só uma renova, e a outra espera e usa a credencial nova. |
+| **Métrica e valor-alvo** | 100% das renovações com credencial revogada ou já trocada recusadas com 401, inclusive duas renovações simultâneas com a mesma credencial (1 aceita, 1 recusada); cada renovação entrega credencial de renovação nova, com o mesmo prazo final da entrada ([RNF-F03](#rnf-f03)); sair responde igual (200) para credencial válida, já revogada ou vencida, e 400 para o que não é credencial de renovação; credencial de acesso emitida antes de sair aceita até expirar (no máximo 30 min, lacuna [L-04](srs.md#l-04)); sair sem limite de tentativas e funcionando com a credencial de acesso já vencida; 1 renovação para duas janelas que precisam renovar juntas; 0 janelas encerradas pela renovação de outra janela da mesma sessão, qualquer que seja a demora dela. |
+| **Como verificar** | `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_sair_de_novo_com_o_mesmo_refresh_responde_200`, `::test_sair_com_refresh_vencido_responde_200_sem_revogar`, `::test_sair_com_texto_que_nao_e_token_responde_400_com_o_campo [x]`, `::test_sair_com_access_no_lugar_do_refresh_responde_400`, `::test_sair_com_access_vencido_no_cabecalho_funciona`, `::test_access_emitido_antes_de_sair_continua_valendo_ate_expirar`, `::test_refresh_emitido_antes_da_lista_negra_tambem_e_revogado`; `contas/tests/test_api_autenticacao.py::test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado`, `::test_duas_trocas_do_mesmo_refresh_so_a_primeira_vale`, `::test_refresh_emitido_antes_da_lista_negra_e_trocado_sem_erro`; `contas/tests/test_limites_de_tentativas.py::test_sair_nao_tem_limite_de_tentativas_nem_conta_para_o_login`; `api/cliente.test.ts` ("renovação recusada com outro refresh já salvo por outra aba repete com a sessão nova e não desloga", "a renovação roda dentro da trava entre abas", "com a renovação de outra aba em andamento, espera a trava e usa a sessão nova sem renovar, por mais que ela demore") |
+| **Origem** | NS-11, NS-14; [DEC-04](../decisoes/DEC-04.md) |
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho |
 

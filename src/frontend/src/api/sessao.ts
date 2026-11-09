@@ -60,9 +60,11 @@ export function salvarSessao(sessao: Sessao) {
   avisar(sessao, 'atualizacao')
 }
 
-export function atualizarAccess(access: string) {
+export type TokensDaSessao = Pick<Sessao, 'access' | 'refresh'>
+
+export function atualizarTokens({ access, refresh }: TokensDaSessao) {
   const atual = lerSessao()
-  if (atual) salvarSessao({ ...atual, access })
+  if (atual) salvarSessao({ ...atual, access, refresh })
 }
 
 export function limparSessao({ expirou = false }: { expirou?: boolean } = {}) {

@@ -17,6 +17,7 @@ pytestmark = pytest.mark.django_db
 URL_LOGIN = reverse("contas:login")
 URL_CADASTRO = reverse("contas:cadastro")
 URL_REFRESH = reverse("contas:refresh")
+URL_SAIR = reverse("contas:logout")
 EMAIL = "ana@x.com"
 OUTRO_EMAIL = "bruno@x.com"
 SENHA = "senha-de-teste-123"
@@ -319,15 +320,33 @@ def test_renovar_o_token_nao_tem_limite_de_tentativas(usuario):
     # Arrange
     refresh = _login(senha=SENHA).data["dados"]["refresh"]
     cliente = APIClient()
+    respostas = []
 
     # Act
-    respostas = [
-        cliente.post(URL_REFRESH, {"refresh": refresh}, format="json")
-        for _ in range(LIMITE_POR_IP + 10)
-    ]
+    for _ in range(LIMITE_POR_IP + 10):
+        resposta = cliente.post(URL_REFRESH, {"refresh": refresh}, format="json")
+        respostas.append(resposta)
+        refresh = resposta.data["dados"]["refresh"]
 
     # Assert
     assert {resposta.status_code for resposta in respostas} == {200}
+
+
+def test_sair_nao_tem_limite_de_tentativas_nem_conta_para_o_login(usuario):
+    # Arrange
+    refresh = _login(senha=SENHA).data["dados"]["refresh"]
+    cliente = APIClient()
+
+    # Act
+    respostas = [
+        cliente.post(URL_SAIR, {"refresh": refresh}, format="json")
+        for _ in range(LIMITE_POR_IP + 5)
+    ]
+    login = _login(senha=SENHA)
+
+    # Assert
+    assert {resposta.status_code for resposta in respostas} == {200}
+    assert login.status_code == 200
 
 
 def _requisicao(email=EMAIL):

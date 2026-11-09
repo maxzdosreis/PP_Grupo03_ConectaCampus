@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
 import {
   aoMudarSessao,
-  atualizarAccess,
+  atualizarTokens,
   CHAVE_DA_SESSAO,
   lerSessao,
   limparSessao,
@@ -34,16 +34,16 @@ describe('sessao', () => {
     expect(lerSessao()).toBeNull()
   })
 
-  it('atualizarAccess troca só o access e mantém o refresh e o usuário', () => {
+  it('atualizarTokens troca o access e o refresh e mantém o usuário', () => {
     salvarSessao(SESSAO)
 
-    atualizarAccess('access-2')
+    atualizarTokens({ access: 'access-2', refresh: 'refresh-2' })
 
-    expect(lerSessao()).toEqual({ ...SESSAO, access: 'access-2' })
+    expect(lerSessao()).toEqual({ ...SESSAO, access: 'access-2', refresh: 'refresh-2' })
   })
 
-  it('atualizarAccess sem sessão não cria uma', () => {
-    atualizarAccess('access-2')
+  it('atualizarTokens sem sessão não cria uma', () => {
+    atualizarTokens({ access: 'access-2', refresh: 'refresh-2' })
 
     expect(lerSessao()).toBeNull()
   })
