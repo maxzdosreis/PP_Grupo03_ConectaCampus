@@ -13,6 +13,7 @@ Ficha do caso de uso abstrato UC-10 do [índice](README.md#uc-10). Ela descreve 
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo comum, variações UC-11/17/18/19, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator das variações UC-17, UC-18, UC-19 e UC-11 e interessado "Gestor": Atendente responsável; E6.4 e as regras seguem com o perfil Gestor ([DEC-25](../decisoes/DEC-25.md), REQ-12). Metas e exceções iguais; ator misto tratado no [CR-05](../mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos CR-01 (DEC-13) e CR-02 (DEC-05), com o código nas tarefas RES-11 e RES-12 (REQ-13): passos 2 e 6, variações, exceção E6.8 (fora do momento permitido, depois de E6.5), subfunções, garantia mínima, RF-24.1 e questões em aberto. A ficha está adiante do código de propósito; o anexo de evidência ainda descreve os testes da regra anterior. Mudança comportamental da especificação. Sem aprovação. |
 
 ## Sumário
 
@@ -52,15 +53,15 @@ Ficha do caso de uso abstrato UC-10 do [índice](README.md#uc-10). Ela descreve 
 ## Fluxo principal (comum aos filhos)
 
 1. <a id="p1"></a>O ator localiza a reserva, pela consulta ([UC-07](fichas-resumidas.md#uc-07)) ou pelo detalhe ([UC-08](fichas-resumidas.md#uc-08)).
-2. <a id="p2"></a>O sistema mostra a reserva com a situação atual, o motivo (se houver) e as [ações disponíveis](../glossario.md#acao-disponivel) para o ator: as transições que a tabela permite a partir da situação atual e que o perfil dele pode executar, com a indicação das que exigem motivo.
+2. <a id="p2"></a>O sistema mostra a reserva com a situação atual, o motivo (se houver) e as [ações disponíveis](../glossario.md#acao-disponivel) para o ator: as transições que a tabela permite a partir da situação atual, que o perfil dele pode executar e que o momento atual permite (concluir a partir do término; recusar e cancelar, pelo Atendente responsável, antes do início), com a indicação das que exigem motivo.
 3. <a id="p3"></a>O ator escolhe uma das ações disponíveis.
 4. <a id="p4"></a>O sistema pede que o ator confirme a decisão, mostrando o espaço, a data e o horário e o solicitante da reserva e, se a ação exige motivo, pedindo o motivo. *(UC-12, nos filhos que exigem motivo.)*
 5. <a id="p5"></a>O ator confirma a decisão, com o [motivo](../glossario.md#motivo) quando exigido (opcional nas outras ações).
-6. <a id="p6"></a>O sistema confere o pedido de mudança, nesta ordem: a situação nova foi informada; a reserva existe e é visível ao ator; a situação nova é conhecida; o perfil do ator pode levar a reserva a ela; a tabela permite a transição a partir da situação atual; o motivo respeita o limite e, para recusar ou cancelar, foi informado.
+6. <a id="p6"></a>O sistema confere o pedido de mudança, nesta ordem: a situação nova foi informada; a reserva existe e é visível ao ator; a situação nova é conhecida; o perfil do ator pode levar a reserva a ela; a tabela permite a transição a partir da situação atual; o momento atual permite a mudança; o motivo respeita o limite e, para recusar ou cancelar, foi informado.
 7. <a id="p7"></a>O sistema grava a nova situação e o motivo e, na mesma gravação, o [registro de situação](../glossario.md#registro-de-situacao) da mudança: situação anterior e nova, motivo, autor (o ator) e momento. *(UC-13.)*
 8. <a id="p8"></a>O sistema mostra a reserva na nova situação, com o motivo e as novas ações disponíveis, e informa o resultado ("Reserva «situação» com sucesso."). O horário fica ocupado ou é liberado conforme a [variação](#variações).
 
-**Subfunções incluídas.** UC-12 *Informar motivo* = o pedido do motivo no [passo 4](#p4), o motivo no [passo 5](#p5) e as exceções [E6.6](#e6-6) e [E6.7](#e6-7). UC-13 *Registrar no histórico* = a segunda metade do [passo 7](#p7). Só as mudanças aceitas são registradas: nenhuma exceção grava registro ([DEC-05](../decisoes/DEC-05.md)).
+**Subfunções incluídas.** UC-12 *Informar motivo* = o pedido do motivo no [passo 4](#p4), o motivo no [passo 5](#p5) e as exceções [E6.6](#e6-6) e [E6.7](#e6-7). UC-13 *Registrar no histórico* = a segunda metade do [passo 7](#p7). São registradas as mudanças aceitas e as tentativas recusadas sobre uma reserva visível ao ator; a reserva inexistente ou de outra pessoa ([E6.2](#e6-2)) não grava nada ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), código na tarefa RES-12).
 
 ## Variações
 
@@ -68,12 +69,12 @@ O que muda de um filho para outro. Tudo o mais (passos, alternativas e exceçõe
 
 | Filho | Ator permitido | Situações de origem | Exige motivo? | Efeito sobre o horário | Ações depois | RF |
 |---|---|---|---|---|---|---|
-| <a id="v-uc-17"></a>**UC-17 Confirmar reserva** | Atendente responsável | Solicitada | Não (opcional, até 300 caracteres) | Continua ocupado (Confirmada ocupa horário) | Atendente responsável: Cancelar, Concluir · Solicitante dono: Cancelar | [RF-17](../requisitos/rf-reservas.md#rf-17) |
-| <a id="v-uc-18"></a>**UC-18 Recusar reserva** | Atendente responsável | Solicitada | **Sim** (UC-12), até 300 caracteres | Liberado (Recusada não ocupa) | Nenhuma: situação final | [RF-18](../requisitos/rf-reservas.md#rf-18) |
-| <a id="v-uc-19"></a>**UC-19 Concluir reserva** | Atendente responsável | Confirmada | Não (opcional, até 300 caracteres) | Liberado (Concluída não ocupa; só tem efeito se concluída antes do término, [DEC-13](../decisoes/DEC-13.md)) | Nenhuma: situação final | [RF-19](../requisitos/rf-reservas.md#rf-19) |
-| <a id="v-uc-11"></a>**UC-11 Cancelar reserva** | Atendente responsável (qualquer reserva) ou Solicitante (só a própria) | Solicitada ou Confirmada | **Sim** (UC-12), até 300 caracteres | Liberado (Cancelada não ocupa) | Nenhuma: situação final | [RF-20](../requisitos/rf-reservas.md#rf-20) (Gestor), [RF-21](../requisitos/rf-reservas.md#rf-21) (Solicitante) |
+| <a id="v-uc-17"></a>**UC-17 Confirmar reserva** | Atendente responsável | Solicitada | Não (opcional, até 300 caracteres) | Continua ocupado (Confirmada ocupa horário) | Atendente responsável: Cancelar (antes do início), Concluir (a partir do término) · Solicitante dono: Cancelar | [RF-17](../requisitos/rf-reservas.md#rf-17) |
+| <a id="v-uc-18"></a>**UC-18 Recusar reserva** | Atendente responsável | Solicitada, antes do início | **Sim** (UC-12), até 300 caracteres | Liberado (Recusada não ocupa) | Nenhuma: situação final | [RF-18](../requisitos/rf-reservas.md#rf-18) |
+| <a id="v-uc-19"></a>**UC-19 Concluir reserva** | Atendente responsável | Confirmada, a partir do término | Não (opcional, até 300 caracteres) | Liberado (Concluída não ocupa; como só se conclui a partir do término, o horário já passou, [DEC-13](../decisoes/DEC-13.md)) | Nenhuma: situação final | [RF-19](../requisitos/rf-reservas.md#rf-19) |
+| <a id="v-uc-11"></a>**UC-11 Cancelar reserva** | Atendente responsável (qualquer reserva, antes do início) ou Solicitante (só a própria, sem restrição de horário) | Solicitada ou Confirmada | **Sim** (UC-12), até 300 caracteres | Liberado (Cancelada não ocupa) | Nenhuma: situação final | [RF-20](../requisitos/rf-reservas.md#rf-20) (Gestor), [RF-21](../requisitos/rf-reservas.md#rf-21) (Solicitante) |
 
-Nenhuma transição depende do horário da reserva: confirmar ou recusar depois do início, concluir antes do término e cancelar depois do uso são aceitos (opção a da [DEC-13](../decisoes/DEC-13.md); [lacuna L-01](../requisitos/srs.md#l-01)). Solicitada não é destino de nenhuma ação.
+Concluir depende do término da reserva, e recusar e cancelar pelo Atendente responsável dependem do início: concluir vale a partir do instante do término; recusar e cancelar valem só enquanto o início ainda não chegou. Confirmar e o cancelamento pelo Solicitante não dependem do horário, e uma Solicitada não decidida continua ocupando o horário depois da data ([DEC-13](../decisoes/DEC-13.md), decidida na Aula 7; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), código na tarefa RES-11; [lacuna L-01](../requisitos/srs.md#l-01)). Solicitada não é destino de nenhuma ação.
 
 ## Alternativas
 
@@ -93,7 +94,7 @@ No passo 5 de UC-17 ou UC-19, o ator informa um motivo, mesmo sem ser exigido. O
 
 ## Exceções
 
-A meta é interrompida: **a reserva fica exatamente como estava** (situação, motivo e histórico) e **nenhum registro é gravado**. A ordem é a ordem real das verificações, que decide qual mensagem a pessoa vê primeiro ([evidência da ordem](#evidencia-da-ordem)). Em particular, o perfil é conferido **antes** da transição: um Solicitante que tenta confirmar recebe sempre a mesma resposta, sem descobrir a situação atual.
+A meta é interrompida: **a reserva fica com a mesma situação e o mesmo motivo** e **a tentativa recusada sobre uma reserva visível ao ator fica no histórico**, com o resultado e o código do erro; a reserva inexistente ou de outra pessoa ([E6.2](#e6-2)) não grava nada. Quais exceções do passo 6 entram como tentativa fica fechado na tarefa RES-12 (ver [Questões em aberto](#questões-em-aberto)). A ordem é a ordem real das verificações, que decide qual mensagem a pessoa vê primeiro ([evidência da ordem](#evidencia-da-ordem)). Em particular, o perfil é conferido **antes** da transição: um Solicitante que tenta confirmar recebe sempre a mesma resposta, sem descobrir a situação atual.
 
 #### <a id="e2-1"></a>E2.1 · Nenhuma ação disponível
 
@@ -137,6 +138,13 @@ A meta é interrompida: **a reserva fica exatamente como estava** (situação, m
 - **Estado depois:** a reserva continua na situação atual, com o mesmo motivo e o mesmo histórico.
 - **Requisito:** [RF-24](../requisitos/rf-reservas.md#rf-24).
 
+#### <a id="e6-8"></a>E6.8 · Fora do momento permitido para a mudança
+
+- **Condição:** no passo 6, o Atendente responsável tenta concluir uma reserva antes do término dela, ou recusá-la ou cancelá-la a partir do início dela. Concluir vale a partir do instante do término; recusar e cancelar valem só enquanto o início ainda não chegou. Confirmar e o cancelamento pelo Solicitante não são conferidos aqui.
+- **Resultado para o ator:** a regra e o momento a partir do qual concluir é possível (a data e a hora do término), ou a informação de que recusar e cancelar só valem antes do início. O texto exato da mensagem e o código do erro são definidos na tarefa RES-11.
+- **Estado depois:** a reserva fica como estava.
+- **Requisito:** [RF-24.1](../requisitos/rf-reservas.md#rf-24-1).
+
 #### <a id="e6-6"></a>E6.6 · Motivo longo demais
 
 - **Condição:** no passo 6, o motivo informado passa de 300 caracteres depois de tirar os espaços das pontas e os repetidos, em **qualquer** ação (inclusive confirmar e concluir, em que o motivo é opcional).
@@ -155,10 +163,10 @@ A meta é interrompida: **a reserva fica exatamente como estava** (situação, m
 
 - **Condição:** no passo 7, outra mudança da mesma reserva foi gravada depois que o ator a leu (dois decidindo ao mesmo tempo, ou uma lista antiga). Só a primeira grava.
 - **Resultado para o ator:** "Esta reserva já está «situação atual»: ela foi alterada enquanto você decidia. Atualize a lista e tente de novo." O ator atualiza a reserva e decide de novo sobre o estado real.
-- **Estado depois:** vale só a mudança que chegou primeiro; a segunda não grava situação, motivo nem registro, e o histórico continua um caminho coerente da tabela.
+- **Estado depois:** vale só a mudança que chegou primeiro; a segunda não grava situação nem motivo, e o histórico continua um caminho coerente da tabela (se a tentativa recusada por leitura desatualizada entra no histórico fica para a tarefa RES-12).
 - **Requisito:** [RNF-R04](../requisitos/rnf.md#rnf-r04) (não há RF "Recusar…" para este caso; a garantia é de confiabilidade).
 
-**Fora das exceções:** sem identificação, o pedido não chega ao passo 1 (precondição; [UC-02 E4.1](UC-02-autenticar.md#e4-1)). Dados extras no pedido (outro solicitante, outra data) são ignorados: só a situação e o motivo são lidos ([RNF-F09](../requisitos/rnf.md#rnf-f09)). A [DEC-13](../decisoes/DEC-13.md) hoje não gera exceção; se a opção b, c ou d for adotada, nasce uma exceção nova no passo 6, depois de [E6.5](#e6-5) (por exemplo, "concluir antes do término").
+**Fora das exceções:** sem identificação, o pedido não chega ao passo 1 (precondição; [UC-02 E4.1](UC-02-autenticar.md#e4-1)). Dados extras no pedido (outro solicitante, outra data) são ignorados: só a situação e o motivo são lidos ([RNF-F09](../requisitos/rnf.md#rnf-f09)). A [DEC-13](../decisoes/DEC-13.md), decidida, gera a exceção [E6.8](#e6-8), no passo 6, depois de [E6.5](#e6-5).
 
 ## Pós-condições e garantias
 
@@ -166,7 +174,7 @@ A meta é interrompida: **a reserva fica exatamente como estava** (situação, m
 |---|---|
 | **Pós-condições (sucesso)** | A reserva está na situação nova, com o motivo informado (ou sem motivo, se não foi informado e não era exigido). O histórico ganhou exatamente um registro, da situação anterior para a nova, com autor, momento e motivo. Se a nova situação é final (Recusada, Cancelada, Concluída), a reserva deixa de ocupar o horário, que volta a aceitar pedidos, e não tem mais nenhuma ação disponível. |
 | **Garantia de sucesso** | A mudança é uma das permitidas pela tabela e pelo perfil, foi feita sobre o estado real da reserva e está registrada com quem decidiu, quando e por quê. |
-| **Garantia mínima** | Mesmo quando a meta falha: a reserva fica exatamente como estava (situação, motivo e histórico); nenhuma tentativa recusada vira registro; uma reserva de outra pessoa não é revelada ao Solicitante; de duas decisões simultâneas, nenhuma é perdida em silêncio (a segunda é recusada e informada). |
+| **Garantia mínima** | Mesmo quando a meta falha: a reserva fica com a mesma situação e o mesmo motivo; a tentativa recusada sobre uma reserva visível ao ator fica no histórico, com o resultado e o código do erro; uma reserva de outra pessoa não é revelada ao Solicitante; de duas decisões simultâneas, nenhuma é perdida em silêncio (a segunda é recusada e informada). |
 
 ## Regras de negócio
 
@@ -175,7 +183,8 @@ A meta é interrompida: **a reserva fica exatamente como estava** (situação, m
 - [Motivo](../glossario.md#motivo): obrigatório para recusar e cancelar, até 300 caracteres em qualquer ação, normalizado.
 - [Reserva que ocupa horário](../glossario.md#reserva-que-ocupa-horario): só Solicitada e Confirmada.
 - [Reserva desatualizada](../glossario.md#reserva-desatualizada): a situação gravada precisa ser a lida.
-- [Histórico](../glossario.md#historico) e [registro de situação](../glossario.md#registro-de-situacao): só mudanças aceitas, na mesma gravação, imutáveis ([DEC-05](../decisoes/DEC-05.md)).
+- [Histórico](../glossario.md#historico) e [registro de situação](../glossario.md#registro-de-situacao): mudanças aceitas e tentativas recusadas sobre uma reserva visível ao ator, imutáveis; a mudança aceita é gravada na mesma operação da situação ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7).
+- Momento da mudança: o Atendente responsável conclui a partir do término e recusa ou cancela antes do início; confirmar e o cancelamento pelo Solicitante não dependem do horário ([DEC-13](../decisoes/DEC-13.md), decidida na Aula 7; regra [RN-10](../requisitos/regras-de-negocio.md#rn-10)).
 - Visibilidade: o Gestor vê todas; o Solicitante, só as próprias; a de outra pessoa é tratada como inexistente.
 
 ## RFs cobertos
@@ -192,6 +201,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [RF-22](../requisitos/rf-reservas.md#rf-22) | Consultar o histórico da reserva | [passo 7](#p7) (UC-13 grava a mudança que UC-09 mostra) |
 | [RF-23](../requisitos/rf-reservas.md#rf-23) | Recusar operação sobre reserva inexistente ou de outra pessoa | [E6.2](#e6-2) |
 | [RF-24](../requisitos/rf-reservas.md#rf-24) | Recusar transição de situação não permitida | [E6.5](#e6-5); prevenção em [E2.1](#e2-1) |
+| [RF-24.1](../requisitos/rf-reservas.md#rf-24-1) | Recusar mudança de situação fora do momento permitido | [E6.8](#e6-8) |
 | [RF-25](../requisitos/rf-reservas.md#rf-25) | Recusar situação ausente ou desconhecida | [E6.1](#e6-1), [E6.3](#e6-3) |
 | [RF-26](../requisitos/rf-reservas.md#rf-26) | Recusar recusa ou cancelamento sem motivo válido | [E6.6](#e6-6), [E6.7](#e6-7) (UC-12) |
 | [RF-27](../requisitos/rf-reservas.md#rf-27) | Recusar mudança de situação que o perfil não pode fazer | [E6.4](#e6-4) |
@@ -218,8 +228,8 @@ Também aparece aqui, sem ser atribuído a UC-10: [RF-16](../requisitos/rf-reser
 
 | DEC | Como afeta este caso de uso |
 |---|---|
-| [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário | Hoje nenhuma mudança depende do horário. As opções b, c e d criariam exceções novas no passo 6 (concluir antes do término; confirmar, recusar ou cancelar depois do início) e mudariam as [ações disponíveis](#p2) conforme o horário. |
-| [DEC-05](../decisoes/DEC-05.md) · Histórico só com mudanças efetivas | Se as tentativas recusadas passarem a ser registradas, a garantia mínima muda: as exceções do passo 6 passariam a gravar um registro (ou um log técnico). |
+| [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário (decidida na Aula 7) | Aplicada pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md): a exceção [E6.8](#e6-8) e as [ações disponíveis](#p2) conforme o horário. O código está na tarefa RES-11; a posição exata de E6.8 na ordem real das verificações é definida nela (aqui, depois de E6.5). |
+| [DEC-05](../decisoes/DEC-05.md) · Histórico das tentativas recusadas (decidida na Aula 7) | Aplicada pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md): as exceções do passo 6 sobre uma reserva visível ao ator gravam a tentativa. Ficam para a tarefa RES-12, sem mudar a decisão: se a situação não informada ([E6.1](#e6-1)) entra como tentativa quando a reserva é visível; se a leitura desatualizada ([E7.1](#e7-1)) entra; e como gravar a situação pedida quando ela é desconhecida ([E6.3](#e6-3)). |
 | [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | É por UC-11 (cancelar, pelo Atendente responsável) que as reservas de um espaço desativado são desfeitas; a desativação não as muda. |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Define os atores de cada variação. |
 
@@ -244,11 +254,12 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E6.2](#e6-2) | `reservas/tests/test_api_situacao_reserva.py::test_reserva_inexistente_responde_404`; `reservas/tests/test_api_permissoes.py::test_solicitante_cancelando_a_de_outra_pessoa_responde_404_sem_mudar_nada`; `reservas/tests/test_alterar_situacao.py::test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada`; `reservas/tests/test_permissoes_reserva.py::test_quem_nao_ve_a_reserva_recebe_nao_encontrada_com_o_codigo_dela` |
 | [E6.4](#e6-4) | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada`; `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`, `::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
 | [E6.5](#e6-5) | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`, `::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`, `::test_transicao_proibida_tem_mensagem_com_os_rotulos`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_permissoes_reserva.py::test_solicitada_como_destino_e_transicao_invalida_para_os_dois_papeis [x]` |
+| [E6.8](#e6-8) | Ainda nenhum: implementação pendente (tarefa RES-11). |
 | [E6.6](#e6-6) | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` (motivo acima do limite em qualquer destino) |
 | [E6.7](#e6-7) | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo`; `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `reservas/tests/test_alterar_situacao.py::test_recusar_ou_cancelar_sem_motivo_lanca_erro_e_preserva_a_reserva [x]` |
 | [E7.1](#e7-1) | `reservas/tests/test_repositorio_reservas.py::test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar`, `::test_salvar_entidade_que_ficou_para_tras_nao_regride_a_situacao`, `::test_salvar_reserva_existente_bloqueia_a_linha`; `reservas/tests/test_concorrencia_de_situacao.py::test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente`; `reservas/tests/test_reserva.py::test_reserva_desatualizada_vira_409_com_a_situacao_atual` |
-| Nenhuma exceção registra | `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico` |
+| Nenhuma exceção registra (regra anterior: muda na tarefa RES-12) | `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico` |
 
-<a id="evidencia-da-ordem"></a>**Ordem das exceções.** E6.1 vem antes de procurar a reserva porque o formato do pedido é conferido primeiro (`ReservaSituacaoView.patch` valida a entrada e só então chama `AlterarSituacaoReserva`). E6.2 → E6.3 → E6.4 → E6.5 → E6.6 → E6.7 é a ordem de `Reserva.alterar_situacao` (visibilidade, conversão da situação, `_exigir_permissao`, `transicao_permitida`, `_normalizar_motivo`, `_exigir_motivo_se_necessario`), fixada por `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]` e `::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` (perfil antes da transição). E7.1 só pode acontecer na gravação (`RepositorioReservasDjango.salvar`, com a linha bloqueada).
+<a id="evidencia-da-ordem"></a>**Ordem das exceções.** E6.1 vem antes de procurar a reserva porque o formato do pedido é conferido primeiro (`ReservaSituacaoView.patch` valida a entrada e só então chama `AlterarSituacaoReserva`). E6.2 → E6.3 → E6.4 → E6.5 → E6.6 → E6.7 é a ordem de `Reserva.alterar_situacao` hoje (a E6.8 entra depois de E6.5 na tarefa RES-11) (visibilidade, conversão da situação, `_exigir_permissao`, `transicao_permitida`, `_normalizar_motivo`, `_exigir_motivo_se_necessario`), fixada por `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]` e `::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` (perfil antes da transição). E7.1 só pode acontecer na gravação (`RepositorioReservasDjango.salvar`, com a linha bloqueada).
 
-**Histórias derivadas:** [US-13 Cancelar uma reserva](../historias/US-13-cancelar-uma-reserva.md), [US-14 Confirmar uma reserva](../historias/US-14-confirmar-uma-reserva.md), [US-15 Recusar uma reserva com motivo](../historias/US-15-recusar-uma-reserva.md), [US-16 Concluir uma reserva](../historias/US-16-concluir-uma-reserva.md) (uma por variação; [A1.1](#a1-1) também em US-11 e US-12). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).
+**Histórias derivadas:** [US-13 Cancelar uma reserva](../historias/US-13-cancelar-uma-reserva.md), [US-20 Cancelar qualquer reserva](../historias/US-20-cancelar-qualquer-reserva.md), [US-14 Confirmar uma reserva](../historias/US-14-confirmar-uma-reserva.md), [US-15 Recusar uma reserva com motivo](../historias/US-15-recusar-uma-reserva.md), [US-16 Concluir uma reserva](../historias/US-16-concluir-uma-reserva.md) (uma por variação; [A1.1](#a1-1) também em US-11 e US-12). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).

@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from verificar_casos_de_uso import tabela_rf_uc, uc_principal  # noqa: E402
 from verificar_historias import BACKEND, FRONTEND, ler_historias, todos_os_criterios  # noqa: E402
-from verificar_requisitos import PASTA, RAIZ, fichas_de_rf, fichas_de_rnf, ler, necessidades_da_visao  # noqa: E402
+from verificar_requisitos import PASTA, RAIZ, fichas_de_rf, fichas_de_rnf, ler, necessidades_da_visao, necessidades_fora_do_1_0  # noqa: E402
 
 PASTA_RAS = PASTA / "rastreabilidade"
 SRS = PASTA / "requisitos" / "srs.md"
@@ -406,10 +406,17 @@ def situacao(requisito: Requisito, modelo: Modelo, historias_por_id) -> tuple[st
         for ca in requisito.cas
         if (ta := ta_de(ca, historias_por_id)) and ta.tipo == "manual"
     ]
+    pendentes = [
+        f"TA-{ta.numero:02d}"
+        for ca in requisito.cas
+        if (ta := ta_de(ca, historias_por_id)) and ta.tipo == "pendente"
+    ]
     if not faltando:
         texto = "completa"
         if manuais:
             texto += f", com TA manual ({', '.join(manuais)})"
+        if pendentes:
+            texto += f", com TA pendente da tarefa de código ({', '.join(pendentes)})"
         return (texto + (f"; ver {lacunas}" if lacunas else ""), True)
     if requisito.id in JUSTIFICADOS:
         return (f"sem {', '.join(faltando)} — {JUSTIFICADOS[requisito.id]}", True)
@@ -452,7 +459,7 @@ def lista_tas(cas, historias_por_id, com_links=True) -> str:
         ta = ta_de(ca, historias_por_id)
         if ta is None:
             continue
-        rotulo = f"TA-{ta.numero:02d}" + (" (manual)" if ta.tipo == "manual" else "")
+        rotulo = f"TA-{ta.numero:02d}" + {"manual": " (manual)", "pendente": " (pendente)"}.get(ta.tipo, "")
         itens.append(f"[{rotulo}]({link_ta(ta, historias_por_id[ca.historia])})" if com_links else rotulo)
     return ", ".join(dict.fromkeys(itens)) or "—"
 
@@ -601,6 +608,7 @@ def gerar_cobertura(modelo: Modelo) -> str:
     completos = [r for r in todos if not faltas(r, por_id)]
     cas_com_ta = [ca for ca in modelo.criterios if ta_de(ca, por_id)]
     manuais = [ta for ta in tas_todos if ta.tipo == "manual"]
+    pendentes = [ta for ta in tas_todos if ta.tipo == "pendente"]
     linhas = [
         ("NS com pelo menos um RF", len(ns_com_rf), len(modelo.ns)),
         ("NS que chegam a um TA", len(ns_com_ta), len(modelo.ns)),
@@ -609,8 +617,9 @@ def gerar_cobertura(modelo: Modelo) -> str:
         ("RF com UC (sem o transversal)", sum(1 for r in sem_transversal if r.uc), len(sem_transversal)),
         ("RF com US e CA (sem o transversal)", sum(1 for r in sem_transversal if r.cas), len(sem_transversal)),
         ("CA com TA", len(cas_com_ta), len(modelo.criterios)),
-        ("TA automatizados", len(tas_todos) - len(manuais), len(tas_todos)),
+        ("TA automatizados", len(tas_todos) - len(manuais) - len(pendentes), len(tas_todos)),
         ("TA manuais (roteiro)", len(manuais), len(tas_todos)),
+        ("TA pendentes (regra decidida, código na tarefa citada)", len(pendentes), len(tas_todos)),
         ("RF com endpoint ou tela", sum(1 for r in todos if r.rotas), len(todos)),
         ("RF com código citado", sum(1 for r in todos if r.codigo), len(todos)),
         ("RF com a cadeia completa", len(completos), len(todos)),
@@ -627,6 +636,9 @@ def gerar_cobertura(modelo: Modelo) -> str:
         "",
         f"TA manuais: {', '.join(f'TA-{t.numero:02d}' for t in manuais) or 'nenhum'} "
         "(ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).",
+        "",
+        f"TA pendentes: {', '.join(f'TA-{t.numero:02d}' for t in pendentes) or 'nenhum'} "
+        "(a especificação está adiante do código de propósito; cada um aponta para a tarefa que o implementa).",
         "",
         "## Por necessidade (NS)",
         "",
@@ -973,6 +985,8 @@ def verificar_cadeia(modelo: Modelo) -> list[str]:
     por_id = {h.id: h for h in modelo.historias}
     erros = []
     for ns in modelo.ns:
+        if ns in necessidades_fora_do_1_0():
+            continue
         if not any(ns in r.ns and r.cas for r in modelo.rfs.values()):
             erros.append(f"{ns} não chega a nenhum TA")
     justificados = 0

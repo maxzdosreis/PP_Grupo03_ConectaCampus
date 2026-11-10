@@ -13,6 +13,7 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator primário, interessado e passos: Gestor do serviço; E1.1 e as regras seguem com o perfil Gestor, que cobre o papel ([DEC-25](../decisoes/DEC-25.md), REQ-12). Meta e exceções iguais. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Questões em aberto: o horário de funcionamento do espaço (DEC-07, CR-03) fica registrado como pendência de redação dos passos 3 e 7, para a tarefa ESP-07 (REQ-13). Fluxo e exceções sem mudança. Mudança editorial. Sem aprovação. |
 
 ## Sumário
 
@@ -180,6 +181,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [DEC-10](../decisoes/DEC-10.md) · Nome de espaço único | Se o cliente aceitar nomes repetidos (por exemplo, em prédios diferentes), [E6.1](#e6-1) e [E7.1](#e7-1) deixam de existir. |
 | [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | Define o que acontece com o espaço depois, em [UC-16](fichas-resumidas.md#uc-16). |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Só o Gestor cadastra ([E1.1](#e1-1)). |
+| [DEC-07](../decisoes/DEC-07.md) · Horário de funcionamento por espaço (decidida na Aula 7) | O [CR-03](../mudancas/CR-03-horario-por-espaco.md) acrescenta o horário de funcionamento ao cadastro ([RF-05](../requisitos/rf-espacos.md#rf-05)), com o padrão das 07:00 às 00:00 quando não informado. Os passos 3 e 7 desta ficha ainda não o descrevem: a redação fica para a tarefa ESP-07, que decide também a validação do horário. |
 
 ## Anexo — Evidência (complementar)
 

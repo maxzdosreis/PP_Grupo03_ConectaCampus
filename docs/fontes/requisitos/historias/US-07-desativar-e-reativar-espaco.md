@@ -15,6 +15,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Gestor do serviço ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-53 a TA-61 passam a TA-58 a TA-66 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -52,7 +53,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço desativado. Novas reservas ficam bloqueadas; as existentes continuam valendo.", o espaço aparece como inativo, um novo pedido nele é recusado com "Este espaço está inativo e não aceita reservas." e a reserva Solicitada continua na lista, com as mesmas ações
 - **Origem:** [UC-16 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc16-p1)
 - **RF:** [RF-07](../requisitos/rf-espacos.md#rf-07)
-- **TA:** [TA-53](#ta-53)
+- **TA:** [TA-58](#ta-58)
 - **Depende de:** [DEC-06](../decisoes/DEC-06.md) (decidida)
 
 #### <a id="us-07-ca-02"></a>US-07 · CA-02 · Espaço reativado (alternativa)
@@ -62,7 +63,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço reativado.", o espaço aparece como ativo e volta a aceitar pedidos
 - **Origem:** [UC-16 A1.1](../casos-de-uso/fichas-resumidas.md#uc16-a1-1)
 - **RF:** [RF-08](../requisitos/rf-espacos.md#rf-08)
-- **TA:** [TA-54](#ta-54)
+- **TA:** [TA-59](#ta-59)
 
 #### <a id="us-07-ca-03"></a>US-07 · CA-03 · O Gestor desiste (alternativa)
 
@@ -71,7 +72,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** nada muda: o espaço continua ativo e aceitando pedidos
 - **Origem:** [UC-16 A3.1](../casos-de-uso/fichas-resumidas.md#uc16-a3-1)
 - **RF:** [RF-07](../requisitos/rf-espacos.md#rf-07)
-- **TA:** [TA-55](#ta-55)
+- **TA:** [TA-60](#ta-60)
 
 #### <a id="us-07-ca-04"></a>US-07 · CA-04 · Decidir sobre as reservas do espaço desativado (alternativa)
 
@@ -80,7 +81,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** ela continua oferecendo as mesmas ações de antes (confirmar, recusar ou cancelar, com motivo), e a decisão é aceita normalmente
 - **Origem:** [UC-16 A5.1](../casos-de-uso/fichas-resumidas.md#uc16-a5-1)
 - **RF:** [RF-07](../requisitos/rf-espacos.md#rf-07), [RF-20](../requisitos/rf-reservas.md#rf-20)
-- **TA:** [TA-56](#ta-56)
+- **TA:** [TA-61](#ta-61)
 - **Depende de:** [DEC-06](../decisoes/DEC-06.md) (decidida)
 
 #### <a id="us-07-ca-05"></a>US-07 · CA-05 · Espaço inexistente (exceção)
@@ -90,7 +91,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Espaço de código «n» não encontrado." e nenhum espaço muda
 - **Origem:** [UC-16 E4.1](../casos-de-uso/fichas-resumidas.md#uc16-e4-1)
 - **RF:** [RF-09](../requisitos/rf-espacos.md#rf-09)
-- **TA:** [TA-57](#ta-57)
+- **TA:** [TA-62](#ta-62)
 
 #### <a id="us-07-ca-06"></a>US-07 · CA-06 · Desativar um espaço já inativo (exceção)
 
@@ -99,7 +100,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Este espaço já está inativo." e o espaço continua inativo
 - **Origem:** [UC-16 E4.2](../casos-de-uso/fichas-resumidas.md#uc16-e4-2)
 - **RF:** [RF-07.1](../requisitos/rf-espacos.md#rf-07-1)
-- **TA:** [TA-58](#ta-58)
+- **TA:** [TA-63](#ta-63)
 
 #### <a id="us-07-ca-07"></a>US-07 · CA-07 · Reativar um espaço já ativo (exceção)
 
@@ -108,7 +109,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Este espaço já está ativo." e o espaço continua ativo
 - **Origem:** [UC-16 E4.3](../casos-de-uso/fichas-resumidas.md#uc16-e4-3)
 - **RF:** [RF-08.1](../requisitos/rf-espacos.md#rf-08-1)
-- **TA:** [TA-59](#ta-59)
+- **TA:** [TA-64](#ta-64)
 
 #### <a id="us-07-ca-08"></a>US-07 · CA-08 · Espaço alterado por outra pessoa (exceção)
 
@@ -117,7 +118,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** só a primeira desativação vale; o segundo recebe "Este espaço foi alterado por outra pessoa enquanto você decidia. Atualize a lista e tente de novo." e a opção de atualizar a lista
 - **Origem:** [UC-16 E4.4](../casos-de-uso/fichas-resumidas.md#uc16-e4-4)
 - **RF:** [RF-07](../requisitos/rf-espacos.md#rf-07) (a garantia é o [RNF-R04](../requisitos/rnf.md#rnf-r04))
-- **TA:** [TA-60](#ta-60)
+- **TA:** [TA-65](#ta-65)
 
 #### <a id="us-07-ca-09"></a>US-07 · CA-09 · Só o Gestor desativa e reativa (acesso)
 
@@ -126,7 +127,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Você não tem permissão para realizar esta ação." e o espaço não muda
 - **Origem:** [UC-16 E1.1](../casos-de-uso/fichas-resumidas.md#uc16-e1-1)
 - **RF:** [RF-10](../requisitos/rf-espacos.md#rf-10)
-- **TA:** [TA-61](#ta-61)
+- **TA:** [TA-66](#ta-66)
 
 ## Testes de aceite
 
@@ -134,12 +135,12 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-53"></a>TA-53 | [CA-01](#us-07-ca-01) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`; `pages/PaginaEspacos.test.tsx`: `o diálogo explica que as reservas existentes continuam valendo`; `pages/PaginaEspacos.test.tsx`: `desativar com sucesso mostra o toast, fecha e recarrega a lista` |
-| <a id="ta-54"></a>TA-54 | [CA-02](#us-07-ca-02) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_inativo_responde_200_com_o_espaco_ativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas`; `pages/PaginaEspacos.test.tsx`: `reativar chama a API de ativar para o espaço inativo` |
-| <a id="ta-55"></a>TA-55 | [CA-03](#us-07-ca-03) | automatizado | `pages/PaginaEspacos.test.tsx`: `"Voltar" fecha sem chamar a API e devolve o foco ao botão da linha` |
-| <a id="ta-56"></a>TA-56 | [CA-04](#us-07-ca-04) | automatizado | `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_pode_ser_confirmada_depois_de_desativar` |
-| <a id="ta-57"></a>TA-57 | [CA-05](#us-07-ca-05) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404 [x]` |
-| <a id="ta-58"></a>TA-58 | [CA-06](#us-07-ca-06) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo`; `espacos/tests/test_espaco_esportivo.py::test_desativar_espaco_ja_inativo_e_recusado` |
-| <a id="ta-59"></a>TA-59 | [CA-07](#us-07-ca-07) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_ja_ativo_responde_409`; `espacos/tests/test_espaco_esportivo.py::test_ativar_espaco_ja_ativo_e_recusado` |
-| <a id="ta-60"></a>TA-60 | [CA-08](#us-07-ca-08) | automatizado | `espacos/tests/test_concorrencia_de_espaco.py::test_duas_desativacoes_simultaneas_aceitam_so_uma`; `pages/PaginaEspacos.test.tsx`: `com 409 %s, mostra o aviso e "Atualizar lista", que fecha e recarrega` |
-| <a id="ta-61"></a>TA-61 | [CA-09](#us-07-ca-09) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| <a id="ta-58"></a>TA-58 | [CA-01](#us-07-ca-01) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`; `pages/PaginaEspacos.test.tsx`: `o diálogo explica que as reservas existentes continuam valendo`; `pages/PaginaEspacos.test.tsx`: `desativar com sucesso mostra o toast, fecha e recarrega a lista` |
+| <a id="ta-59"></a>TA-59 | [CA-02](#us-07-ca-02) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_inativo_responde_200_com_o_espaco_ativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reativar_volta_a_aceitar_reservas`; `pages/PaginaEspacos.test.tsx`: `reativar chama a API de ativar para o espaço inativo` |
+| <a id="ta-60"></a>TA-60 | [CA-03](#us-07-ca-03) | automatizado | `pages/PaginaEspacos.test.tsx`: `"Voltar" fecha sem chamar a API e devolve o foco ao botão da linha` |
+| <a id="ta-61"></a>TA-61 | [CA-04](#us-07-ca-04) | automatizado | `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`; `espacos/tests/test_api_desativacao_e_reservas.py::test_reserva_existente_pode_ser_confirmada_depois_de_desativar` |
+| <a id="ta-62"></a>TA-62 | [CA-05](#us-07-ca-05) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_acoes_em_espaco_inexistente_respondem_404 [x]` |
+| <a id="ta-63"></a>TA-63 | [CA-06](#us-07-ca-06) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ja_inativo_responde_409_e_ele_continua_inativo`; `espacos/tests/test_espaco_esportivo.py::test_desativar_espaco_ja_inativo_e_recusado` |
+| <a id="ta-64"></a>TA-64 | [CA-07](#us-07-ca-07) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_ativar_espaco_ja_ativo_responde_409`; `espacos/tests/test_espaco_esportivo.py::test_ativar_espaco_ja_ativo_e_recusado` |
+| <a id="ta-65"></a>TA-65 | [CA-08](#us-07-ca-08) | automatizado | `espacos/tests/test_concorrencia_de_espaco.py::test_duas_desativacoes_simultaneas_aceitam_so_uma`; `pages/PaginaEspacos.test.tsx`: `com 409 %s, mostra o aviso e "Atualizar lista", que fecha e recarrega` |
+| <a id="ta-66"></a>TA-66 | [CA-09](#us-07-ca-09) | automatizado | `espacos/tests/test_api_edicao_de_espaco.py::test_solicitante_nao_edita_desativa_nem_ativa_e_nada_muda [x]`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

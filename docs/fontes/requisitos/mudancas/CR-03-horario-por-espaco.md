@@ -4,7 +4,7 @@
 |---|---|
 | **CR-03 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha (aprovador da fonte oficial) |
 
-Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR **não** muda nenhum RF, UC, CA nem código: quem o aplica é a tarefa **ESP-07**, no mesmo PR do código, e é ela que atualiza os artefatos da seção 4 e roda `python scripts/gerar_rastreabilidade.py --manifesto`.
+Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa ESP-07)\". O **código não mudou**: quem o muda é a tarefa **ESP-07**, que também cria os testes de aceite e marca o CR como implementado.
 
 ## Histórico de revisões
 
@@ -13,6 +13,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decis
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Abertura a partir da DEC-07 decidida na Aula 7 (GES-02). Aprovado pelo professor, aguardando implementação na ESP-07. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13): RF, RN, UC, histórias, CAs e TAs com a regra nova, listados na [seção 8](#8-aplicação-na-especificação-req-13). Estado: aplicado na especificação; código pendente (tarefa ESP-07). A especificação está adiante do código de propósito, e cada CA novo leva a marca "implementação pendente (tarefa ESP-07)". Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -21,7 +22,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decis
 | **Motivo** | Resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026): "O horário de funcionamento é das 07:00 às 00:00, as reservas padrões são de 1 hora, e precisa de horário por espaço, porque teremos vários espaços." Decisão do grupo, nos pontos que a resposta não cobriu: 07:00–00:00 é o padrão de cada espaço, configurável por espaço; "reservas padrões de 1 hora" é a duração sugerida ao pedir; mínimo de 30 minutos, máximo de 3 horas e antecedência de 30 dias continuam; o término à meia-noite é o fim do dia da reserva. |
 | **Solicitante** | O professor, como representante do cliente. |
 | **Responsável** | O grupo. |
-| **Estado** | Aprovado, aguardando implementação. |
+| **Estado** | **Aplicado na especificação; código pendente (tarefa ESP-07)** (10/11/2026, REQ-13). |
 | **Origem** | [DEC-07](../decisoes/DEC-07.md). |
 | **Baseline vigente** | Nenhuma aprovada: a [candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata (aprovação na REQ-07). |
 | **Tarefa que implementa** | ESP-07 |
@@ -56,9 +57,9 @@ Nos dois sentidos (A4·s19). O resumo por elo vem primeiro; depois, a seção da
   - RF-30: [UC-06](../casos-de-uso/README.md#uc-06) · fluxo principal — [UC-06 passos 4 e 5](../casos-de-uso/fichas-resumidas.md#uc06-p4), [UC-04 A3.1](../casos-de-uso/UC-04-solicitar-reserva.md#a3-1)
   - RF-31: [UC-06](../casos-de-uso/README.md#uc-06) · alternativa (data que não é reservável) — [UC-06 A4.1](../casos-de-uso/fichas-resumidas.md#uc06-a4-1), [UC-04 A3.1](../casos-de-uso/UC-04-solicitar-reserva.md#a3-1)
 - **US:** [US-08](../historias/US-08-solicitar-reserva.md), [US-09](../historias/US-09-ver-a-agenda-do-dia.md)
-- **CA que dependem da DEC:** US-08: [CA-02](../historias/US-08-solicitar-reserva.md#us-08-ca-02), [CA-10](../historias/US-08-solicitar-reserva.md#us-08-ca-10), [CA-11](../historias/US-08-solicitar-reserva.md#us-08-ca-11), [CA-12](../historias/US-08-solicitar-reserva.md#us-08-ca-12); US-09: [CA-05](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-05)
-- **CA dos RF afetados (regressão):** US-08: [CA-04](../historias/US-08-solicitar-reserva.md#us-08-ca-04), [CA-13](../historias/US-08-solicitar-reserva.md#us-08-ca-13); US-09: [CA-01](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-01), [CA-02](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-02), [CA-03](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-03)
-- **TA:** [TA-63](../historias/US-08-solicitar-reserva.md#ta-63), [TA-65](../historias/US-08-solicitar-reserva.md#ta-65), [TA-71](../historias/US-08-solicitar-reserva.md#ta-71), [TA-72](../historias/US-08-solicitar-reserva.md#ta-72), [TA-73](../historias/US-08-solicitar-reserva.md#ta-73), [TA-74](../historias/US-08-solicitar-reserva.md#ta-74), [TA-83](../historias/US-09-ver-a-agenda-do-dia.md#ta-83), [TA-84](../historias/US-09-ver-a-agenda-do-dia.md#ta-84), [TA-85](../historias/US-09-ver-a-agenda-do-dia.md#ta-85), [TA-87](../historias/US-09-ver-a-agenda-do-dia.md#ta-87)
+- **CA que dependem da DEC:** US-08: [CA-02](../historias/US-08-solicitar-reserva.md#us-08-ca-02), [CA-13](../historias/US-08-solicitar-reserva.md#us-08-ca-13), [CA-15](../historias/US-08-solicitar-reserva.md#us-08-ca-15), [CA-17](../historias/US-08-solicitar-reserva.md#us-08-ca-17); US-09: [CA-05](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-05)
+- **CA dos RF afetados (regressão):** US-08: [CA-06](../historias/US-08-solicitar-reserva.md#us-08-ca-06), [CA-18](../historias/US-08-solicitar-reserva.md#us-08-ca-18); US-09: [CA-01](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-01), [CA-02](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-02), [CA-03](../historias/US-09-ver-a-agenda-do-dia.md#us-09-ca-03)
+- **TA:** [TA-68](../historias/US-08-solicitar-reserva.md#ta-68), [TA-72](../historias/US-08-solicitar-reserva.md#ta-72), [TA-79](../historias/US-08-solicitar-reserva.md#ta-79), [TA-81](../historias/US-08-solicitar-reserva.md#ta-81), [TA-83](../historias/US-08-solicitar-reserva.md#ta-83), [TA-84](../historias/US-08-solicitar-reserva.md#ta-84), [TA-93](../historias/US-09-ver-a-agenda-do-dia.md#ta-93), [TA-94](../historias/US-09-ver-a-agenda-do-dia.md#ta-94), [TA-95](../historias/US-09-ver-a-agenda-do-dia.md#ta-95), [TA-97](../historias/US-09-ver-a-agenda-do-dia.md#ta-97)
 - **Endpoint ou tela:** `POST /api/reservas/`; `/reservas/nova`; `GET /api/reservas/regras-de-agenda/`; `GET /api/reservas/ocupacao/`
 - **Código:** `reservas/domain/regras_de_agenda.py::garantir_regras_de_agenda`, `reservas/domain/reserva.py::Reserva.solicitar`, `reservas/domain/regras_de_agenda.py::data_limite_para_reservar`, `reservas/domain/regras_de_agenda.py::HORARIO_DE_ABERTURA`, `reservas/api/serializers.py::RegrasDeAgendaSaidaSerializer.vigentes`, `reservas/domain/regras_de_agenda.py::horarios_livres`, `reservas/application/casos_de_uso.py::ConsultarOcupacaoDoDia.executar`, `reservas/domain/regras_de_agenda.py::garantir_data_reservavel`, `reservas/domain/regras_de_agenda.py::motivo_de_indisponibilidade`
 
@@ -142,7 +143,7 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 ## 6. Regressão
 
 - Rever os 10 TAs listados no mapa de impacto (seção 3), todos automatizados, com os testes de borda de `reservas/tests/test_regras_de_agenda.py` e as propriedades de `test_propriedades_da_agenda.py`.
-- Não devem mudar: a duração mínima e a máxima ([US-08 · CA-11](../historias/US-08-solicitar-reserva.md#us-08-ca-11)), a antecedência ([US-08 · CA-12](../historias/US-08-solicitar-reserva.md#us-08-ca-12)), a ordem funcionamento → duração → antecedência, a recusa de espaço inativo ([DEC-06](../decisoes/DEC-06.md)) e a agenda do dia sem dados pessoais ([DEC-11](../decisoes/DEC-11.md)).
+- Não devem mudar: a duração mínima e a máxima ([US-08 · CA-15](../historias/US-08-solicitar-reserva.md#us-08-ca-15)), a antecedência ([US-08 · CA-17](../historias/US-08-solicitar-reserva.md#us-08-ca-17)), a ordem funcionamento → duração → antecedência, a recusa de espaço inativo ([DEC-06](../decisoes/DEC-06.md)) e a agenda do dia sem dados pessoais ([DEC-11](../decisoes/DEC-11.md)).
 - Os espaços já cadastrados continuam reserváveis com o horário padrão depois da migration.
 
 ## 7. Decisão
@@ -152,4 +153,37 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 | **Decisão** | Aceita. |
 | **Quem decidiu e quando** | O professor, como representante do cliente, na Aula 7 (06/11/2026), na resposta à [DEC-07](../decisoes/DEC-07.md); registrado pelo grupo na GES-02. |
 | **Justificativa** | Regra de uso dada pelo cliente na resposta à DEC-07: funcionamento das 07:00 às 00:00, reservas padrões de 1 hora e horário por espaço "porque teremos vários espaços". Mínimo, máximo e antecedência ficam como estão, por decisão do grupo. |
-| **Referência candidata** | Ainda nenhuma: a ESP-07 aplica o CR e gera o manifesto (`python scripts/gerar_rastreabilidade.py --manifesto`). A [baseline candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata; a aprovação é da REQ-07. |
+| **Referência candidata** | O manifesto da [baseline candidata](../baselines/conecta-campus-1.0-candidata.md) foi gerado de novo com a aplicação na especificação (REQ-13); a ESP-07 só marca o CR como implementado. A [baseline candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata; a aprovação é da REQ-07. |
+
+## 8. Aplicação na especificação (REQ-13)
+
+Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a especificação está adiante do código de propósito, e cada critério abaixo leva a marca "implementação pendente (tarefa ESP-07)" até a tarefa ESP-07 implementar a regra e criar o teste de aceite dele. Os testes que existem hoje verificam a regra anterior, e nenhum TA novo cita um deles.
+
+**O que mudou:**
+
+- RF: [RF-11.5](../requisitos/rf-reservas.md#rf-11-5), [RF-28](../requisitos/rf-agenda.md#rf-28), [RF-30](../requisitos/rf-agenda.md#rf-30), [RF-05](../requisitos/rf-espacos.md#rf-05) e [RF-06](../requisitos/rf-espacos.md#rf-06) (enunciado e decisão).
+- RN: [RN-03](../requisitos/regras-de-negocio.md#rn-03) e [RN-04](../requisitos/regras-de-negocio.md#rn-04) (vigência).
+- UC: [UC-04 E6.1](../casos-de-uso/UC-04-solicitar-reserva.md#e6-1) (horário do espaço pedido) e as questões em aberto de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md); [UC-06 passo 4](../casos-de-uso/fichas-resumidas.md#uc06-p4); nota nas questões em aberto do [UC-14](../casos-de-uso/UC-14-cadastrar-espaco.md). O fluxo `fluxo-solicitar-reserva.puml` não cita horário: nada foi regerado.
+- US/CA/TA: [US-05](../historias/US-05-cadastrar-espaco.md) e [US-08](../historias/US-08-solicitar-reserva.md) (CAs novos); [US-09](../historias/US-09-ver-a-agenda-do-dia.md) (CAs de agenda reescritos sem o valor fixo de 22:00, mesma obrigação, mesmos TAs).
+- Documentos: [glossário](../glossario.md) (horário de funcionamento, termo novo duração sugerida), [Visão](../visao.md) (NS-06, P-04, R-10), [SRS](../requisitos/srs.md) (auditoria).
+
+**CAs novos (6, todos com a marca "implementação pendente (tarefa ESP-07)")**
+
+| CA | Título | Tipo | TA | Pedido do CR | Implementação |
+|---|---|---|---|---|---|
+| [US-08 · CA-03](../historias/US-08-solicitar-reserva.md#us-08-ca-03) | Pedido até a meia-noite no horário padrão | sucesso | [TA-69](../historias/US-08-solicitar-reserva.md#ta-69) | CR-03 · CA-01 | implementação pendente (tarefa ESP-07) |
+| [US-08 · CA-04](../historias/US-08-solicitar-reserva.md#us-08-ca-04) | Pedido depois das 22:00 aceito | sucesso | [TA-70](../historias/US-08-solicitar-reserva.md#ta-70) | CR-03 · CA-02 | implementação pendente (tarefa ESP-07) |
+| [US-08 · CA-08](../historias/US-08-solicitar-reserva.md#us-08-ca-08) | Duração sugerida | alternativa | [TA-74](../historias/US-08-solicitar-reserva.md#ta-74) | CR-03 · CA-05 | implementação pendente (tarefa ESP-07) |
+| [US-08 · CA-14](../historias/US-08-solicitar-reserva.md#us-08-ca-14) | Fora do horário de um espaço com horário próprio | exceção | [TA-80](../historias/US-08-solicitar-reserva.md#ta-80) | CR-03 · CA-03 | implementação pendente (tarefa ESP-07) |
+| [US-08 · CA-16](../historias/US-08-solicitar-reserva.md#us-08-ca-16) | Limites de duração sem mudança | exceção | [TA-82](../historias/US-08-solicitar-reserva.md#ta-82) | CR-03 · CA-06 | implementação pendente (tarefa ESP-07) |
+| [US-05 · CA-03](../historias/US-05-cadastrar-espaco.md#us-05-ca-03) | Espaço cadastrado sem horário | sucesso | [TA-38](../historias/US-05-cadastrar-espaco.md#ta-38) | CR-03 · CA-04 | implementação pendente (tarefa ESP-07) |
+
+**CAs antigos marcados:** [US-08 · CA-02](../historias/US-08-solicitar-reserva.md#us-08-ca-02) (substituído em parte), [US-08 · CA-13](../historias/US-08-solicitar-reserva.md#us-08-ca-13) (substituído). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpre até a tarefa ESP-07.
+
+**Pontos que ficam abertos para a tarefa ESP-07 (nada foi decidido aqui):**
+
+- Os artefatos marcados "a confirmar" na seção 3: [RF-01](../requisitos/rf-espacos.md#rf-01), [RF-02](../requisitos/rf-espacos.md#rf-02), [RF-29](../requisitos/rf-agenda.md#rf-29), [UC-03](../casos-de-uso/fichas-resumidas.md#uc-03), [UC-14](../casos-de-uso/UC-14-cadastrar-espaco.md) (fluxo), [UC-15](../casos-de-uso/fichas-resumidas.md#uc-15), [US-04](../historias/US-04-consultar-os-espacos.md), [US-06](../historias/US-06-editar-espaco.md), [NS-01](../visao.md#ns-01) e [NS-02](../visao.md#ns-02). Não há CA da edição do horário nem da consulta dele.
+- Onde a duração sugerida aparece (dica do pedido, término preenchido pela agenda do dia ou os dois): por isso [US-09 · CA do preenchimento do horário livre](../historias/US-09-ver-a-agenda-do-dia.md) segue como está.
+- Se a consulta das regras de agenda passa a receber o espaço ou se o horário vai junto com o espaço na consulta de espaços.
+- O texto da mensagem de fora do horário e a validação do horário do espaço (por exemplo, abertura antes do fechamento).
+- A Figura 3 da modelagem (atributos de `EspacoEsportivo`) não foi alterada nesta tarefa.

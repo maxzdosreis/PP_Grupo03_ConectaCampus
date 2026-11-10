@@ -19,6 +19,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-22: confere também o cache, com a exceção E2.2 · Cache fora do ar; UC-01: a recusa com o serviço de contagem fora do ar (Redis, AUT-08). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | UC-07: a consulta em páginas, com o total, nos passos 2 e 4; alternativas novas A2.3 (ver outra página), A2.4 (página além da última) e A3.2 (mudar um critério recomeça da primeira página); a exceção E3.1 inclui a página e o tamanho inválidos; RF-12.2 nos RFs cobertos (RES-10). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator de UC-15 e UC-16: Gestor do serviço; UC-16 A5.1 (desfazer reservas): Atendente responsável. Só o rótulo do ator; metas e passos iguais ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (DEC-13), [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (DEC-05), [CR-03](../mudancas/CR-03-horario-por-espaco.md) (DEC-07) e [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (DEC-09), com o código nas tarefas RES-11, RES-12, ESP-07 e AUT-12 (REQ-13): UC-01 E3.1 (matrícula só de dígitos), UC-06 passo 4 (funcionamento do espaço), UC-07 passo 2 e UC-08 passo 3 (ações conforme o horário) e UC-09 passo 3 e A3.2 (tentativas recusadas no histórico). As fichas estão adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
 
 ## Sumário
 
@@ -52,7 +53,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 | Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
 |---|---|---|---|---|
-| <a id="uc01-e3-1"></a>E3.1 · Dados ausentes ou inválidos | Falta um dado; o nome só tem espaços ou passa de 150 caracteres; a matrícula passa de 20 caracteres ou tem espaço; o e-mail está mal formado. | A regra violada junto a cada dado (por exemplo, 'O campo "Nome" é obrigatório.'). | Nenhuma conta é criada. | [RF-32.1](../requisitos/rf-contas.md#rf-32-1) ([DEC-09](../decisoes/DEC-09.md)) |
+| <a id="uc01-e3-1"></a>E3.1 · Dados ausentes ou inválidos | Falta um dado; o nome só tem espaços ou passa de 150 caracteres; a matrícula tem um caractere que não é dígito ou passa de 20 caracteres (limite técnico); o e-mail está mal formado. | A regra violada junto a cada dado (por exemplo, 'O campo "Nome" é obrigatório.'). | Nenhuma conta é criada. | [RF-32.1](../requisitos/rf-contas.md#rf-32-1) ([DEC-09](../decisoes/DEC-09.md)) |
 | <a id="uc01-e3-2"></a>E3.2 · Senha fraca | A senha é curta (menos de 8 caracteres), comum, só de números ou parecida com o nome, o e-mail ou a matrícula. | Junto à senha, cada motivo da recusa. | Nenhuma conta é criada. | [RF-32.2](../requisitos/rf-contas.md#rf-32-2) |
 | <a id="uc01-e3-3"></a>E3.3 · E-mail ou matrícula já usados | O e-mail (sem diferenciar maiúsculas) ou a matrícula já pertencem a outra conta. | Junto ao dado, que ele já está cadastrado; a pessoa pode entrar ([UC-02](UC-02-autenticar.md)) se a conta for dela. | Nenhuma conta é criada; a outra conta não muda. | [RF-32.3](../requisitos/rf-contas.md#rf-32-3) |
 
@@ -112,7 +113,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 1. <a id="uc06-p1"></a>O ator, com espaço e data escolhidos, pede a [agenda do dia](../glossario.md#agenda-do-dia).
 2. <a id="uc06-p2"></a>O sistema confere que o espaço e a data foram informados e que o espaço aceita pedidos.
 3. <a id="uc06-p3"></a>O sistema mostra os [horários ocupados](../glossario.md#horario-ocupado) por reservas Solicitadas ou Confirmadas daquele espaço no dia, em ordem de início, cada um só com início, término e situação (nunca quem reservou nem para quê), e a quantidade ("1 horário ocupado neste dia.").
-4. <a id="uc06-p4"></a>O sistema mostra o horário de funcionamento e os [horários livres](../glossario.md#horario-livre): dentro do funcionamento, com pelo menos 30 minutos e, para hoje, a partir do próximo múltiplo de 5 minutos.
+4. <a id="uc06-p4"></a>O sistema mostra o horário de funcionamento e os [horários livres](../glossario.md#horario-livre): dentro do funcionamento do espaço, com pelo menos 30 minutos e, para hoje, a partir do próximo múltiplo de 5 minutos.
 5. <a id="uc06-p5"></a>O ator usa um horário livre: o sistema preenche o início do pedido com o começo dele e o término com o [término sugerido](../glossario.md#termino-sugerido). Segue no [passo 3 de UC-04](UC-04-solicitar-reserva.md#p3).
 
 **Alternativas**
@@ -147,7 +148,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 **Fluxo principal**
 
 1. <a id="uc07-p1"></a>O ator pede para ver as reservas.
-2. <a id="uc07-p2"></a>O sistema mostra as reservas que o ator pode ver — o Gestor, todas; o Solicitante, só as próprias, como "Minhas reservas" —, ordenadas pelo início, em páginas de até 20, com data e horário, espaço, solicitante, finalidade, situação com o motivo, as [ações disponíveis](../glossario.md#acao-disponivel) de cada uma, o total encontrado, a página atual e o número de páginas.
+2. <a id="uc07-p2"></a>O sistema mostra as reservas que o ator pode ver — o Gestor, todas; o Solicitante, só as próprias, como "Minhas reservas" —, ordenadas pelo início, em páginas de até 20, com data e horário, espaço, solicitante, finalidade, situação com o motivo, as [ações disponíveis](../glossario.md#acao-disponivel) de cada uma (conforme o perfil e o momento da consulta), o total encontrado, a página atual e o número de páginas.
 3. <a id="uc07-p3"></a>O ator informa um ou mais critérios: espaço, situação (entre as situações de reserva, na ordem do ciclo de vida), data e, só para o Gestor, solicitante (trecho do nome ou da matrícula) e "somente as minhas".
 4. <a id="uc07-p4"></a>O sistema mostra só as reservas que atendem a todos os critérios, a partir da primeira página, com a quantidade.
 
@@ -186,7 +187,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 1. <a id="uc08-p1"></a>O ator escolhe uma reserva (pela consulta, [UC-07](#uc-07), ou logo depois de pedi-la).
 2. <a id="uc08-p2"></a>O sistema confere que a reserva existe e é visível ao ator.
-3. <a id="uc08-p3"></a>O sistema mostra o espaço, a data e o horário, o solicitante com a matrícula, o momento do pedido, a finalidade, a situação com o motivo e as ações disponíveis para o ator.
+3. <a id="uc08-p3"></a>O sistema mostra o espaço, a data e o horário, o solicitante com a matrícula, o momento do pedido, a finalidade, a situação com o motivo e as ações disponíveis para o ator (conforme o perfil e o momento da consulta).
 
 **Alternativas**
 
@@ -219,12 +220,12 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 1. <a id="uc09-p1"></a>O ator pede o [histórico](../glossario.md#historico) da reserva.
 2. <a id="uc09-p2"></a>O sistema confere que a reserva existe e é visível ao ator (a mesma regra do detalhe).
-3. <a id="uc09-p3"></a>O sistema mostra, em ordem cronológica, a criação e cada mudança de situação aceita: data e hora, nome do autor, situação anterior e nova e motivo.
+3. <a id="uc09-p3"></a>O sistema mostra, em ordem cronológica, a criação, cada mudança de situação aceita e cada tentativa recusada: data e hora, nome do autor, situação anterior e nova (ou a pedida), motivo e, na tentativa, o resultado e o código do erro.
 
 **Alternativas**
 
 - <a id="uc09-a3-1"></a>**A3.1** · Reserva sem registros (gravada antes de existir o histórico): "Nenhuma mudança registrada."
-- <a id="uc09-a3-2"></a>**A3.2** · Tentativas recusadas não aparecem: só as mudanças aceitas ([DEC-05](../decisoes/DEC-05.md)).
+- <a id="uc09-a3-2"></a>**A3.2** · Tentativas recusadas aparecem, distintas das mudanças aceitas ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), código na tarefa RES-12).
 
 **Exceções**
 

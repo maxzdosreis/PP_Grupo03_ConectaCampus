@@ -35,6 +35,8 @@ CAMPOS_DO_CARD = (
 )
 LETRAS_INVEST = ("I", "N", "V", "E", "S", "T")
 TIPOS_DE_CA = ("sucesso", "alternativa", "exceção", "registro", "acesso")
+TAREFAS_DE_CODIGO = ("RES-11", "RES-12", "ESP-07", "AUT-12")
+MARCA_PENDENTE = re.compile(r"^implementação pendente \(tarefa (?P<tarefa>[A-Z]{2,3}-\d{2})\)(?P<resto>.*)$")
 RF_SEM_HISTORIA = {"RF-38": "transversal: o resultado de cada operação aparece no Então de todos os CAs"}
 TERMOS_PROIBIDOS = {
     "HTTP": r"\bhttps?\b",
@@ -61,10 +63,10 @@ CABECALHO_CA = re.compile(
     r"US-(?P<us_rotulo>\d{2}) · CA-(?P<n_rotulo>\d{2}) · (?P<titulo>.+) \((?P<tipo>[^()]+)\)$"
 )
 PARTE_CA = re.compile(r"^- \*\*(?P<parte>Dado|Quando|Então)\*\* (?P<texto>.+)$")
-CAMPO_CA = re.compile(r"^- \*\*(?P<campo>Origem|RF|TA|Depende de):\*\* (?P<texto>.+)$")
+CAMPO_CA = re.compile(r"^- \*\*(?P<campo>Origem|RF|TA|Depende de|Implementação):\*\* (?P<texto>.+)$")
 LINHA_TA = re.compile(
     r'^\|\s*<a id="ta-(?P<ancora>\d{2,3})"></a>TA-(?P<numero>\d{2,3})\s*\|\s*\[CA-(?P<ca>\d{2})\]\((?P<alvo>[^)]*)\)'
-    r"\s*\|\s*(?P<tipo>automatizado|manual)\s*\|\s*(?P<testes>.+?)\s*\|\s*$"
+    r"\s*\|\s*(?P<tipo>automatizado|manual|pendente)\s*\|\s*(?P<testes>.+?)\s*\|\s*$"
 )
 LINK_UC = re.compile(r"\]\(\.\./casos-de-uso/(?P<arquivo>[\w.-]+\.md)#(?P<ancora>[\w-]+)\)")
 LINK_RF = re.compile(r"\[(?P<rf>RF-[\d.]+)\]\(\.\./requisitos/(?P<arquivo>rf-[\w-]+\.md)#(?P<ancora>rf-[\w-]+)\)")
@@ -258,12 +260,36 @@ def verificar_criterios(historias: list[Historia]) -> list[str]:
                     erros.append(f"{onde}: TA-{numero:02d} não está na tabela da história")
                 elif ta.alvo != f"#{ca.ancora}" or ta.ca != f"CA-{ca.numero:02d}":
                     erros.append(f"{onde}: TA-{numero:02d} aponta para {ta.ca} {ta.alvo}")
+                else:
+                    erros += verificar_pendencia(ca, ta, onde)
     print(f"CAs lidos: {len(todos_os_criterios(historias))}")
     return erros
 
 
+def verificar_pendencia(ca: CriterioDeAceite, ta: TesteDeAceite, onde: str) -> list[str]:
+    erros = []
+    marca_do_ca = MARCA_PENDENTE.match(ca.campos.get("Implementação", ""))
+    marca_do_ta = MARCA_PENDENTE.match(ta.testes) if ta.tipo == "pendente" else None
+    if "Implementação" in ca.campos:
+        if marca_do_ca is None or marca_do_ca["resto"]:
+            erros.append(f"{onde}: Implementação deve ser exatamente 'implementação pendente (tarefa X)'")
+        elif marca_do_ca["tarefa"] not in TAREFAS_DE_CODIGO:
+            erros.append(f"{onde}: tarefa {marca_do_ca['tarefa']} fora de {TAREFAS_DE_CODIGO}")
+        if ta.tipo != "pendente":
+            erros.append(f"{onde}: CA com implementação pendente, mas TA-{ta.numero:02d} é {ta.tipo}")
+    elif ta.tipo == "pendente":
+        erros.append(f"{onde}: TA-{ta.numero:02d} é pendente, mas o CA não tem o campo Implementação")
+    if ta.tipo == "pendente":
+        if marca_do_ta is None:
+            erros.append(f"{onde}: TA pendente deve começar com 'implementação pendente (tarefa X)'")
+        elif marca_do_ca and marca_do_ta["tarefa"] != marca_do_ca["tarefa"]:
+            erros.append(f"{onde}: o CA aponta para {marca_do_ca['tarefa']}, o TA para {marca_do_ta['tarefa']}")
+        if TESTE_PYTEST.search(ta.testes) or TESTE_VITEST.search(ta.testes) or re.search(r"test_\w+|\.test\.tsx?", ta.testes):
+            erros.append(f"{onde}: TA pendente não pode citar teste de código (os testes de hoje verificam a regra antiga)")
+    return erros
+
+
 def itens_das_fichas() -> list[tuple[str, str, str]]:
-    """(arquivo, âncora, rótulo) de toda alternativa e exceção das fichas de caso de uso."""
     itens = []
     for nome in FICHAS_COMPLETAS:
         for linha in ler(PASTA_UC / nome).splitlines():
@@ -436,7 +462,7 @@ def verificar_readme(historias: list[Historia]) -> list[str]:
     for linha in _secao(texto, "Índice dos testes de aceite"):
         if achado := re.match(
             r"^\|\s*\[TA-(\d{2,3})\]\((US-\d{2}-[\w-]+\.md)#ta-\d{2,3}\)\s*\|\s*\[US-\d{2} · CA-(\d{2})\]"
-            r"\((US-\d{2}-[\w-]+\.md)#(us-\d{2}-ca-\d{2})\)\s*\|\s*(automatizado|manual)\s*\|\s*(.+?)\s*\|\s*$",
+            r"\((US-\d{2}-[\w-]+\.md)#(us-\d{2}-ca-\d{2})\)\s*\|\s*(automatizado|manual|pendente)\s*\|\s*(.+?)\s*\|\s*$",
             linha,
         ):
             no_readme[int(achado[1])] = (achado[2], achado[5], achado[6], achado[7])
@@ -467,15 +493,20 @@ def verificar_linguagem(historias: list[Historia]) -> list[str]:
 
 
 def imprimir_contagens(historias: list[Historia]) -> None:
-    print(f"{'US':6} {'suc':>4} {'alt':>4} {'exc':>4} {'reg':>4} {'ace':>4} {'CAs':>4} {'TA aut':>7} {'TA man':>7}")
+    print(f"{'US':6} {'suc':>4} {'alt':>4} {'exc':>4} {'reg':>4} {'ace':>4} {'CAs':>4} {'TA aut':>7} {'TA man':>7} {'TA pen':>7}")
     totais = Counter()
     for historia in historias:
         tipos = Counter(ca.tipo for ca in historia.criterios)
         tas = Counter(ta.tipo for ta in historia.testes)
-        valores = [tipos[t] for t in TIPOS_DE_CA] + [len(historia.criterios), tas["automatizado"], tas["manual"]]
+        valores = [tipos[t] for t in TIPOS_DE_CA] + [
+            len(historia.criterios),
+            tas["automatizado"],
+            tas["manual"],
+            tas["pendente"],
+        ]
         totais.update(dict(zip(range(len(valores)), valores)))
-        print(f"{historia.id:6} " + " ".join(f"{v:>4}" for v in valores[:6]) + f" {valores[6]:>7} {valores[7]:>7}")
-    print(f"{'Total':6} " + " ".join(f"{totais[i]:>4}" for i in range(6)) + f" {totais[6]:>7} {totais[7]:>7}")
+        print(f"{historia.id:6} " + " ".join(f"{v:>4}" for v in valores[:6]) + f" {valores[6]:>7} {valores[7]:>7} {valores[8]:>7}")
+    print(f"{'Total':6} " + " ".join(f"{totais[i]:>4}" for i in range(6)) + f" {totais[6]:>7} {totais[7]:>7} {totais[8]:>7}")
 
 
 def imprimir_selecao_de_testes(historias: list[Historia]) -> None:

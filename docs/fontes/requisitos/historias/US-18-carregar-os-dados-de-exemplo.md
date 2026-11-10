@@ -14,6 +14,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-161 a TA-165 passam a TA-186 a TA-190 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -51,7 +52,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema cria 1 Gestor e 2 Solicitantes, um espaço de cada tipo mais um inativo e uma reserva de cada situação, todas com o histórico coerente, sem sobreposição entre as que ocupam horário e com as reservas em aberto no futuro, e mostra o resumo do que foi criado
 - **Origem:** [UC-21 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc21-p1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-161](#ta-161)
+- **TA:** [TA-182](#ta-182)
 
 #### <a id="us-18-ca-02"></a>US-18 · CA-02 · Pronta para a demonstração (sucesso)
 
@@ -60,7 +61,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** cada usuário de exemplo entra com a senha documentada, e o horário de conflito documentado é recusado por conflito no pedido e aparece ocupado na agenda do dia
 - **Origem:** [UC-21 passo 3](../casos-de-uso/fichas-resumidas.md#uc21-p3)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-162](#ta-162)
+- **TA:** [TA-183](#ta-183)
 
 #### <a id="us-18-ca-03"></a>US-18 · CA-03 · Carga repetida (alternativa)
 
@@ -69,7 +70,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** nada é duplicado (usuário pelo e-mail, espaço pelo nome, reservas dos usuários de exemplo), e o resumo informa que os dados já existiam
 - **Origem:** [UC-21 A3.1](../casos-de-uso/fichas-resumidas.md#uc21-a3-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-163](#ta-163)
+- **TA:** [TA-184](#ta-184)
 
 #### <a id="us-18-ca-04"></a>US-18 · CA-04 · Fora do modo de desenvolvimento (exceção)
 
@@ -78,7 +79,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** a carga é recusada, porque criaria usuários com senhas conhecidas, e nada é criado
 - **Origem:** [UC-21 E2.1](../casos-de-uso/fichas-resumidas.md#uc21-e2-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-164](#ta-164)
+- **TA:** [TA-185](#ta-185)
 
 #### <a id="us-18-ca-05"></a>US-18 · CA-05 · Dado de exemplo que viola uma regra (exceção)
 
@@ -87,7 +88,7 @@ História de apoio do [índice](README.md#índice-das-histórias) (diagrama UCD-
 - **Então** o sistema informa "Dado de exemplo inválido: «mensagem da regra»" (no caso da regra) e a carga inteira é desfeita: nada fica pela metade
 - **Origem:** [UC-21 E3.1](../casos-de-uso/fichas-resumidas.md#uc21-e3-1)
 - **RF:** [RF-39](../requisitos/rf-gerais.md#rf-39)
-- **TA:** [TA-165](#ta-165)
+- **TA:** [TA-186](#ta-186)
 
 ## Testes de aceite
 
@@ -95,8 +96,8 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-161"></a>TA-161 | [CA-01](#us-18-ca-01) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_espaco_de_cada_tipo_e_um_inativo`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_uma_reserva_de_cada_situacao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_todas_as_reservas_de_exemplo_tem_historico_coerente`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_que_ocupam_horario_nao_se_sobrepoem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_em_aberto_sao_futuras_e_a_concluida_e_passada`; `exemplos/tests/test_carregar_dados_exemplo.py::test_primeira_execucao_informa_o_que_foi_criado` |
-| <a id="ta-162"></a>TA-162 | [CA-02](#us-18-ca-02) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_responde_409`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia`; `exemplos/tests/test_carregar_dados_exemplo.py::test_nenhum_dado_de_exemplo_usa_o_usuario_do_readme` |
-| <a id="ta-163"></a>TA-163 | [CA-03](#us-18-ca-03) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
-| <a id="ta-164"></a>TA-164 | [CA-04](#us-18-ca-04) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_com_debug_desligado_recusa_sem_criar_nada` |
-| <a id="ta-165"></a>TA-165 | [CA-05](#us-18-ca-05) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_dado_de_exemplo_que_viola_regra_faz_o_comando_falhar`; `exemplos/tests/test_carregar_dados_exemplo.py::test_falha_no_meio_da_carga_nao_deixa_nada_gravado` |
+| <a id="ta-182"></a>TA-182 | [CA-01](#us-18-ca-01) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_gestor_e_dois_solicitantes`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_um_espaco_de_cada_tipo_e_um_inativo`; `exemplos/tests/test_carregar_dados_exemplo.py::test_cria_uma_reserva_de_cada_situacao`; `exemplos/tests/test_carregar_dados_exemplo.py::test_todas_as_reservas_de_exemplo_tem_historico_coerente`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_que_ocupam_horario_nao_se_sobrepoem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_reservas_em_aberto_sao_futuras_e_a_concluida_e_passada`; `exemplos/tests/test_carregar_dados_exemplo.py::test_primeira_execucao_informa_o_que_foi_criado` |
+| <a id="ta-183"></a>TA-183 | [CA-02](#us-18-ca-02) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_login_com_cada_usuario_de_exemplo [x]`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_responde_409`; `exemplos/tests/test_carregar_dados_exemplo.py::test_horario_de_conflito_documentado_aparece_ocupado_na_agenda_do_dia`; `exemplos/tests/test_carregar_dados_exemplo.py::test_nenhum_dado_de_exemplo_usa_o_usuario_do_readme` |
+| <a id="ta-184"></a>TA-184 | [CA-03](#us-18-ca-03) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
+| <a id="ta-185"></a>TA-185 | [CA-04](#us-18-ca-04) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_com_debug_desligado_recusa_sem_criar_nada` |
+| <a id="ta-186"></a>TA-186 | [CA-05](#us-18-ca-05) | automatizado | `exemplos/tests/test_carregar_dados_exemplo.py::test_dado_de_exemplo_que_viola_regra_faz_o_comando_falhar`; `exemplos/tests/test_carregar_dados_exemplo.py::test_falha_no_meio_da_carga_nao_deixa_nada_gravado` |
