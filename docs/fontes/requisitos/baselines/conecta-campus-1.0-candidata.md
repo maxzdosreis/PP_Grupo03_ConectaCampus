@@ -32,11 +32,11 @@ Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + apro
 Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcadores abaixo; não edite à mão. O `--verificar` acusa qualquer artefato que mude depois do manifesto, e a versão acordada é a que tem este hash, não "o arquivo mais novo". Na aprovação, todos os documentos devem estar na versão e no estado aprovados (1.0 • Aprovado), e o manifesto é gerado de novo.
 
 <!-- manifesto:inicio -->
-78 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `9f9bafcd`.
+88 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `65732ac5`.
 
 | Artefato | ID | Versão | Estado | Caminho (a partir de `docs/fontes/requisitos/`) | SHA-256 |
 |---|---|---|---|---|---|
-| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `6457b256` |
+| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `b6fb6699` |
 | Casos de uso | UCD-01 | 0.1 | Rascunho | `casos-de-uso/README.md` | `f12e1d90` |
 | UC-02 · Autenticar | UC-02 | 0.1 | Rascunho | `casos-de-uso/UC-02-autenticar.md` | `40ff8c2b` |
 | UC-04 · Solicitar reserva | UC-04 | 0.1 | Rascunho | `casos-de-uso/UC-04-solicitar-reserva.md` | `21c8cffc` |
@@ -92,6 +92,16 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | US-17 · Criar o primeiro Gestor | US-17 | 0.1 | Rascunho | `historias/US-17-criar-o-primeiro-gestor.md` | `c28827e0` |
 | US-18 · Carregar os dados de exemplo | US-18 | 0.1 | Rascunho | `historias/US-18-carregar-os-dados-de-exemplo.md` | `c1212216` |
 | US-19 · Verificar se o sistema está no ar | US-19 | 0.1 | Rascunho | `historias/US-19-verificar-se-o-sistema-esta-no-ar.md` | `317b266f` |
+| Levantamento de requisitos | IND-05 | 0.1 | Rascunho | `levantamento/README.md` | `c590ec80` |
+| Entrevista ENT-01 — Representante do cliente | ENT-01 | 0.1 | Rascunho | `levantamento/entrevistas/ENT-01-representante-do-cliente.md` | `deb10660` |
+| Entrevista ENT-02 — Solicitante (estudante), simulada | ENT-02 | 0.1 | Rascunho | `levantamento/entrevistas/ENT-02-solicitante-estudante-simulada.md` | `6d30f11f` |
+| Entrevista ENT-03 — Solicitante (servidor), simulada | ENT-03 | 0.1 | Rascunho | `levantamento/entrevistas/ENT-03-solicitante-servidor-simulada.md` | `16b7060b` |
+| Entrevista ENT-04 — Atendente responsável, simulada | ENT-04 | 0.1 | Rascunho | `levantamento/entrevistas/ENT-04-atendente-responsavel-simulada.md` | `45ee9275` |
+| Roteiro de entrevista — Representante do cliente | ROT-01 | 0.1 | Rascunho | `levantamento/entrevistas/ROT-01-representante-do-cliente.md` | `baeda0bd` |
+| Roteiro de entrevista — Solicitante | ROT-02 | 0.1 | Rascunho | `levantamento/entrevistas/ROT-02-solicitante.md` | `7e2319e9` |
+| Roteiro de entrevista — Atendente responsável | ROT-03 | 0.1 | Rascunho | `levantamento/entrevistas/ROT-03-atendente-responsavel.md` | `b7738640` |
+| Modelo de registro de entrevista | MRE-01 | 0.1 | Rascunho | `levantamento/entrevistas/modelo-registro-entrevista.md` | `3b844f47` |
+| Guia do entrevistador | GUI-01 | 0.1 | Rascunho | `levantamento/guia-do-entrevistador.md` | `12d17f1a` |
 | CR-01 — Mudança de situação em relação ao horário da reserva | CR-01 | 0.1 | Rascunho | `mudancas/CR-01-situacao-e-horario-da-reserva.md` | `55c26cca` |
 | CR-02 — Tentativas recusadas no histórico da reserva | CR-02 | 0.1 | Rascunho | `mudancas/CR-02-tentativas-recusadas-no-historico.md` | `b5fbdb3b` |
 | CR-03 — Horário de funcionamento por espaço e duração sugerida | CR-03 | 0.1 | Rascunho | `mudancas/CR-03-horario-por-espaco.md` | `58751e99` |
