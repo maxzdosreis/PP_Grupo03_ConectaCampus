@@ -14,6 +14,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Passo 7 na ordem real do código: a identificação do espaço antes da finalidade; E7.1 passa a ser "Espaço não identificado" e E7.2, "Finalidade em branco ou longa demais" (achado da DOC-03). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Quem decide o pedido (passo 11, interessado e garantia de sucesso) passa a ser o Atendente responsável; o ator primário e as exceções não mudam ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação do [CR-03](../mudancas/CR-03-horario-por-espaco.md) (DEC-07), com o código na tarefa ESP-07 (REQ-13): E6.1 com o horário do espaço pedido (padrão 07:00–00:00) e as questões em aberto da DEC-07 e da DEC-13. A ficha está adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
 
 ## Sumário
 
@@ -134,8 +135,8 @@ A meta é interrompida: **nenhuma reserva e nenhum registro de histórico são g
 
 #### <a id="e6-1"></a>E6.1 · Fora do horário de funcionamento
 
-- **Condição:** no passo 6, o pedido começa antes da abertura (07:00) ou termina depois do fechamento (22:00). As bordas valem: começar às 07:00 e terminar às 22:00 é aceito.
-- **Resultado para o ator:** junto ao início (se começa cedo demais) ou ao término (se termina tarde demais), "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período."
+- **Condição:** no passo 6, o pedido começa antes da abertura ou termina depois do fechamento do espaço pedido (padrão: 07:00 e 00:00, com o término à meia-noite como fim do dia da reserva). As bordas valem: começar na abertura e terminar no fechamento é aceito.
+- **Resultado para o ator:** junto ao início (se começa cedo demais) ou ao término (se termina tarde demais), a mensagem com o horário de funcionamento desse espaço (o texto exato é definido na tarefa ESP-07).
 - **Estado depois:** nada é gravado.
 - **Requisito:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5).
 
@@ -261,10 +262,10 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 
 | DEC | Como afeta este caso de uso |
 |---|---|
-| [DEC-07](../decisoes/DEC-07.md) · Valores das regras de agenda | Os números de [E6.1](#e6-1) a [E6.3](#e6-3) (07:00–22:00, 30 min a 3 h, 30 dias) mudam se o cliente decidir outros; as mensagens já saem das constantes. |
+| [DEC-07](../decisoes/DEC-07.md) · Valores das regras de agenda | Decidida na Aula 7 ([CR-03](../mudancas/CR-03-horario-por-espaco.md); código na tarefa ESP-07): [E6.1](#e6-1) passa a usar o horário do espaço pedido (padrão 07:00–00:00); [E6.2](#e6-2) (30 min a 3 h) e [E6.3](#e6-3) (30 dias) não mudam. A duração sugerida de 1 h e onde ela aparece no pedido ficam para a ESP-07. |
 | [DEC-11](../decisoes/DEC-11.md) · Períodos ocupados por outras pessoas na agenda do dia | Se recusada, [A3.1](#a3-1) deixa de mostrar os ocupados de outras pessoas, e o Solicitante só descobre o conflito em [E9.1](#e9-1). |
 | [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | Define o estado depois de [E8.2](#e8-2) (as reservas existentes continuam valendo). |
-| [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário | Uma Solicitada não decidida continua ocupando o horário depois da data e, portanto, entrando em [E9.1](#e9-1); a opção c) mudaria isso. |
+| [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário | Decidida na Aula 7: uma Solicitada não decidida continua ocupando o horário depois da data (decisão do grupo) e, portanto, entrando em [E9.1](#e9-1). |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | O Gestor pede em nome próprio; não há pedido em nome de outra pessoa. |
 
 A ordem do passo 7 (espaço e finalidade depois das regras de agenda) diverge do texto do RF-11 e está registrada como [lacuna L-12](../requisitos/srs.md#l-12), não como decisão: não muda o que é aceito, só qual mensagem aparece primeiro.
@@ -283,7 +284,7 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E5.1](#e5-1) | `reservas/tests/test_api_reservas.py::test_campos_ausentes_respondem_400_com_cada_campo`, `::test_dado_invalido_responde_400_sem_salvar [data-inexistente]` |
 | [E5.2](#e5-2) | `reservas/tests/test_intervalo_de_horario.py::test_fim_igual_ou_antes_do_inicio_e_recusado [x]`; `reservas/tests/test_criar_reserva.py::test_fim_igual_ou_antes_do_inicio_lanca_horario_invalido [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [fim-antes-do-inicio]` |
 | [E5.3](#e5-3) | `reservas/tests/test_reserva.py::test_solicitar_com_inicio_igual_a_agora_e_recusado`, `::test_solicitar_um_minuto_depois_de_agora_e_aceito`, `::test_solicitar_para_ontem_e_recusado`; `reservas/tests/test_criar_reserva.py::test_horario_no_passado_lanca_data_retroativa_antes_de_consultar_o_espaco`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [data-retroativa]` |
-| [E6.1](#e6-1) | `reservas/tests/test_regras_de_agenda.py::test_horario_nas_bordas_do_funcionamento_e_aceito [x]`, `::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [antes-da-abertura]` |
+| [E6.1](#e6-1) (os testes verificam o horário único 07:00–22:00, a regra anterior; a do espaço está em implementação pendente, tarefa ESP-07) | `reservas/tests/test_regras_de_agenda.py::test_horario_nas_bordas_do_funcionamento_e_aceito [x]`, `::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [antes-da-abertura]` |
 | [E6.2](#e6-2) | `reservas/tests/test_regras_de_agenda.py::test_duracao_nas_bordas_e_aceita [x]`, `::test_duracao_fora_dos_limites_e_recusada_no_termino [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [duracao-acima-da-maxima]` |
 | [E6.3](#e6-3) | `reservas/tests/test_regras_de_agenda.py::test_data_no_limite_da_antecedencia_e_aceita`, `::test_data_alem_da_antecedencia_e_recusada_com_a_data_limite`, `::test_data_limite_conta_hoje_no_fuso_de_sao_paulo`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [alem-da-antecedencia]` |
 | [E7.1](#e7-1) | `reservas/tests/test_reserva.py::test_espaco_id_vazio_e_recusado_como_obrigatorio`, `::test_espaco_id_que_nao_e_inteiro_positivo_e_recusado [x]` |

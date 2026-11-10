@@ -11,6 +11,7 @@ Pedido de mudança aberto na REQ-12, no [modelo de CR](modelo-cr.md), para os ar
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Abertura a partir da DEC-25 (REQ-12). Estado: proposto, aguardando decisão na REQ-13. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13), conforme a [seção 8](#8-aplicação-na-especificação-req-13): US-13 dividida (US-20 nova), US-12 e US-03 com os três papéis. Sem mudança de código. Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -19,7 +20,7 @@ Pedido de mudança aberto na REQ-12, no [modelo de CR](modelo-cr.md), para os ar
 | **Motivo** | A [DEC-25](../decisoes/DEC-25.md) separa o Atendente responsável (opera as reservas) do Gestor do serviço (mantém os espaços e as regras). Três histórias e um caso de uso reúnem os dois papéis, ou um papel e o perfil, numa só frase de ator. |
 | **Solicitante** | Max Zimmermann dos Reis (grupo). |
 | **Responsável** | Max Zimmermann dos Reis (análise); a atualização é da REQ-13. |
-| **Estado** | **Proposto** |
+| **Estado** | **Aplicado na especificação** (10/11/2026, REQ-13; sem código, o sistema tem um perfil só) |
 | **Origem** | [DEC-25](../decisoes/DEC-25.md); enunciado §2; [síntese do levantamento](../levantamento/sintese-do-levantamento.md) (ACH-22). |
 | **Baseline vigente** | [Conecta Campus — Requisitos 1.0 (candidata)](../baselines/conecta-campus-1.0-candidata.md), até a nova ser aprovada. |
 
@@ -65,7 +66,16 @@ Pedido de mudança aberto na REQ-12, no [modelo de CR](modelo-cr.md), para os ar
 
 | Campo | Conteúdo |
 |---|---|
-| **Decisão** | Adiada: proposto, sem decisão. |
+| **Decisão** | Aceita e aplicada na especificação (REQ-13), a pedido do grupo. |
 | **Quem decidiu e quando** | — |
 | **Justificativa** | A REQ-12 ajustou só o rótulo dos artefatos de um papel; os de ator misto mudam história e testes e ficam para a REQ-13, que gera os IDs do PDF e aplica os CRs. |
 | **Referência candidata** | Manifesto da [baseline candidata](../baselines/conecta-campus-1.0-candidata.md); falta a decisão do grupo na REQ-13. |
+
+## 8. Aplicação na especificação (REQ-13)
+
+Aplicado em 10/11/2026. O comportamento do sistema não muda (perfil único, [DEC-25](../decisoes/DEC-25.md)); só o escopo das histórias.
+
+- [US-13](../historias/US-13-cancelar-uma-reserva.md) ficou com o Solicitante (cancelar a própria). A [US-20](../historias/US-20-cancelar-qualquer-reserva.md), nova, é do Atendente responsável e recebeu quatro CAs (os de cancelar qualquer reserva, antes do início e depois do início, e o da tentativa de cancelar uma Concluída no histórico), com os mesmos TAs renumerados (dois pendentes da RES-11, um da RES-12 e um automatizado).
+- [US-12](../historias/US-12-ver-detalhe-e-historico.md) e [US-03](../historias/US-03-manter-e-encerrar-a-sessao.md) com os três papéis no Index Card. Os CAs e os enunciados de RF continuam dizendo "Gestor" para o perfil, porque o sistema mínimo tem um perfil só.
+- Verificação: `python scripts/verificar_historias.py` e `python scripts/gerar_rastreabilidade.py --verificar` sem apontar a US-13 ou a US-20; 20 histórias, 193 CAs e 193 TAs.
+- **Fica aberto:** se os enunciados de RF passam a dizer "Atendente responsável" ou "Gestor do serviço" (RF-04 a RF-09, RF-12, RF-17 a RF-20); nada foi trocado.

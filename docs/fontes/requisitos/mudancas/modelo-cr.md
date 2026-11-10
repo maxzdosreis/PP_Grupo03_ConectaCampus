@@ -12,6 +12,7 @@ Modelo de CR no fluxo do A4·s20 (registrar → analisar → decidir → atualiz
 |---|---|---|---|
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Criação do modelo, com o mapa de impacto tirado da [matriz de rastreabilidade](../rastreabilidade/README.md) (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Cabeçalho deixa de dizer que nenhum CR foi aberto: os CR-01 a CR-04 foram abertos a partir deste modelo (GES-02). Conteúdo do modelo sem mudança. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Dois estados novos ("Aplicado na especificação; código pendente (tarefa X)" e "Implementado") e a seção opcional 6.1, para aplicar um CR na especificação antes do código (REQ-13). Sem aprovação. |
 
 ---
 
@@ -28,7 +29,7 @@ Modelo de CR no fluxo do A4·s20 (registrar → analisar → decidir → atualiz
 | **Motivo** | Por que mudar (a resposta de uma DEC, um defeito, um pedido do cliente). |
 | **Solicitante** | Quem pede. |
 | **Responsável** | Quem analisa e atualiza os artefatos. |
-| **Estado** | Pendente · Proposto · Em análise · Aprovado · Rejeitado · Adiado |
+| **Estado** | Pendente · Proposto · Em análise · Aprovado · Rejeitado · Adiado · Aplicado na especificação; código pendente (tarefa X) · Implementado |
 | **Origem** | DEC-xx, lacuna L-xx ou outro pedido. |
 | **Baseline vigente** | A que continua valendo até a nova ser aprovada (ex.: Conecta Campus — Requisitos 1.0). |
 
@@ -67,6 +68,10 @@ Pelo menos dois critérios observáveis, em Dado/Quando/Então, novos ou alterad
 ## 6. Regressão
 
 Os TAs a rever (do mapa de impacto) e pelo menos um cenário de regressão dos critérios que não deveriam mudar.
+
+## 6.1. Aplicação na especificação (opcional)
+
+Quando o grupo aplica o CR nos documentos antes do código: uma seção final "Aplicação na especificação" com a data, os artefatos alterados (com link), os CAs novos com a marca "implementação pendente (tarefa X)" e o TA do tipo pendente, os CAs antigos marcados como substituídos e os pontos que ficam abertos para a tarefa de código. O estado passa a "Aplicado na especificação; código pendente (tarefa X)" e só a tarefa de código o muda para "Implementado".
 
 ## 7. Decisão
 

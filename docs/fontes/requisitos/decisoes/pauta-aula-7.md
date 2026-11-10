@@ -12,6 +12,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 |---|---|---|---|
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Criação: DEC-05, 06, 07, 09, 10, 11 e 13; DEC-08 e DEC-12 "se houver tempo"; pontos a confirmar abertos (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 registradas: resposta do professor e data em cada DEC, decisão do grupo separada onde a resposta não cobriu tudo, conclusão com o CR e a tarefa, tabela de pontos preenchida, entrega e apresentação e a seção Resultado (GES-02). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Contagens de CAs e TAs por DEC (DEC-05, DEC-06, DEC-07, DEC-09 e DEC-13) depois da aplicação dos CR-01 a CR-04 na especificação (REQ-13); a DEC-07 passa a ter o RF-05 e o RF-06 e as US-05 e US-06. Respostas e opções sem mudança. Sem aprovação. |
 
 ## Decisões com prazo em 06/11/2026
 
@@ -19,7 +20,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 
 - **Pergunta:** concluir, confirmar, recusar e cancelar devem depender do horário da reserva (e o que acontece com um pedido que ninguém decidiu até a data passar)?
 - **Adotado:** não dependem; valem a tabela de transições, o perfil e o motivo. Um pedido não decidido continua ocupando o horário. Por quê: nada no enunciado fixa essas regras, e elas dependem do uso real da instituição.
-- **Se a resposta for outra:** 21 CAs e 21 TAs em 9 histórias; RF-16 a RF-21, exceções novas no UC-10 e as ações disponíveis em cada reserva ([impacto](../rastreabilidade/impacto-por-dec.md#dec-13)).
+- **Se a resposta for outra:** 31 CAs e 31 TAs em 9 histórias; RF-16 a RF-21, RF-24.1, exceções novas no UC-10 e as ações disponíveis em cada reserva ([impacto](../rastreabilidade/impacto-por-dec.md#dec-13)).
 - **Resposta do professor:** "Temos que alterar, deve poder concluir somente depois do término, e recusar e cancelar somente antes do início (isso para Gestor)." • **Data:** 06/11/2026
 - **Decisão do grupo:** confirmar continua sem restrição de horário; o cancelamento pelo Solicitante continua sem restrição de horário; a Solicitada não decidida continua ocupando o horário depois da data (pontos que o professor não abordou; mantida a opção atual).
 - **Conclusão:** **muda** → [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), tarefa RES-11.
@@ -28,7 +29,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 
 - **Pergunta:** uma tentativa recusada de mudar a situação precisa ficar registrada? Onde e para quem?
 - **Adotado:** não; o histórico guarda só a criação e as mudanças aceitas. Por quê: uma recusa não muda a reserva. Difere do modelo de aceite da aula ("tentativa registrada com data, ator e resultado").
-- **Se a resposta for outra:** 10 CAs e 10 TAs em 6 histórias; RF-22, RNF-R02 e o registro das recusas no histórico ou num log ([impacto](../rastreabilidade/impacto-por-dec.md#dec-05)).
+- **Se a resposta for outra:** 15 CAs e 15 TAs em 6 histórias; RF-22, RNF-R02 e o registro das recusas no histórico ou num log ([impacto](../rastreabilidade/impacto-por-dec.md#dec-05)).
 - **Resposta do professor:** "Deve ficar registrado sim, para ter o histórico completo da reserva." • **Data:** 06/11/2026
 - **Decisão do grupo:** as tentativas recusadas entram no próprio histórico da reserva (não num log separado), com ator, momento, situação pedida, resultado e código do erro; só se registram tentativas sobre uma reserva visível ao ator (a de outro Solicitante continua "não encontrada" e não é registrada, para não revelar a reserva).
 - **Conclusão:** **muda** → [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), tarefa RES-12.
@@ -37,7 +38,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 
 - **Pergunta:** quais são o horário de funcionamento, a duração mínima e máxima e a antecedência máxima? São iguais para todos os espaços e dias?
 - **Adotado:** 07:00 às 22:00, de 30 min a 3 h, até 30 dias, iguais para todos. Por quê: sem cliente real (P-01), os valores são do grupo e ficam em constantes únicas.
-- **Se a resposta for outra:** 10 CAs e 10 TAs em 2 histórias; RF-11.5, RF-28, RF-30, RF-31 e os testes de borda; por espaço ou por dia, o cadastro de espaços também muda ([impacto](../rastreabilidade/impacto-por-dec.md#dec-07)).
+- **Se a resposta for outra:** 22 CAs e 22 TAs em 4 histórias; RF-05, RF-06, RF-11.5, RF-28, RF-30, RF-31 e os testes de borda; por espaço ou por dia, o cadastro de espaços também muda ([impacto](../rastreabilidade/impacto-por-dec.md#dec-07)).
 - **Resposta do professor:** "O horário de funcionamento é das 07:00 às 00:00, as reservas padrões são de 1 hora, e precisa de horário por espaço, porque teremos vários espaços." • **Data:** 06/11/2026
 - **Decisão do grupo:** 07:00–00:00 é o padrão de cada espaço, configurável por espaço; "reservas padrões de 1 hora" = duração sugerida ao pedir; mínimo de 30 min, máximo de 3 h e antecedência de 30 dias continuam (o professor não os mudou); o término à meia-noite é o fim do dia da reserva.
 - **Conclusão:** **muda** → [CR-03](../mudancas/CR-03-horario-por-espaco.md), tarefa ESP-07.
@@ -46,7 +47,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 
 - **Pergunta:** quando o Gestor desativa um espaço, o que acontece com as reservas que ele já tem?
 - **Adotado:** continuam valendo; só novos pedidos ficam bloqueados, e o Gestor cancela uma a uma, se precisar. Por quê: preserva decisões e histórico; cancelar em cascata faria o cadastro de espaços conhecer as reservas.
-- **Se a resposta for outra:** 14 CAs e 14 TAs em 4 histórias; RF-06, RF-07, RF-08, RF-11.3, RF-20 e RNF-R05 ([impacto](../rastreabilidade/impacto-por-dec.md#dec-06)).
+- **Se a resposta for outra:** 15 CAs e 15 TAs em 4 histórias; RF-06, RF-07, RF-08, RF-11.3, RF-20 e RNF-R05 ([impacto](../rastreabilidade/impacto-por-dec.md#dec-06)).
 - **Resposta do professor:** "Isso mesmo, deve continuar assim." • **Data:** 06/11/2026
 - **Conclusão:** **confirma** a opção adotada; nenhum CR.
 
@@ -54,7 +55,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 
 - **Pergunta:** qual é o formato real da matrícula, e ela precisa ser conferida com a instituição?
 - **Adotado:** obrigatória, única, até 20 caracteres, sem espaços, sem conferência. Por quê: o formato não foi informado; a regra está isolada numa função.
-- **Se a resposta for outra:** 5 CAs e 5 TAs em 2 histórias; RF-32 e RF-32.1 e os dados de exemplo ([impacto](../rastreabilidade/impacto-por-dec.md#dec-09)).
+- **Se a resposta for outra:** 9 CAs e 9 TAs em 2 histórias; RF-32 e RF-32.1 e os dados de exemplo ([impacto](../rastreabilidade/impacto-por-dec.md#dec-09)).
 - **Resposta do professor:** "São números sempre, mas não tem uma quantidade máxima e uma quantidade mínima." • **Data:** 06/11/2026
 - **Decisão do grupo:** só dígitos; o limite de 20 caracteres fica como limite técnico (coluna do banco), não como regra da instituição.
 - **Conclusão:** **muda** → [CR-04](../mudancas/CR-04-matricula-so-digitos.md), tarefa AUT-12.

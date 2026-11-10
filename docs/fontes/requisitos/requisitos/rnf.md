@@ -17,6 +17,7 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | RNF-F13 · Revogação e troca da credencial de renovação; RNF-F03 cita que a troca mantém o prazo de 1 dia; RNF-F04 passa a 8 operações públicas, com sair (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RNF-F13: uma renovação só para as janelas da mesma sessão, com a outra esperando sem tempo fixo (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RNF-P01 com 1.000 e 5.000 reservas e o cenário da última página do Gestor sem critério, medido depois da paginação da consulta (RES-10); a medição de 04/11/2026 fica como "antes"; RNF-P02 com o resultado novo (a meta não muda). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | RNF-R02 passa a cobrir a gravação da tentativa recusada e RNF-R03 deixa de dizer que o histórico fica como estava ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), DEC-05), com o código na tarefa RES-12 (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
 
 ## Como ler
 
@@ -258,10 +259,10 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | Toda criação e toda mudança de situação aceita gera exatamente um registro no histórico, gravado junto com a reserva: ou os dois ficam gravados, ou nenhum. Registros nunca são alterados nem excluídos. |
-| **Métrica e valor-alvo** | 100% das mudanças aceitas com registro; 0 registros de operações recusadas ou que falharam ao gravar; histórico coerente (cada situação anterior é a nova do registro anterior; a última é a situação atual). |
+| **Enunciado** | Toda criação e toda mudança de situação aceita gera exatamente um registro no histórico, gravado junto com a reserva: ou os dois ficam gravados, ou nenhum. Toda tentativa recusada de mudar a situação de uma reserva visível ao ator também gera um registro, gravado mesmo com a mudança recusada. Registros nunca são alterados nem excluídos. |
+| **Métrica e valor-alvo** | 100% das mudanças aceitas e das tentativas recusadas sobre uma reserva visível ao ator com registro; 0 registros de reserva que o ator não vê e de operações que falharam ao gravar; histórico coerente (cada situação anterior é a nova do registro anterior; a última é a situação atual). |
 | **Como verificar** | `reservas/tests/test_repositorio_reservas.py::test_conflito_ao_salvar_nao_grava_registro_e_mantem_os_pendentes`, `::test_conflito_barrado_pelo_banco_nao_grava_registro`, `::test_salvar_de_novo_sem_mudanca_nao_duplica_registros`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva`; `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao [x]`; `exemplos/tests/test_carregar_dados_exemplo.py::test_todas_as_reservas_de_exemplo_tem_historico_coerente` |
-| **Origem** | NS-12; critério CS-02; [DEC-05](../decisoes/DEC-05.md) |
+| **Origem** | NS-12; critério CS-02; [DEC-05](../decisoes/DEC-05.md) (decidida na Aula 7; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), tarefa RES-12: a gravação da tentativa recusada é implementação pendente; os testes citados verificam a regra anterior) |
 | **O cliente não pediria** | ✔ (ele pede o histórico; a atomicidade, não) |
 | **Revisão / estado** | 0.1 • Rascunho |
 
@@ -269,7 +270,7 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | Uma operação recusada deixa espaços, reservas e histórico exatamente como estavam. |
+| **Enunciado** | Uma operação recusada deixa espaços e reservas (situação e motivo) exatamente como estavam; a única mudança é o registro da tentativa recusada de mudar a situação de uma reserva visível ao ator no histórico dela (RNF-R02). |
 | **Métrica e valor-alvo** | 0 mudanças de estado depois de uma recusa, em sequências geradas de tentativas. |
 | **Como verificar** | `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` e `espacos/tests/test_propriedades_do_espaco.py::TestMaquinaDoEspaco` (toda recusa compara o estado antes e depois); `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [x]`; `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` |
 | **Origem** | NS-13, NS-09; enunciado (F5) |

@@ -1,17 +1,3 @@
-"""Confere a fonte oficial de requisitos (docs/fontes/requisitos/).
-
-Verificações:
-  1. Rastreabilidade: toda NS da Visão é origem principal de pelo menos um RF,
-     e todo RF tem uma NS de origem que existe.
-  2. Sintaxe: todo enunciado de RF começa com "O sistema deve permitir ao";
-     os de recusa (F5) começam com "O sistema deve impedir que".
-  3. Termos vagos nos enunciados e textos da SRS, das fichas de RF e dos RNF.
-  4. Links relativos e âncoras de todos os .md da pasta.
-
-Uso, na raiz do repositório:  python scripts/verificar_requisitos.py
-Sai com código 1 se alguma verificação falhar. Não depende de pacotes externos.
-"""
-
 from __future__ import annotations
 
 import re
@@ -86,6 +72,16 @@ def necessidades_da_visao() -> list[str]:
     return list(dict.fromkeys(encontradas))
 
 
+def necessidades_fora_do_1_0() -> list[str]:
+    linhas = re.findall(r'^\|\s*<a id="ns-\d{2}"></a>(NS-\d{2})\s*\|.*$', ler(PASTA / "visao.md"), flags=re.M)
+    achadas = []
+    for ns in linhas:
+        linha = re.search(rf'^\|\s*<a id="ns-\d{{2}}"></a>{ns}\s*\|.*$', ler(PASTA / "visao.md"), flags=re.M)[0]
+        if "fora do 1.0" in linha and re.search(r"DEC-\d{2}", linha):
+            achadas.append(ns)
+    return achadas
+
+
 def verificar_rastreabilidade(rfs: list[dict]) -> list[str]:
     erros = []
     necessidades = necessidades_da_visao()
@@ -105,7 +101,9 @@ def verificar_rastreabilidade(rfs: list[dict]) -> list[str]:
     for ns in necessidades:
         rfs_da_ns = origem_principal.get(ns, [])
         print(f"  {ns}: {', '.join(rfs_da_ns) if rfs_da_ns else '— NENHUM'}")
-        if not rfs_da_ns:
+        if not rfs_da_ns and ns in necessidades_fora_do_1_0():
+            print(f"    ({ns} fora do 1.0 por DEC: sem RF de propósito)")
+        elif not rfs_da_ns:
             erros.append(f"{ns} não é origem principal de nenhum RF")
     print(f"  {len(necessidades)} NS na Visão; {len(rfs)} RF com origem.")
     return erros

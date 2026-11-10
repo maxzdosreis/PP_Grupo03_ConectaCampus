@@ -15,6 +15,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03, CA-07 novos, com a implementação pendente na tarefa RES-11 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-145 a TA-151 passam a TA-165 a TA-173 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -27,15 +28,15 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | **Origem** | [UC-18 Recusar reserva](../casos-de-uso/README.md#uc-18): o fluxo comum de [UC-10, passos 1 a 8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p1), na [variação UC-18](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-18), com UC-12 ([Informar motivo](../casos-de-uso/README.md#uc-12): passos 4 e 5, E6.6 e E6.7) e UC-13; as exceções E6.4 a E6.7 no contexto da recusa. |
 | **Prioridade** | Normal — [RF-18](../requisitos/rf-reservas.md#rf-18) e [RF-24](../requisitos/rf-reservas.md#rf-24) são normais (F4 do enunciado). |
 | **Estimativa (Custo em Semanas)** | 0,2 (retrospectiva: a recusa com motivo obrigatório da RES-06 e o campo de motivo do diálogo da FE-05). |
-| **Conversa** | "Pode recusar um pedido já confirmado?" → não; para desfazer uma Confirmada, o Gestor cancela ([US-13](US-13-cancelar-uma-reserva.md)). "Pode recusar depois que o horário começou?" → hoje sim ([DEC-13](../decisoes/DEC-13.md)). "A tentativa de recusar sem motivo fica registrada?" → não ([DEC-05](../decisoes/DEC-05.md)). |
-| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). |
+| **Conversa** | "Pode recusar um pedido já confirmado?" → não; para desfazer uma Confirmada, o Gestor cancela ([US-13](US-13-cancelar-uma-reserva.md)). "Pode recusar depois que o horário começou?" → não, só antes do início ([DEC-13](../decisoes/DEC-13.md), decidida na Aula 7; tarefa RES-11). "A tentativa de recusar sem motivo fica registrada?" → sim, se a reserva for visível a quem tentou ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7; tarefa RES-12). |
+| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). Os CAs marcados com implementação pendente só contam quando a tarefa citada os implementar e criar o TA deles. |
 
 ## INVEST
 
 | Letra | Atende | Justificativa |
 |---|---|---|
 | **I** · Independente | ✗ | Precisa de um pedido Solicitado ([US-08](US-08-solicitar-reserva.md)); compartilha o fluxo de [US-14](US-14-confirmar-uma-reserva.md). |
-| **N** · Negociável | ✓ | O texto do motivo, o limite de caracteres e se a recusa vale depois do início ([DEC-13](../decisoes/DEC-13.md)) podem ser combinados sem mudar a meta. |
+| **N** · Negociável | ✓ | O texto do motivo e o limite de caracteres podem ser combinados sem mudar a meta; a recusa só antes do início foi decidida na [DEC-13](../decisoes/DEC-13.md). |
 | **V** · Valiosa | ✓ | Sem ela, um pedido indevido ocuparia o horário até alguém cancelá-lo. |
 | **E** · Estimável | ✓ | Uma transição com motivo, sobre o fluxo comum. |
 | **S** · Small | ✓ | Uma transição sobre o fluxo comum: cabe numa iteração. |
@@ -52,8 +53,9 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o sistema informa "Reserva recusada com sucesso.", a reserva passa a Recusada com o motivo visível ao solicitante na lista e no detalhe, e não oferece mais nenhuma ação
 - **Origem:** [UC-10 passos 1 a 8, variação UC-18](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-18)
 - **RF:** [RF-18](../requisitos/rf-reservas.md#rf-18)
-- **TA:** [TA-145](#ta-145)
-- **Depende de:** [DEC-13](../decisoes/DEC-13.md) (recusar depois do início também é aceito hoje)
+- **TA:** [TA-161](#ta-161)
+- **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; recusar só vale antes do início: ver a Situação abaixo)
+- **Situação:** substituído por [CA-03](#us-15-ca-03), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-11; não valem como prova da regra nova.
 
 #### <a id="us-15-ca-02"></a>US-15 · CA-02 · O horário é liberado (sucesso)
 
@@ -62,53 +64,77 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Então** o pedido é aceito: uma reserva Recusada não ocupa o horário
 - **Origem:** [UC-10 variação UC-18](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-18)
 - **RF:** [RF-18](../requisitos/rf-reservas.md#rf-18)
-- **TA:** [TA-146](#ta-146)
+- **TA:** [TA-162](#ta-162)
 
-#### <a id="us-15-ca-03"></a>US-15 · CA-03 · Recusar o que não está Solicitada (exceção)
+#### <a id="us-15-ca-03"></a>US-15 · CA-03 · Pedido recusado antes do início (sucesso)
+
+- **Dado** uma reserva Solicitada cujo início ainda não chegou e um Gestor identificado
+- **Quando** o Gestor escolhe recusá-la, escreve o motivo "Espaço reservado para um evento da instituição" e confirma
+- **Então** o sistema informa "Reserva recusada com sucesso.", a reserva passa a Recusada com o motivo visível ao solicitante na lista e no detalhe, e não oferece mais nenhuma ação
+- **Origem:** [UC-10 passos 1 a 8, variação UC-18](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-18)
+- **RF:** [RF-18](../requisitos/rf-reservas.md#rf-18)
+- **TA:** [TA-163](#ta-163)
+- **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
+- **Implementação:** implementação pendente (tarefa RES-11)
+
+#### <a id="us-15-ca-04"></a>US-15 · CA-04 · Recusar o que não está Solicitada (exceção)
 
 - **Dado** uma reserva Confirmada, ou numa situação final
 - **Quando** o Gestor pede para recusá-la
 - **Então** o sistema informa "Não é possível alterar uma reserva Confirmada para Recusada." (com a situação atual), e a reserva continua como estava, com o mesmo motivo e o mesmo histórico
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
-- **TA:** [TA-147](#ta-147)
+- **TA:** [TA-164](#ta-164)
+- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código ainda cumpre até a tarefa RES-12.
 
-#### <a id="us-15-ca-04"></a>US-15 · CA-04 · Motivo longo demais (exceção)
+#### <a id="us-15-ca-05"></a>US-15 · CA-05 · Motivo longo demais (exceção)
 
 - **Dado** uma reserva Solicitada
 - **Quando** o Gestor a recusa com um motivo de mais de 300 caracteres depois de tirar os espaços das pontas e os repetidos
 - **Então** o sistema informa, junto ao motivo, 'O campo "Motivo" deve ter no máximo 300 caracteres.', e a reserva continua Solicitada, ocupando o horário
 - **Origem:** [UC-10 E6.6](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-6)
 - **RF:** [RF-26](../requisitos/rf-reservas.md#rf-26)
-- **TA:** [TA-148](#ta-148)
+- **TA:** [TA-165](#ta-165)
 
-#### <a id="us-15-ca-05"></a>US-15 · CA-05 · Recusar sem motivo (exceção)
+#### <a id="us-15-ca-06"></a>US-15 · CA-06 · Recusar sem motivo (exceção)
 
 - **Dado** uma reserva Solicitada
 - **Quando** o Gestor confirma a recusa sem motivo, ou com um motivo só de espaços
 - **Então** o sistema informa, junto ao motivo, "Informe o motivo para recusar ou cancelar a reserva.", o motivo fica pronto para ser escrito, e a reserva continua Solicitada
 - **Origem:** [UC-10 E6.7](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-7)
 - **RF:** [RF-26](../requisitos/rf-reservas.md#rf-26)
-- **TA:** [TA-149](#ta-149)
+- **TA:** [TA-166](#ta-166)
 
-#### <a id="us-15-ca-06"></a>US-15 · CA-06 · Recusa registrada no histórico (registro)
+#### <a id="us-15-ca-07"></a>US-15 · CA-07 · Recusar depois do início (exceção)
+
+- **Dado** uma reserva Solicitada cujo início já chegou
+- **Quando** o Gestor tenta recusá-la, com motivo
+- **Então** o sistema recusa, informa que só é possível recusar antes do início e a reserva continua Solicitada
+- **Origem:** [UC-10 E6.8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-8)
+- **RF:** [RF-24.1](../requisitos/rf-reservas.md#rf-24-1)
+- **TA:** [TA-167](#ta-167)
+- **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
+- **Implementação:** implementação pendente (tarefa RES-11)
+
+#### <a id="us-15-ca-08"></a>US-15 · CA-08 · Recusa registrada no histórico (registro)
 
 - **Dado** uma reserva que o Gestor acabou de recusar (CA-01)
 - **Quando** o histórico é consultado
-- **Então** o último registro é "Recusada por" o nome do Gestor, da situação anterior Solicitada, com o momento e o motivo; a tentativa de recusar sem motivo (CA-05) não aparece — só as mudanças aceitas são registradas, diferente do modelo do professor
+- **Então** o último registro é "Recusada por" o nome do Gestor, da situação anterior Solicitada, com o momento e o motivo; a tentativa de recusar sem motivo (CA-06) não aparece — só as mudanças aceitas são registradas, diferente do modelo do professor
 - **Origem:** [UC-10 passo 7](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p7)
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
-- **TA:** [TA-150](#ta-150)
+- **TA:** [TA-168](#ta-168)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
+- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-14 · CA-12](US-14-confirmar-uma-reserva.md#us-14-ca-12), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-12; não valem como prova da regra nova.
 
-#### <a id="us-15-ca-07"></a>US-15 · CA-07 · Só o Gestor recusa (acesso)
+#### <a id="us-15-ca-09"></a>US-15 · CA-09 · Só o Gestor recusa (acesso)
 
 - **Dado** uma reserva Solicitada do próprio Solicitante
 - **Quando** ele pede para recusá-la
 - **Então** o sistema informa "Somente o gestor pode recusar reservas.", a reserva não muda, e a opção de recusar nem é oferecida a ele
 - **Origem:** [UC-10 E6.4](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-4)
 - **RF:** [RF-27](../requisitos/rf-reservas.md#rf-27)
-- **TA:** [TA-151](#ta-151)
+- **TA:** [TA-169](#ta-169)
 
 ## Testes de aceite
 
@@ -116,10 +142,12 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-145"></a>TA-145 | [CA-01](#us-15-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [recusada]`; `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida [x]`; `pages/PaginaReservas.test.tsx`: `"Recusar" abre o diálogo com o campo de motivo em foco`; `pages/PaginaReservas.test.tsx`: `enviar recusa com o motivo, mostra a mensagem da API, fecha e recarrega` |
-| <a id="ta-146"></a>TA-146 | [CA-02](#us-15-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
-| <a id="ta-147"></a>TA-147 | [CA-03](#us-15-ca-03) | automatizado | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos` |
-| <a id="ta-148"></a>TA-148 | [CA-04](#us-15-ca-04) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
-| <a id="ta-149"></a>TA-149 | [CA-05](#us-15-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo`; `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `pages/PaginaReservas.test.tsx`: `erro no motivo aparece embaixo do campo, que recebe o foco` |
-| <a id="ta-150"></a>TA-150 | [CA-06](#us-15-ca-06) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico` |
-| <a id="ta-151"></a>TA-151 | [CA-07](#us-15-ca-07) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |
+| <a id="ta-161"></a>TA-161 | [CA-01](#us-15-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [recusada]`; `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida [x]`; `pages/PaginaReservas.test.tsx`: `"Recusar" abre o diálogo com o campo de motivo em foco`; `pages/PaginaReservas.test.tsx`: `enviar recusa com o motivo, mostra a mensagem da API, fecha e recarrega` |
+| <a id="ta-162"></a>TA-162 | [CA-02](#us-15-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
+| <a id="ta-163"></a>TA-163 | [CA-03](#us-15-ca-03) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md#4-diferença) (seção 4, o "depois")). |
+| <a id="ta-164"></a>TA-164 | [CA-04](#us-15-ca-04) | automatizado | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos` |
+| <a id="ta-165"></a>TA-165 | [CA-05](#us-15-ca-05) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
+| <a id="ta-166"></a>TA-166 | [CA-06](#us-15-ca-06) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo`; `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `pages/PaginaReservas.test.tsx`: `erro no motivo aparece embaixo do campo, que recebe o foco` |
+| <a id="ta-167"></a>TA-167 | [CA-07](#us-15-ca-07) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-03](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-168"></a>TA-168 | [CA-08](#us-15-ca-08) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico` |
+| <a id="ta-169"></a>TA-169 | [CA-09](#us-15-ca-09) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |

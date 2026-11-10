@@ -23,6 +23,9 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | AUT-09: RNF-F13 nas tabelas (5, 6.3 e auditoria; 33 RNF); RNF-F04 com 8 operações públicas; a L-04 passa a cobrir só a credencial de acesso, porque sair revoga a de renovação; auditoria e evidência (6.4) do RF-36; TAs citados renumerados (TA-19 e TA-20 passam a TA-20 e TA-21; TA-21 a TA-158 passam a TA-24 a TA-161). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RES-10: RF-12.2 (consulta em páginas) nas tabelas (resumo, 6.1, 6.2, 6.4, QFD e auditoria; 62 RF); a lacuna L-05 passa a resolvida; RNF-P01 medido com 1.000 e 5.000 reservas, inclusive a última página; TAs citados renumerados (TA-96 a TA-107 passam a TA-97 a TA-114, conforme as US-10 e US-11; TA-108 a TA-161 passam a TA-115 a TA-168). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Atores: Atendente responsável e Gestor do serviço como papéis, com o perfil Gestor cobrindo os dois ([DEC-25](../decisoes/DEC-25.md)); as regras de negócio estão no catálogo [`regras-de-negocio.md`](regras-de-negocio.md). Nenhum RF, RNF nem a tabela de resumo mudou (REQ-12). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos CR-01 a CR-04 (DEC-13, DEC-05, DEC-07, DEC-09), com o código nas tarefas RES-11, RES-12, ESP-07 e AUT-12 (REQ-13): RF-24.1 novo (63 fichas) nas tabelas (resumo, 6.1, 6.2, 6.3, 6.4, QFD e auditoria); auditoria dos RF-05, RF-06, RF-11.5, RF-16, RF-18 a RF-22, RF-28, RF-30 e RF-32.1 com "Co" apontando o código que ainda não tem a regra; L-01, L-02 e L-06 com a aplicação na especificação. A SRS está adiante do código de propósito. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | L-18 nova (RF-24.1 sem código até a tarefa RES-11) e DEC-07 com o RF-05 e o RF-06 na seção 6.3 (REQ-13). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | NS-17 na seção 6.1 como fora do 1.0 (DEC-24) e L-11 com a NS-17; `verificar_requisitos.py` e `gerar_rastreabilidade.py` passam a reconhecer a NS fora do 1.0 por DEC (pendência da REQ-11). Mudança editorial. Sem aprovação. |
 
 ## Sumário
 
@@ -157,6 +160,7 @@ F = funcionalidade do enunciado (F1 a F6) ou Extra. QFD: N normal, E esperado, F
 | [RF-22](rf-reservas.md#rf-22) | Consultar o histórico da reserva | NS-12 | Extra | N | Rascunho |
 | [RF-23](rf-reservas.md#rf-23) | Recusar operação sobre reserva inexistente ou de outra pessoa | NS-14 | F5 | N | Rascunho |
 | [RF-24](rf-reservas.md#rf-24) | Recusar transição de situação não permitida | NS-09 | F5 | N | Rascunho |
+| [RF-24.1](rf-reservas.md#rf-24-1) | Recusar mudança de situação fora do momento permitido | NS-09 | F5 | N | Rascunho |
 | [RF-25](rf-reservas.md#rf-25) | Recusar situação ausente ou desconhecida | NS-09 | F5 | N | Rascunho |
 | [RF-26](rf-reservas.md#rf-26) | Recusar recusa ou cancelamento sem motivo válido | NS-09 | F5 | E | Rascunho |
 | [RF-27](rf-reservas.md#rf-27) | Recusar mudança de situação que o perfil não pode fazer | NS-11 | F5 | E | Rascunho |
@@ -182,7 +186,7 @@ F = funcionalidade do enunciado (F1 a F6) ou Extra. QFD: N normal, E esperado, F
 | [RF-39](rf-gerais.md#rf-39) | Carregar dados de exemplo | NS-16 | Extra | E | Rascunho |
 | [RF-40](rf-gerais.md#rf-40) | Verificar se o sistema está no ar | NS-16 | Extra | E | Rascunho |
 
-**Contagem:** 62 fichas (40 RF principais e 22 filhos). Por área: espaços 17, reservas 24, agenda 6, contas 12, mensagens e operação 3.
+**Contagem:** 63 fichas (40 RF principais e 23 filhos). Por área: espaços 17, reservas 25, agenda 6, contas 12, mensagens e operação 3.
 
 ## 4. Interfaces
 
@@ -295,7 +299,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | NS-06 | Conhecer as regras de uso e ter os pedidos fora delas impedidos | RF-11.2, RF-11.5, RF-28 | RF-31 |
 | NS-07 | Acompanhar os próprios pedidos | RF-13, RF-14 | RF-15, RF-26 |
 | NS-08 | Localizar pedidos por critérios combinados | RF-12, RF-12.1, RF-12.2, RF-15 | RF-14 |
-| NS-09 | Decidir sobre cada pedido | RF-16, RF-17, RF-18, RF-19, RF-20, RF-24, RF-25, RF-26 | RF-27 |
+| NS-09 | Decidir sobre cada pedido | RF-16, RF-17, RF-18, RF-19, RF-20, RF-24, RF-24.1, RF-25, RF-26 | RF-27 |
 | NS-10 | Desistir do próprio pedido | RF-21 | RF-16, RF-26 |
 | NS-11 | Saber quem pediu e só quem tem autoridade decide | RF-10, RF-27, RF-33, RF-33.1, RF-33.2, RF-34, RF-34.1, RF-35, RF-36, RF-37 | RF-16, RF-22, RF-32.2, RF-32.3 |
 | NS-12 | Histórico de cada reserva | RF-22 | — |
@@ -303,6 +307,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | NS-14 | Pedidos protegidos de outros solicitantes | RF-23 | RF-11.4, RF-13, RF-29, RF-36 |
 | NS-15 | Acesso sem depender de um gestor | RF-32, RF-32.1, RF-32.2, RF-32.3 | — |
 | NS-16 | Instalar, executar e demonstrar | RF-39, RF-40 | — |
+| NS-17 | Ser avisado de que a situação do pedido mudou | — (fora do 1.0, [DEC-24](../decisoes/DEC-24.md)) | — |
 
 ### 6.2 RF → funcionalidades do enunciado (F1 a F6)
 
@@ -312,7 +317,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | F2 | Cadastrar solicitação com solicitante, item, data e situação inicial | RF-11 | ✔ |
 | F3 | Consultar por pelo menos dois critérios | RF-12 (espaço, situação, data, solicitante, "somente as minhas"), RF-12.2 (em páginas, com o total), RF-13, RF-14, RF-15 | ✔ |
 | F4 | Alterar a situação com pelo menos três estados | RF-16 a RF-21 (cinco situações) | ✔ |
-| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 28 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
+| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 29 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-24.1, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
 | F6 | Mensagens claras de sucesso e erro | RF-38 (e RNF-U01) | ✔ |
 | Extra | Além das seis | RF-06, RF-07, RF-08, RF-22, RF-28 a RF-31, RF-32 a RF-37, RF-39, RF-40 (16 fichas, sem contar as recusas, que são F5) | — |
 
@@ -326,13 +331,13 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | [DEC-04](../decisoes/DEC-04.md) | Decidida | RF-05, RF-10, RF-11, RF-13, RF-23, RF-27, RF-32, RF-33, RF-34, RF-36, RF-37 | RNF-F01 a RNF-F04, RNF-F09, RNF-F13; REST-08 |
 | [DEC-05](../decisoes/DEC-05.md) | Decidida (CR-02) | RF-22 | RNF-R02 |
 | [DEC-06](../decisoes/DEC-06.md) | Decidida | RF-06, RF-07, RF-08, RF-11.3, RF-20 | RNF-R05 |
-| [DEC-07](../decisoes/DEC-07.md) | Decidida (CR-03) | RF-11.5, RF-28, RF-30, RF-31 | — |
+| [DEC-07](../decisoes/DEC-07.md) | Decidida (CR-03) | RF-05, RF-06, RF-11.5, RF-28, RF-30, RF-31 | — |
 | [DEC-08](../decisoes/DEC-08.md) | Decidida | — | RNF-S03 |
 | [DEC-09](../decisoes/DEC-09.md) | Decidida (CR-04) | RF-32, RF-32.1 | — |
 | [DEC-10](../decisoes/DEC-10.md) | Decidida | RF-05.2, RF-06.2 | — |
 | [DEC-11](../decisoes/DEC-11.md) | Decidida | RF-29 | RNF-F06 |
 | [DEC-12](../decisoes/DEC-12.md) | Decidida | — | RNF-P01, RNF-P02 |
-| [DEC-13](../decisoes/DEC-13.md) | Decidida (CR-01) | RF-16, RF-17, RF-18, RF-19, RF-20, RF-21 | — |
+| [DEC-13](../decisoes/DEC-13.md) | Decidida (CR-01) | RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-24.1 | — |
 | [DEC-14](../decisoes/DEC-14.md) | Decidida | — | — |
 | [DEC-15](../decisoes/DEC-15.md) | Decidida | — | — |
 | [DEC-16](../decisoes/DEC-16.md) | Decidida | — | — |
@@ -388,6 +393,7 @@ UC, US, CA e TA de cada RF estão na [matriz gerada](../rastreabilidade/matriz.m
 | RF-22 | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` |
 | RF-23 | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404` |
 | RF-24 | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva` |
+| RF-24.1 | — (implementação pendente, tarefa RES-11: ainda não há teste) |
 | RF-25 | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400` |
 | RF-26 | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo` |
 | RF-27 | `reservas/tests/test_api_permissoes.py::test_solicitante_confirmando_a_propria_responde_403_sem_mudar_nada` |
@@ -423,7 +429,7 @@ Classificação do ponto de vista do **cliente** (a instituição), não do enun
 
 | Classe | Fichas | RF |
 |---|---|---|
-| Normal | 22 | RF-01, RF-03, RF-05, RF-05.1, RF-09, RF-11, RF-11.1, RF-11.3, RF-11.4, RF-12, RF-13, RF-14, RF-17, RF-18, RF-19, RF-20, RF-22, RF-23, RF-24, RF-25, RF-37, RF-38 |
+| Normal | 23 | RF-01, RF-03, RF-05, RF-05.1, RF-09, RF-11, RF-11.1, RF-11.3, RF-11.4, RF-12, RF-13, RF-14, RF-17, RF-18, RF-19, RF-20, RF-22, RF-23, RF-24, RF-24.1, RF-25, RF-37, RF-38 |
 | Esperado | 37 | as demais, salvo as três abaixo |
 | Fascinante | 3 | RF-28, RF-29, RF-30 |
 
@@ -441,23 +447,24 @@ Comportamento que uma necessidade pede e o sistema não tem, comportamento sem t
 
 | ID | Tipo | Lacuna | Afeta | Proposta |
 |---|---|---|---|---|
-| <a id="l-01"></a>L-01 | NS × comportamento | A NS-09 fala em registrar que o uso **aconteceu**, mas o Gestor conclui uma reserva antes do término; também confirma ou recusa depois do início, qualquer um cancela depois do uso, e uma Solicitada não decidida continua ocupando horário depois da data. | RF-16 a RF-21; NS-09 | **CR** — [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (a [DEC-13](../decisoes/DEC-13.md), decidida em 06/11/2026: concluir só a partir do término; recusar e cancelar, pelo Gestor, só antes do início); fecha com a RES-11. |
-| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **CR** — [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (a [DEC-05](../decisoes/DEC-05.md), decidida em 06/11/2026: as tentativas recusadas entram no histórico); fecha com a RES-12. |
+| <a id="l-01"></a>L-01 | NS × comportamento | A NS-09 fala em registrar que o uso **aconteceu**, mas o Gestor conclui uma reserva antes do término; também confirma ou recusa depois do início, qualquer um cancela depois do uso, e uma Solicitada não decidida continua ocupando horário depois da data. | RF-16 a RF-21; NS-09 | **CR** — [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (a [DEC-13](../decisoes/DEC-13.md), decidida em 06/11/2026: concluir só a partir do término; recusar e cancelar, pelo Gestor, só antes do início); fecha com a RES-11. Aplicado na especificação em 10/11/2026 (REQ-13); o código ainda não muda. |
+| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **CR** — [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (a [DEC-05](../decisoes/DEC-05.md), decidida em 06/11/2026: as tentativas recusadas entram no histórico); fecha com a RES-12. Aplicado na especificação em 10/11/2026 (REQ-13); o código ainda não muda. |
 | <a id="l-03"></a>L-03 | RNF ausente | Não havia limite de tentativas de entrada: nada impedia adivinhar senhas por tentativa e erro. | RF-33; NS-11 | **Resolvida pela AUT-08:** [RF-33.2](rf-contas.md#rf-33-2) (a recusa e o tempo de espera) e [RNF-F12](rnf.md#rnf-f12) (limites por e-mail e por origem no login e por origem no cadastro). Fica a limitação do contador no Redis sem persistência, nas [limitações conhecidas do README da raiz](../../../../README.md#limitações-conhecidas). |
 | <a id="l-04"></a>L-04 | RNF ausente | Sair não invalida a credencial de acesso: uma cópia dela continua valendo até expirar (até 30 min). A parte da credencial de renovação foi resolvida pela AUT-09: sair a revoga, e cada renovação a troca ([RNF-F13](rnf.md#rnf-f13)). | RF-36; RNF-F03; RNF-F13 | **Aceitar** ([limitação conhecida do README da raiz](../../../../README.md#limitações-conhecidas); [DEC-04](../decisoes/DEC-04.md), decisão c da AUT-03). |
 | <a id="l-05"></a>L-05 | Comportamento | A consulta de reservas não era paginada: a lista do Gestor sem critério devolvia todas as reservas, e o tempo e o tamanho da resposta cresciam com elas. Medido antes: p95 de 378 ms com 1.000 reservas (meta atendida) e de 1.743 ms com 5.000 (meta estourada). | RF-12; RNF-P01 | **Resolvida pela RES-10:** [RF-12.2](rf-reservas.md#rf-12-2) (a consulta vem em páginas de até 20, contadas e cortadas no banco, com o total) e [RNF-P01](rnf.md#rnf-p01) (medido de novo: p95 de 34 ms com 1.000 reservas e de 45 ms com 5.000, inclusive a última página do Gestor sem critério; [medição](rnf.md#medição)). |
-| <a id="l-06"></a>L-06 | NS × comportamento | A matrícula não é conferida com a instituição: qualquer texto de até 20 caracteres sem espaço é aceito. | RF-32, RF-32.1; NS-11 | **CR** — [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (a [DEC-09](../decisoes/DEC-09.md), decidida em 06/11/2026: só dígitos); fecha com a AUT-12. A conferência com a instituição continua fora do escopo. |
+| <a id="l-06"></a>L-06 | NS × comportamento | A matrícula não é conferida com a instituição: qualquer texto de até 20 caracteres sem espaço é aceito. | RF-32, RF-32.1; NS-11 | **CR** — [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (a [DEC-09](../decisoes/DEC-09.md), decidida em 06/11/2026: só dígitos); fecha com a AUT-12. A conferência com a instituição continua fora do escopo. Aplicado na especificação em 10/11/2026 (REQ-13); o código ainda não muda. |
 | <a id="l-07"></a>L-07 | RF/RNF sem teste | Não há teste com dois pedidos simultâneos de verdade (duas threads) para o mesmo período; a garantia é a restrição do banco, provada por um teste que simula a corrida. Para a mudança de situação o teste de duas threads existe. | RNF-R01; RF-11.4 | **Aceitar** nesta tarefa (não muda testes); sugerir o teste numa tarefa de testes antes da baseline. |
-| <a id="l-08"></a>L-08 | RF sem teste | A resposta "Não foi possível conectar ao banco de dados." (503) da verificação do sistema não tem teste. | RF-40; [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-167, roteiro manual, REQ-05) | **Aceitar** nesta tarefa; sugerir o teste numa tarefa de testes. |
+| <a id="l-08"></a>L-08 | RF sem teste | A resposta "Não foi possível conectar ao banco de dados." (503) da verificação do sistema não tem teste. | RF-40; [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-188, roteiro manual, REQ-05) | **Aceitar** nesta tarefa; sugerir o teste numa tarefa de testes. |
 | <a id="l-09"></a>L-09 | RNF sem verificação automática | 360 px, teclado, contraste nas telas, situação sem depender da cor, execução num ambiente novo e ausência de segredos no ZIP dependem de verificação manual. | RNF-U02 a RNF-U05, RNF-S01, RNF-S06 | **Aceitar**, com a verificação feita no ensaio antes da entrega e o resultado registrado na versão 0.2. |
 | <a id="l-10"></a>L-10 | Comportamento sem NS | (a) Só a origem das telas é autorizada a chamar a API pelo navegador (RNF-F11): proteção técnica sem NS própria, ligada à NS-14. (b) A administração (`/admin/`) permite à Equipe de TI mudar o perfil e desativar usuários, sem RF próprio além do [RF-37](rf-contas.md#rf-37). (c) O Gestor também pede reservas em nome próprio ([RF-11](rf-reservas.md#rf-11)) e filtra "somente as minhas" ([RF-12](rf-reservas.md#rf-12)), mas a NS-03 e a NS-07 têm só o Solicitante como origem. | RNF-F11; RF-37; RF-11, RF-12; Visão | (a) e (b) **aceitar**: são operação da Equipe de TI, que não é ator do negócio. (c) Ajuste editorial na Visão na 0.2 (acrescentar o Gestor à origem da NS-03 e da NS-07), sem mudança de comportamento. |
-| <a id="l-11"></a>L-11 | NS sem RF implementado | Nenhuma. As 16 NS têm pelo menos um RF implementado e com teste. | — | — |
+| <a id="l-11"></a>L-11 | NS sem RF implementado | Nenhuma. As 16 NS do 1.0 têm pelo menos um RF implementado e com teste; a NS-17 está fora do 1.0 pela [DEC-24](../decisoes/DEC-24.md), sem RF de propósito, e os verificadores a reconhecem. | — | — |
 | <a id="l-12"></a>L-12 | RF × comportamento | Ao solicitar, o espaço informado por um número que não é positivo e, depois dele, a finalidade (em branco ou acima de 200 caracteres) são conferidos **depois** da data retroativa e das regras de agenda, e não junto com os outros dados do RF-11.1, como diz a ordem do campo Regras de negócio do [RF-11](rf-reservas.md#rf-11). Um pedido com finalidade vazia e data passada recebe primeiro "data retroativa"; com finalidade vazia e espaço zero, recebe primeiro "espaço não identificado" (a ficha dizia o contrário até a DOC-03). O que é aceito não muda, só qual mensagem aparece primeiro; nenhum teste fixa essa posição. Achada ao escrever a ficha de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#p7) (REQ-04). | RF-11, RF-11.1; UC-04 | **Aceitar** o comportamento; ajuste editorial do campo Regras de negócio do RF-11 na 0.2 (a ficha de UC-04 já mostra a ordem real) e um teste da ordem numa tarefa de testes. |
 | <a id="l-13"></a>L-13 | RF incompleto | O motivo de mais de 300 caracteres é recusado em **qualquer** mudança de situação, inclusive ao confirmar e ao concluir, em que é opcional; o [RF-26](rf-reservas.md#rf-26) só cobre recusar e cancelar, e o [RF-17](rf-reservas.md#rf-17) e o [RF-19](rf-reservas.md#rf-19) dizem só "motivo opcional". Provado pela máquina de estados da reserva. Achada na ficha de [UC-10](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-6) (REQ-04). | RF-17, RF-19, RF-26; UC-10 | **Aceitar**; ajuste editorial na 0.2 ("motivo opcional de até 300 caracteres" no RF-17 e no RF-19). |
 | <a id="l-14"></a>L-14 | Comportamento sem RF | A entrada sem e-mail ou sem senha, ou com e-mail mal formado, é recusada com a indicação de cada dado, antes de conferir as credenciais; nenhum RF descreve essa recusa (o [RF-33.1](rf-contas.md#rf-33-1) trata só as credenciais inválidas). Coberta por teste. Achada na ficha de [UC-02](../casos-de-uso/UC-02-autenticar.md#e3-2) (REQ-04). | RF-33, RF-33.1; UC-02 | **Aceitar**; na 0.2, um RF filho novo (o próximo ID livre do RF-33), sem mudança de comportamento. |
-| <a id="l-15"></a>L-15 | CA sem TA automatizado | [US-01 · CA-02](../historias/US-01-criar-minha-conta.md#us-01-ca-02): depois de criar a conta vindo de algo que exige identificação, a pessoa volta ao ponto em que estava. Os testes cobrem só a preservação do destino até o cadastro e a regra do destino seguro, não o retorno depois dele; o TA-02 é roteiro manual. Achada ao escrever as histórias (REQ-05). | RF-32; UC-01 A1.1; US-01 | **Aceitar**, com o TA-02 executado no ensaio; sugerir um teste do cadastro com destino numa tarefa de testes. |
-| <a id="l-16"></a>L-16 | CA sem TA automatizado | [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03): criar um administrador com um e-mail já cadastrado é recusado pelo comando de administração. Só a unicidade do e-mail tem teste, não a resposta do comando; o TA-160 é roteiro manual. Achada ao escrever as histórias (REQ-05). | RF-37; UC-20 E2.1; US-17 | **Aceitar**, com o TA-160 executado no ensaio. |
+| <a id="l-15"></a>L-15 | CA sem TA automatizado | [US-01 · CA-04](../historias/US-01-criar-minha-conta.md#us-01-ca-04): depois de criar a conta vindo de algo que exige identificação, a pessoa volta ao ponto em que estava. Os testes cobrem só a preservação do destino até o cadastro e a regra do destino seguro, não o retorno depois dele; o TA-04 é roteiro manual. Achada ao escrever as histórias (REQ-05). | RF-32; UC-01 A1.1; US-01 | **Aceitar**, com o TA-04 executado no ensaio; sugerir um teste do cadastro com destino numa tarefa de testes. |
+| <a id="l-16"></a>L-16 | CA sem TA automatizado | [US-17 · CA-03](../historias/US-17-criar-o-primeiro-gestor.md#us-17-ca-03): criar um administrador com um e-mail já cadastrado é recusado pelo comando de administração. Só a unicidade do e-mail tem teste, não a resposta do comando; o TA-181 é roteiro manual. Achada ao escrever as histórias (REQ-05). | RF-37; UC-20 E2.1; US-17 | **Aceitar**, com o TA-181 executado no ensaio. |
 | <a id="l-17"></a>L-17 | Comportamento sem RF | Um endereço de tela que não existe (`*`) mostra a página "não encontrada" com o caminho de volta ao início; nenhum RF descreve esse comportamento, que não tem regra de negócio nem teste próprio. Achada no [sentido inverso da matriz](../rastreabilidade/sentido-inverso.md#telas) (REQ-06). | Telas; NS-13 | **Aceitar**: é navegação, sem dado nem regra. Se o professor pedir rastreabilidade de toda tela, ajuste editorial na 0.2 (citar a tela na evidência do [RF-38](rf-gerais.md#rf-38)). |
+| <a id="l-18"></a>L-18 | RF sem código | O [RF-24.1](rf-reservas.md#rf-24-1) (recusar mudança de situação fora do momento permitido) está na especificação, mas ainda não existe no código nem tem teste: o campo Código da ficha fica vazio até a tarefa. Achada ao aplicar o [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). | RF-24.1; UC-10 E6.8; [US-20 · CA-03](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-03), [US-15 · CA-07](../historias/US-15-recusar-uma-reserva.md#us-15-ca-07), [US-16 · CA-07](../historias/US-16-concluir-uma-reserva.md#us-16-ca-07) | **Aceitar** até a tarefa RES-11, que escreve o código e o teste e fecha esta lacuna. |
 
 ## 9. Auditoria de qualidade
 
@@ -472,10 +479,10 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-02.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda não guarda o horário de funcionamento do espaço. A ficha já o inclui no cadastro ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
 | RF-05.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-05.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Conforme a [DEC-10](../decisoes/DEC-10.md) (decidida). |
-| RF-06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda não altera o horário de funcionamento do espaço. A ficha já o inclui na edição ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
 | RF-06.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-06.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-07 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Efeito sobre as reservas existentes conforme a [DEC-06](../decisoes/DEC-06.md) (decidida). |
@@ -489,33 +496,34 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-11.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | "Data retroativa" compara data e hora (divergência registrada no glossário). |
 | RF-11.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-11.4 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Valores da [DEC-07](../decisoes/DEC-07.md), decidida; mudam pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md). |
+| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código usa 07:00–22:00 para todos os espaços. A ficha já diz o horário do espaço pedido, padrão 07:00–00:00 ([DEC-07](../decisoes/DEC-07.md) decidida; [CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
 | RF-12 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Em páginas desde a RES-10 ([RF-12.2](rf-reservas.md#rf-12-2), [L-05](#l-05) resolvida). |
 | RF-12.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-12.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-13 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-14 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-15 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-16 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: as ações não consideram o horário da reserva. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md). |
-| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; confirmar continua sem restrição de horário. Co: o limite de 300 caracteres do motivo opcional não está no enunciado ([L-13](#l-13)). |
-| RF-18 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: recusar depois do início é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md). |
-| RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: concluir antes do término é aceito, contra a NS-09. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), lacuna [L-01](#l-01). |
-| RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: cancelar depois do uso é aceito. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (só para o Gestor). |
-| RF-21 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: idem. Ação: [DEC-13](../decisoes/DEC-13.md) decidida; o cancelamento pelo Solicitante continua sem restrição de horário. |
-| RF-22 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: tentativas recusadas não são registradas. Ação: [DEC-05](../decisoes/DEC-05.md) decidida; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), lacuna [L-02](#l-02). |
+| RF-16 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda não considera o horário da reserva nas ações. A ficha já diz que dependem do momento ([DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)); fecha com a RES-11. |
+| RF-17 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: confirmar depois do início é aceito, e assim deve continuar ([DEC-13](../decisoes/DEC-13.md) decidida: confirmar sem restrição de horário). Co: o limite de 300 caracteres do motivo opcional não está no enunciado ([L-13](#l-13)). |
+| RF-18 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda aceita recusar depois do início. A ficha já diz que só vale antes do início ([DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)); fecha com a RES-11. |
+| RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda aceita concluir antes do término, contra a NS-09. A ficha já diz que só vale a partir do término ([DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), lacuna [L-01](#l-01)); fecha com a RES-11. |
+| RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda aceita cancelar pelo Gestor depois do início. A ficha já diz que só vale antes do início ([DEC-13](../decisoes/DEC-13.md) decidida; [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)); fecha com a RES-11. |
+| RF-21 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o cancelamento pelo Solicitante continua sem restrição de horário, como o código ([DEC-13](../decisoes/DEC-13.md) decidida). |
+| RF-22 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda não registra as tentativas recusadas. A ficha já diz que entram ([DEC-05](../decisoes/DEC-05.md) decidida; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), lacuna [L-02](#l-02)); fecha com a RES-12. |
 | RF-23 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-24 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-24.1 | ✔ | ✔ | ✔ | ✘ | ✘ | ✔ | Ve: sem teste ainda (implementação pendente, tarefa RES-11). Co: o código não tem a recusa. Ação: [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md). |
 | RF-25 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-26 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O limite do motivo também vale ao confirmar e concluir, fora deste RF ([L-13](#l-13)). |
 | RF-27 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda mostra um horário único e não tem a duração sugerida. A ficha já diz o horário de cada espaço e a duração sugerida de 1 hora ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
 | RF-29 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Privacidade conforme a [DEC-11](../decisoes/DEC-11.md) (decidida). |
 | RF-29.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-29.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-30 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-30 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda calcula os livres com o funcionamento único. A ficha já diz o funcionamento do espaço ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
 | RF-31 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-32.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Formato da matrícula pela [DEC-09](../decisoes/DEC-09.md), decidida; muda pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md). |
+| RF-32.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda aceita matrícula com letras. A ficha já diz só dígitos ([DEC-09](../decisoes/DEC-09.md) decidida; [CR-04](../mudancas/CR-04-matricula-so-digitos.md), lacuna [L-06](#l-06)); fecha com a AUT-12. |
 | RF-32.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-33 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Limite de tentativas no [RF-33.2](rf-contas.md#rf-33-2) ([L-03](#l-03), resolvida). |
