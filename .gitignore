@@ -145,3 +145,6 @@ $RECYCLE.BIN/
 *.temp
 *.swp
 *~
+
+# Levantamento: dados brutos do questionario (CSV do formulario) nunca entram no repositorio
+docs/fontes/requisitos/levantamento/questionario/brutos/

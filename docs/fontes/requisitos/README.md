@@ -20,6 +20,7 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Contagens de RNF (33), CAs (161) e TAs (TA-01 a TA-161), com o RNF-F13 e os CAs novos da US-03; renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161 (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Contagens de RF (62 fichas, com o RF-12.2), CAs (168) e TAs (TA-01 a TA-168), com os CAs novos das US-10 e US-11; renumeração dos TAs: TA-96 a TA-107 passam a TA-97 a TA-114, conforme as histórias, e TA-108 a TA-161 passam a TA-115 a TA-168 (RES-10). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Estrutura com [`levantamento/`](levantamento/README.md): técnicas de levantamento, roteiros ROT-01 a ROT-03, guia do entrevistador, modelo de registro e a ENT-01; identificadores `ENT`, `ROT`, `IND-05`, `GUI-01` e `MRE-01` (REQ-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Questionário QST-01 em [`levantamento/questionario/`](levantamento/questionario/QST-01-questionario.md): instrumento, plano de aplicação e modelo de síntese; identificador `QST` (REQ-10). Sem aprovação. |
 
 ## Estrutura
 
@@ -33,7 +34,7 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | [`decisoes/`](decisoes/README.md) | DEC-xx, uma decisão por arquivo, com índice e a [pauta da Aula 7](decisoes/pauta-aula-7.md). | DEC-01 a DEC-23, todas decididas (Aula 7) |
 | [`mudancas/`](mudancas/README.md) | CR-xx, pedidos de mudança, e o [modelo de CR](mudancas/modelo-cr.md). | CR-01 a CR-04 aprovados, aguardando implementação (GES-02) |
 | [`baselines/`](baselines/README.md) | Manifestos de baseline (conjunto aprovado de versões). | [candidata à 1.0](baselines/conecta-campus-1.0-candidata.md), aguardando aprovação (REQ-06) |
-| [`levantamento/`](levantamento/README.md) | **IND-05**: técnicas de levantamento do grupo (entrevista semiestruturada na REQ-09; questionário na REQ-10), roteiros de entrevista ROT-01 a ROT-03, [guia do entrevistador](levantamento/guia-do-entrevistador.md), modelo de registro e os registros ENT-xx (ENT-01, com o representante do cliente na Aula 7; as demais planejadas). | 0.1 • Rascunho (REQ-09) |
+| [`levantamento/`](levantamento/README.md) | **IND-05**: técnicas de levantamento do grupo (entrevista semiestruturada na REQ-09; questionário na REQ-10), roteiros de entrevista ROT-01 a ROT-03, [guia do entrevistador](levantamento/guia-do-entrevistador.md), modelo de registro e os registros ENT-xx (ENT-01, com o representante do cliente na Aula 7; as demais planejadas), e o [questionário QST-01](levantamento/questionario/QST-01-questionario.md) com plano de aplicação e modelo de síntese (instrumento pronto, sem respostas). | 0.1 • Rascunho (REQ-09, REQ-10) |
 | [`rastreabilidade/`](rastreabilidade/README.md) | **RAS-01**: [matriz](rastreabilidade/matriz.md) NS → RF → UC → US → CA/TA → endpoint ou tela → código (e [`matriz.csv`](rastreabilidade/matriz.csv)), [cobertura](rastreabilidade/cobertura.md), [sentido inverso](rastreabilidade/sentido-inverso.md), [RNF](rastreabilidade/rnf.md) e [mapa de impacto por DEC](rastreabilidade/impacto-por-dec.md), gerados por `scripts/gerar_rastreabilidade.py`. | 0.1 • Rascunho (REQ-06) |
 
 ## Decisões de organização (REQ-01)
@@ -86,8 +87,9 @@ Esta pasta é a **fonte oficial** dos requisitos do Conecta Campus (disciplina d
 | `CR` | Pedido de mudança | `mudancas/` |
 | `A2.1`, `E5` | Alternativa / exceção ligada ao passo de um UC | dentro do UC |
 | `ROT` / `ENT` | Roteiro de entrevista / registro de entrevista (perguntas numeradas no roteiro: `ROT-02 P03`) | `levantamento/entrevistas/` |
+| `QST` | Questionário (perguntas numeradas: `QST-01-P03`) | `levantamento/questionario/` |
 
-Convenções do grupo, além das do professor: `VIS-01` e `GLO-01` identificam os documentos; `P-xx` (premissa), `CS-xx` (critério de sucesso) e `R-xx` (risco) valem dentro da Visão. Desde a REQ-06: `IND-01` a `IND-04` (este README e os índices de `decisoes/`, `mudancas/` e `baselines/`), `RAS-01` (rastreabilidade), `PAU-01` (pauta da Aula 7), `MCR-01` (modelo de CR) e `BL-01` (manifesto da baseline candidata); `L-xx` são as lacunas da SRS. Desde a REQ-09: `IND-05` (índice de `levantamento/`), `GUI-01` (guia do entrevistador) e `MRE-01` (modelo de registro de entrevista).
+Convenções do grupo, além das do professor: `VIS-01` e `GLO-01` identificam os documentos; `P-xx` (premissa), `CS-xx` (critério de sucesso) e `R-xx` (risco) valem dentro da Visão. Desde a REQ-06: `IND-01` a `IND-04` (este README e os índices de `decisoes/`, `mudancas/` e `baselines/`), `RAS-01` (rastreabilidade), `PAU-01` (pauta da Aula 7), `MCR-01` (modelo de CR) e `BL-01` (manifesto da baseline candidata); `L-xx` são as lacunas da SRS. Desde a REQ-09: `IND-05` (índice de `levantamento/`), `GUI-01` (guia do entrevistador) e `MRE-01` (modelo de registro de entrevista). Desde a REQ-10: `QST-01` (questionário; as perguntas são `QST-01-P01`…).
 
 Regras (A4·s8):
 
