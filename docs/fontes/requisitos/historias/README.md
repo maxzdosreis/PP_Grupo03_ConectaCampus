@@ -21,6 +21,7 @@ Histórias de usuário (US-xx) no formato "Como [papel], quero [capacidade] para
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | US-03 · CA-06, CA-09 e CA-10 e TA-19, TA-22 e TA-23 (revogação e troca da credencial de renovação, duas janelas); as antigas US-03 · CA-06 e CA-07 passam a CA-07 e CA-08 e os TA-19 a TA-158 passam a TA-20, TA-21 e TA-24 a TA-161 ([decisão b](#decisao-b)); cobertura de UC-02 A4.1, A4.3 e E4.1; total 161 CAs e 161 TAs (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Índice dos TAs: TA-19 com os testes da trava entre janelas (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Consulta em páginas (RES-10): US-10 · CA-04, CA-08, CA-09 e CA-12 e US-11 · CA-04, CA-07 e CA-08 novos, com os TA-96, TA-100, TA-101, TA-104, TA-108, TA-111 e TA-112; os CAs seguintes das duas histórias e os TA-96 a TA-161 renumerados (TA-108 a TA-161 passam a TA-115 a TA-168) ([decisão b](#decisao-b)); cobertura de UC-07 A2.3, A2.4 e A3.2; RF-12.2 na rastreabilidade RF → US/CA; total 168 CAs e 168 TAs. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Papel das histórias de decisão (US-11, US-14, US-15, US-16): Atendente responsável; das de manutenção de espaços (US-05, US-06, US-07): Gestor do serviço ([DEC-25](../decisoes/DEC-25.md)). Meta, critérios e testes iguais; US-03, US-12 e US-13 (ator misto) seguem como estavam, no [CR-05](../mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md) (REQ-12). Sem aprovação. |
 
 ## Sumário
 
@@ -85,9 +86,9 @@ US-06 e US-07 são extras ao enunciado (manutenção completa do cadastro).
 | ID | Título | Papel | UC de origem | Prioridade | Estimativa (semanas) | CAs | Ficha |
 |---|---|---|---|---|---|---|---|
 | US-04 | Consultar os espaços | Solicitante | [UC-03](../casos-de-uso/README.md#uc-03) | Normal | 0,3 | 8 | [US-04-consultar-os-espacos.md](US-04-consultar-os-espacos.md) |
-| US-05 | Cadastrar espaço | Gestor | [UC-14](../casos-de-uso/README.md#uc-14) | Normal | 0,5 | 11 | [US-05-cadastrar-espaco.md](US-05-cadastrar-espaco.md) |
-| US-06 | Editar espaço | Gestor | [UC-15](../casos-de-uso/README.md#uc-15) | Normal | 0,3 | 10 | [US-06-editar-espaco.md](US-06-editar-espaco.md) |
-| US-07 | Desativar e reativar espaço | Gestor | [UC-16](../casos-de-uso/README.md#uc-16) | Normal | 0,2 | 9 | [US-07-desativar-e-reativar-espaco.md](US-07-desativar-e-reativar-espaco.md) |
+| US-05 | Cadastrar espaço | Gestor do serviço | [UC-14](../casos-de-uso/README.md#uc-14) | Normal | 0,5 | 11 | [US-05-cadastrar-espaco.md](US-05-cadastrar-espaco.md) |
+| US-06 | Editar espaço | Gestor do serviço | [UC-15](../casos-de-uso/README.md#uc-15) | Normal | 0,3 | 10 | [US-06-editar-espaco.md](US-06-editar-espaco.md) |
+| US-07 | Desativar e reativar espaço | Gestor do serviço | [UC-16](../casos-de-uso/README.md#uc-16) | Normal | 0,2 | 9 | [US-07-desativar-e-reativar-espaco.md](US-07-desativar-e-reativar-espaco.md) |
 
 ### F2 — Cadastrar a solicitação (reserva Solicitada)
 
@@ -103,7 +104,7 @@ US-09 é extra (fascinante): a agenda do dia, extensão do pedido.
 | ID | Título | Papel | UC de origem | Prioridade | Estimativa (semanas) | CAs | Ficha |
 |---|---|---|---|---|---|---|---|
 | US-10 | Acompanhar minhas reservas | Solicitante | [UC-07](../casos-de-uso/README.md#uc-07) | Normal | 0,3 | 12 | [US-10-acompanhar-minhas-reservas.md](US-10-acompanhar-minhas-reservas.md) |
-| US-11 | Acompanhar todas as reservas | Gestor | [UC-07](../casos-de-uso/README.md#uc-07) | Normal | 0,4 | 10 | [US-11-acompanhar-todas-as-reservas.md](US-11-acompanhar-todas-as-reservas.md) |
+| US-11 | Acompanhar todas as reservas | Atendente responsável | [UC-07](../casos-de-uso/README.md#uc-07) | Normal | 0,4 | 10 | [US-11-acompanhar-todas-as-reservas.md](US-11-acompanhar-todas-as-reservas.md) |
 | US-12 | Ver o detalhe e o histórico de uma reserva | Solicitante, Gestor | [UC-08](../casos-de-uso/README.md#uc-08), [UC-09](../casos-de-uso/README.md#uc-09) | Normal | 0,5 | 10 | [US-12-ver-detalhe-e-historico.md](US-12-ver-detalhe-e-historico.md) |
 
 ### F4 — Alterar a situação (cinco situações)
@@ -111,9 +112,9 @@ US-09 é extra (fascinante): a agenda do dia, extensão do pedido.
 | ID | Título | Papel | UC de origem | Prioridade | Estimativa (semanas) | CAs | Ficha |
 |---|---|---|---|---|---|---|---|
 | US-13 | Cancelar uma reserva | Solicitante, Gestor | [UC-11](../casos-de-uso/README.md#uc-11), [UC-12](../casos-de-uso/README.md#uc-12) | Normal | 0,2 | 9 | [US-13-cancelar-uma-reserva.md](US-13-cancelar-uma-reserva.md) |
-| US-14 | Confirmar uma reserva | Gestor | [UC-17](../casos-de-uso/README.md#uc-17) | Normal | 0,4 | 11 | [US-14-confirmar-uma-reserva.md](US-14-confirmar-uma-reserva.md) |
-| US-15 | Recusar uma reserva com motivo | Gestor | [UC-18](../casos-de-uso/README.md#uc-18), [UC-12](../casos-de-uso/README.md#uc-12) | Normal | 0,2 | 7 | [US-15-recusar-uma-reserva.md](US-15-recusar-uma-reserva.md) |
-| US-16 | Concluir uma reserva | Gestor | [UC-19](../casos-de-uso/README.md#uc-19) | Normal | 0,1 | 6 | [US-16-concluir-uma-reserva.md](US-16-concluir-uma-reserva.md) |
+| US-14 | Confirmar uma reserva | Atendente responsável | [UC-17](../casos-de-uso/README.md#uc-17) | Normal | 0,4 | 11 | [US-14-confirmar-uma-reserva.md](US-14-confirmar-uma-reserva.md) |
+| US-15 | Recusar uma reserva com motivo | Atendente responsável | [UC-18](../casos-de-uso/README.md#uc-18), [UC-12](../casos-de-uso/README.md#uc-12) | Normal | 0,2 | 7 | [US-15-recusar-uma-reserva.md](US-15-recusar-uma-reserva.md) |
+| US-16 | Concluir uma reserva | Atendente responsável | [UC-19](../casos-de-uso/README.md#uc-19) | Normal | 0,1 | 6 | [US-16-concluir-uma-reserva.md](US-16-concluir-uma-reserva.md) |
 
 ### Contas (extra, DEC-04)
 

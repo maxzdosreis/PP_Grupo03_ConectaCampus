@@ -12,6 +12,7 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator primário, interessado e passos: Gestor do serviço; E1.1 e as regras seguem com o perfil Gestor, que cobre o papel ([DEC-25](../decisoes/DEC-25.md), REQ-12). Meta e exceções iguais. Sem aprovação. |
 
 ## Sumário
 
@@ -33,7 +34,7 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 |---|---|
 | **Escopo** | Conecta Campus (caixa-preta). |
 | **Nível** | Objetivo do usuário. |
-| **Ator primário** | [Gestor](../glossario.md#gestor). |
+| **Ator primário** | [Gestor do serviço](../glossario.md#gestor-do-servico). |
 | **Atores secundários** | Nenhum ([decisão f](README.md#decisao-f)). |
 | **Meta de contexto** | Incluir um [espaço esportivo](../glossario.md#espaco-esportivo) novo na lista, para que ele passe a aceitar pedidos de reserva. |
 | **Precondições** | O ator é um [usuário autenticado](../glossario.md#usuario-autenticado) com o perfil Gestor ([UC-02 Autenticar](UC-02-autenticar.md); [decisão d](README.md#decisao-d)). |
@@ -43,16 +44,16 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 
 | Stakeholder | Interesse neste caso de uso |
 |---|---|
-| **Gestor** | Cadastrar em uma ação, escolhendo o tipo entre os existentes; ser avisado na hora se o nome já existe ou se algum dado está fora das regras, sem perder o que digitou. |
+| **Gestor do serviço** | Cadastrar em uma ação, escolhendo o tipo entre os existentes; ser avisado na hora se o nome já existe ou se algum dado está fora das regras, sem perder o que digitou. |
 | **Solicitante** | Encontrar o espaço novo pelo nome e pelo tipo e poder pedir reservas nele logo depois do cadastro; não confundir dois espaços com o mesmo nome. |
 | **Cliente** (instituição) | Só o setor responsável mantém a lista de espaços; a lista corresponde à realidade, sem nomes repetidos nem capacidades impossíveis. |
 
 ## Fluxo principal
 
-1. <a id="p1"></a>O Gestor pede para cadastrar um espaço.
+1. <a id="p1"></a>O Gestor do serviço pede para cadastrar um espaço.
 2. <a id="p2"></a>O sistema apresenta os [tipos de espaço](../glossario.md#tipo-de-espaco) existentes, na ordem do negócio (Quadra poliesportiva, Campo de futebol, Ginásio, Quadra de areia, Quadra de tênis).
-3. <a id="p3"></a>O Gestor informa o nome, escolhe o tipo e informa a [capacidade](../glossario.md#capacidade).
-4. <a id="p4"></a>O Gestor envia o cadastro.
+3. <a id="p3"></a>O Gestor do serviço informa o nome, escolhe o tipo e informa a [capacidade](../glossario.md#capacidade).
+4. <a id="p4"></a>O Gestor do serviço envia o cadastro.
 5. <a id="p5"></a>O sistema confere os dados, nesta ordem: todos presentes e no formato esperado; nome; tipo; capacidade.
 6. <a id="p6"></a>O sistema confere que nenhum espaço já tem esse nome, sem diferenciar maiúsculas de minúsculas e comparando o nome já sem espaços nas pontas nem repetidos.
 7. <a id="p7"></a>O sistema grava o espaço [ativo](../glossario.md#espaco-ativo), com o nome normalizado.
@@ -64,15 +65,15 @@ A meta ainda é alcançada.
 
 #### <a id="a8-1"></a>A8.1 · Cadastrar outro espaço
 
-Depois do passo 8, o Gestor cadastra outro espaço. O sistema volta ao passo 3, com os dados em branco.
+Depois do passo 8, o Gestor do serviço cadastra outro espaço. O sistema volta ao passo 3, com os dados em branco.
 
 #### <a id="a8-2"></a>A8.2 · Pedir uma reserva no espaço recém-cadastrado
 
-Depois do passo 8, o Gestor (ou qualquer Solicitante) pede uma reserva no espaço novo: segue em [UC-04 A1.1](UC-04-solicitar-reserva.md#a1-1), com o espaço já escolhido.
+Depois do passo 8, o Gestor do serviço (ou qualquer Solicitante) pede uma reserva no espaço novo: segue em [UC-04 A1.1](UC-04-solicitar-reserva.md#a1-1), com o espaço já escolhido.
 
 ## Exceções
 
-A meta é interrompida: **nenhum espaço é criado** e a lista de espaços fica exatamente como estava; os dados informados continuam com o Gestor para ele corrigir só o que foi apontado (volta ao passo 3). A ordem é a ordem real das verificações ([evidência da ordem](#evidencia-da-ordem)): no passo 5, os dados ausentes ou mal formados aparecem todos de uma vez; daí em diante, uma regra por vez.
+A meta é interrompida: **nenhum espaço é criado** e a lista de espaços fica exatamente como estava; os dados informados continuam com o Gestor do serviço para ele corrigir só o que foi apontado (volta ao passo 3). A ordem é a ordem real das verificações ([evidência da ordem](#evidencia-da-ordem)): no passo 5, os dados ausentes ou mal formados aparecem todos de uma vez; daí em diante, uma regra por vez.
 
 #### <a id="e1-1"></a>E1.1 · Ator sem o perfil Gestor
 
@@ -119,7 +120,7 @@ A meta é interrompida: **nenhum espaço é criado** e a lista de espaços fica 
 #### <a id="e6-1"></a>E6.1 · Nome já usado por outro espaço
 
 - **Condição:** no passo 6, já existe um espaço com o mesmo nome, sem diferenciar maiúsculas de minúsculas (por exemplo, "ginásio  a" e "Ginásio A"), ativo ou inativo.
-- **Resultado para o ator:** junto ao nome, "Já existe um espaço com este nome." O Gestor escolhe outro nome.
+- **Resultado para o ator:** junto ao nome, "Já existe um espaço com este nome." O Gestor do serviço escolhe outro nome.
 - **Estado depois:** nenhum espaço é criado; o espaço que já tinha o nome não muda.
 - **Requisito:** [RF-05.2](../requisitos/rf-espacos.md#rf-05-2) ([DEC-10](../decisoes/DEC-10.md)).
 

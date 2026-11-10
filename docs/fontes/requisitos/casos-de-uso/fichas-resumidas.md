@@ -18,6 +18,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-01: nota do limite de pedidos de cadastro por origem (RNF-F12, AUT-08), sem exceção nem RF novos. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | UC-22: confere também o cache, com a exceção E2.2 · Cache fora do ar; UC-01: a recusa com o serviço de contagem fora do ar (Redis, AUT-08). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | UC-07: a consulta em páginas, com o total, nos passos 2 e 4; alternativas novas A2.3 (ver outra página), A2.4 (página além da última) e A3.2 (mudar um critério recomeça da primeira página); a exceção E3.1 inclui a página e o tamanho inválidos; RF-12.2 nos RFs cobertos (RES-10). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator de UC-15 e UC-16: Gestor do serviço; UC-16 A5.1 (desfazer reservas): Atendente responsável. Só o rótulo do ator; metas e passos iguais ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
 
 ## Sumário
 
@@ -242,16 +243,16 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 | Campo | Conteúdo |
 |---|---|
-| **Ator primário** | [Gestor](../glossario.md#gestor) |
+| **Ator primário** | [Gestor do serviço](../glossario.md#gestor-do-servico) |
 | **Meta** | Manter o nome, o tipo e a capacidade de um espaço iguais à realidade. |
 | **Precondição** | Ator autenticado com o perfil Gestor. |
 | **Ficha completa relacionada** | [UC-14 Cadastrar espaço](UC-14-cadastrar-espaco.md): as mesmas regras de nome, tipo e capacidade ([E5.2 a E5.5](UC-14-cadastrar-espaco.md#e5-2)) e de nome único ([E6.1](UC-14-cadastrar-espaco.md#e6-1)). |
 
 **Fluxo principal**
 
-1. <a id="uc15-p1"></a>O Gestor escolhe um espaço e pede para editá-lo.
+1. <a id="uc15-p1"></a>O Gestor do serviço escolhe um espaço e pede para editá-lo.
 2. <a id="uc15-p2"></a>O sistema mostra o nome, o tipo e a capacidade atuais e os tipos de espaço existentes.
-3. <a id="uc15-p3"></a>O Gestor altera um ou mais dados e envia; só os dados alterados entram no pedido.
+3. <a id="uc15-p3"></a>O Gestor do serviço altera um ou mais dados e envia; só os dados alterados entram no pedido.
 4. <a id="uc15-p4"></a>O sistema confere, nesta ordem: formato dos dados; o espaço existe; algum dado foi alterado; nome, tipo e capacidade pelas regras do cadastro; o nome novo não é de outro espaço.
 5. <a id="uc15-p5"></a>O sistema grava os dados novos, mantém os não alterados, informa "Espaço atualizado com sucesso." e mostra o espaço atualizado.
 
@@ -270,7 +271,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | <a id="uc15-e4-3"></a>E4.3 · Nenhum dado alterado | O pedido não altera nome, tipo nem capacidade. | "Informe ao menos um campo para alterar." | O espaço não muda. | [RF-06.1](../requisitos/rf-espacos.md#rf-06-1) |
 | <a id="uc15-e4-4"></a>E4.4 · Dado fora das regras do cadastro | Nome em branco ou longo, tipo desconhecido ou capacidade menor que 1, como em [UC-14 E5.2 a E5.5](UC-14-cadastrar-espaco.md#e5-2). | A mensagem da regra junto ao dado. | Nenhum dado do espaço muda, nem os válidos do mesmo pedido. | [RF-06.2](../requisitos/rf-espacos.md#rf-06-2) |
 | <a id="uc15-e4-5"></a>E4.5 · Nome de outro espaço | O nome novo já é de outro espaço, sem diferenciar maiúsculas. | Junto ao nome, "Já existe um espaço com este nome." | O espaço não muda. | [RF-05.2](../requisitos/rf-espacos.md#rf-05-2), [RF-06.2](../requisitos/rf-espacos.md#rf-06-2) |
-| <a id="uc15-e5-1"></a>E5.1 · Espaço alterado por outra pessoa | Outra edição, desativação ou reativação do espaço foi gravada depois que o Gestor o leu. | "Este espaço foi alterado por outra pessoa enquanto você decidia. Atualize a lista e tente de novo." | Vale só a primeira alteração. | [RNF-R04](../requisitos/rnf.md#rnf-r04) |
+| <a id="uc15-e5-1"></a>E5.1 · Espaço alterado por outra pessoa | Outra edição, desativação ou reativação do espaço foi gravada depois que o Gestor do serviço o leu. | "Este espaço foi alterado por outra pessoa enquanto você decidia. Atualize a lista e tente de novo." | Vale só a primeira alteração. | [RNF-R04](../requisitos/rnf.md#rnf-r04) |
 
 **RFs cobertos:** [RF-04](../requisitos/rf-espacos.md#rf-04) → [passo 2](#uc15-p2) · [RF-05.2](../requisitos/rf-espacos.md#rf-05-2) → [E4.5](#uc15-e4-5) · [RF-06](../requisitos/rf-espacos.md#rf-06) → [passos 1 a 5](#uc15-p1) · [RF-06.1](../requisitos/rf-espacos.md#rf-06-1) → [E4.3](#uc15-e4-3) · [RF-06.2](../requisitos/rf-espacos.md#rf-06-2) → [E4.1](#uc15-e4-1), [E4.4](#uc15-e4-4) · [RF-09](../requisitos/rf-espacos.md#rf-09) → [E4.2](#uc15-e4-2) · [RF-10](../requisitos/rf-espacos.md#rf-10) → [E1.1](#uc15-e1-1)
 
@@ -282,24 +283,24 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 
 | Campo | Conteúdo |
 |---|---|
-| **Ator primário** | [Gestor](../glossario.md#gestor) |
+| **Ator primário** | [Gestor do serviço](../glossario.md#gestor-do-servico) |
 | **Meta** | Impedir novos pedidos num espaço que deixou de poder ser usado, ou voltar a aceitá-los. |
 | **Precondição** | Ator autenticado com o perfil Gestor. |
 | **Ficha completa relacionada** | [UC-04 E8.2](UC-04-solicitar-reserva.md#e8-2) (o pedido recusado num espaço inativo) e [UC-10](UC-10-alterar-situacao-da-reserva.md), variação [Cancelar](UC-10-alterar-situacao-da-reserva.md#v-uc-11) (para desfazer as reservas existentes). |
 
 **Fluxo principal**
 
-1. <a id="uc16-p1"></a>O Gestor escolhe um espaço ativo e pede para desativá-lo.
+1. <a id="uc16-p1"></a>O Gestor do serviço escolhe um espaço ativo e pede para desativá-lo.
 2. <a id="uc16-p2"></a>O sistema pede a confirmação, mostrando o nome e o tipo e avisando que novos pedidos ficarão bloqueados e que as reservas já existentes continuam valendo.
-3. <a id="uc16-p3"></a>O Gestor confirma.
+3. <a id="uc16-p3"></a>O Gestor do serviço confirma.
 4. <a id="uc16-p4"></a>O sistema confere que o espaço existe, ainda está ativo e não foi alterado por outra pessoa desde a leitura.
 5. <a id="uc16-p5"></a>O sistema grava o espaço como inativo e informa "Espaço desativado. Novas reservas ficam bloqueadas; as existentes continuam valendo."
 
 **Alternativas**
 
-- <a id="uc16-a1-1"></a>**A1.1** · Reativar: o Gestor escolhe um espaço inativo e pede para reativá-lo; seguem os passos 2 a 5, e o sistema grava o espaço como ativo e informa "Espaço reativado." Ele volta a aceitar pedidos.
-- <a id="uc16-a3-1"></a>**A3.1** · O Gestor desiste no passo 3: nada muda.
-- <a id="uc16-a5-1"></a>**A5.1** · Desfazer as reservas do espaço desativado: o Gestor cancela, com motivo, as que quiser ([UC-11](UC-10-alterar-situacao-da-reserva.md#v-uc-11); [DEC-06](../decisoes/DEC-06.md)).
+- <a id="uc16-a1-1"></a>**A1.1** · Reativar: o Gestor do serviço escolhe um espaço inativo e pede para reativá-lo; seguem os passos 2 a 5, e o sistema grava o espaço como ativo e informa "Espaço reativado." Ele volta a aceitar pedidos.
+- <a id="uc16-a3-1"></a>**A3.1** · O Gestor do serviço desiste no passo 3: nada muda.
+- <a id="uc16-a5-1"></a>**A5.1** · Desfazer as reservas do espaço desativado: o Atendente responsável cancela, com motivo, as que quiser ([UC-11](UC-10-alterar-situacao-da-reserva.md#v-uc-11); [DEC-06](../decisoes/DEC-06.md)).
 
 **Exceções**
 

@@ -23,6 +23,7 @@ PASTA_DEC = PASTA / "decisoes"
 PAUTA = PASTA_DEC / "pauta-aula-7.md"
 CANDIDATA = PASTA / "baselines" / "conecta-campus-1.0-candidata.md"
 README_RAS = PASTA_RAS / "README.md"
+CATALOGO_RN = PASTA / "requisitos" / "regras-de-negocio.md"
 
 AVISO = (
     "> Gerado por `scripts/gerar_rastreabilidade.py`, não edite à mão; para mudar um vínculo, "
@@ -51,6 +52,8 @@ NOMES_DAS_FUNCIONALIDADES = {
 ID_RF = re.compile(r"RF-\d{2}(?:\.\d+)?")
 ID_NS = re.compile(r"NS-\d{2}")
 ID_DEC = re.compile(r"DEC-\d{2}")
+ID_RN = re.compile(r"RN-\d{2}")
+LINHA_RN = re.compile(r'^\|\s*<a id="rn-\d{2}"></a>(?P<id>RN-\d{2})\s*\|(?P<celulas>.*)\|\s*$')
 ID_US = re.compile(r"US-\d{2}")
 FAIXA_RF = re.compile(r"(RF-\d{2}(?:\.\d+)?) a (RF-\d{2}(?:\.\d+)?)")
 ID_RNF = re.compile(r"RNF-[FURPS]\d{2}")
@@ -185,6 +188,7 @@ class Requisito:
     uc: str | None = None
     como_entra: str = ""
     decs: list[str] = field(default_factory=list)
+    rns: list[str] = field(default_factory=list)
     cas: list = field(default_factory=list)
     rotas: list[str] = field(default_factory=list)
     protegidas: list[str] = field(default_factory=list)
@@ -243,6 +247,7 @@ class Modelo:
     rotas: list[Rota]
     lacunas: dict[str, dict]
     decs: dict[str, dict]
+    rns: dict[str, dict]
     rnfs: list[dict]
     ns: list[str]
     rotas_desconhecidas: list[str]
@@ -268,6 +273,26 @@ def ler_decs() -> dict[str, dict]:
             "historico": bool(re.search(r"^## Histórico", texto, flags=re.M)),
         }
     return decs
+
+
+def ler_rns() -> dict[str, dict]:
+    rns: dict[str, dict] = {}
+    if not CATALOGO_RN.exists():
+        return rns
+    for linha in ler(CATALOGO_RN).splitlines():
+        achado = LINHA_RN.match(linha)
+        if not achado:
+            continue
+        celulas = [c.strip() for c in achado["celulas"].split("|")]
+        regra, fonte, rfs, excecao, vigencia = (celulas + [""] * 5)[:5]
+        rns[achado["id"]] = {
+            "regra": regra,
+            "fonte": fonte,
+            "rfs": ordenar(ID_RF.findall(sem_links(rfs))),
+            "excecao": excecao,
+            "vigencia": vigencia,
+        }
+    return rns
 
 
 def ler_cabecalho(caminho: Path) -> tuple[str, str, str] | None:
@@ -298,6 +323,7 @@ def carregar() -> Modelo:
         requisito.uc = uc_principal(linha_uc.get("uc", ""))
         requisito.como_entra = linha_uc.get("como", "")
         requisito.decs = ordenar(ID_DEC.findall(campos.get("Decisões", "")))
+        requisito.rns = ordenar(ID_RN.findall(campos.get("Regras de negócio", "")))
         requisito.rotas, fora = rotas_do_texto(campos.get("Evidência (complementar)", ""), conhecidas)
         desconhecidas += [f"{ficha['id']}: {r}" for r in fora]
         requisito.codigo = [(a["arquivo"], a["simbolo"]) for a in SIMBOLO.finditer(campos.get("Código (complementar)", ""))]
@@ -326,6 +352,7 @@ def carregar() -> Modelo:
         rotas=rotas,
         lacunas=lacunas,
         decs=ler_decs(),
+        rns=ler_rns(),
         rnfs=fichas_de_rnf(),
         ns=necessidades_da_visao(),
         rotas_desconhecidas=desconhecidas,
@@ -460,7 +487,7 @@ def cabecalho_gerado(titulo: str, modelo: Modelo, descricao: str) -> list[str]:
     ]
 
 
-COLUNAS = ["NS", "RF (título)", "F", "UC (passo, alternativa ou exceção)", "US", "CA", "TA", "DEC",
+COLUNAS = ["NS", "RF (título)", "F", "RN", "UC (passo, alternativa ou exceção)", "US", "CA", "TA", "DEC",
            "Endpoint ou tela", "Código", "Situação"]
 
 
@@ -474,17 +501,20 @@ def linhas_da_matriz(modelo: Modelo, com_links: bool) -> list[list[str]]:
             ns = ns.replace(")", ") (principal)", 1) if len(r.ns) > 1 else ns
             titulo = f'<a id="{ancora_rf(rf)}"></a>[{rf}]({r.link}) {r.titulo}'
             decs = ", ".join(f"[{d}](../decisoes/{d}.md)" for d in r.decs) or "—"
+            rns = ", ".join(f"[{n}](../requisitos/regras-de-negocio.md#{n.lower()})" for n in r.rns) or "—"
             uc = como_entra_relinkado(r)
         else:
             ns = ", ".join(r.ns)
             titulo = f"{rf} {r.titulo}"
             decs = ", ".join(r.decs) or "—"
+            rns = ", ".join(r.rns) or "—"
             uc = sem_links(f"{r.uc or '—'} · {r.como_entra}")
         texto_situacao, _ = situacao(r, modelo, por_id)
         linhas.append([
             ns or "—",
             titulo,
             r.f,
+            rns,
             uc,
             lista_us(r.cas, por_id, com_links),
             agrupar_cas(r.cas, por_id, com_links),
@@ -575,6 +605,7 @@ def gerar_cobertura(modelo: Modelo) -> str:
         ("NS com pelo menos um RF", len(ns_com_rf), len(modelo.ns)),
         ("NS que chegam a um TA", len(ns_com_ta), len(modelo.ns)),
         ("RF com NS de origem", sum(1 for r in todos if r.ns), len(todos)),
+        ("RN com pelo menos um RF", sum(1 for rn in modelo.rns.values() if rn["rfs"]), len(modelo.rns)),
         ("RF com UC (sem o transversal)", sum(1 for r in sem_transversal if r.uc), len(sem_transversal)),
         ("RF com US e CA (sem o transversal)", sum(1 for r in sem_transversal if r.cas), len(sem_transversal)),
         ("CA com TA", len(cas_com_ta), len(modelo.criterios)),
@@ -818,6 +849,34 @@ def gerar_impacto(modelo: Modelo) -> str:
     return "\n".join(saida)
 
 
+def gerar_regras(modelo: Modelo) -> str:
+    por_id = {h.id: h for h in modelo.historias}
+    saida = cabecalho_gerado(
+        "Rastreabilidade das regras de negócio (RN → RF → UC → US → CA)",
+        modelo,
+        f"Uma linha por regra de negócio do [catálogo](../requisitos/regras-de-negocio.md) ({len(modelo.rns)} RN). "
+        "Os RF vêm da coluna \"RFs ligados\" do catálogo e batem com o campo \"Regras de negócio\" de cada ficha; "
+        "UC, US e CA são os dos RF ligados. Como ler: [README](README.md#como-ler-a-matriz).",
+    )
+    saida += ["| RN | Regra | RF | UC | US | CA | Vigência |", "|---|---|---|---|---|---|---|"]
+    for identificador, rn in modelo.rns.items():
+        rfs = [modelo.rfs[rf] for rf in rn["rfs"] if rf in modelo.rfs]
+        cas = list({ca.ancora: ca for r in rfs for ca in r.cas}.values())
+        ucs = ordenar(r.uc for r in rfs if r.uc)
+        saida.append(
+            "| " + " | ".join(c.replace("|", "\\|") for c in [
+                f'<a id="{identificador.lower()}"></a>[{identificador}](../requisitos/regras-de-negocio.md#{identificador.lower()})',
+                rn["regra"],
+                ", ".join(f"[{r.id}]({r.link})" for r in rfs) or "—",
+                ", ".join(f"[{u}](../casos-de-uso/README.md#{u.lower()})" for u in ucs) or "—",
+                lista_us(cas, por_id, True),
+                agrupar_cas(cas, por_id, True),
+                rn["vigencia"],
+            ]) + " |"
+        )
+    return "\n".join(saida) + "\n"
+
+
 def arquivos_gerados(modelo: Modelo) -> dict[Path, str]:
     return {
         PASTA_RAS / "matriz.md": gerar_matriz(modelo),
@@ -825,6 +884,7 @@ def arquivos_gerados(modelo: Modelo) -> dict[Path, str]:
         PASTA_RAS / "cobertura.md": gerar_cobertura(modelo),
         PASTA_RAS / "sentido-inverso.md": gerar_inverso(modelo),
         PASTA_RAS / "rnf.md": gerar_rnf(modelo),
+        PASTA_RAS / "regras-de-negocio.md": gerar_regras(modelo),
         PASTA_RAS / "impacto-por-dec.md": gerar_impacto(modelo),
     }
 
@@ -1100,13 +1160,42 @@ def verificar_decs(modelo: Modelo, gerado_impacto: str) -> list[str]:
     return erros
 
 
+def verificar_regras(modelo: Modelo) -> list[str]:
+    erros = []
+    if not modelo.rns:
+        return ["catálogo de regras de negócio ausente ou sem linhas RN-xx"]
+    citados = {}
+    for r in modelo.rfs.values():
+        for rn in r.rns:
+            citados.setdefault(rn, set()).add(r.id)
+            if rn not in modelo.rns:
+                erros.append(f"{r.id}: cita {rn}, que não está no catálogo")
+    numeros = sorted(chave(i)[0] for i in modelo.rns)
+    if numeros != list(range(1, len(numeros) + 1)):
+        erros.append("IDs do catálogo fora de sequência ou repetidos (um RN nunca é reutilizado)")
+    for identificador, rn in modelo.rns.items():
+        if not rn["rfs"]:
+            erros.append(f"{identificador}: não cita nenhum RF")
+        if not ID_DEC.search(sem_links(rn["fonte"])) and "glossário" not in rn["fonte"] and "RF-" not in sem_links(rn["fonte"]):
+            erros.append(f"{identificador}: sem fonte (glossário, RF ou DEC)")
+        for rf in rn["rfs"]:
+            if rf not in modelo.rfs:
+                erros.append(f"{identificador}: cita {rf}, que não existe")
+            elif identificador not in modelo.rfs[rf].rns:
+                erros.append(f"{identificador}: lista {rf}, mas a ficha do {rf} não cita {identificador} em 'Regras de negócio'")
+        for rf in citados.get(identificador, set()) - set(rn["rfs"]):
+            erros.append(f"{rf}: cita {identificador}, que não lista o {rf} no catálogo")
+    print(f"Regras de negócio: {len(modelo.rns)}; RF que citam alguma: {len({rf for v in citados.values() for rf in v})}")
+    return erros
+
+
 def documentos_da_fonte() -> list[Path]:
     return sorted(PASTA.rglob("*.md"), key=lambda a: a.relative_to(PASTA).as_posix())
 
 
 def verificar_cabecalhos() -> list[str]:
     erros = []
-    gerados = {p.name for p in (PASTA_RAS / n for n in ("matriz.md", "cobertura.md", "sentido-inverso.md", "rnf.md", "impacto-por-dec.md"))}
+    gerados = {p.name for p in (PASTA_RAS / n for n in ("matriz.md", "cobertura.md", "sentido-inverso.md", "rnf.md", "impacto-por-dec.md", "regras-de-negocio.md"))}
     for arquivo in documentos_da_fonte():
         texto = ler(arquivo)
         caminho = arquivo.relative_to(PASTA).as_posix()
@@ -1192,6 +1281,7 @@ def main() -> int:
         ("e. DECs completas e no mapa de impacto", lambda: verificar_decs(modelo, gerados[PASTA_RAS / "impacto-por-dec.md"])),
         ("f. Cabeçalho e histórico de todos os documentos", verificar_cabecalhos),
         ("g. Manifesto da baseline candidata", lambda: verificar_candidata(modelo)),
+        ("h. Regras de negócio ligadas aos RF", lambda: verificar_regras(modelo)),
     ]
     falhou = False
     for titulo, verificar in verificacoes:

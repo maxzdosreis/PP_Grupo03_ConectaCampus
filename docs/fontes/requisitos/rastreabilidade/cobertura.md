@@ -15,6 +15,7 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 | NS com pelo menos um RF | 16 | 17 | 94% |
 | NS que chegam a um TA | 16 | 17 | 94% |
 | RF com NS de origem | 62 | 62 | 100% |
+| RN com pelo menos um RF | 17 | 17 | 100% |
 | RF com UC (sem o transversal) | 61 | 61 | 100% |
 | RF com US e CA (sem o transversal) | 61 | 61 | 100% |
 | CA com TA | 168 | 168 | 100% |

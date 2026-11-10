@@ -12,6 +12,7 @@ Ficha do caso de uso abstrato UC-10 do [índice](README.md#uc-10). Ela descreve 
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo comum, variações UC-11/17/18/19, exceções na ordem real das verificações, garantias, RF cobertos e evidência (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator das variações UC-17, UC-18, UC-19 e UC-11 e interessado "Gestor": Atendente responsável; E6.4 e as regras seguem com o perfil Gestor ([DEC-25](../decisoes/DEC-25.md), REQ-12). Metas e exceções iguais; ator misto tratado no [CR-05](../mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md). Sem aprovação. |
 
 ## Sumário
 
@@ -34,18 +35,18 @@ Ficha do caso de uso abstrato UC-10 do [índice](README.md#uc-10). Ela descreve 
 |---|---|
 | **Escopo** | Conecta Campus (caixa-preta). |
 | **Nível** | Objetivo do usuário, **abstrato**: só acontece por um dos filhos ([decisão c](README.md#decisao-c)). Inclui UC-12 (nos filhos que exigem motivo) e UC-13. |
-| **Ator primário** | Depende do filho: o [Gestor](../glossario.md#gestor) em UC-17, UC-18 e UC-19; o Gestor ou o [Solicitante](../glossario.md#solicitante) (só na própria reserva) em UC-11. Ver [Variações](#variações). |
+| **Ator primário** | Depende do filho: o [Atendente responsável](../glossario.md#atendente-responsavel) em UC-17, UC-18 e UC-19; o Atendente responsável ou o [Solicitante](../glossario.md#solicitante) (só na própria reserva) em UC-11. Ver [Variações](#variações). |
 | **Atores secundários** | Nenhum ([decisão f](README.md#decisao-f)). |
 | **Meta de contexto** | Levar uma reserva a uma situação que a [tabela de transições](../glossario.md#transicao-de-situacao) e o [perfil](../glossario.md#perfil) de quem age permitem, com o motivo quando exigido, e deixar a mudança registrada no [histórico](../glossario.md#historico). |
 | **Precondições** | O ator é um [usuário autenticado](../glossario.md#usuario-autenticado) com o perfil exigido pelo filho ([UC-02 Autenticar](UC-02-autenticar.md); [decisão d](README.md#decisao-d)). A reserva existir e ser visível ao ator **não** é precondição: é conferido no [passo 6](#p6). |
-| **Disparador** | O Gestor decide sobre um pedido (confirmar, recusar), registra que o uso aconteceu (concluir) ou desfaz um uso combinado (cancelar); ou o Solicitante desiste do próprio pedido (cancelar). |
+| **Disparador** | O Atendente responsável decide sobre um pedido (confirmar, recusar), registra que o uso aconteceu (concluir) ou desfaz um uso combinado (cancelar); ou o Solicitante desiste do próprio pedido (cancelar). |
 
 ## Stakeholders e interesses
 
 | Stakeholder | Interesse neste caso de uso |
 |---|---|
-| **Solicitante** | Desistir sem procurar o Gestor, liberando o horário; saber, pela situação e pelo motivo, por que o pedido foi recusado ou cancelado; ter certeza de que ninguém além do Gestor decide sobre o pedido dele, e que outro solicitante não o vê nem o altera. |
-| **Gestor** | Decidir com uma ação só, vendo apenas as ações que fazem sentido na situação atual; justificar recusas e cancelamentos; não perder uma decisão tomada ao mesmo tempo por outra pessoa sem ficar sabendo. |
+| **Solicitante** | Desistir sem procurar o Atendente responsável, liberando o horário; saber, pela situação e pelo motivo, por que o pedido foi recusado ou cancelado; ter certeza de que ninguém além do Atendente responsável decide sobre o pedido dele, e que outro solicitante não o vê nem o altera. |
+| **Atendente responsável** | Decidir com uma ação só, vendo apenas as ações que fazem sentido na situação atual; justificar recusas e cancelamentos; não perder uma decisão tomada ao mesmo tempo por outra pessoa sem ficar sabendo. |
 | **Cliente** (instituição) | Só quem tem autoridade decide sobre os pedidos; toda decisão fica registrada com autor, momento e motivo; nenhuma reserva sai de um estado final nem pula etapas. |
 
 ## Fluxo principal (comum aos filhos)
@@ -67,10 +68,10 @@ O que muda de um filho para outro. Tudo o mais (passos, alternativas e exceçõe
 
 | Filho | Ator permitido | Situações de origem | Exige motivo? | Efeito sobre o horário | Ações depois | RF |
 |---|---|---|---|---|---|---|
-| <a id="v-uc-17"></a>**UC-17 Confirmar reserva** | Gestor | Solicitada | Não (opcional, até 300 caracteres) | Continua ocupado (Confirmada ocupa horário) | Gestor: Cancelar, Concluir · Solicitante dono: Cancelar | [RF-17](../requisitos/rf-reservas.md#rf-17) |
-| <a id="v-uc-18"></a>**UC-18 Recusar reserva** | Gestor | Solicitada | **Sim** (UC-12), até 300 caracteres | Liberado (Recusada não ocupa) | Nenhuma: situação final | [RF-18](../requisitos/rf-reservas.md#rf-18) |
-| <a id="v-uc-19"></a>**UC-19 Concluir reserva** | Gestor | Confirmada | Não (opcional, até 300 caracteres) | Liberado (Concluída não ocupa; só tem efeito se concluída antes do término, [DEC-13](../decisoes/DEC-13.md)) | Nenhuma: situação final | [RF-19](../requisitos/rf-reservas.md#rf-19) |
-| <a id="v-uc-11"></a>**UC-11 Cancelar reserva** | Gestor (qualquer reserva) ou Solicitante (só a própria) | Solicitada ou Confirmada | **Sim** (UC-12), até 300 caracteres | Liberado (Cancelada não ocupa) | Nenhuma: situação final | [RF-20](../requisitos/rf-reservas.md#rf-20) (Gestor), [RF-21](../requisitos/rf-reservas.md#rf-21) (Solicitante) |
+| <a id="v-uc-17"></a>**UC-17 Confirmar reserva** | Atendente responsável | Solicitada | Não (opcional, até 300 caracteres) | Continua ocupado (Confirmada ocupa horário) | Atendente responsável: Cancelar, Concluir · Solicitante dono: Cancelar | [RF-17](../requisitos/rf-reservas.md#rf-17) |
+| <a id="v-uc-18"></a>**UC-18 Recusar reserva** | Atendente responsável | Solicitada | **Sim** (UC-12), até 300 caracteres | Liberado (Recusada não ocupa) | Nenhuma: situação final | [RF-18](../requisitos/rf-reservas.md#rf-18) |
+| <a id="v-uc-19"></a>**UC-19 Concluir reserva** | Atendente responsável | Confirmada | Não (opcional, até 300 caracteres) | Liberado (Concluída não ocupa; só tem efeito se concluída antes do término, [DEC-13](../decisoes/DEC-13.md)) | Nenhuma: situação final | [RF-19](../requisitos/rf-reservas.md#rf-19) |
+| <a id="v-uc-11"></a>**UC-11 Cancelar reserva** | Atendente responsável (qualquer reserva) ou Solicitante (só a própria) | Solicitada ou Confirmada | **Sim** (UC-12), até 300 caracteres | Liberado (Cancelada não ocupa) | Nenhuma: situação final | [RF-20](../requisitos/rf-reservas.md#rf-20) (Gestor), [RF-21](../requisitos/rf-reservas.md#rf-21) (Solicitante) |
 
 Nenhuma transição depende do horário da reserva: confirmar ou recusar depois do início, concluir antes do término e cancelar depois do uso são aceitos (opção a da [DEC-13](../decisoes/DEC-13.md); [lacuna L-01](../requisitos/srs.md#l-01)). Solicitada não é destino de nenhuma ação.
 
@@ -219,7 +220,7 @@ Também aparece aqui, sem ser atribuído a UC-10: [RF-16](../requisitos/rf-reser
 |---|---|
 | [DEC-13](../decisoes/DEC-13.md) · Mudança de situação × horário | Hoje nenhuma mudança depende do horário. As opções b, c e d criariam exceções novas no passo 6 (concluir antes do término; confirmar, recusar ou cancelar depois do início) e mudariam as [ações disponíveis](#p2) conforme o horário. |
 | [DEC-05](../decisoes/DEC-05.md) · Histórico só com mudanças efetivas | Se as tentativas recusadas passarem a ser registradas, a garantia mínima muda: as exceções do passo 6 passariam a gravar um registro (ou um log técnico). |
-| [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | É por UC-11 (cancelar, pelo Gestor) que as reservas de um espaço desativado são desfeitas; a desativação não as muda. |
+| [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | É por UC-11 (cancelar, pelo Atendente responsável) que as reservas de um espaço desativado são desfeitas; a desativação não as muda. |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Define os atores de cada variação. |
 
 O limite do motivo ao confirmar e concluir ([E6.6](#e6-6)) não está escrito em nenhum RF: [lacuna L-13](../requisitos/srs.md#l-13).

@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Gestor do serviço ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-06 |
 | **Título** | Editar espaço |
-| **História** | Como Gestor, quero corrigir o nome, o tipo ou a capacidade de um espaço para que a lista continue igual à realidade, sem cadastrar um espaço novo. |
+| **História** | Como Gestor do serviço, quero corrigir o nome, o tipo ou a capacidade de um espaço para que a lista continue igual à realidade, sem cadastrar um espaço novo. |
 | **Valor** | Uma reforma ou um erro de digitação não obriga a desativar um espaço e cadastrar outro, e as reservas dele continuam ligadas ao mesmo espaço ([NS-02](../visao.md#necessidades)). |
 | **Origem** | [UC-15 Editar espaço, passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc15-p1), alternativas [A3.1](../casos-de-uso/fichas-resumidas.md#uc15-a3-1) e [A3.2](../casos-de-uso/fichas-resumidas.md#uc15-a3-2) e exceções [E1.1](../casos-de-uso/fichas-resumidas.md#uc15-e1-1) a [E5.1](../casos-de-uso/fichas-resumidas.md#uc15-e5-1). |
 | **Prioridade** | Normal — por [RF-09](../requisitos/rf-espacos.md#rf-09) (espaço inexistente), a recusa comum normal que esta história também cobre; os RF próprios da edição ([RF-06](../requisitos/rf-espacos.md#rf-06), [RF-06.1](../requisitos/rf-espacos.md#rf-06-1), [RF-06.2](../requisitos/rf-espacos.md#rf-06-2)) são esperados e extras ao enunciado. |

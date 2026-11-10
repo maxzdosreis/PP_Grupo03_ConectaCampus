@@ -126,6 +126,6 @@ Nada abaixo foi aplicado aqui. A REQ-13 aplica na especificação, antes do cód
 | 6 | RF-32.1 e validação do cadastro | Comportamental: aplicar o [CR-04](../mudancas/CR-04-matricula-so-digitos.md) | ACH-04 |
 | 7 | Visão (stakeholders) e papéis Atendente responsável e Gestor do serviço | Tarefa REQ-12, não CR desta síntese | ACH-22 |
 | 8 | Visão §3, "Bloqueio de períodos" | Reavaliar com cliente real; sem CR agora | ACH-19, DEC-24 |
-| 9 | Se o grupo trouxer a NS-17 para o 1.0 | Abrir o CR-05 pelo [modelo de CR](../mudancas/modelo-cr.md) e substituir a DEC-24 | ACH-16 |
+| 9 | Se o grupo trouxer a NS-17 para o 1.0 | Abrir um CR novo (o próximo número livre) pelo [modelo de CR](../mudancas/modelo-cr.md) e substituir a DEC-24 | ACH-16 |
 
 Os CR-01 a CR-04 já existem, aprovados, e aguardam a implementação (RES-11, RES-12, ESP-07 e AUT-12). Nenhum CR novo foi aberto, porque a NS-17 fica fora do 1.0 e não muda nenhum artefato existente.

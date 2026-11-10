@@ -24,12 +24,15 @@ skinparam usecase {
 
 title Conecta Campus — casos de uso do negócio (UCD-01 • 0.1 • Rascunho)
 
-actor Gestor
+actor "Gestor do serviço" as GestorDoServico
+actor "Atendente responsável" as Atendente
 actor Solicitante
 actor Visitante
-' Generalização de atores: o Gestor é um Solicitante com mais casos de uso.
-' Um traço só deixa os dois atores na mesma coluna.
-Gestor -|> Solicitante
+' Generalização de atores: o Atendente responsável e o Gestor do serviço são Solicitantes com
+' mais casos de uso. No sistema mínimo (DEC-25), um perfil só, o Gestor, cobre os dois papéis.
+' Um traço só deixa os atores na mesma coluna.
+Atendente -|> Solicitante
+GestorDoServico -|> Solicitante
 
 rectangle "Conecta Campus" {
   usecase "UC-03 Consultar espaços" as UC03
@@ -55,7 +58,7 @@ rectangle "Conecta Campus" {
   usecase "UC-02 Autenticar" as UC02
 }
 
-' Associações ator–caso de uso (o Gestor herda as do Solicitante). UC-06 e UC-09
+' Associações ator–caso de uso (o Atendente responsável e o Gestor do serviço herdam as do Solicitante). UC-06 e UC-09
 ' não têm associação própria: só acontecem como extensão de UC-04 e UC-08.
 Visitante -- UC01
 Visitante -- UC02
@@ -66,12 +69,12 @@ Solicitante -- UC07
 Solicitante -- UC08
 Solicitante -- UC11
 
-Gestor -- UC14
-Gestor -- UC15
-Gestor -- UC16
-Gestor -- UC17
-Gestor -- UC18
-Gestor -- UC19
+GestorDoServico -- UC14
+GestorDoServico -- UC15
+GestorDoServico -- UC16
+Atendente -- UC17
+Atendente -- UC18
+Atendente -- UC19
 
 ' Inclusões (obrigatórias): base ..> incluído ("...>" é a mesma seta, mais longa, só de layout)
 UC04 ..> UC05 : <<include>>
@@ -92,9 +95,14 @@ UC17 --|> UC10
 UC18 --|> UC10
 UC19 --|> UC10
 
-note "Precondição de todos os casos de uso\ndo Solicitante e do Gestor:\nator autenticado (UC-02 Autenticar)." as PRECONDICAO
+note "Precondição de todos os casos de uso\ndo Solicitante, do Atendente responsável\ne do Gestor do serviço:\nator autenticado (UC-02 Autenticar)." as PRECONDICAO
 Solicitante .. PRECONDICAO
-Gestor .. PRECONDICAO
+Atendente .. PRECONDICAO
+GestorDoServico .. PRECONDICAO
+
+note "No sistema mínimo, o perfil Gestor\ncobre o Atendente responsável\ne o Gestor do serviço (DEC-25)." as PERFILUNICO
+Atendente .. PERFILUNICO
+GestorDoServico .. PERFILUNICO
 
 legend right
   |= Notação |= Significado |
