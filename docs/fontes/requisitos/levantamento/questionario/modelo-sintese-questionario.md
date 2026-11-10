@@ -117,7 +117,7 @@ Roteiro de leitura das ligações (as mesmas da tabela interna do [QST-01](QST-0
 
 ## 6. Comparação com as entrevistas
 
-Pergunta a pergunta do [ROT-02](../entrevistas/ROT-02-solicitante.md), para ver onde as técnicas concordam e onde não. **As ENT-02 e ENT-03 são simuladas** ([README do levantamento](../README.md#plano-e-status-das-entrevistas)): não são falas de pessoas reais, então uma concordância com elas **não** reforça um achado do questionário. Só a ENT-01 e as respostas do questionário são de pessoas reais.
+Pergunta a pergunta do [ROT-02](../entrevistas/ROT-02-solicitante.md), para ver onde as técnicas concordam e onde não.
 
 | Tema | Questionário | Entrevista (ROT-02) | Concorda? |
 |---|---|---|---|

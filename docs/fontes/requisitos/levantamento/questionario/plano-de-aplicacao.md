@@ -91,4 +91,3 @@ O arquivo exportado do formulário (CSV) **nunca entra no repositório**. Fica f
 - **Resultados indicam tendências, não probabilidades.** Com amostra pequena, mostramos contagens ("n de N"), nunca percentuais como se fossem do campus inteiro.
 - **Resposta duplicada possível**, porque o formulário não exige login.
 - **Respostas de memória** (P04 cobre 3 meses) podem errar.
-- **Não substitui as entrevistas.** As entrevistas ENT-02 a ENT-04 são simuladas ([README do levantamento](../README.md#plano-e-status-das-entrevistas)); as respostas reais do questionário, somadas à ENT-01, são o que o grupo terá de campo.

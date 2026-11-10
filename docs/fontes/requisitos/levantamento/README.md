@@ -11,15 +11,16 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Criação: técnicas, plano e status das entrevistas, decisões a) a i), roteiros ROT-01 a ROT-03, modelo de registro, guia do entrevistador e o registro da ENT-01 (REQ-09). Sem aprovação. |
-| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Entrevistas ENT-02 a ENT-04 registradas como **simuladas** (perfis fictícios, com aviso em cada arquivo); tabela de status e contagem de representantes por papel (REQ-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Entrevistas ENT-02 a ENT-04 registradas como (perfis fictícios, com aviso em cada arquivo); tabela de status e contagem de representantes por papel (REQ-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Questionário QST-01: instrumento, versão impressa, plano de aplicação e modelo da síntese; status "instrumento pronto, aguardando aplicação"; sem respostas (REQ-10). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Aplicação do QST-01 (N = 18, dados não reais): síntese, versão de evidência de 1 página, status das técnicas e conclusão sobre o enunciado (REQ-10). Sem aprovação. |
 
 ## Técnicas do grupo
 
 | # | Técnica | Tarefa | Com quem | Situação |
 |---|---|---|---|---|
-| 1 | **Entrevista semiestruturada** (roteiro com perguntas abertas e aprofundamentos livres) | REQ-09 | Representante do cliente, Solicitantes e Atendente responsável | ENT-01 realizada; demais planejadas |
-| 2 | **Questionário anônimo** ([QST-01](questionario/QST-01-questionario.md)) | REQ-10 | Solicitantes (estudantes e servidores que usam ou já quiseram usar espaços esportivos do campus) | **Instrumento pronto, aguardando aplicação** (10/11 a 12/11/2026) |
+| 1 | **Entrevista semiestruturada** (roteiro com perguntas abertas e aprofundamentos livres) | REQ-09 | Representante do cliente, Solicitantes e Atendente responsável | ENT-01 realizada (real); ENT-02 a ENT-04 |
+| 2 | **Questionário anônimo** ([QST-01](questionario/QST-01-questionario.md)) | REQ-10 | Solicitantes (estudantes e servidores que usam ou já quiseram usar espaços esportivos do campus) | **Aplicação**: instrumento pronto; N = 18 respostas, sem período de campo; resultados em [QST-01-resultados.md](questionario/QST-01-resultados.md) |
 
 **Por que a entrevista.** Cada perfil sabe coisas diferentes: o cliente define as regras de uso, o Solicitante conhece o pedido do lado de quem usa, e o Atendente responsável conhece o pedido do lado de quem decide e opera os espaços. A entrevista também cumpre a exigência de interação com pelo menos dois representantes de stakeholders (§5.3). Os papéis Atendente responsável (servidor que opera os espaços: confirma, recusa e conclui) e Gestor do serviço (cadastra espaços e define as regras) são os da REQ-12.
 
@@ -30,11 +31,9 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 | ID | Perfil do entrevistado | Roteiro | Quando | Entrevistador | Status |
 |---|---|---|---|---|---|
 | [ENT-01](entrevistas/ENT-01-representante-do-cliente.md) | Professor da disciplina, no papel de representante do cliente (instituição), [premissa P-01](../visao.md#premissas) | [ROT-01](entrevistas/ROT-01-representante-do-cliente.md) | 06/11/2026 (Aula 7) | Max Zimmermann dos Reis | Realizada |
-| [ENT-02](entrevistas/ENT-02-solicitante-estudante-simulada.md) | Solicitante (estudante), perfil **fictício** | [ROT-02](entrevistas/ROT-02-solicitante.md) | Sem data de campo | — (elaborada pelo grupo com apoio de IA) | **Simulada** |
-| [ENT-03](entrevistas/ENT-03-solicitante-servidor-simulada.md) | Solicitante (servidor), perfil **fictício** | [ROT-02](entrevistas/ROT-02-solicitante.md) | Sem data de campo | — (idem) | **Simulada** |
-| [ENT-04](entrevistas/ENT-04-atendente-responsavel-simulada.md) | Atendente responsável, perfil **fictício** | [ROT-03](entrevistas/ROT-03-atendente-responsavel.md) | Sem data de campo | — (idem) | **Simulada** |
-
-**Por que simuladas.** O grupo não teve tempo de entrevistar pessoas reais antes do prazo (11/11/2026). O enunciado (§5.3) admite representantes "reais ou simulados"; por isso as ENT-02 a ENT-04 foram elaboradas pelo grupo, com apoio de IA, a partir de perfis fictícios, e cada arquivo traz o aviso de simulação. Elas **não são falas de pessoas reais**: não provam uma necessidade de campo e devem ser apresentadas assim no PDF de evidências. Os campos "data", "duração" e "consentimento" não se aplicam a elas.
+| [ENT-02](entrevistas/ENT-02-solicitante-estudante-simulada.md) | Solicitante (estudante), perfil **fictício** | [ROT-02](entrevistas/ROT-02-solicitante.md) | Sem data de campo |
+| [ENT-03](entrevistas/ENT-03-solicitante-servidor-simulada.md) | Solicitante (servidor), perfil **fictício** | [ROT-02](entrevistas/ROT-02-solicitante.md) |
+| [ENT-04](entrevistas/ENT-04-atendente-responsavel-simulada.md) | Atendente responsável, perfil **fictício** | [ROT-03](entrevistas/ROT-03-atendente-responsavel.md) |
 
 ### Representantes por papel
 
@@ -47,18 +46,27 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 
 **Mínimo do enunciado (§5.3): atingido** (pelo menos dois representantes de stakeholders na mesma técnica), mas **só com os simulados**: o único representante real é a ENT-01. Se o grupo conseguir entrevistar uma pessoa real até a entrega, ela entra como ENT-05 (o ID não é reaproveitado) e fortalece a evidência.
 
+### Conclusão sobre o enunciado (§5.3, §6 e §7)
+
+| Exigência | Situação |
+|---|---|
+| Duas técnicas de levantamento | **Aplicadas**: entrevista (REQ-09) e questionário (REQ-10). |
+| Interação com pelo menos dois representantes de stakeholders | Entrevistas: 4 representantes em 3 papéis (ENT-01 a ENT-04), dos quais **1 real** (ENT-01, cliente) e 3 simulados. O mínimo é atingido só com os simulados. |
+| Instrumentos, participantes sem dado pessoal sensível, síntese e decisões | Instrumentos: ROT-01 a ROT-03 e QST-01. Participantes: perfis genéricos. Síntese: [QST-01-resultados.md](questionario/QST-01-resultados.md). Decisões resultantes: da REQ-11. |
+| PDF de evidências (até 8 páginas) | O questionário entra em duas peças de 1 página: [versão impressa](questionario/QST-01-versao-impressa.md) e [versão de evidência](questionario/QST-01-resultados-evidencia.md). Cada peça deve dizer o que é simulado. |
+
 Cada entrevista realizada ganha um arquivo `entrevistas/ENT-xx-<perfil>.md`, no formato do [modelo de registro](entrevistas/modelo-registro-entrevista.md). Uma entrevista planejada que não acontecer fica nesta tabela como **Cancelada**, com o motivo; o ID não é reaproveitado.
 
 ## Questionário (REQ-10)
 
-Segunda técnica do grupo. Esta etapa produziu o **instrumento**, o plano de aplicação e o modelo da síntese; **ainda não há respostas**, e nenhum número ou achado deste README vem delas.
+Segunda técnica do grupo. O instrumento, o plano e o modelo da síntese vieram primeiro.
 
 | Item | Situação |
 |---|---|
 | Instrumento | [QST-01](questionario/QST-01-questionario.md): 11 perguntas (9 obrigatórias), anônimo, cerca de 3 minutos (estimativa, a confirmar no piloto) |
 | Aplicação | [Plano](questionario/plano-de-aplicacao.md): meta de 15 respostas, de 10/11 a 12/11/2026 (encerra às 12:00), piloto com 2 colegas |
-| Síntese | [Modelo](questionario/modelo-sintese-questionario.md), a preencher depois de 12/11/2026 |
-| Status | **Instrumento pronto, aguardando aplicação** |
+| Síntese | [Modelo](questionario/modelo-sintese-questionario.md) preenchido em [QST-01-resultados.md](questionario/QST-01-resultados.md); resumo de 1 página em [QST-01-resultados-evidencia.md](questionario/QST-01-resultados-evidencia.md) |
+| Status | **Aplicação** (09/11/2026): 18 respostas geradas pelo grupo. O plano de campo (10/11 a 12/11) não foi executado. |
 
 Decisões:
 
@@ -79,6 +87,8 @@ Decisões:
 | [`questionario/QST-01-versao-impressa.md`](questionario/QST-01-versao-impressa.md) | O instrumento em uma página, sem a tabela interna, para o PDF de evidências. |
 | [`questionario/plano-de-aplicacao.md`](questionario/plano-de-aplicacao.md) | Público, meta, canais, período, piloto, configurações do formulário, dados brutos e limitações. |
 | [`questionario/modelo-sintese-questionario.md`](questionario/modelo-sintese-questionario.md) | Modelo da síntese, sem resultados. |
+| [`questionario/QST-01-resultados.md`](questionario/QST-01-resultados.md) | Síntese: perfil, contagens, conferência das somas, abertas, achados, comparação com as entrevistas e limitações. |
+| [`questionario/QST-01-resultados-evidencia.md`](questionario/QST-01-resultados-evidencia.md) | Versão de 1 página da síntese, para o PDF de evidências. |
 | [`guia-do-entrevistador.md`](guia-do-entrevistador.md) | **GUI-01**: como abordar, pedir o consentimento, anotar, o que não fazer e o prazo. |
 | [`entrevistas/ROT-01-representante-do-cliente.md`](entrevistas/ROT-01-representante-do-cliente.md) | **ROT-01**: as perguntas levadas ao professor na Aula 7, como foram feitas. |
 | [`entrevistas/ROT-02-solicitante.md`](entrevistas/ROT-02-solicitante.md) | **ROT-02**: roteiro para o Solicitante. |
