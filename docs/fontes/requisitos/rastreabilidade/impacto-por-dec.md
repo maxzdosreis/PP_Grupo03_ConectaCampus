@@ -36,6 +36,7 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 | [DEC-21](#dec-21) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-22](#dec-22) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-23](#dec-23) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
+| [DEC-24](#dec-24) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 
 ## <a id="dec-13"></a>DEC-13 · Mudança de situação em relação ao horário da reserva
 
@@ -639,6 +640,28 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 | **Opção adotada** | A apresentação é feita em aula, no notebook do grupo, com o sistema funcionando, em até 10 minutos. |
 | **Responsável** | Professor (resposta); grupo (decisão). |
 | **Prazo** | Decidida em 06/11/2026. |
+| **Tipo de mudança se a resposta for outra** | decidida: outra resposta só por CR (comportamental) |
+| **Regressão estimada** | 0 TAs a rever (0 manuais), de 0 CAs em 0 histórias: 0 CAs dependem diretamente da DEC e 0 verificam os RF afetados |
+
+- **RF:** nenhum
+- **RNF:** nenhum
+- **UC (passo, alternativa ou exceção):** nenhum
+- **US:** —
+- **CA que dependem da DEC:** —
+- **CA dos RF afetados (regressão):** —
+- **TA:** —
+- **Endpoint ou tela:** nenhum
+- **Código:** nenhum
+
+## <a id="dec-24"></a>DEC-24 · A necessidade de ser avisado de mudanças (NS-17) fica fora do 1.0
+
+| Campo | Conteúdo |
+|---|---|
+| **Estado** | Decidida ([ficha](../decisoes/DEC-24.md)) |
+| **Pergunta** | A necessidade [NS-17](../visao.md#ns-17) (ficar sabendo que a situação de um pedido próprio mudou, em especial quando um uso confirmado é cancelado) entra no 1.0 ou fica fora dele? |
+| **Opção adotada** | **a)** A NS-17 fica registrada na Visão e **fora do 1.0**. O aviso ativo (e-mail, SMS ou aplicativo de mensagens) segue no fora do escopo "Notificações" da Visão. **b)** O Solicitante continua acompanhando a situação do pedido consultando o sistema ([NS-07](../visao.md#ns-07), [RF-13](../requisitos/rf-reservas.md#rf-13) e [RF-14](../requisitos/rf-reservas.md#rf-14)); isso atende a NS-17 só em parte. **c)** Nenhum RF, UC, US, CA, TA nem código muda. A NS-17 fica sem RF derivado até a REQ-13. **d)** O item "Bloqueio de períodos para manutenção ou eventos da instituição" (ACH-19) **continua fora do escopo**, sem NS própria; a evidência fica na [síntese do levantamento](../levantamento/sintese-do-levantamento.md) como motivo para reavaliá-lo com um cliente real. |
+| **Responsável** | Max Zimmermann dos Reis (grupo). |
+| **Prazo** | Decidida em 10/11/2026. |
 | **Tipo de mudança se a resposta for outra** | decidida: outra resposta só por CR (comportamental) |
 | **Regressão estimada** | 0 TAs a rever (0 manuais), de 0 CAs em 0 histórias: 0 CAs dependem diretamente da DEC e 0 verificam os RF afetados |
 

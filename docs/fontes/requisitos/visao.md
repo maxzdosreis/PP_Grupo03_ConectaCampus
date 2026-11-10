@@ -15,6 +15,7 @@ Modelo: Documento de Visão do RUP em quatro quadrantes (A3·s7), com o cabeçal
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Âncoras estáveis `#ns-01` a `#ns-16` na tabela de necessidades, para a [matriz de rastreabilidade](rastreabilidade/README.md) apontar para cada NS (REQ-06). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): P-02, P-04, o item de regras por espaço do fora do escopo e a resposta dos riscos R-05 e R-08 a R-14 apontam para as DECs decididas e os CR-02 a CR-04. Nenhuma necessidade, premissa ou risco novo; a P-04 deixa de valer só com a ESP-07. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | NS-11 cita também o RF-33.2, novo na AUT-08. Nenhuma necessidade nova. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | NS-17 (ser avisado de mudança no pedido), vinda do levantamento, fora do 1.0 pela [DEC-24](decisoes/DEC-24.md); sem RF até a REQ-13. Nenhuma NS existente mudou (REQ-11). Sem aprovação. |
 
 ## Sumário
 
@@ -93,6 +94,7 @@ Cada necessidade descreve **o que** um stakeholder precisa, sem tela nem tecnolo
 | <a id="ns-14"></a>NS-14 | Ter os próprios pedidos protegidos: um solicitante não conhece quem pediu outros espaços nem para quê. | Solicitante, Cliente | Extra (AUT-05): o Solicitante só lê as próprias reservas. A agenda do dia mostra período e situação, sem dados pessoais ([DEC-11](decisoes/DEC-11.md)). | [RF-23](requisitos/rf-reservas.md#rf-23) |
 | <a id="ns-15"></a>NS-15 | Obter acesso ao sistema sem depender de um gestor. | Visitante | Extra (AUT-04): cadastro de solicitante. | [RF-32](requisitos/rf-contas.md#rf-32), [RF-32.1](requisitos/rf-contas.md#rf-32-1), [RF-32.2](requisitos/rf-contas.md#rf-32-2), [RF-32.3](requisitos/rf-contas.md#rf-32-3) |
 | <a id="ns-16"></a>NS-16 | Instalar, executar e demonstrar o sistema num ambiente novo seguindo instruções escritas, com dados de exemplo. | Equipe de TI, Professor | README com o passo a passo e o comando de dados de exemplo (INF-06). | [RF-39](requisitos/rf-gerais.md#rf-39), [RF-40](requisitos/rf-gerais.md#rf-40) |
+| <a id="ns-17"></a>NS-17 | Ficar sabendo que a situação de um pedido próprio mudou, em especial quando um uso já confirmado é cancelado antes de acontecer. | Solicitante (levantamento: [ENT-03](levantamento/entrevistas/ENT-03-solicitante-servidor-simulada.md) P04, [QST-01](levantamento/questionario/QST-01-resultados.md) P09) | Em parte, por consultar a situação (NS-07). O aviso ativo está fora do escopo ("Notificações") e a necessidade fica fora do 1.0 ([DEC-24](decisoes/DEC-24.md)). | Nenhum até a REQ-13 |
 
 ## 3. Escopo inicial do sistema
 
@@ -237,3 +239,4 @@ Revisor: Matheus Cezar Santos • Data: [dd/mm/aaaa]
 | NS-14 | | | | | |
 | NS-15 | | | | | |
 | NS-16 | | | | | |
+| NS-17 | | | | | |
