@@ -12,13 +12,14 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 |---|---|---|---|
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Criação: técnicas, plano e status das entrevistas, decisões a) a i), roteiros ROT-01 a ROT-03, modelo de registro, guia do entrevistador e o registro da ENT-01 (REQ-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Entrevistas ENT-02 a ENT-04 registradas como **simuladas** (perfis fictícios, com aviso em cada arquivo); tabela de status e contagem de representantes por papel (REQ-09). Sem aprovação. |
+| 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Questionário QST-01: instrumento, versão impressa, plano de aplicação e modelo da síntese; status "instrumento pronto, aguardando aplicação"; sem respostas (REQ-10). Sem aprovação. |
 
 ## Técnicas do grupo
 
 | # | Técnica | Tarefa | Com quem | Situação |
 |---|---|---|---|---|
 | 1 | **Entrevista semiestruturada** (roteiro com perguntas abertas e aprofundamentos livres) | REQ-09 | Representante do cliente, Solicitantes e Atendente responsável | ENT-01 realizada; demais planejadas |
-| 2 | **Questionário** | REQ-10 | A definir na REQ-10 | Não iniciado |
+| 2 | **Questionário anônimo** ([QST-01](questionario/QST-01-questionario.md)) | REQ-10 | Solicitantes (estudantes e servidores que usam ou já quiseram usar espaços esportivos do campus) | **Instrumento pronto, aguardando aplicação** (10/11 a 12/11/2026) |
 
 **Por que a entrevista.** Cada perfil sabe coisas diferentes: o cliente define as regras de uso, o Solicitante conhece o pedido do lado de quem usa, e o Atendente responsável conhece o pedido do lado de quem decide e opera os espaços. A entrevista também cumpre a exigência de interação com pelo menos dois representantes de stakeholders (§5.3). Os papéis Atendente responsável (servidor que opera os espaços: confirma, recusa e conclui) e Gestor do serviço (cadastra espaços e define as regras) são os da REQ-12.
 
@@ -48,10 +49,36 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 
 Cada entrevista realizada ganha um arquivo `entrevistas/ENT-xx-<perfil>.md`, no formato do [modelo de registro](entrevistas/modelo-registro-entrevista.md). Uma entrevista planejada que não acontecer fica nesta tabela como **Cancelada**, com o motivo; o ID não é reaproveitado.
 
+## Questionário (REQ-10)
+
+Segunda técnica do grupo. Esta etapa produziu o **instrumento**, o plano de aplicação e o modelo da síntese; **ainda não há respostas**, e nenhum número ou achado deste README vem delas.
+
+| Item | Situação |
+|---|---|
+| Instrumento | [QST-01](questionario/QST-01-questionario.md): 11 perguntas (9 obrigatórias), anônimo, cerca de 3 minutos (estimativa, a confirmar no piloto) |
+| Aplicação | [Plano](questionario/plano-de-aplicacao.md): meta de 15 respostas, de 10/11 a 12/11/2026 (encerra às 12:00), piloto com 2 colegas |
+| Síntese | [Modelo](questionario/modelo-sintese-questionario.md), a preencher depois de 12/11/2026 |
+| Status | **Instrumento pronto, aguardando aplicação** |
+
+Decisões:
+
+- **a) Identificador.** `QST-01`, estável e nunca reutilizado; um próximo questionário seria `QST-02`. Cabeçalho `ID • versão • estado` e histórico, como os demais.
+- **b) Público.** Só Solicitantes. O Atendente responsável e o Gestor do serviço ficam com as entrevistas, porque o que eles sabem (decidir, operar, definir regras) cabe mal em perguntas fechadas.
+- **c) Forma.** Anônimo: não se coleta e-mail, nome, matrícula, curso nem turma. De 9 a 11 perguntas, até 3 minutos. A abertura diz o objetivo, que é anônimo e que as respostas só servem ao trabalho da disciplina.
+- **d) Perguntas ligadas aos requisitos.** Cada pergunta tem, na tabela interna do QST-01, a NS, a regra ou a DEC que ela pode confirmar ou contestar; o que não tem ligação é marcado "possível necessidade nova", sem criar NS (isso é da REQ-11). As perguntas de perfil (P01, P02) são contexto e não confirmam NS.
+- **e) Regras de escrita.** Neutras e sobre a situação, nunca sobre solução, tela, aplicativo, site ou tecnologia. A opção "Peço por e-mail ou formulário" (P03) descreve a prática de hoje. Opções que se excluem e cobrem os casos, sem pergunta dupla e sem dado pessoal.
+- **f) Não repete a entrevista; complementa.** As perguntas fechadas medem o que o [ROT-02](entrevistas/ROT-02-solicitante.md) perguntou em aberto (como consegue o espaço, duração, antecedência, horários, desistência, o que precisa saber), para a síntese comparar as duas técnicas. As faixas de duração e de antecedência separam os limites já adotados (DEC-07), sem citá-los ao respondente.
+- **g) Dados brutos fora do Git.** O CSV do formulário nunca entra no repositório: `levantamento/questionario/brutos/` está no `.gitignore`. O repositório guarda o instrumento e a síntese.
+- **h) Tamanho.** A [versão impressa](questionario/QST-01-versao-impressa.md) foi escrita para caber em uma página do PDF de evidências (§7); a conferência é feita ao gerar o PDF.
+
 ## Arquivos
 
 | Arquivo | O que contém |
 |---|---|
+| [`questionario/QST-01-questionario.md`](questionario/QST-01-questionario.md) | **QST-01**: abertura, perguntas como entram no formulário e tabela interna "o que busca". |
+| [`questionario/QST-01-versao-impressa.md`](questionario/QST-01-versao-impressa.md) | O instrumento em uma página, sem a tabela interna, para o PDF de evidências. |
+| [`questionario/plano-de-aplicacao.md`](questionario/plano-de-aplicacao.md) | Público, meta, canais, período, piloto, configurações do formulário, dados brutos e limitações. |
+| [`questionario/modelo-sintese-questionario.md`](questionario/modelo-sintese-questionario.md) | Modelo da síntese, sem resultados. |
 | [`guia-do-entrevistador.md`](guia-do-entrevistador.md) | **GUI-01**: como abordar, pedir o consentimento, anotar, o que não fazer e o prazo. |
 | [`entrevistas/ROT-01-representante-do-cliente.md`](entrevistas/ROT-01-representante-do-cliente.md) | **ROT-01**: as perguntas levadas ao professor na Aula 7, como foram feitas. |
 | [`entrevistas/ROT-02-solicitante.md`](entrevistas/ROT-02-solicitante.md) | **ROT-02**: roteiro para o Solicitante. |
