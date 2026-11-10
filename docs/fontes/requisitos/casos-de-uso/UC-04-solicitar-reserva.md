@@ -13,6 +13,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: fluxo principal, alternativas, exceções na ordem real das verificações, garantias, RF cobertos, evidência e fluxo de decisão (REQ-04). Sem aprovação. |
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Passo 7 na ordem real do código: a identificação do espaço antes da finalidade; E7.1 passa a ser "Espaço não identificado" e E7.2, "Finalidade em branco ou longa demais" (achado da DOC-03). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Quem decide o pedido (passo 11, interessado e garantia de sucesso) passa a ser o Atendente responsável; o ator primário e as exceções não mudam ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
 
 ## Sumário
 
@@ -37,7 +38,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 | **Nível** | Objetivo do usuário. Inclui duas subfunções (UC-05, UC-13) e é estendido por UC-06. |
 | **Ator primário** | [Solicitante](../glossario.md#solicitante). O [Gestor](../glossario.md#gestor) também solicita, por herança, sempre em nome próprio ([decisão c](README.md#decisao-c)). |
 | **Atores secundários** | Nenhum ([decisão f](README.md#decisao-f)). |
-| **Meta de contexto** | Garantir o uso de um espaço num intervalo de um dia: o pedido fica registrado na situação [Solicitada](../glossario.md#solicitada), ocupando o horário até o Gestor decidir. |
+| **Meta de contexto** | Garantir o uso de um espaço num intervalo de um dia: o pedido fica registrado na situação [Solicitada](../glossario.md#solicitada), ocupando o horário até o Atendente responsável decidir. |
 | **Precondições** | O ator é um [usuário autenticado](../glossario.md#usuario-autenticado) com o perfil Solicitante ou Gestor ([UC-02 Autenticar](UC-02-autenticar.md); [decisão d](README.md#decisao-d)). |
 | **Disparador** | A pessoa decide usar um espaço esportivo numa data e num horário. |
 | **Ponto de extensão** | "antes de enviar o pedido", no [passo 3](#p3) (UC-06, alternativa [A3.1](#a3-1)). |
@@ -47,7 +48,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 | Stakeholder | Interesse neste caso de uso |
 |---|---|
 | **Solicitante** | Pedir sem procurar ninguém; saber, antes de enviar, o que já está ocupado; quando o pedido for recusado, saber qual regra impediu e o que corrigir, sem redigitar o resto; não ter o próprio pedido exposto a outros solicitantes. |
-| **Gestor** | Receber só pedidos dentro das regras de uso e sem conflito, para decidir sem conferir o calendário à mão; saber quem pediu (nome e matrícula), para qual finalidade e quando. |
+| **Atendente responsável** | Receber só pedidos dentro das regras de uso e sem conflito, para decidir sem conferir o calendário à mão; saber quem pediu (nome e matrícula), para qual finalidade e quando. |
 | **Cliente** (instituição) | Nenhum espaço comprometido duas vezes no mesmo período; as regras de uso (funcionamento, duração, antecedência) aplicadas a todos igualmente; o registro de quem pediu e quando, para a rastreabilidade das decisões. |
 
 ## Fluxo principal
@@ -62,7 +63,7 @@ Ficha do caso de uso UC-04 do [índice](README.md#uc-04), com as subfunções in
 8. <a id="p8"></a>O sistema confere que o espaço existe e aceita pedidos ([espaço reservável](../glossario.md#espaco-reservavel)). *(UC-05.)*
 9. <a id="p9"></a>O sistema confere que nenhuma [reserva que ocupa horário](../glossario.md#reserva-que-ocupa-horario) do mesmo espaço tem algum momento em comum com o intervalo pedido (o intervalo é semiaberto: encostar não é conflito). *(UC-05.)*
 10. <a id="p10"></a>O sistema grava a reserva na situação Solicitada, com o usuário autenticado como solicitante e o momento do pedido, e, na mesma gravação, o [registro de situação](../glossario.md#registro-de-situacao) da criação: sem situação anterior, nova Solicitada, autor = solicitante, momento = o do pedido. *(UC-13.)*
-11. <a id="p11"></a>O sistema mostra a reserva criada (espaço, data e horário, finalidade, situação Solicitada e solicitante) e informa que o pedido aguarda a decisão do Gestor.
+11. <a id="p11"></a>O sistema mostra a reserva criada (espaço, data e horário, finalidade, situação Solicitada e solicitante) e informa que o pedido aguarda a decisão do Atendente responsável.
 
 **Subfunções incluídas.** UC-05 *Verificar disponibilidade do horário* = passos [6](#p6), [8](#p8) e [9](#p9): as três condições que dependem das regras de uso e do estado do sistema. UC-13 *Registrar no histórico* = a segunda metade do passo [10](#p10). O passo [7](#p7) fica entre as verificações de UC-05 porque essa é a ordem real do sistema ([lacuna L-12](../requisitos/srs.md#l-12)): a identificação do espaço e a finalidade, nessa ordem, são conferidas depois das regras de agenda.
 
@@ -175,7 +176,7 @@ A meta é interrompida: **nenhuma reserva e nenhum registro de histórico são g
 
 #### <a id="e8-2"></a>E8.2 · Espaço inativo
 
-- **Condição:** no passo 8, o espaço existe, mas está [inativo](../glossario.md#espaco-inativo) (desativado pelo Gestor).
+- **Condição:** no passo 8, o espaço existe, mas está [inativo](../glossario.md#espaco-inativo) (desativado pelo Gestor do serviço).
 - **Resultado para o ator:** "Este espaço está inativo e não aceita reservas." O Solicitante escolhe outro espaço.
 - **Estado depois:** nada é gravado; as reservas que o espaço já tinha continuam valendo ([DEC-06](../decisoes/DEC-06.md)).
 - **Requisito:** [RF-11.3](../requisitos/rf-reservas.md#rf-11-3).
@@ -207,7 +208,7 @@ Cada pergunta revela uma regra e leva à exceção da ficha que a trata (A3·s17
 | Campo | Conteúdo |
 |---|---|
 | **Pós-condições (sucesso)** | Existe uma reserva nova na situação Solicitada, do espaço escolhido, no intervalo pedido, com a finalidade normalizada e o usuário autenticado como solicitante (nome e matrícula copiados no momento do pedido). O intervalo passa a constar como ocupado na agenda do dia e a impedir outro pedido com momento em comum. O histórico da reserva tem exatamente um registro: a criação. As ações disponíveis são as do perfil de quem pediu (o Solicitante pode cancelar; o Gestor pode confirmar, recusar ou cancelar). |
-| **Garantia de sucesso** | O pedido aceito respeita todas as regras de uso no momento do pedido e não compromete o espaço duas vezes; o Gestor recebe um pedido que só depende da decisão dele. |
+| **Garantia de sucesso** | O pedido aceito respeita todas as regras de uso no momento do pedido e não compromete o espaço duas vezes; o Atendente responsável recebe um pedido que só depende da decisão dele. |
 | **Garantia mínima** | Mesmo quando a meta falha: nenhuma reserva nem registro de histórico é gravado pela metade ou fora das regras; nenhuma reserva existente muda; a pessoa fica sabendo qual regra impediu o pedido e o que corrigir; nenhum dado de quem ocupa o período é revelado. |
 
 ## Regras de negócio

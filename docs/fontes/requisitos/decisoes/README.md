@@ -15,6 +15,7 @@ Registro oficial das decisões do Conecta Campus: respostas do professor e escol
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): DEC-05 a DEC-13 decididas, com a data e o CR de cada resposta que muda o comportamento (coluna CR); DEC-14 a DEC-23 criadas a partir dos pontos a confirmar respondidos e das respostas sobre entrega e apresentação; só o ponto 4 do `CLAUDE.md` segue aberto. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | DEC-04: impacto com 42 CAs (estava em 39 desde antes da AUT-08; o US-10 · CA-12 da RES-10 é o mais recente), conforme o [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-04). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | DEC-24 (NS-17 fora do 1.0), vinda da [síntese do levantamento](../levantamento/sintese-do-levantamento.md) (REQ-11). Nenhuma outra DEC mudou. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | DEC-25 (Atendente responsável como papel da especificação; um perfil cobre Atendente e Gestor no sistema mínimo), da REQ-12. Nenhuma outra DEC mudou. Sem aprovação. |
 
 ## Estados
 
@@ -58,7 +59,8 @@ O estado da decisão é diferente da versão e do estado do arquivo (`0.1 • Ra
 | DEC-21 | Capa do modelagem.pdf | Decidida | 06/11/2026 | Professor (resposta); grupo | decidida em 06/11/2026 | Só o plano de páginas do `modelagem.pdf` (DOC-04) ([impacto](../rastreabilidade/impacto-por-dec.md#dec-21)). | — (decidida) | — | [DEC-21](DEC-21.md) |
 | DEC-22 | Modelo do contribuicoes.pdf | Decidida | 06/11/2026 | Professor (resposta); grupo | decidida em 06/11/2026 | Só o formato do `contribuicoes.pdf` (DOC-06) ([impacto](../rastreabilidade/impacto-por-dec.md#dec-22)). | — (decidida) | — | [DEC-22](DEC-22.md) |
 | DEC-23 | Apresentação | Decidida | 06/11/2026 | Professor (resposta); grupo | decidida em 06/11/2026 | Só o roteiro e o ensaio da demonstração ([impacto](../rastreabilidade/impacto-por-dec.md#dec-23)). | — (decidida) | — | [DEC-23](DEC-23.md) |
-| DEC-24 | NS-17 (ser avisado de mudanças) fica fora do 1.0 | Decidida | 10/11/2026 | Max Zimmermann dos Reis (grupo) | decidida em 10/11/2026 | Incluir a NS-17 no 1.0 exigiria o CR-05, um RF novo e um canal de aviso, hoje fora do escopo (a NS-17 não tem RF até a REQ-13). | — (mantém o escopo) | — | [DEC-24](DEC-24.md) |
+| DEC-24 | NS-17 (ser avisado de mudanças) fica fora do 1.0 | Decidida | 10/11/2026 | Max Zimmermann dos Reis (grupo) | decidida em 10/11/2026 | Incluir a NS-17 no 1.0 exigiria um CR novo, um RF novo e um canal de aviso, hoje fora do escopo (a NS-17 não tem RF até a REQ-13). | — (mantém o escopo) | — | [DEC-24](DEC-24.md) |
+| DEC-25 | Atendente responsável como papel da especificação; um perfil cobre Atendente e Gestor no sistema mínimo | Decidida | 10/11/2026 | Max Zimmermann dos Reis (grupo) | decidida em 10/11/2026 | Dois perfis no produto exigiriam um CR e a divisão das permissões do Gestor; hoje só a especificação distingue os papéis ([impacto](../rastreabilidade/impacto-por-dec.md#dec-25)). | — (mantém o comportamento) | — | [DEC-25](DEC-25.md) |
 
 A [pauta da Aula 7](pauta-aula-7.md) (06/11/2026) levou ao professor as DECs com prazo nessa data e os pontos a confirmar; as respostas e o resultado de cada item estão na [seção Resultado](pauta-aula-7.md#resultado).
 

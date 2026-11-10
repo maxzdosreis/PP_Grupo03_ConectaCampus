@@ -28,7 +28,7 @@ Modelo de CR no fluxo do A4·s20 (registrar → analisar → decidir → atualiz
 | **Motivo** | Por que mudar (a resposta de uma DEC, um defeito, um pedido do cliente). |
 | **Solicitante** | Quem pede. |
 | **Responsável** | Quem analisa e atualiza os artefatos. |
-| **Estado** | Pendente · Em análise · Aprovado · Rejeitado · Adiado |
+| **Estado** | Pendente · Proposto · Em análise · Aprovado · Rejeitado · Adiado |
 | **Origem** | DEC-xx, lacuna L-xx ou outro pedido. |
 | **Baseline vigente** | A que continua valendo até a nova ser aprovada (ex.: Conecta Campus — Requisitos 1.0). |
 

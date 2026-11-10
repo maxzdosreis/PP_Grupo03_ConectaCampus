@@ -158,7 +158,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Vínculos** | UC: [UC-14 Cadastrar espaço](../casos-de-uso/README.md#uc-14) (exceção); também em [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) — na ficha: [UC-14 E6.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e6-1), [UC-14 E7.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e7-1), [UC-15 E4.5](../casos-de-uso/fichas-resumidas.md#uc15-e4-5) · US/CA: [US-05 · CA-09](../historias/US-05-cadastrar-espaco.md#us-05-ca-09) (TA-40), [US-05 · CA-10](../historias/US-05-cadastrar-espaco.md#us-05-ca-10) (TA-41), [US-06 · CA-02](../historias/US-06-editar-espaco.md#us-06-ca-02) (TA-44), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-50) |
 | **Evidência (complementar)** | 409 `NOME_DE_ESPACO_JA_CADASTRADO` com `campos.nome`. `espacos/tests/test_casos_de_uso.py::test_cadastrar_nome_repetido_com_caixa_e_espacos_diferentes_lanca_conflito`; `espacos/tests/test_repositorio_espacos.py::test_salvar_nome_repetido_com_caixa_diferente_lanca_nome_ja_cadastrado`; `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [nome-repetido]` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::CadastrarEspaco.executar`, `espacos/application/repositorio.py::RepositorioEspacos.existe_com_nome`, `espacos/infrastructure/models.py::EspacoEsportivoModel`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar` |
-| **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) (nome único) |
+| **Regras de negócio** | [RN-12](regras-de-negocio.md#rn-12). Glossário e detalhes: [Espaço esportivo](../glossario.md#espaco-esportivo) (nome único) |
 | **Decisões** | [DEC-10](../decisoes/DEC-10.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
@@ -211,7 +211,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Vínculos** | UC: [UC-15 Editar espaço](../casos-de-uso/README.md#uc-15) (exceção) — na ficha: [UC-15 E4.1](../casos-de-uso/fichas-resumidas.md#uc15-e4-1), [UC-15 E4.4](../casos-de-uso/fichas-resumidas.md#uc15-e4-4) · US/CA: [US-06 · CA-04](../historias/US-06-editar-espaco.md#us-06-ca-04) (TA-46), [US-06 · CA-07](../historias/US-06-editar-espaco.md#us-06-ca-07) (TA-49), [US-06 · CA-08](../historias/US-06-editar-espaco.md#us-06-ca-08) (TA-50) |
 | **Evidência (complementar)** | 400 ou 409 com `campos`. `espacos/tests/test_api_edicao_de_espaco.py::test_editar_com_dado_invalido_responde_erro_no_campo_e_nao_grava [x]`; `espacos/tests/test_espaco_esportivo.py::test_alterar_dados_invalidos_lanca_o_erro_do_construtor_sem_mudar_nada [x]`; `espacos/tests/test_casos_de_uso.py::test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar`, `::test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade [x]` |
 | **Código (complementar)** | `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/application/casos_de_uso.py::EditarEspaco.executar` |
-| **Regras de negócio** | [Espaço esportivo](../glossario.md#espaco-esportivo) |
+| **Regras de negócio** | [RN-12](regras-de-negocio.md#rn-12). Glossário e detalhes: [Espaço esportivo](../glossario.md#espaco-esportivo) |
 | **Decisões** | [DEC-10](../decisoes/DEC-10.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
@@ -228,7 +228,7 @@ Caminhos de teste a partir de `src/backend/`; `[x]` = teste parametrizado.
 | **Vínculos** | UC: [UC-16 Desativar ou reativar espaço](../casos-de-uso/README.md#uc-16) (fluxo principal) — na ficha: [UC-16 passos 1 a 5](../casos-de-uso/fichas-resumidas.md#uc16-p1) · US/CA: [US-07 · CA-01](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-01) (TA-53), [US-07 · CA-03](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-03) (TA-55), [US-07 · CA-04](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-04) (TA-56), [US-07 · CA-08](../historias/US-07-desativar-e-reativar-espaco.md#us-07-ca-08) (TA-60) |
 | **Evidência (complementar)** | `POST /api/espacos/{id}/desativar/`; diálogo "Desativar espaço" em `/espacos`. `espacos/tests/test_api_edicao_de_espaco.py::test_desativar_espaco_ativo_responde_200_e_a_listagem_mostra_inativo`; `espacos/tests/test_api_desativacao_e_reservas.py::test_espaco_desativado_recusa_nova_reserva_com_409`, `::test_reserva_existente_continua_listada_com_as_acoes_depois_de_desativar`, `::test_reserva_existente_pode_ser_confirmada_depois_de_desativar` |
 | **Código (complementar)** | `espacos/application/casos_de_uso.py::DesativarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.desativar` |
-| **Regras de negócio** | [Espaço inativo](../glossario.md#espaco-inativo), [espaço reservável](../glossario.md#espaco-reservavel) |
+| **Regras de negócio** | [RN-07](regras-de-negocio.md#rn-07). Glossário e detalhes: [Espaço inativo](../glossario.md#espaco-inativo), [espaço reservável](../glossario.md#espaco-reservavel) |
 | **Decisões** | [DEC-06](../decisoes/DEC-06.md) (decidida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |

@@ -35,7 +35,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (fluxo principal) — na ficha: [UC-01 passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc01-p1) · US/CA: [US-01 · CA-01](../historias/US-01-criar-minha-conta.md#us-01-ca-01) (TA-01), [US-01 · CA-02](../historias/US-01-criar-minha-conta.md#us-01-ca-02) (TA-02), [US-01 · CA-06](../historias/US-01-criar-minha-conta.md#us-01-ca-06) (TA-06), [US-02 · CA-03](../historias/US-02-entrar-no-sistema.md#us-02-ca-03) (TA-09) |
 | **Evidência (complementar)** | `POST /api/auth/cadastro/` → 201, seguido do login; tela `/cadastro`. `contas/tests/test_api_cadastro.py::test_cadastro_valido_responde_201_com_solicitante_sem_senha`, `::test_usuario_recem_cadastrado_consegue_fazer_login`, `::test_campos_de_privilegio_no_corpo_sao_ignorados`; `pages/PaginaCadastro.test.tsx` ("com sucesso, cadastra, entra com as mesmas credenciais e vai para /reservas/nova") |
 | **Código (complementar)** | `contas/application/casos_de_uso.py::CadastrarSolicitante.executar`, `contas/domain/cadastro.py::DadosDeCadastro` |
-| **Regras de negócio** | [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula), [perfil](../glossario.md#perfil), [Solicitante](../glossario.md#solicitante) |
+| **Regras de negócio** | [RN-13](regras-de-negocio.md#rn-13). Glossário e detalhes: [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula), [perfil](../glossario.md#perfil), [Solicitante](../glossario.md#solicitante) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) (o cadastro público nunca cria Gestor), [DEC-09](../decisoes/DEC-09.md) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
@@ -53,7 +53,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (exceção) — na ficha: [UC-01 E3.1](../casos-de-uso/fichas-resumidas.md#uc01-e3-1) · US/CA: [US-01 · CA-03](../historias/US-01-criar-minha-conta.md#us-01-ca-03) (TA-03) |
 | **Evidência (complementar)** | 400 com `campos`. `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo`, `::test_nome_so_com_espacos_responde_400_campo_obrigatorio`, `::test_matricula_com_espaco_responde_400`, `::test_email_malformado_responde_400`; `contas/tests/test_cadastro_dominio.py::test_nome_acima_do_limite_lanca_texto_muito_longo`, `::test_matricula_longa_ou_com_espaco_no_meio_lanca_matricula_invalida [x]` |
 | **Código (complementar)** | `contas/domain/cadastro.py::DadosDeCadastro`, `contas/domain/excecoes.py::MatriculaInvalida` |
-| **Regras de negócio** | [Matrícula](../glossario.md#matricula), [usuário](../glossario.md#usuario) |
+| **Regras de negócio** | [RN-13](regras-de-negocio.md#rn-13). Glossário e detalhes: [Matrícula](../glossario.md#matricula), [usuário](../glossario.md#usuario) |
 | **Decisões** | [DEC-09](../decisoes/DEC-09.md) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
@@ -89,7 +89,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Vínculos** | UC: [UC-01 Cadastrar-se](../casos-de-uso/README.md#uc-01) (exceção) — na ficha: [UC-01 E3.3](../casos-de-uso/fichas-resumidas.md#uc01-e3-3) · US/CA: [US-01 · CA-05](../historias/US-01-criar-minha-conta.md#us-01-ca-05) (TA-05) |
 | **Evidência (complementar)** | 409 `EMAIL_JA_CADASTRADO` ou `MATRICULA_JA_CADASTRADA`. `contas/tests/test_api_cadastro.py::test_email_repetido_com_caixa_diferente_responde_409`, `::test_matricula_repetida_responde_409`; `contas/tests/test_repositorio_usuarios.py::test_email_repetido_lanca_email_ja_cadastrado [x]` |
 | **Código (complementar)** | `contas/application/casos_de_uso.py::CadastrarSolicitante.executar`, `contas/infrastructure/repositorio_django.py::RepositorioUsuariosDjango.criar_solicitante` |
-| **Regras de negócio** | [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula) |
+| **Regras de negócio** | [RN-13](regras-de-negocio.md#rn-13). Glossário e detalhes: [Usuário](../glossario.md#usuario), [matrícula](../glossario.md#matricula) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |

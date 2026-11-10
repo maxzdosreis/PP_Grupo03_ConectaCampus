@@ -14,6 +14,7 @@ Matriz de rastreabilidade do Conecta Campus, nos dois sentidos, da necessidade a
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Decisão b aponta para a [DEC-16](../decisoes/DEC-16.md) (rastreabilidade até o código confirmada na Aula 7; GES-02). A frase "(ponto 13 em aberto)" no topo do `matriz.md` é escrita pelo script e só muda numa tarefa que altere o `scripts/gerar_rastreabilidade.py`. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Coluna RN na matriz e no CSV, arquivo gerado `regras-de-negocio.md` e a verificação h do `--verificar` (todo RN cita um RF que existe e cada RF cita as suas RN); mudança em `scripts/gerar_rastreabilidade.py` (REQ-12). Sem aprovação. |
 
 ## Arquivos
 
@@ -21,16 +22,18 @@ Só este README é escrito à mão. Os demais são **gerados** e começam com o 
 
 | Arquivo | O que mostra | Uso |
 |---|---|---|
-| [`matriz.md`](matriz.md) | Uma linha por RF (os 60, com os filhos): NS, RF, F1–F6, UC (passo, alternativa ou exceção), US, CA, TA, DEC, endpoint ou tela, código e a situação da cadeia. | Consulta de um requisito; "de onde veio e onde aparece". |
+| [`matriz.md`](matriz.md) | Uma linha por RF (os 60, com os filhos): NS, RF, F1–F6, RN, UC (passo, alternativa ou exceção), US, CA, TA, DEC, endpoint ou tela, código e a situação da cadeia. | Consulta de um requisito; "de onde veio e onde aparece". |
 | [`matriz.csv`](matriz.csv) | As mesmas linhas, sem links, separadas por `;` (UTF-8 com BOM, para abrir direto numa planilha). | Tabela do `modelagem.pdf` (DOC-01) ou planilha. |
 | [`cobertura.md`](cobertura.md) | Totais e percentuais por elo, por NS e por funcionalidade F1–F6; RNF por forma de verificação. | Resumo para o `modelagem.pdf` (DOC-01). |
 | [`sentido-inverso.md`](sentido-inverso.md) | Cada rota da [matriz de acesso](../../matriz_de_acesso.md), cada página do frontend e cada comando → RF → NS. | Prova de que nenhum comportamento existe sem necessidade. |
 | [`rnf.md`](rnf.md) | RNF → NS, RF ou DEC → forma de verificação (automatizado, medição ou manual) → evidência. | Cobertura dos RNF. |
+| [`regras-de-negocio.md`](regras-de-negocio.md) | Cada regra de negócio do [catálogo](../requisitos/regras-de-negocio.md) → RF → UC → US → CA, com a vigência da regra. | Prova de que toda regra é cobrada por pelo menos um RF e chega a um critério de aceite. |
 | [`impacto-por-dec.md`](impacto-por-dec.md) | Para cada DEC: RF, RNF, UC e passos, US, CA, TA, endpoints, telas e código que mudam se a resposta for outra, com a regressão estimada. | [Pauta da Aula 7](../decisoes/pauta-aula-7.md) e seção "Mapa de impacto" de um [CR](../mudancas/modelo-cr.md). |
 
 ## Como ler a matriz
 
 - **NS:** a primeira é a origem principal do RF; as outras são origens secundárias (campo Origem da ficha).
+- **RN:** as regras de negócio que o RF aplica (campo "Regras de negócio" da ficha); cada uma está no [catálogo](../requisitos/regras-de-negocio.md) e em [`regras-de-negocio.md`](regras-de-negocio.md), onde o caminho vai da regra aos RF, UC, US e CA.
 - **UC:** o caso de uso principal e o "como entra" exato (fluxo principal, alternativa, exceção ou transversal, com o passo, a alternativa ou a exceção da ficha), copiados da [rastreabilidade RF → UC](../casos-de-uso/README.md#rastreabilidade-rf--uc).
 - **US, CA, TA:** os critérios de aceite que citam o RF, agrupados por história, e o TA de cada um; "(manual)" marca um roteiro manual.
 - **Endpoint ou tela:** as rotas citadas no campo Evidência da ficha. "(do pai)" = o filho herda a rota do RF pai; "(das operações protegidas)" = a recusa comum herda as rotas das operações que ela protege.

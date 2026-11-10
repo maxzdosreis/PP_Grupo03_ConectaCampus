@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Consulta em páginas (RES-10, [RF-12.2](../requisitos/rf-reservas.md#rf-12-2)): CAs novos CA-04 (todas em páginas, com o total), CA-07 (outra página com os mesmos critérios) e CA-08 (mudar um critério volta à primeira página), com os TA-108, TA-111 e TA-112; o CA-09 (antigo CA-06) inclui a página e o tamanho inválidos. Renumeração: os CA-04 a CA-07 passam a CA-05, CA-06, CA-09 e CA-10, e os TA-101 a TA-107 passam a TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, para os TA novos da US-10 e desta história seguirem a ordem das histórias. Conversa: a pergunta sobre milhares de reservas respondida pela RES-10 ([L-05](../requisitos/srs.md#l-05) resolvida). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-11 |
 | **Título** | Acompanhar todas as reservas |
-| **História** | Como Gestor, quero localizar reservas por espaço, situação, data e solicitante, combinados, para encontrar rápido os pedidos que esperam a minha decisão. |
+| **História** | Como Atendente responsável, quero localizar reservas por espaço, situação, data e solicitante, combinados, para encontrar rápido os pedidos que esperam a minha decisão. |
 | **Valor** | O Gestor decide sobre os pedidos sem conferir um calendário à mão, e vê em cada um só as ações que fazem sentido ([NS-08](../visao.md#necessidades), [NS-09](../visao.md#necessidades)). |
 | **Origem** | [UC-07 Consultar reservas](../casos-de-uso/fichas-resumidas.md#uc-07), no papel do Gestor: [passos 1 a 4](../casos-de-uso/fichas-resumidas.md#uc07-p1), alternativas [A2.3](../casos-de-uso/fichas-resumidas.md#uc07-a2-3), [A3.2](../casos-de-uso/fichas-resumidas.md#uc07-a3-2) e [A4.1](../casos-de-uso/fichas-resumidas.md#uc07-a4-1) e exceção [E3.1](../casos-de-uso/fichas-resumidas.md#uc07-e3-1). O papel do Solicitante é a [US-10](US-10-acompanhar-minhas-reservas.md). |
 | **Prioridade** | Normal — [RF-12](../requisitos/rf-reservas.md#rf-12) e [RF-13](../requisitos/rf-reservas.md#rf-13) são normais (F3 do enunciado: "pelo menos dois critérios"); [RF-12.2](../requisitos/rf-reservas.md#rf-12-2), a consulta em páginas, é esperado. |

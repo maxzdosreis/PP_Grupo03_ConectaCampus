@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-16 |
 | **Título** | Concluir uma reserva |
-| **História** | Como Gestor, quero marcar como concluída uma reserva confirmada para registrar que o uso aconteceu e encerrar o ciclo dela. |
+| **História** | Como Atendente responsável, quero marcar como concluída uma reserva confirmada para registrar que o uso aconteceu e encerrar o ciclo dela. |
 | **Valor** | A instituição sabe quais usos combinados de fato aconteceram, com quem registrou e quando ([NS-09](../visao.md#necessidades), [NS-12](../visao.md#necessidades)). |
 | **Origem** | [UC-19 Concluir reserva](../casos-de-uso/README.md#uc-19): o fluxo comum de [UC-10, passos 1 a 8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p1), na [variação UC-19](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-19), com UC-13; alternativa A8.1 e as exceções E2.1, E6.4 e E6.5 no contexto da conclusão. |
 | **Prioridade** | Normal — [RF-19](../requisitos/rf-reservas.md#rf-19) e [RF-24](../requisitos/rf-reservas.md#rf-24) são normais (F4 do enunciado: o terceiro estado). |

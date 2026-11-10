@@ -22,6 +22,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | AUT-08: auditoria do RNF-F12 e L-03 com o contador no Redis; RF-40 passa a conferir também o cache. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | AUT-09: RNF-F13 nas tabelas (5, 6.3 e auditoria; 33 RNF); RNF-F04 com 8 operações públicas; a L-04 passa a cobrir só a credencial de acesso, porque sair revoga a de renovação; auditoria e evidência (6.4) do RF-36; TAs citados renumerados (TA-19 e TA-20 passam a TA-20 e TA-21; TA-21 a TA-158 passam a TA-24 a TA-161). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RES-10: RF-12.2 (consulta em páginas) nas tabelas (resumo, 6.1, 6.2, 6.4, QFD e auditoria; 62 RF); a lacuna L-05 passa a resolvida; RNF-P01 medido com 1.000 e 5.000 reservas, inclusive a última página; TAs citados renumerados (TA-96 a TA-107 passam a TA-97 a TA-114, conforme as US-10 e US-11; TA-108 a TA-161 passam a TA-115 a TA-168). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Atores: Atendente responsável e Gestor do serviço como papéis, com o perfil Gestor cobrindo os dois ([DEC-25](../decisoes/DEC-25.md)); as regras de negócio estão no catálogo [`regras-de-negocio.md`](regras-de-negocio.md). Nenhum RF, RNF nem a tabela de resumo mudou (REQ-12). Sem aprovação. |
 
 ## Sumário
 

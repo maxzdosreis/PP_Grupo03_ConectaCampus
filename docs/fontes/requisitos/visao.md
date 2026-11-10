@@ -16,6 +16,7 @@ Modelo: Documento de Visão do RUP em quatro quadrantes (A3·s7), com o cabeçal
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 (GES-02): P-02, P-04, o item de regras por espaço do fora do escopo e a resposta dos riscos R-05 e R-08 a R-14 apontam para as DECs decididas e os CR-02 a CR-04. Nenhuma necessidade, premissa ou risco novo; a P-04 deixa de valer só com a ESP-07. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | NS-11 cita também o RF-33.2, novo na AUT-08. Nenhuma necessidade nova. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | NS-17 (ser avisado de mudança no pedido), vinda do levantamento, fora do 1.0 pela [DEC-24](decisoes/DEC-24.md); sem RF até a REQ-13. Nenhuma NS existente mudou (REQ-11). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Papéis Atendente responsável e Gestor do serviço na tabela de atores (enunciado §2), com a nota do perfil único do sistema mínimo ([DEC-25](decisoes/DEC-25.md)); vínculo com o catálogo de [regras de negócio](requisitos/regras-de-negocio.md). Nenhuma NS mudou (REQ-12). Sem aprovação. |
 
 ## Sumário
 
@@ -53,7 +54,8 @@ No sumário do template A4·s11, este documento cobre as partes 1 (visão, objet
 |---|---|---|---|
 | **Cliente** (instituição: [nome do setor que administra os espaços esportivos]) | Patrocina o sistema, define as regras de uso dos espaços e aprova o escopo. **Premissa P-01:** não há cliente real nomeado; o grupo representa a instituição. | Uso organizado dos espaços; menos conflitos de horário; rastreabilidade de quem pediu e de quem decidiu; custo de operação baixo (execução local, sem serviços pagos). | **Cliente.** Não opera o sistema e não é ator. |
 | **Solicitante** ([perfil](glossario.md#solicitante)) | Aluno ou servidor com [matrícula](glossario.md#matricula), cadastrado no sistema, que pede o uso de espaços em nome próprio. | Pedir sem procurar ninguém; saber antes de pedir o que já está ocupado; acompanhar a [situação](glossario.md#situacao) do próprio pedido; desistir quando precisar; não ter os próprios pedidos expostos a outros solicitantes. | **Usuário** e **ator** do sistema. |
-| **Gestor** ([perfil](glossario.md#gestor)) | Pessoa do setor responsável pelos espaços. Mantém o cadastro de espaços e decide sobre os pedidos: confirma, recusa, conclui ou cancela. | Ver todos os pedidos e filtrá-los; decidir sem conflito de horário; justificar recusas e cancelamentos; retirar um espaço de uso sem perder o que já foi combinado. | **Usuário** e **ator** do sistema. |
+| **Atendente responsável** ([papel](glossario.md#atendente-responsavel)) | Servidor do setor que opera os espaços no dia a dia. Decide sobre os pedidos: confirma, recusa, conclui ou cancela, e acompanha todos os pedidos. No sistema mínimo (1.0), é o [perfil Gestor](glossario.md#gestor) ([DEC-25](decisoes/DEC-25.md)). | Ver todos os pedidos e filtrá-los; decidir sem conflito de horário; justificar recusas e cancelamentos; desfazer o que foi combinado quando preciso. | **Usuário** e **ator** do sistema. |
+| **Gestor do serviço** ([papel](glossario.md#gestor-do-servico)) | Pessoa do setor que mantém o cadastro dos espaços (cadastrar, corrigir, desativar e reativar) e define as regras de uso aplicadas pela instituição. No sistema mínimo (1.0), é o [perfil Gestor](glossario.md#gestor) ([DEC-25](decisoes/DEC-25.md)), o mesmo que cobre o Atendente responsável; a instituição (cliente) define as regras de uso, e o Gestor do serviço as mantém no sistema como [regras de negócio](requisitos/regras-de-negocio.md). | Manter a lista de espaços igual à realidade; retirar um espaço de uso sem perder o que já foi combinado. | **Usuário** e **ator** do sistema. |
 | **Visitante** ([definição](glossario.md#visitante)) | Pessoa ainda não identificada no sistema. | Criar a própria conta; conhecer as regras de uso antes de se cadastrar. | **Ator** do sistema (antes de se identificar). |
 | **Equipe de TI** | Quem instala e opera o sistema e cria os usuários Gestor pela administração. | Instalar e executar seguindo um roteiro escrito; dados de exemplo para demonstração; configuração sem senhas no código. | **Stakeholder.** Não é ator dos casos de uso do negócio: atua na instalação e na administração. |
 | **Professor / avaliador** | Avalia o produto e a documentação nas duas disciplinas. | Executar o sistema pelo README num ambiente limpo; requisitos rastreáveis até o código e os testes. | **Stakeholder** do projeto acadêmico. Não é usuário. |
@@ -63,14 +65,14 @@ No sumário do template A4·s11, este documento cobre as partes 1 (visão, objet
 
 O **cliente** e o **usuário** não são a mesma pessoa e não querem as mesmas coisas (A2·s5):
 
-| | Cliente (instituição) | Usuários (Solicitante e Gestor) |
+| | Cliente (instituição) | Usuários (Solicitante, Atendente responsável e Gestor do serviço) |
 |---|---|---|
 | Papel | Aprova o escopo e as regras de uso | Opera o sistema no dia a dia |
 | Foco | Metas da instituição: espaços sem conflito, decisões rastreáveis, custo | Tarefa do momento: pedir, acompanhar, decidir sem atrito |
 | Exemplo de necessidade | NS-11 (saber quem pediu e quem decidiu) e NS-12 (histórico) | NS-03 (pedir o uso) e NS-05 (ver o que está ocupado antes de pedir) |
 | Quem responde às dúvidas | As DECs de regra de uso (ex.: [DEC-07](decisoes/DEC-07.md)) | As dúvidas de uso surgem nas histórias e nos critérios de aceite (REQ-04 em diante) |
 
-O Gestor é usuário, não cliente: ele aplica as regras de uso, mas quem as define é a instituição.
+O Atendente responsável e o Gestor do serviço são usuários, não clientes: aplicam as regras de uso, mas quem as define é a instituição.
 
 ### Necessidades
 

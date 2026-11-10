@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Marca "Depende de" das DECs confirmadas na Aula 7 (DEC-06, DEC-10, DEC-11) com "(decidida)" (GES-02). Nenhum Dado/Quando/Então muda. Sem aprovação. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Gestor do serviço ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-05 |
 | **Título** | Cadastrar espaço |
-| **História** | Como Gestor, quero cadastrar um espaço esportivo com nome, tipo e capacidade para que ele passe a aceitar pedidos de reserva. |
+| **História** | Como Gestor do serviço, quero cadastrar um espaço esportivo com nome, tipo e capacidade para que ele passe a aceitar pedidos de reserva. |
 | **Valor** | A lista de espaços fica igual à realidade do campus, e cada espaço novo já pode ser pedido ([NS-02](../visao.md#necessidades)). |
 | **Origem** | [UC-14 Cadastrar espaço, passos 1 a 8](../casos-de-uso/UC-14-cadastrar-espaco.md#p1), alternativa [A8.1](../casos-de-uso/UC-14-cadastrar-espaco.md#a8-1) e exceções [E1.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e1-1) a [E7.1](../casos-de-uso/UC-14-cadastrar-espaco.md#e7-1). |
 | **Prioridade** | Normal — [RF-05](../requisitos/rf-espacos.md#rf-05) e [RF-05.1](../requisitos/rf-espacos.md#rf-05-1) são normais (F1 do enunciado). |

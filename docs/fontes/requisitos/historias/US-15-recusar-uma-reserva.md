@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-15 |
 | **Título** | Recusar uma reserva com motivo |
-| **História** | Como Gestor, quero recusar um pedido Solicitado explicando o motivo para que o solicitante entenda a decisão e o horário fique livre para outra pessoa. |
+| **História** | Como Atendente responsável, quero recusar um pedido Solicitado explicando o motivo para que o solicitante entenda a decisão e o horário fique livre para outra pessoa. |
 | **Valor** | Toda recusa é justificada a quem pediu e o período volta a aceitar pedidos ([NS-09](../visao.md#necessidades), [NS-07](../visao.md#necessidades)). |
 | **Origem** | [UC-18 Recusar reserva](../casos-de-uso/README.md#uc-18): o fluxo comum de [UC-10, passos 1 a 8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p1), na [variação UC-18](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-18), com UC-12 ([Informar motivo](../casos-de-uso/README.md#uc-12): passos 4 e 5, E6.6 e E6.7) e UC-13; as exceções E6.4 a E6.7 no contexto da recusa. |
 | **Prioridade** | Normal — [RF-18](../requisitos/rf-reservas.md#rf-18) e [RF-24](../requisitos/rf-reservas.md#rf-24) são normais (F4 do enunciado). |

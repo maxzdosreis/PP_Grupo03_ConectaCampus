@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 
 ## Index Card
 
@@ -21,7 +22,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 |---|---|
 | **ID** | US-14 |
 | **Título** | Confirmar uma reserva |
-| **História** | Como Gestor, quero confirmar um pedido Solicitado para garantir ao solicitante que o espaço é dele naquele horário. |
+| **História** | Como Atendente responsável, quero confirmar um pedido Solicitado para garantir ao solicitante que o espaço é dele naquele horário. |
 | **Valor** | O solicitante sabe que pode contar com o espaço, e a decisão fica registrada com quem decidiu e quando ([NS-09](../visao.md#necessidades), [NS-11](../visao.md#necessidades)). |
 | **Origem** | [UC-17 Confirmar reserva](../casos-de-uso/README.md#uc-17): o fluxo comum de [UC-10, passos 1 a 8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#p1), na [variação UC-17](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#v-uc-17), com UC-13; alternativa A8.1 e as exceções E6.1 a E6.6 e E7.1 no contexto da confirmação. As recusas de formato do pedido de mudança (E6.1 e E6.3), comuns aos quatro filhos, ficam nesta história, a primeira decisão do Gestor. |
 | **Prioridade** | Normal — [RF-17](../requisitos/rf-reservas.md#rf-17), [RF-23](../requisitos/rf-reservas.md#rf-23), [RF-24](../requisitos/rf-reservas.md#rf-24) e [RF-25](../requisitos/rf-reservas.md#rf-25) são normais (F4 do enunciado). |
