@@ -12,8 +12,8 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 
 | Elo | Com o elo | Total | % |
 |---|---|---|---|
-| NS com pelo menos um RF | 16 | 16 | 100% |
-| NS que chegam a um TA | 16 | 16 | 100% |
+| NS com pelo menos um RF | 16 | 17 | 94% |
+| NS que chegam a um TA | 16 | 17 | 94% |
 | RF com NS de origem | 62 | 62 | 100% |
 | RF com UC (sem o transversal) | 61 | 61 | 100% |
 | RF com US e CA (sem o transversal) | 61 | 61 | 100% |
@@ -46,6 +46,7 @@ TA manuais: TA-02, TA-160, TA-167 (ver as lacunas de CA sem TA automatizado na [
 | [NS-14](../visao.md#ns-14) | 1 | 5 | 5 | 8 | 21 | 21 (0) |
 | [NS-15](../visao.md#ns-15) | 4 | 4 | 1 | 2 | 7 | 7 (1) |
 | [NS-16](../visao.md#ns-16) | 2 | 2 | 2 | 2 | 8 | 8 (1) |
+| [NS-17](../visao.md#ns-17) | 0 | 0 | 0 | 0 | 0 | 0 (0) |
 
 ## Por funcionalidade do enunciado (F1 a F6)
 

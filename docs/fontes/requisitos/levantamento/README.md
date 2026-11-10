@@ -4,7 +4,7 @@
 |---|---|---|
 | **IND-05 • 0.1 • Rascunho** (índice do levantamento) | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha | `docs/fontes/requisitos/levantamento/` |
 
-Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunciado do Projeto Final de Requisitos, §5.3, §6 "Levantamento" e §7). Esta pasta guarda **o que foi perguntado e o que foi respondido**; as consequências dos achados nos requisitos (Visão, NS, RF, DECs) são de outra tarefa (REQ-11) e não são feitas aqui.
+Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunciado do Projeto Final de Requisitos, §5.3, §6 "Levantamento" e §7). Esta pasta guarda **o que foi perguntado e o que foi respondido**; as consequências dos achados nos requisitos (Visão, NS, DECs) estão na [síntese do levantamento](sintese-do-levantamento.md) (REQ-11). O que exige mudar RF, casos de uso ou histórias fica nas pendências da REQ-13.
 
 ## Histórico de revisões
 
@@ -14,6 +14,7 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Entrevistas ENT-02 a ENT-04 registradas como (perfis fictícios, com aviso em cada arquivo); tabela de status e contagem de representantes por papel (REQ-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Questionário QST-01: instrumento, versão impressa, plano de aplicação e modelo da síntese; status "instrumento pronto, aguardando aplicação"; sem respostas (REQ-10). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Aplicação do QST-01 (N = 18, dados não reais): síntese, versão de evidência de 1 página, status das técnicas e conclusão sobre o enunciado (REQ-10). Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Síntese concluída (SIN-01): 23 achados com destino, NS-17, DEC-24, versão de evidência de 1 página e pendências para a REQ-13 (REQ-11). Sem aprovação. |
 
 ## Técnicas do grupo
 
@@ -52,7 +53,7 @@ Instrumentos e registros das técnicas de levantamento do Conecta Campus (enunci
 |---|---|
 | Duas técnicas de levantamento | **Aplicadas**: entrevista (REQ-09) e questionário (REQ-10). |
 | Interação com pelo menos dois representantes de stakeholders | Entrevistas: 4 representantes em 3 papéis (ENT-01 a ENT-04), dos quais **1 real** (ENT-01, cliente) e 3 simulados. O mínimo é atingido só com os simulados. |
-| Instrumentos, participantes sem dado pessoal sensível, síntese e decisões | Instrumentos: ROT-01 a ROT-03 e QST-01. Participantes: perfis genéricos. Síntese: [QST-01-resultados.md](questionario/QST-01-resultados.md). Decisões resultantes: da REQ-11. |
+| Instrumentos, participantes sem dado pessoal sensível, síntese e decisões | Instrumentos: ROT-01 a ROT-03 e QST-01. Participantes: perfis genéricos. Síntese: [QST-01-resultados.md](questionario/QST-01-resultados.md) e [sintese-do-levantamento.md](sintese-do-levantamento.md) (**concluída em 10/11/2026**, REQ-11). Decisões resultantes: NS-17 e [DEC-24](../decisoes/DEC-24.md), com a [versão de evidência](sintese-evidencia-1pag.md). |
 | PDF de evidências (até 8 páginas) | O questionário entra em duas peças de 1 página: [versão impressa](questionario/QST-01-versao-impressa.md) e [versão de evidência](questionario/QST-01-resultados-evidencia.md). Cada peça deve dizer o que é simulado. |
 
 Cada entrevista realizada ganha um arquivo `entrevistas/ENT-xx-<perfil>.md`, no formato do [modelo de registro](entrevistas/modelo-registro-entrevista.md). Uma entrevista planejada que não acontecer fica nesta tabela como **Cancelada**, com o motivo; o ID não é reaproveitado.
@@ -89,6 +90,8 @@ Decisões:
 | [`questionario/modelo-sintese-questionario.md`](questionario/modelo-sintese-questionario.md) | Modelo da síntese, sem resultados. |
 | [`questionario/QST-01-resultados.md`](questionario/QST-01-resultados.md) | Síntese: perfil, contagens, conferência das somas, abertas, achados, comparação com as entrevistas e limitações. |
 | [`questionario/QST-01-resultados-evidencia.md`](questionario/QST-01-resultados-evidencia.md) | Versão de 1 página da síntese, para o PDF de evidências. |
+| [`sintese-do-levantamento.md`](sintese-do-levantamento.md) | **SIN-01**: achados (ACH-01…) com fonte e destino, convergências, decisões resultantes, ameaças à validade e pendências para a REQ-13. |
+| [`sintese-evidencia-1pag.md`](sintese-evidencia-1pag.md) | Versão de 1 página da síntese, para o PDF de evidências. |
 | [`guia-do-entrevistador.md`](guia-do-entrevistador.md) | **GUI-01**: como abordar, pedir o consentimento, anotar, o que não fazer e o prazo. |
 | [`entrevistas/ROT-01-representante-do-cliente.md`](entrevistas/ROT-01-representante-do-cliente.md) | **ROT-01**: as perguntas levadas ao professor na Aula 7, como foram feitas. |
 | [`entrevistas/ROT-02-solicitante.md`](entrevistas/ROT-02-solicitante.md) | **ROT-02**: roteiro para o Solicitante. |
