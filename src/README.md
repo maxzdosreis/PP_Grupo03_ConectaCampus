@@ -44,6 +44,7 @@ O `.env` é criado a partir do `.env.example` (passo 1 do [README da raiz](../RE
 | `LIMITE_LOGIN_POR_EMAIL` | `5/min` | Tentativas de login com o mesmo e-mail, no formato `N/s`, `N/min`, `N/hour` ou `N/day`. Um valor fora do formato impede o backend de subir (`ImproperlyConfigured`, com o nome da variável). Ausente, vale o do exemplo. |
 | `LIMITE_LOGIN_POR_IP` | `20/min` | Tentativas de login do mesmo computador (endereço da conexão), com qualquer e-mail. Mesmo formato. |
 | `LIMITE_CADASTRO_POR_IP` | `10/hour` | Pedidos de cadastro do mesmo computador. Mesmo formato. A renovação do token não tem limite. |
+| `LIMITE_TROCA_DE_SENHA_POR_USUARIO` | `5/min` | Pedidos de troca de senha da mesma pessoa logada (contados por usuário, não por computador). Mesmo formato. |
 
 ### Derivadas pelo Compose a partir das portas
 

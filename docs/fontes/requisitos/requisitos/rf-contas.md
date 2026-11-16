@@ -22,6 +22,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | RF-34: evidência e código da trava entre janelas na renovação (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação do CR-04 (DEC-09), com a implementação pendente na tarefa AUT-12 (REQ-13): RF-32.1 com a matrícula só de dígitos (o limite de 20 fica como limite técnico); Vínculos do RF-32 e do RF-32.1 com os CAs novos. A especificação está adiante do código de propósito. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RF-41 · Trocar a própria senha, RF-41.1 · Recusar a troca de senha inválida e RF-41.2 · Recusar tentativas de troca de senha em excesso, a partir da NS-15 ([DEC-26](../decisoes/DEC-26.md), [CR-06](../mudancas/CR-06-trocar-a-propria-senha.md)); [US-21](../historias/US-21-trocar-a-propria-senha.md) e UC-02 A4.4 e E4.3 a E4.6 (AUT-10). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
 
 ## Cadastro
 
@@ -216,6 +217,61 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Código (complementar)** | `contas/api/views.py::SairView.post`, `components/sessao/SessaoProvider.tsx::SessaoProvider`, `api/sessao.ts::limparSessao` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) (a credencial de acesso não é revogada ao sair: lacuna [L-04](srs.md#lacunas)) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+## Conta
+
+### <a id="rf-41"></a>RF-41 · Trocar a própria senha
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao usuário autenticado trocar a própria senha, informando a senha atual e a nova, e ver a mensagem "Senha alterada com sucesso." sem sair da conta; a senha nova segue a mesma política de senha do cadastro, e a sessão aberta continua valendo enquanto as sessões abertas em outros aparelhos deixam de ser renovadas. |
+| **Origem** | NS-15 (principal); NS-11 |
+| **Funcionalidade** | Extra (AUT-10) |
+| **Prioridade (QFD)** | Esperado — sem a troca, quem suspeita que a senha vazou, ou quer uma melhor, depende da administração (a mesma [NS-15](../visao.md#ns-15) de não depender de um gestor). |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.4](../casos-de-uso/UC-02-autenticar.md#a4-4) · US/CA: [US-21 · CA-01](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-01) (TA-194), [US-21 · CA-02](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-02) (TA-195), [US-21 · CA-07](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-07) (TA-200) |
+| **Evidência (complementar)** | `POST /api/auth/senha/` com `senha_atual`, `nova_senha` e, opcional, `refresh_atual`; tela `/conta` ("Minha conta"), com o link "Minha conta" no cabeçalho. `contas/tests/test_api_alterar_senha.py::test_troca_com_sucesso_responde_200_e_a_nova_senha_passa_a_valer`, `::test_troca_revoga_os_refresh_das_outras_sessoes_e_mantem_a_atual`, `::test_pessoa_so_troca_a_propria_senha_mesmo_enviando_outro_id`; `contas/tests/test_alterar_senha.py::test_troca_valida_passa_a_valer_a_nova_senha_e_nao_a_antiga`; `pages/PaginaMinhaConta.test.tsx` ("sucesso envia a senha e o refresh da sessão, limpa os campos e mantém a pessoa logada") |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::AlterarSenha`, `contas/api/views.py::AlterarSenhaView`, `components/sessao/FormularioDeTrocaDeSenha.tsx::FormularioDeTrocaDeSenha`, `pages/PaginaMinhaConta.tsx::PaginaMinhaConta` |
+| **Regras de negócio** | [Troca de senha](../glossario.md#troca-de-senha), [política de senha](../glossario.md#politica-de-senha), [sessão](../glossario.md#sessao) |
+| **Decisões** | [DEC-26](../decisoes/DEC-26.md) (a troca entra no 1.0, como extra de autenticação; a credencial de acesso já emitida não é revogada, [L-04](srs.md#l-04)) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-41-1"></a>RF-41.1 · Recusar a troca de senha inválida
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que a senha seja trocada quando a senha atual informada não é a da conta, quando a senha nova é igual à atual ou quando ela não cumpre a política de senha, informando o motivo junto ao campo, sem encerrar a sessão e sem mudar a senha. |
+| **Pai** | [RF-41](#rf-41) |
+| **Origem** | NS-15 (principal); NS-11 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Esperado — sem conferir a senha atual, quem usasse um computador deixado aberto trocaria a senha da dona da conta; recusada, a pessoa não pode ser deslogada por errar a senha. |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E4.4](../casos-de-uso/UC-02-autenticar.md#e4-4), [UC-02 E4.5](../casos-de-uso/UC-02-autenticar.md#e4-5), [UC-02 E4.6](../casos-de-uso/UC-02-autenticar.md#e4-6) · US/CA: [US-21 · CA-03](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-03) (TA-196), [US-21 · CA-04](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-04) (TA-197), [US-21 · CA-05](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-05) (TA-198) |
+| **Evidência (complementar)** | 400 `SENHA_ATUAL_INCORRETA`, `NOVA_SENHA_IGUAL_A_ATUAL` e `SENHA_FRACA`, nunca 401. `contas/tests/test_api_alterar_senha.py::test_senha_atual_errada_responde_400_com_codigo_proprio_e_nunca_401`, `::test_nova_senha_igual_a_atual_responde_400`, `::test_nova_senha_que_viola_a_politica_responde_400_senha_fraca [x]`; `api/cliente.test.ts` ("400 SENHA_ATUAL_INCORRETA na troca de senha não renova nem encerra a sessão"); `pages/PaginaMinhaConta.test.tsx` ("senha atual errada mostra a mensagem no campo e NÃO desloga") |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::AlterarSenha`, `contas/domain/excecoes.py::SenhaAtualIncorreta`, `contas/domain/excecoes.py::NovaSenhaIgualAAtual`, `contas/domain/excecoes.py::SenhaFraca` |
+| **Regras de negócio** | [Troca de senha](../glossario.md#troca-de-senha), [política de senha](../glossario.md#politica-de-senha) |
+| **Decisões** | [DEC-26](../decisoes/DEC-26.md) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-41-2"></a>RF-41.2 · Recusar tentativas de troca de senha em excesso
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que o usuário tente trocar a senha mais de 5 vezes dentro de 1 minuto, sem conferir a senha atual (nem a certa) e sem trocar a senha, e informar em quantos segundos ele pode tentar de novo. |
+| **Pai** | [RF-41](#rf-41) |
+| **Origem** | NS-15 (principal); NS-11 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Esperado — a troca confere a senha atual; sem limite, uma sessão aberta num computador alheio serviria para adivinhá-la por tentativa e erro ([RNF-F12](rnf.md#rnf-f12)). |
+| **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (exceção) — na ficha: [UC-02 E4.3](../casos-de-uso/UC-02-autenticar.md#e4-3) · US/CA: [US-21 · CA-06](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-06) (TA-199) |
+| **Evidência (complementar)** | 429 `LIMITE_DE_TENTATIVAS` com `Retry-After`, contado por usuário e não por origem. `contas/tests/test_api_alterar_senha.py::test_sexta_troca_seguida_responde_429_traduzido_pelo_tratador`, `::test_limite_de_troca_e_por_usuario_e_nao_por_ip`, `::test_limite_de_troca_vem_das_settings_a_cada_requisicao` |
+| **Código (complementar)** | `contas/api/limites.py::LimiteDeTrocaDeSenhaPorUsuario` |
+| **Regras de negócio** | [Tentativas em excesso](../glossario.md#tentativas-em-excesso) |
+| **Decisões** | [DEC-26](../decisoes/DEC-26.md) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |

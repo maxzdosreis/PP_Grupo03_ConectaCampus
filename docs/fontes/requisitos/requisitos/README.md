@@ -12,7 +12,7 @@ RF-xx e RNF-xx (classificados por FURPS) do Conecta Campus, derivados das necess
 | [`rf-espacos.md`](rf-espacos.md) | RF-01 a RF-10 (17 fichas): consultar, cadastrar, editar, desativar e reativar espaços, e as recusas. | 0.1 • Rascunho |
 | [`rf-reservas.md`](rf-reservas.md) | RF-11 a RF-27 (25 fichas): pedir, consultar, mudar a situação e ver o histórico de reservas, e as recusas. | 0.1 • Rascunho |
 | [`rf-agenda.md`](rf-agenda.md) | RF-28 a RF-31 (6 fichas): regras de agenda e agenda do dia. | 0.1 • Rascunho |
-| [`rf-contas.md`](rf-contas.md) | RF-32 a RF-37 (11 fichas): cadastro, entrada, sessão, dados próprios, sair e criação do Gestor. | 0.1 • Rascunho |
+| [`rf-contas.md`](rf-contas.md) | RF-32 a RF-37 e RF-41 (15 fichas): cadastro, entrada, sessão, dados próprios, sair, criação do Gestor e troca da própria senha. | 0.1 • Rascunho |
 | [`rf-gerais.md`](rf-gerais.md) | RF-38 a RF-40 (3 fichas): mensagem de resultado, dados de exemplo e verificação do sistema. | 0.1 • Rascunho |
 | [`rnf.md`](rnf.md) | RNF-F01 a RNF-S06 (31 fichas, por FURPS) e as restrições REST-01 a REST-08. | 0.1 • Rascunho |
 | [`regras-de-negocio.md`](regras-de-negocio.md) | **RNG-01**, catálogo de regras de negócio RN-01 a RN-17 (regra, fonte, RF ligados, exceção associada e vigência), mais as regras implícitas a confirmar. Cada ficha de RF cita as suas RN no campo "Regras de negócio". | 0.1 • Rascunho (REQ-12) |

@@ -14,17 +14,17 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 |---|---|---|---|
 | NS com pelo menos um RF | 16 | 17 | 94% |
 | NS que chegam a um TA | 16 | 17 | 94% |
-| RF com NS de origem | 63 | 63 | 100% |
+| RF com NS de origem | 66 | 66 | 100% |
 | RN com pelo menos um RF | 17 | 17 | 100% |
-| RF com UC (sem o transversal) | 62 | 62 | 100% |
-| RF com US e CA (sem o transversal) | 62 | 62 | 100% |
-| CA com TA | 193 | 193 | 100% |
-| TA automatizados | 165 | 193 | 85% |
-| TA manuais (roteiro) | 3 | 193 | 2% |
-| TA pendentes (regra decidida, código na tarefa citada) | 25 | 193 | 13% |
-| RF com endpoint ou tela | 62 | 63 | 98% |
-| RF com código citado | 62 | 63 | 98% |
-| RF com a cadeia completa | 61 | 63 | 97% |
+| RF com UC (sem o transversal) | 65 | 65 | 100% |
+| RF com US e CA (sem o transversal) | 65 | 65 | 100% |
+| CA com TA | 200 | 200 | 100% |
+| TA automatizados | 172 | 200 | 86% |
+| TA manuais (roteiro) | 3 | 200 | 2% |
+| TA pendentes (regra decidida, código na tarefa citada) | 25 | 200 | 12% |
+| RF com endpoint ou tela | 65 | 66 | 98% |
+| RF com código citado | 65 | 66 | 98% |
+| RF com a cadeia completa | 64 | 66 | 97% |
 
 TA manuais: TA-04, TA-181, TA-188 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
 
@@ -44,11 +44,11 @@ TA pendentes: TA-02, TA-03, TA-06, TA-07, TA-38, TA-69, TA-70, TA-74, TA-80, TA-
 | [NS-08](../visao.md#ns-08) | 4 | 5 | 2 | 3 | 17 | 17 (0) |
 | [NS-09](../visao.md#ns-09) | 9 | 10 | 7 | 9 | 41 | 41 (0) |
 | [NS-10](../visao.md#ns-10) | 1 | 3 | 3 | 7 | 15 | 15 (0) |
-| [NS-11](../visao.md#ns-11) | 10 | 14 | 7 | 17 | 51 | 51 (1) |
+| [NS-11](../visao.md#ns-11) | 10 | 17 | 7 | 18 | 58 | 58 (1) |
 | [NS-12](../visao.md#ns-12) | 1 | 1 | 1 | 7 | 15 | 15 (0) |
 | [NS-13](../visao.md#ns-13) | 1 | 18 | 11 | 17 | 47 | 47 (0) |
 | [NS-14](../visao.md#ns-14) | 1 | 5 | 5 | 8 | 22 | 22 (0) |
-| [NS-15](../visao.md#ns-15) | 4 | 4 | 1 | 2 | 11 | 11 (1) |
+| [NS-15](../visao.md#ns-15) | 7 | 7 | 2 | 3 | 18 | 18 (1) |
 | [NS-16](../visao.md#ns-16) | 2 | 2 | 2 | 2 | 8 | 8 (1) |
 | [NS-17](../visao.md#ns-17) | 0 | 0 | 0 | 0 | 0 | 0 (0) |
 
@@ -60,9 +60,9 @@ TA pendentes: TA-02, TA-03, TA-06, TA-07, TA-38, TA-69, TA-70, TA-74, TA-80, TA-
 | F2 | Cadastrar a solicitação | 1 | 1 | 1 | 6 | 6 (0) |
 | F3 | Consultar por dois ou mais critérios | 5 | 2 | 3 | 21 | 21 (0) |
 | F4 | Alterar a situação | 6 | 5 | 9 | 27 | 27 (0) |
-| F5 | Impedir operações inválidas | 29 | 13 | 17 | 82 | 82 (0) |
+| F5 | Impedir operações inválidas | 31 | 13 | 18 | 86 | 86 (0) |
 | F6 | Mensagens de sucesso e erro | 1 | 0 | 0 | 0 | 0 (0) |
-| Extra | Além das seis | 16 | 10 | 16 | 63 | 63 (3) |
+| Extra | Além das seis | 17 | 10 | 17 | 66 | 66 (3) |
 
 ## RNF por forma de verificação
 

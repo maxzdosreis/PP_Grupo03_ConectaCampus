@@ -125,6 +125,8 @@ curl -X POST http://localhost:8000/api/auth/logout/ -H "Content-Type: applicatio
 
 Depois disso, o `refresh` não renova mais. O `access` não é revogado e vale até expirar (veja as [limitações conhecidas](../../README.md#limitações-conhecidas)). Os detalhes do logout estão no [README de contas](contas/README.md#sair-logout).
 
+Para trocar a própria senha (`POST /api/auth/senha/`, com o `access`, a senha atual e a nova), com a revogação do `refresh` das outras sessões e o limite de 5 tentativas por minuto por conta, veja [Trocar a própria senha](contas/README.md#trocar-a-própria-senha).
+
 ### Tokens guardados no banco
 
 A lista negra do Simple JWT (`rest_framework_simplejwt.token_blacklist`, em `INSTALLED_APPS`) guarda cada `refresh` emitido (`OutstandingToken`) e cada um revogado (`BlacklistedToken`); as duas tabelas aparecem no admin. Elas crescem a cada login e renovação. Para apagar os tokens já vencidos:

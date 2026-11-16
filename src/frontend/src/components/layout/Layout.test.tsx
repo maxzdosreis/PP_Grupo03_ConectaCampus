@@ -32,6 +32,9 @@ describe('Layout', () => {
     expect(cabecalho.textContent).toContain('Carla Mendes · Gestor')
     expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Reservas', 'Nova reserva'])
     expect(within(cabecalho).queryByRole('link', { name: 'Entrar' })).toBeNull()
+    expect(within(cabecalho).getByRole('link', { name: 'Minha conta' }).getAttribute('href')).toBe(
+      '/conta',
+    )
 
     await userEvent.click(within(cabecalho).getByRole('button', { name: 'Sair' }))
 

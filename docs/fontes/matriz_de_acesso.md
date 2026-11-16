@@ -25,6 +25,11 @@
 | `contas:logout` | `/api/auth/logout/` | DELETE | — | 405 | 405 | 405 | 405 |
 | `contas:cadastro` | `/api/auth/cadastro/` | POST | novo usuário | livre | livre | livre | livre |
 | `contas:me` | `/api/auth/me/` | GET | — | 401 | 200 | 200 | 200 |
+| `contas:senha` | `/api/auth/senha/` | POST | senha atual e nova senha válidas (AUT-10) | 401 | 200 | 200 | 200 |
+| `contas:senha` | `/api/auth/senha/` | GET | — | 401 | 405 | 405 | 405 |
+| `contas:senha` | `/api/auth/senha/` | PUT | — | 401 | 405 | 405 | 405 |
+| `contas:senha` | `/api/auth/senha/` | PATCH | — | 401 | 405 | 405 | 405 |
+| `contas:senha` | `/api/auth/senha/` | DELETE | — | 401 | 405 | 405 | 405 |
 | `espacos:lista` | `/api/espacos/` | GET | — | 401 | 200 | 200 | 200 |
 | `espacos:lista` | `/api/espacos/` | POST | novo espaço | 401 | 403 | 403 | 201 |
 | `espacos:tipos` | `/api/espacos/tipos/` | GET | — | 200 | 200 | 200 | 200 |
@@ -52,6 +57,7 @@
 - **Login obrigatório por padrão:** tudo exige login, exceto `health`, os vocabulários (`espacos:tipos`, `reservas:situacoes`, `reservas:regras_de_agenda`) e login, refresh, logout e cadastro.
 - **Limite de tentativas (AUT-08):** login (por e-mail e por IP) e cadastro (por IP) recusam com 429 `LIMITE_DE_TENTATIVAS` o que passa do limite. Não é regra de acesso por perfil: a linha continua "livre" (não exige login) e vale igual para todas as personas. Cada caso da matriz faz no máximo cinco logins, com o contador zerado antes de cada teste (fixture do `conftest.py`), então nenhum caso chega ao limite. Provas em `contas/tests/test_limites_de_tentativas.py`.
 - **Sair (AUT-09):** `contas:logout` é livre para todos, porque a posse do refresh é a credencial e o access pode já ter vencido; um refresh de outra pessoa é revogado do mesmo jeito, sem nenhum dado dela na resposta. Não tem limite de tentativas. Os outros métodos respondem 405 até para o anônimo, porque a rota não autentica ninguém.
+- **Trocar a própria senha (AUT-10):** `contas:senha` exige login e é aberta aos dois perfis, mas só troca a senha de quem está logado: o usuário vem sempre do token, e a rota não tem id na URL nem no corpo. Tem limite de tentativas por usuário (429 `LIMITE_DE_TENTATIVAS`, `LIMITE_TROCA_DE_SENHA_POR_USUARIO`). Senha atual errada é 400 `SENHA_ATUAL_INCORRETA`, nunca 401. Provas em `contas/tests/test_api_alterar_senha.py`.
 - **403 x 404:** o solicitante recebe 403 quando a ação é proibida ao perfil numa reserva que ele vê (confirmar a própria), e 404 numa reserva de outra pessoa, para não revelar que ela existe.
 - **Sem exclusão:** `DELETE` não existe em espaços, em reservas nem no histórico (405 para quem está logado; o anônimo recebe 401 antes, porque a autenticação vem primeiro). Espaço é desativado, reserva muda de situação e o histórico só recebe registros novos (RES-07); nada é excluído.
 - **Gestão de espaços (ESP-04):** cadastrar, editar (`PATCH`), desativar e reativar são só do gestor; os dois solicitantes recebem 403. As rotas de ação só aceitam `POST`: um `GET` nelas responde 405 a quem está logado, porque a restrição ao gestor vale só para o método implementado.

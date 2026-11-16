@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -23,8 +24,10 @@ from contas.api.limites import (
     LimiteDeCadastroPorIp,
     LimiteDeLoginPorEmail,
     LimiteDeLoginPorIp,
+    LimiteDeTrocaDeSenhaPorUsuario,
 )
 from contas.api.serializers import (
+    AlteracaoDeSenhaSerializer,
     CadastroSerializer,
     LoginSerializer,
     RenovacaoDeTokenSerializer,
@@ -169,9 +172,53 @@ def _refresh_para_revogar(texto):
         return None
 
 
-def _refresh_invalido():
+def _refresh_invalido(campo="refresh"):
     return serializers.ValidationError(
-        {"refresh": ["Informe um token de renovação válido."]}
+        {campo: ["Informe um token de renovação válido."]}
+    )
+
+
+class AlterarSenhaView(APIView):
+    """Troca a senha de quem está logado: o usuário vem sempre do token."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [LimiteDeTrocaDeSenhaPorUsuario]
+
+    def post(self, request):
+        entrada = AlteracaoDeSenhaSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        dados = entrada.validated_data
+        jti_atual = _jti_da_sessao_atual(dados.get("refresh_atual"), request.user)
+        with transaction.atomic():
+            dependencias.alterar_senha().executar(
+                usuario_id=request.user.pk,
+                senha_atual=dados["senha_atual"],
+                nova_senha=dados["nova_senha"],
+            )
+            _revogar_outras_sessoes(request.user, manter=jti_atual)
+        return resposta_sucesso("Senha alterada com sucesso.")
+
+
+def _jti_da_sessao_atual(texto, usuario):
+    if texto is None:
+        return None
+    try:
+        refresh = RefreshToken(texto)
+    except TokenError as erro:
+        raise _refresh_invalido("refresh_atual") from erro
+    if str(refresh.get(api_settings.USER_ID_CLAIM)) != str(usuario.pk):
+        raise _refresh_invalido("refresh_atual")
+    return refresh[api_settings.JTI_CLAIM]
+
+
+def _revogar_outras_sessoes(usuario, *, manter):
+    registros = OutstandingToken.objects.filter(
+        user=usuario, expires_at__gt=timezone.now(), blacklistedtoken__isnull=True
+    )
+    if manter is not None:
+        registros = registros.exclude(jti=manter)
+    BlacklistedToken.objects.bulk_create(
+        [BlacklistedToken(token=registro) for registro in registros]
     )
 
 

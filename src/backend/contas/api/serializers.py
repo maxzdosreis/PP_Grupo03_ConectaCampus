@@ -15,6 +15,16 @@ class CadastroSerializer(serializers.Serializer):
     senha = serializers.CharField(write_only=True, trim_whitespace=False)
 
 
+class AlteracaoDeSenhaSerializer(serializers.Serializer):
+    senha_atual = serializers.CharField(
+        write_only=True, trim_whitespace=False, allow_blank=True
+    )
+    nova_senha = serializers.CharField(
+        write_only=True, trim_whitespace=False, allow_blank=True
+    )
+    refresh_atual = serializers.CharField(write_only=True, required=False)
+
+
 class RenovacaoDeTokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 

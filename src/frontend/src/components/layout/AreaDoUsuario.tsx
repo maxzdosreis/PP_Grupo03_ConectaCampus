@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import { useSessao } from '../../hooks/useSessao.ts'
-import { CAMINHO_DE_ENTRAR, CAMINHO_DO_CADASTRO } from '../../navegacao.ts'
+import { CAMINHO_DA_CONTA, CAMINHO_DE_ENTRAR, CAMINHO_DO_CADASTRO } from '../../navegacao.ts'
 import estilos from './AreaDoUsuario.module.css'
 
 function AreaDoUsuario() {
@@ -27,6 +27,9 @@ function AreaDoUsuario() {
         <span className="somente-leitor-de-tela">Conectado como </span>
         {usuario.nome} · {usuario.perfil_rotulo}
       </p>
+      <Link to={CAMINHO_DA_CONTA} className={estilos.link}>
+        Minha conta
+      </Link>
       <button type="button" className={estilos.sair} onClick={sair}>
         Sair
       </button>

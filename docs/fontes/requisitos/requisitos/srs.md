@@ -26,6 +26,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos CR-01 a CR-04 (DEC-13, DEC-05, DEC-07, DEC-09), com o código nas tarefas RES-11, RES-12, ESP-07 e AUT-12 (REQ-13): RF-24.1 novo (63 fichas) nas tabelas (resumo, 6.1, 6.2, 6.3, 6.4, QFD e auditoria); auditoria dos RF-05, RF-06, RF-11.5, RF-16, RF-18 a RF-22, RF-28, RF-30 e RF-32.1 com "Co" apontando o código que ainda não tem a regra; L-01, L-02 e L-06 com a aplicação na especificação. A SRS está adiante do código de propósito. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | L-18 nova (RF-24.1 sem código até a tarefa RES-11) e DEC-07 com o RF-05 e o RF-06 na seção 6.3 (REQ-13). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | NS-17 na seção 6.1 como fora do 1.0 (DEC-24) e L-11 com a NS-17; `verificar_requisitos.py` e `gerar_rastreabilidade.py` passam a reconhecer a NS fora do 1.0 por DEC (pendência da REQ-11). Mudança editorial. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | AUT-10: RF-41, RF-41.1 e RF-41.2 nas tabelas (resumo, 4.1, 4.2, 6.1 a 6.4, QFD e auditoria; 66 fichas, 41 RF principais), a tela `/conta` e a rota `POST /api/auth/senha/`; DEC-26 na seção 6.3; a L-04 passa a cobrir também a troca de senha ([DEC-26](../decisoes/DEC-26.md), [CR-06](../mudancas/CR-06-trocar-a-propria-senha.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -93,7 +94,7 @@ O cliente (a instituição) não opera o sistema e não é ator.
 | **Cadastro de espaços** | Manter a lista de espaços esportivos igual à realidade e dizer quais aceitam pedidos. | [RF-01 a RF-10](rf-espacos.md) |
 | **Reservas** | Receber pedidos, impedir dois usos no mesmo período, registrar cada decisão e mostrar o histórico. | [RF-11 a RF-27](rf-reservas.md) |
 | **Agenda** | Mostrar as regras de uso e o que está ocupado e livre num espaço e dia, antes do pedido. | [RF-28 a RF-31](rf-agenda.md) |
-| **Contas e acesso** | Identificar quem age, com o perfil que define o que cada um pode fazer. | [RF-32 a RF-37](rf-contas.md) |
+| **Contas e acesso** | Identificar quem age, com o perfil que define o que cada um pode fazer, e permitir trocar a própria senha. | [RF-32 a RF-37](rf-contas.md) e [RF-41](rf-contas.md#rf-41) |
 | **Mensagens e operação** | Dizer o resultado de toda operação; permitir instalar, verificar e demonstrar o sistema. | [RF-38 a RF-40](rf-gerais.md) |
 
 Reservas consulta o cadastro de espaços para saber se um espaço é [reservável](../glossario.md#espaco-reservavel); o cadastro de espaços não conhece as reservas (por isso desativar um espaço não mexe nas reservas dele, [DEC-06](../decisoes/DEC-06.md)).
@@ -185,8 +186,11 @@ F = funcionalidade do enunciado (F1 a F6) ou Extra. QFD: N normal, E esperado, F
 | [RF-38](rf-gerais.md#rf-38) | Ver o resultado de cada operação | NS-13 | F6 | N | Rascunho |
 | [RF-39](rf-gerais.md#rf-39) | Carregar dados de exemplo | NS-16 | Extra | E | Rascunho |
 | [RF-40](rf-gerais.md#rf-40) | Verificar se o sistema está no ar | NS-16 | Extra | E | Rascunho |
+| [RF-41](rf-contas.md#rf-41) | Trocar a própria senha | NS-15 | Extra | E | Rascunho |
+| [RF-41.1](rf-contas.md#rf-41-1) | Recusar a troca de senha inválida | NS-15 | F5 | E | Rascunho |
+| [RF-41.2](rf-contas.md#rf-41-2) | Recusar tentativas de troca de senha em excesso | NS-15 | F5 | E | Rascunho |
 
-**Contagem:** 63 fichas (40 RF principais e 23 filhos). Por área: espaços 17, reservas 25, agenda 6, contas 12, mensagens e operação 3.
+**Contagem:** 66 fichas (41 RF principais e 25 filhos). Por área: espaços 17, reservas 25, agenda 6, contas 15, mensagens e operação 3.
 
 ## 4. Interfaces
 
@@ -199,6 +203,7 @@ Telas no navegador, em português (premissa P-07). Descrição do que cada tela 
 | Início (`/`) | Todos | Ver se o sistema está no ar; ir para entrar, criar conta ou, identificado, para as próprias reservas. | RF-40, RF-33, RF-32 |
 | Entrar (`/entrar`) | Visitante | Entrar com e-mail e senha e voltar à tela de onde veio. | RF-33, RF-33.1 |
 | Cadastro (`/cadastro`) | Visitante | Criar a conta de Solicitante e já entrar. | RF-32 e filhos |
+| Minha conta (`/conta`) | Usuário autenticado | Trocar a própria senha, informando a atual e a nova, e continuar identificado. | RF-41 e filhos |
 | Espaços (`/espacos`) | Usuário autenticado | Listar e filtrar espaços; ir para o pedido num espaço ativo. Só o Gestor: cadastrar, editar, desativar e reativar. | RF-01 a RF-10 |
 | Nova reserva (`/reservas/nova`) | Usuário autenticado | Pedir uma reserva, ver as regras de agenda e a agenda do dia do espaço escolhido, usar um horário livre e ver o resumo do pedido criado. | RF-11 e filhos, RF-28 a RF-31 |
 | Reservas (`/reservas`; "Minhas reservas" para o Solicitante) | Usuário autenticado | Consultar reservas pelos critérios do perfil e mudar a situação pelas ações disponíveis de cada uma. | RF-12, RF-13, RF-16 a RF-21 |
@@ -219,6 +224,7 @@ Em todas as telas, o resultado de cada operação aparece como mensagem ([RF-38]
 |---|---|
 | `GET /api/health/` | RF-40 |
 | `POST /api/auth/cadastro/` · `POST /api/auth/login/` · `POST /api/auth/refresh/` · `GET /api/auth/me/` | RF-32 · RF-33 · RF-34 · RF-35 |
+| `POST /api/auth/senha/` | RF-41, RF-41.1, RF-41.2 |
 | `GET /api/espacos/` · `POST /api/espacos/` | RF-01, RF-02 · RF-05 |
 | `GET /api/espacos/tipos/` | RF-04 |
 | `GET /api/espacos/{id}/` · `PATCH /api/espacos/{id}/` | RF-03 · RF-06 |
@@ -301,11 +307,11 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | NS-08 | Localizar pedidos por critérios combinados | RF-12, RF-12.1, RF-12.2, RF-15 | RF-14 |
 | NS-09 | Decidir sobre cada pedido | RF-16, RF-17, RF-18, RF-19, RF-20, RF-24, RF-24.1, RF-25, RF-26 | RF-27 |
 | NS-10 | Desistir do próprio pedido | RF-21 | RF-16, RF-26 |
-| NS-11 | Saber quem pediu e só quem tem autoridade decide | RF-10, RF-27, RF-33, RF-33.1, RF-33.2, RF-34, RF-34.1, RF-35, RF-36, RF-37 | RF-16, RF-22, RF-32.2, RF-32.3 |
+| NS-11 | Saber quem pediu e só quem tem autoridade decide | RF-10, RF-27, RF-33, RF-33.1, RF-33.2, RF-34, RF-34.1, RF-35, RF-36, RF-37 | RF-16, RF-22, RF-32.2, RF-32.3, RF-41, RF-41.1, RF-41.2 |
 | NS-12 | Histórico de cada reserva | RF-22 | — |
 | NS-13 | Saber o resultado de cada operação | RF-38 | todas as recusas (F5) |
 | NS-14 | Pedidos protegidos de outros solicitantes | RF-23 | RF-11.4, RF-13, RF-29, RF-36 |
-| NS-15 | Acesso sem depender de um gestor | RF-32, RF-32.1, RF-32.2, RF-32.3 | — |
+| NS-15 | Acesso sem depender de um gestor | RF-32, RF-32.1, RF-32.2, RF-32.3, RF-41, RF-41.1, RF-41.2 | — |
 | NS-16 | Instalar, executar e demonstrar | RF-39, RF-40 | — |
 | NS-17 | Ser avisado de que a situação do pedido mudou | — (fora do 1.0, [DEC-24](../decisoes/DEC-24.md)) | — |
 
@@ -317,9 +323,9 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | F2 | Cadastrar solicitação com solicitante, item, data e situação inicial | RF-11 | ✔ |
 | F3 | Consultar por pelo menos dois critérios | RF-12 (espaço, situação, data, solicitante, "somente as minhas"), RF-12.2 (em páginas, com o total), RF-13, RF-14, RF-15 | ✔ |
 | F4 | Alterar a situação com pelo menos três estados | RF-16 a RF-21 (cinco situações) | ✔ |
-| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 29 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-24.1, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
+| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 31 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-24.1, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1, RF-41.1, RF-41.2. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
 | F6 | Mensagens claras de sucesso e erro | RF-38 (e RNF-U01) | ✔ |
-| Extra | Além das seis | RF-06, RF-07, RF-08, RF-22, RF-28 a RF-31, RF-32 a RF-37, RF-39, RF-40 (16 fichas, sem contar as recusas, que são F5) | — |
+| Extra | Além das seis | RF-06, RF-07, RF-08, RF-22, RF-28 a RF-31, RF-32 a RF-37, RF-39 a RF-41 (17 fichas, sem contar as recusas, que são F5) | — |
 
 ### 6.3 RF e RNF → DEC
 
@@ -348,6 +354,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | [DEC-21](../decisoes/DEC-21.md) | Decidida | — | — |
 | [DEC-22](../decisoes/DEC-22.md) | Decidida | — | — |
 | [DEC-23](../decisoes/DEC-23.md) | Decidida | — | — |
+| [DEC-26](../decisoes/DEC-26.md) | Decidida (CR-06) | RF-41, RF-41.1, RF-41.2 | RNF-F12, RNF-F13 |
 
 ### 6.4 RF → evidência, UC, US e CA
 
@@ -415,6 +422,9 @@ UC, US, CA e TA de cada RF estão na [matriz gerada](../rastreabilidade/matriz.m
 | RF-35 | `contas/tests/test_api_autenticacao.py::test_me_com_bearer_valido_devolve_usuario_com_perfil` |
 | RF-36 | `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar` |
 | RF-37 | `contas/tests/test_usuario_manager.py::test_create_superuser_cria_gestor_com_staff_e_superuser` |
+| RF-41 | `contas/tests/test_api_alterar_senha.py::test_troca_com_sucesso_responde_200_e_a_nova_senha_passa_a_valer` |
+| RF-41.1 | `contas/tests/test_api_alterar_senha.py::test_senha_atual_errada_responde_400_com_codigo_proprio_e_nunca_401` |
+| RF-41.2 | `contas/tests/test_api_alterar_senha.py::test_sexta_troca_seguida_responde_429_traduzido_pelo_tratador` |
 | RF-38 | `compartilhado/tests/test_tratador_de_erros.py::test_campo_obrigatorio_ausente_indica_o_campo_que_falhou` |
 | RF-39 | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
 | RF-40 | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login` (sem teste do 503: [L-08](#lacunas)) |
@@ -433,13 +443,13 @@ Classificação do ponto de vista do **cliente** (a instituição), não do enun
 | Esperado | 37 | as demais, salvo as três abaixo |
 | Fascinante | 3 | RF-28, RF-29, RF-30 |
 
-**Risco de *scope creep* (A2·s14).** Dezesseis fichas são extras ao enunciado (seção 6.2), e três delas são fascinantes. Elas não comprometeram as seis funcionalidades mínimas porque:
+**Risco de *scope creep* (A2·s14).** Dezessete fichas são extras ao enunciado (seção 6.2), e três delas são fascinantes. Elas não comprometeram as seis funcionalidades mínimas porque:
 
 1. **Vieram depois.** As seis funcionalidades estavam integradas e testadas antes de cada extra; a regra 2 do projeto ("escopo mínimo primeiro") e a contingência da [DEC-04](../decisoes/DEC-04.md) mandam cortar o extra que ameaçar o prazo (risco R-03 da Visão).
 2. **Não mudam as regras das seis.** A agenda do dia ([RF-29](rf-agenda.md#rf-29), [RF-30](rf-agenda.md#rf-30)) só lê reservas e reaproveita as mesmas regras de conflito e de agenda do pedido; o pedido continua sendo verificado por inteiro no envio. As regras de agenda consultáveis ([RF-28](rf-agenda.md#rf-28)) leem as mesmas constantes da recusa ([RF-11.5](rf-reservas.md#rf-11-5)). Uma propriedade testada prova que a agenda mostra livre exatamente o que o pedido aceitaria.
 3. **Nenhum fascinante é exigido por um normal.** Se os três fossem retirados, nenhuma das seis funcionalidades deixaria de funcionar.
 
-O risco que fica é de **prazo** (R-01): daqui até a entrega não entra nenhum RF novo além do [RF-33.2](rf-contas.md#rf-33-2) (AUT-08), uma recusa que fecha a lacuna [L-03](#l-03) sem tocar nas seis funcionalidades; o tempo vai para documentação e ensaio.
+O risco que fica é de **prazo** (R-01): daqui até a entrega não entra nenhum RF novo além do [RF-33.2](rf-contas.md#rf-33-2) (AUT-08), uma recusa que fecha a lacuna [L-03](#l-03), e do [RF-41](rf-contas.md#rf-41) com os filhos (AUT-10, trocar a própria senha, [DEC-26](../decisoes/DEC-26.md)), todos sem tocar nas seis funcionalidades; o tempo vai para documentação e ensaio.
 
 ## Lacunas
 
@@ -537,6 +547,9 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-38 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-39 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-40 | ✔ | ✔ | ✔ | ✔ | ✘ | ✔ | Ve: o caso do banco fora do ar não tem teste. Ação: lacuna [L-08](#l-08). |
+| RF-41 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Trocar a senha revoga a credencial de renovação das outras sessões; a de acesso já emitida vale até expirar ([L-04](#l-04)). |
+| RF-41.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-41.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 
 ### Requisitos não funcionais
 
@@ -576,7 +589,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-S05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar antes da entrega ([L-09](#l-09)). |
 
-**Resumo:** 10 ✘ em 93 fichas, todos com ação: 8 em Completo (DEC-13, DEC-05 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
+**Resumo:** 10 ✘ em 99 fichas, todos com ação: 8 em Completo (DEC-13, DEC-05 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
 
 ## 10. Checklist de revisão por pares
 

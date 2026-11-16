@@ -52,6 +52,19 @@ export function sair(refresh: string) {
   })
 }
 
+export type DadosDaTrocaDeSenha = {
+  senha_atual: string
+  nova_senha: string
+  refresh_atual?: string
+}
+
+export function alterarSenha(dados: DadosDaTrocaDeSenha) {
+  return requisitar<null>('/auth/senha/', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  })
+}
+
 export function usuarioAtual() {
   return requisitar<Usuario>('/auth/me/')
 }

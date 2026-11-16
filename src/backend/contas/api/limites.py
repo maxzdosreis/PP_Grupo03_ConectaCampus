@@ -75,6 +75,14 @@ class LimiteDeCadastroPorIp(_LimitePorIp):
     configuracao = "LIMITE_CADASTRO_POR_IP"
 
 
+class LimiteDeTrocaDeSenhaPorUsuario(LimiteDeTentativas):
+    scope = "senha_usuario"
+    configuracao = "LIMITE_TROCA_DE_SENHA_POR_USUARIO"
+
+    def get_cache_key(self, request, view):
+        return self._chave(request.user.pk)
+
+
 class LimiteDeLoginPorEmail(LimiteDeTentativas):
     scope = "login_email"
     configuracao = "LIMITE_LOGIN_POR_EMAIL"

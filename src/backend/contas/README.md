@@ -34,6 +34,7 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`.
 | `POST /api/auth/refresh/` | público, com o `refresh` | 200 com `access` e `refresh` novos | 401 `NAO_AUTENTICADO` (inválido, expirado, revogado, já usado, de usuário inativo ou excluído); 400 `DADOS_INVALIDOS` sem `refresh` |
 | `POST /api/auth/logout/` | público, com o `refresh` | 200 (também com o `refresh` já revogado ou vencido) | 400 `DADOS_INVALIDOS` sem `refresh` ou com um texto que não é `refresh` (com `campos.refresh`) |
 | `GET /api/auth/me/` | logado | 200 | 401 `NAO_AUTENTICADO` |
+| `POST /api/auth/senha/` | logado, qualquer perfil (só a própria senha) | 200 `Senha alterada com sucesso.` | 400 `SENHA_ATUAL_INCORRETA` (campo `senha_atual`, **nunca 401**), `NOVA_SENHA_IGUAL_A_ATUAL`, `SENHA_FRACA` (campo `nova_senha`), `CAMPO_OBRIGATORIO_AUSENTE`, `DADOS_INVALIDOS`; 401 `NAO_AUTENTICADO` (sem login); 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
 
 Os exemplos de login, de guardar o `access` e de renovar o token estão em [Autenticação JWT](../README.md#autenticação-jwt), porque todos os contextos usam o mesmo token.
 
@@ -108,6 +109,21 @@ E-mail ou senha errados (ou usuário desativado) respondem sempre igual, **401**
 ```json
 {"erro": {"codigo": "CREDENCIAIS_INVALIDAS", "mensagem": "E-mail ou senha incorretos."}}
 ```
+
+## Trocar a própria senha
+
+`POST /api/auth/senha/` (AUT-10, [DEC-26](../../../README.md#limitações-conhecidas)). Exige login, vale para os dois perfis e troca **só a senha de quem está logado**: a conta vem do token, e um `id` ou e-mail no corpo é ignorado. Corpo: `senha_atual`, `nova_senha` e, opcional, `refresh_atual` (o `refresh` da sessão que fez a troca).
+
+```bash
+curl -X POST http://localhost:8000/api/auth/senha/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"senha_atual": "...", "nova_senha": "...", "refresh_atual": "'$REFRESH'"}'
+```
+
+- **Ordem das conferências:** limite de tentativas → campos informados → senha atual (`SENHA_ATUAL_INCORRETA`) → nova diferente da atual (`NOVA_SENHA_IGUAL_A_ATUAL`) → mesma política de senha do cadastro (`SENHA_FRACA`, com `PoliticaDeSenhaDjango`). A senha atual vem antes da política: quem não prova a atual não aprende nada sobre a política.
+- **Senha atual errada é 400, nunca 401:** um 401 faria o navegador tentar renovar o token ou encerrar a sessão, e a pessoa seria deslogada por errar a senha.
+- **Limite de tentativas:** 5 por minuto **por conta** (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`), contado no Redis como o login; por conta e não por IP, porque no Docker todos chegam do mesmo IP. Estourado: 429 `LIMITE_DE_TENTATIVAS`.
+- **Sessões:** a API revoga o refresh token das **outras** sessões da conta (lista negra do Simple JWT, AUT-09) e mantém o do `refresh_atual`; sem `refresh_atual`, revoga todos. Um `refresh_atual` inválido, ou de outra pessoa, é 400 `DADOS_INVALIDOS` (`campos.refresh_atual`) e nada é trocado. Os **tokens de acesso (JWT) não são revogáveis**: o já emitido em outro aparelho vale até expirar (30 minutos).
+- **Nada de senha em resposta, exceção ou log.** A senha só é guardada como hash.
+- **Onde fica:** caso de uso `AlterarSenha` (`application/casos_de_uso.py`), exceções `SenhaAtualIncorreta` e `NovaSenhaIgualAAtual` (`domain/excecoes.py`), `AlterarSenhaView` (`api/views.py`) e `LimiteDeTrocaDeSenhaPorUsuario` (`api/limites.py`).
 
 ## Limite de tentativas
 
