@@ -70,6 +70,8 @@ _TABELA = [
     ("reservas:situacao",         "PATCH",  "cancelar_com_motivo", 401,   200,   404,   200),
     ("reservas:historico",        "GET",    None,                  401,   200,   404,   200),
     ("reservas:historico",        "DELETE", None,                  401,   405,   405,   405),
+    ("usuarios:lista",            "GET",    None,                  401,   403,   403,   200),
+    ("usuarios:detalhe",          "PATCH",  "alterar_usuario",     401,   403,   403,   200),
 ]
 # fmt: on
 MATRIZ = [Regra(*linha) for linha in _TABELA]
@@ -80,6 +82,7 @@ class Cenario(NamedTuple):
     espaco_inativo_id: int
     reserva_id: int
     refresh: str
+    usuario_id: int
 
 
 _PARAMETROS_DO_CENARIO = {"espacos:ativar": {"espaco_id": "espaco_inativo_id"}}
@@ -126,6 +129,7 @@ CORPOS = {
         "capacidade": 30,
     },
     "editar_espaco": lambda cenario: {"capacidade": 40},
+    "alterar_usuario": lambda cenario: {"ativo": False},
     "nova_reserva": lambda cenario: _reserva(cenario.espaco_id, "14:00", "15:00"),
     "confirmar": lambda cenario: {"situacao": "CONFIRMADA"},
     "cancelar_com_motivo": lambda cenario: {
@@ -206,7 +210,7 @@ def cenario(cliente_com_token, tokens_de, usuario_gestor, usuario_solicitante):
         )
         .data["dados"]["id"]
     )
-    get_user_model().objects.create_user(
+    carla = get_user_model().objects.create_user(
         EMAIL_DE_LOGIN, SENHA, nome="Carla Dias", matricula="2026010"
     )
     return Cenario(
@@ -214,6 +218,7 @@ def cenario(cliente_com_token, tokens_de, usuario_gestor, usuario_solicitante):
         espaco_inativo_id,
         reserva_id,
         tokens_de(usuario_solicitante)["refresh"],
+        carla.pk,
     )
 
 

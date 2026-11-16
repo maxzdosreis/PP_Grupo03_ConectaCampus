@@ -30,7 +30,7 @@ describe('Layout', () => {
 
     const cabecalho = screen.getByRole('banner')
     expect(cabecalho.textContent).toContain('Carla Mendes · Gestor')
-    expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Reservas', 'Nova reserva'])
+    expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Reservas', 'Nova reserva', 'Usuários'])
     expect(within(cabecalho).queryByRole('link', { name: 'Entrar' })).toBeNull()
     expect(within(cabecalho).getByRole('link', { name: 'Minha conta' }).getAttribute('href')).toBe(
       '/conta',
@@ -45,6 +45,7 @@ describe('Layout', () => {
     renderizar(valorDaSessao({ usuario: USUARIO_SOLICITANTE }))
 
     expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Minhas reservas', 'Nova reserva'])
+    expect(itensDoMenu()).not.toContain('Usuários')
   })
 
   it('deslogado, mostra Entrar e Cadastre-se e esconde os itens que exigem login', () => {

@@ -72,3 +72,11 @@ def test_redis_url_ausente_impede_a_subida(monkeypatch):
 def test_ip_dos_limites_ignora_o_x_forwarded_for(settings):
     # Assert
     assert settings.REST_FRAMEWORK["NUM_PROXIES"] == 0
+
+
+def test_limite_da_gestao_de_usuarios_tem_taxa_valida(settings):
+    # Act
+    taxa = settings.LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO
+
+    # Assert
+    assert _taxa("LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO", "30/min") == taxa

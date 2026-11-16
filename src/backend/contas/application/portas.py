@@ -1,7 +1,12 @@
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
+from compartilhado.domain.paginacao import Paginacao, PaginaDeItens
 from contas.domain.cadastro import DadosDeCadastro
+from contas.domain.gestao import SituacaoDoUsuario
+from contas.domain.perfil import PerfilUsuario
 
 
 @dataclass(frozen=True)
@@ -43,3 +48,52 @@ class RepositorioUsuarios(Protocol):
 class PoliticaDeSenha(Protocol):
     def validar(self, senha: str, dados: DadosDeCadastro) -> None:
         """Lança SenhaFraca com todos os motivos quando a senha não é aceita."""
+
+
+@dataclass(frozen=True)
+class UsuarioGerenciado:
+    """O que a gestão de usuários mostra: nunca senha, hash nem token."""
+
+    id: int
+    nome: str
+    email: str
+    matricula: str
+    perfil: PerfilUsuario
+    ativo: bool
+    cadastrado_em: datetime
+    ultimo_acesso: datetime | None
+
+    @property
+    def situacao(self) -> SituacaoDoUsuario:
+        return SituacaoDoUsuario(perfil=self.perfil, ativo=self.ativo)
+
+
+@dataclass(frozen=True)
+class FiltrosDeUsuarios:
+    busca: str | None = None
+    perfil: PerfilUsuario | None = None
+    ativo: bool | None = None
+
+
+@dataclass(frozen=True)
+class ResultadoDaAlteracao:
+    usuario: UsuarioGerenciado
+    alterou: bool
+
+
+class RepositorioGestaoDeUsuarios(Protocol):
+    def listar(
+        self, filtros: FiltrosDeUsuarios, paginacao: Paginacao
+    ) -> PaginaDeItens[UsuarioGerenciado]:
+        """Ordenado por nome e, no empate, por id. Só conta e fatia no banco;
+        uma página depois da última vem sem itens e com o total certo."""
+
+    def alterar_sob_trava(
+        self,
+        usuario_id: int,
+        decidir: Callable[[UsuarioGerenciado, int], SituacaoDoUsuario],
+    ) -> ResultadoDaAlteracao:
+        """Numa transação, trava o usuário e todos os Gestores ativos, conta
+        esses Gestores e chama `decidir(atual, gestores_ativos)`, que lança a
+        recusa ou devolve a situação nova. Só grava se ela for diferente da
+        atual. Usuário inexistente lança UsuarioNaoEncontrado."""

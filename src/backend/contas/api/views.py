@@ -18,21 +18,32 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 
-from compartilhado.api.respostas import resposta_erro, resposta_sucesso
+from compartilhado.api.paginacao import PaginacaoSaidaSerializer
+from compartilhado.api.permissoes import ApenasGestor
+from compartilhado.api.respostas import (
+    mensagem_de_contagem,
+    resposta_erro,
+    resposta_sucesso,
+)
 from contas.api import dependencias
 from contas.api.limites import (
     LimiteDeCadastroPorIp,
+    LimiteDeGestaoDeUsuariosPorUsuario,
     LimiteDeLoginPorEmail,
     LimiteDeLoginPorIp,
     LimiteDeTrocaDeSenhaPorUsuario,
 )
 from contas.api.serializers import (
     AlteracaoDeSenhaSerializer,
+    AlteracaoDeUsuarioSerializer,
     CadastroSerializer,
+    FiltrosDeUsuariosSerializer,
     LoginSerializer,
     RenovacaoDeTokenSerializer,
+    UsuarioGerenciadoSaidaSerializer,
     UsuarioSaidaSerializer,
 )
+from contas.domain.gestao import converter_perfil
 
 
 def _cabecalho_bearer(request):
@@ -228,4 +239,49 @@ class UsuarioAtualView(APIView):
     def get(self, request):
         return resposta_sucesso(
             "Usuário autenticado.", UsuarioSaidaSerializer(request.user).data
+        )
+
+
+class UsuariosView(APIView):
+    permission_classes = [IsAuthenticated, ApenasGestor]
+
+    def get(self, request):
+        filtros = FiltrosDeUsuariosSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+        pagina = dependencias.listar_usuarios().executar(
+            filtros.para_filtros(), filtros.para_paginacao()
+        )
+        return resposta_sucesso(
+            mensagem_de_contagem(
+                pagina.total,
+                nenhum="Nenhum usuário encontrado.",
+                um="1 usuário encontrado.",
+                varios="{total} usuários encontrados.",
+            ),
+            UsuarioGerenciadoSaidaSerializer(pagina.itens, many=True).data,
+            paginacao=PaginacaoSaidaSerializer(pagina).data,
+        )
+
+
+class UsuarioDetalheView(APIView):
+    permission_classes = [IsAuthenticated, ApenasGestor]
+    throttle_classes = [LimiteDeGestaoDeUsuariosPorUsuario]
+
+    def patch(self, request, usuario_id):
+        entrada = AlteracaoDeUsuarioSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        dados = entrada.validated_data
+        resultado = dependencias.alterar_usuario().executar(
+            usuario_id=usuario_id,
+            ator_id=request.user.pk,
+            perfil=converter_perfil(dados["perfil"]) if "perfil" in dados else None,
+            ativo=dados.get("ativo"),
+        )
+        mensagem = (
+            "Usuário atualizado."
+            if resultado.alterou
+            else "Nenhuma mudança: o usuário já estava assim."
+        )
+        return resposta_sucesso(
+            mensagem, UsuarioGerenciadoSaidaSerializer(resultado.usuario).data
         )

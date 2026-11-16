@@ -47,7 +47,18 @@ describe('navegacao', () => {
       'Espaços',
       'Reservas',
       'Nova reserva',
+      'Usuários',
     ])
+  })
+
+  it('o item Usuários aparece só para o gestor', () => {
+    expect(itensVisiveis(true, false).map(({ rotulo }) => rotulo)).not.toContain('Usuários')
+    expect(itensVisiveis(false, false).map(({ rotulo }) => rotulo)).not.toContain('Usuários')
+    expect(itensVisiveis(true, true).find(({ rotulo }) => rotulo === 'Usuários')).toEqual({
+      rotulo: 'Usuários',
+      caminho: '/usuarios',
+      exigeLogin: true,
+    })
   })
 
   it('para quem não é gestor, o item das reservas se chama "Minhas reservas"', () => {

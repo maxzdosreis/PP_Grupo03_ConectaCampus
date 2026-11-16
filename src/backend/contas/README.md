@@ -7,7 +7,7 @@ Guarda quem usa o sistema e com qual perfil, cadastra novos solicitantes e faz o
 | Perfil (`PerfilUsuario`) | Como nasce | O que pode a mais |
 |---|---|---|
 | `SOLICITANTE` (padrão) | `POST /api/auth/cadastro/` | Solicita reservas e cancela as próprias. |
-| `GESTOR` | só por `createsuperuser` ([como](../README.md#criar-um-superusuário-acesso-ao-admin)), pelo admin ou pelos [dados de exemplo](../exemplos/README.md) | Cadastra e gerencia espaços, vê todas as reservas e muda a situação de qualquer uma. |
+| `GESTOR` | `createsuperuser`, o admin, os dados de exemplo ou a [promoção por outro Gestor](#gestão-de-usuários) (a criação do primeiro Gestor continua por `createsuperuser` ([como](../README.md#criar-um-superusuário-acesso-ao-admin)) ou pelos [dados de exemplo](../exemplos/README.md)) | Cadastra e gerencia espaços, vê todas as reservas e muda a situação de qualquer uma. |
 
 `PerfilUsuario.eh_gestor` (`contas/domain/perfil.py`) é a única definição de "é gestor". Os outros contextos não importam `contas`: leem do usuário autenticado só `pk`, `nome`, `matricula` e `eh_gestor`. O perfil é lido do banco a cada requisição, então rebaixar ou promover alguém vale na hora, com o mesmo token.
 
@@ -34,6 +34,8 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`.
 | `POST /api/auth/refresh/` | público, com o `refresh` | 200 com `access` e `refresh` novos | 401 `NAO_AUTENTICADO` (inválido, expirado, revogado, já usado, de usuário inativo ou excluído); 400 `DADOS_INVALIDOS` sem `refresh` |
 | `POST /api/auth/logout/` | público, com o `refresh` | 200 (também com o `refresh` já revogado ou vencido) | 400 `DADOS_INVALIDOS` sem `refresh` ou com um texto que não é `refresh` (com `campos.refresh`) |
 | `GET /api/auth/me/` | logado | 200 | 401 `NAO_AUTENTICADO` |
+| `GET /api/usuarios/` | só Gestor | 200, em páginas | 400 `DADOS_INVALIDOS` (`pagina`, `tamanho`, `perfil`, `ativo`); 401 `NAO_AUTENTICADO`; 403 `ACAO_NAO_PERMITIDA` |
+| `PATCH /api/usuarios/{id}/` | só Gestor | 200 `Usuário atualizado.` ou `Nenhuma mudança: o usuário já estava assim.` | 400 `PERFIL_INVALIDO`, `NENHUMA_ALTERACAO_INFORMADA`, `DADOS_INVALIDOS`; 401; 403 `ACAO_NAO_PERMITIDA`, `NAO_PODE_REBAIXAR_A_SI_MESMO`, `NAO_PODE_DESATIVAR_A_SI_MESMO`; 404 `USUARIO_NAO_ENCONTRADO`; 409 `ULTIMO_GESTOR_ATIVO`; 429 `LIMITE_DE_TENTATIVAS` |
 | `POST /api/auth/senha/` | logado, qualquer perfil (só a própria senha) | 200 `Senha alterada com sucesso.` | 400 `SENHA_ATUAL_INCORRETA` (campo `senha_atual`, **nunca 401**), `NOVA_SENHA_IGUAL_A_ATUAL`, `SENHA_FRACA` (campo `nova_senha`), `CAMPO_OBRIGATORIO_AUSENTE`, `DADOS_INVALIDOS`; 401 `NAO_AUTENTICADO` (sem login); 429 `LIMITE_DE_TENTATIVAS`; 503 `SERVICO_INDISPONIVEL` (Redis fora do ar) |
 
 Os exemplos de login, de guardar o `access` e de renovar o token estão em [Autenticação JWT](../README.md#autenticação-jwt), porque todos os contextos usam o mesmo token.
@@ -125,6 +127,29 @@ curl -X POST http://localhost:8000/api/auth/senha/ -H "Authorization: Bearer $AC
 - **Nada de senha em resposta, exceção ou log.** A senha só é guardada como hash.
 - **Onde fica:** caso de uso `AlterarSenha` (`application/casos_de_uso.py`), exceções `SenhaAtualIncorreta` e `NovaSenhaIgualAAtual` (`domain/excecoes.py`), `AlterarSenhaView` (`api/views.py`) e `LimiteDeTrocaDeSenhaPorUsuario` (`api/limites.py`).
 
+## Gestão de usuários
+
+AUT-11 ([DEC-27](../../../docs/fontes/requisitos/decisoes/DEC-27.md)). Só o Gestor lista os usuários e altera o **perfil** e a **situação da conta** (`is_active`) de outra pessoa. Não há exclusão nem criação de usuário por aqui, e a resposta nunca traz senha, hash nem token.
+
+**Listar:** `GET /api/usuarios/?busca=&perfil=&ativo=&pagina=&tamanho=`, no mesmo padrão da consulta de reservas: `busca` (trecho do nome, do e-mail ou da matrícula, sem diferenciar caixa), `perfil` (`SOLICITANTE` ou `GESTOR`), `ativo` (`true` ou `false`), `pagina` (a partir de 1) e `tamanho` (padrão 20, até 100). Responde 200 com `dados` (a lista, em ordem de nome e depois de id) e `paginacao` (`pagina`, `tamanho`, `total`, `total_de_paginas`) ao lado; uma página depois da última é 200 com `dados` vazio. Cada usuário traz `id`, `nome`, `email`, `matricula`, `perfil`, `perfil_rotulo`, `eh_gestor`, `ativo`, `cadastrado_em` e `ultimo_acesso`.
+
+```bash
+curl "http://localhost:8000/api/usuarios/?perfil=SOLICITANTE&ativo=true" -H "Authorization: Bearer $ACCESS"
+```
+
+**Alterar:** `PATCH /api/usuarios/{id}/` com `perfil` e/ou `ativo` (ao menos um). É **idempotente**: pedir o estado em que a pessoa já está responde 200 sem gravar.
+
+```bash
+curl -X PATCH http://localhost:8000/api/usuarios/2/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"ativo": false}'
+```
+
+- **Ordem das conferências:** limite de tentativas (429) → login e perfil Gestor (401 e 403) → formato do pedido (`PERFIL_INVALIDO`, `DADOS_INVALIDOS`; depois `NENHUMA_ALTERACAO_INFORMADA`) → usuário existe (404) → mudança efetiva (senão, 200 sem gravar) → o próprio Gestor não rebaixa (`NAO_PODE_REBAIXAR_A_SI_MESMO`) nem desativa (`NAO_PODE_DESATIVAR_A_SI_MESMO`) a si, ambas 403 → o último Gestor ativo não é rebaixado nem desativado (`ULTIMO_GESTOR_ATIVO`, 409). Promover e reativar são sempre permitidos. Nenhuma recusa de regra é 401: o frontend renovaria ou encerraria a sessão.
+- **Corrida:** `RepositorioGestaoDeUsuariosDjango.alterar_sob_trava` roda numa transação que trava, em ordem de id, o usuário e todos os Gestores ativos antes de contá-los (`select_for_update`); o domínio (`garantir_alteracao_permitida`) recebe a contagem já travada. Dois Gestores que se rebaixam ao mesmo tempo: só o primeiro vale. Prova: `test_concorrencia_de_gestao.py` (duas conexões de verdade, mais uma contraprova sem a trava).
+- **Sessão e perfil:** o perfil e `is_active` são lidos do banco a cada pedido. Quem é rebaixado perde os poderes na próxima ação, com a mesma credencial; quem é desativado não entra (a mesma resposta de credenciais inválidas), e o access e o refresh que tinha deixam de valer. Reativar devolve o acesso, sem restaurar nada.
+- **Reservas:** nada acontece com as reservas de quem é desativado ou rebaixado; o Gestor cancela ou recusa pelas regras de sempre.
+- **Limite:** 30 alterações por minuto por conta (`LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO`), como a troca de senha.
+- **Onde fica:** regras em `domain/gestao.py` e `domain/excecoes.py`; casos de uso `ListarUsuarios` e `AlterarUsuario`; a porta `RepositorioGestaoDeUsuarios` e o DTO `UsuarioGerenciado` em `application/portas.py`; `RepositorioGestaoDeUsuariosDjango`; `UsuariosView` e `UsuarioDetalheView` em `api/views.py`; as rotas em `api/urls_usuarios.py`, montadas em `/api/usuarios/`. A paginação é a de `compartilhado/domain/paginacao.py` e `compartilhado/api/paginacao.py`.
+
 ## Limite de tentativas
 
 Para ninguém adivinhar uma senha repetindo o login, o login e o cadastro têm limite de tentativas (throttles do DRF em `api/limites.py`, AUT-08):
@@ -193,6 +218,7 @@ Sem token, com token malformado ou expirado → **401** `NAO_AUTENTICADO`.
 | Política de senha | `infrastructure/politica_de_senha.py` e `AUTH_PASSWORD_VALIDATORS` no `config/settings.py` |
 | Model, manager e unicidade | `infrastructure/models.py` e `infrastructure/repositorio_django.py` |
 | Rotas, login, refresh (com a troca do `refresh`), logout e `me` | `api/views.py`, `api/serializers.py`, `api/urls.py` |
+| Gestão de usuários (regras, ordem e trava) | `domain/gestao.py`, `application/casos_de_uso.py` (`AlterarUsuario`), `infrastructure/repositorio_django.py` (`alterar_sob_trava`), `api/urls_usuarios.py` |
 | Limites de tentativas | `api/limites.py` e `LIMITE_*`, `NUM_PROXIES` e `CACHES` no `config/settings.py` |
 | Admin do Django | `admin.py` |
 

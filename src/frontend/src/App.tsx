@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/layout/Layout.tsx'
 import MensagensProvider from './components/mensagens/MensagensProvider.tsx'
+import RotaDeGestor from './components/sessao/RotaDeGestor.tsx'
 import RotaProtegida from './components/sessao/RotaProtegida.tsx'
 import SessaoProvider from './components/sessao/SessaoProvider.tsx'
 import PaginaCadastro from './pages/PaginaCadastro.tsx'
@@ -12,6 +13,7 @@ import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
 import PaginaNovaReserva from './pages/PaginaNovaReserva.tsx'
 import PaginaReserva from './pages/PaginaReserva.tsx'
 import PaginaReservas from './pages/PaginaReservas.tsx'
+import PaginaUsuarios from './pages/PaginaUsuarios.tsx'
 
 function App() {
   return (
@@ -29,6 +31,9 @@ function App() {
                 <Route path="reservas" element={<PaginaReservas />} />
                 <Route path="reservas/nova" element={<PaginaNovaReserva />} />
                 <Route path="reservas/:reservaId" element={<PaginaReserva />} />
+                <Route element={<RotaDeGestor />}>
+                  <Route path="usuarios" element={<PaginaUsuarios />} />
+                </Route>
               </Route>
               <Route path="*" element={<PaginaNaoEncontrada />} />
             </Route>

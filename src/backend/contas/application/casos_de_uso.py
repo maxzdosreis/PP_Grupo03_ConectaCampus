@@ -1,17 +1,29 @@
 from compartilhado.domain.erros import CampoObrigatorioAusente
+from compartilhado.domain.paginacao import Paginacao, PaginaDeItens
 from contas.application.portas import (
+    FiltrosDeUsuarios,
     PoliticaDeSenha,
+    RepositorioGestaoDeUsuarios,
     RepositorioUsuarios,
+    ResultadoDaAlteracao,
     UsuarioCadastrado,
+    UsuarioGerenciado,
 )
 from contas.domain.cadastro import DadosDeCadastro
 from contas.domain.excecoes import (
     EmailJaCadastrado,
     MatriculaJaCadastrada,
+    NenhumaAlteracaoNoUsuario,
     NovaSenhaIgualAAtual,
     SenhaAtualIncorreta,
     SenhaFraca,
 )
+from contas.domain.gestao import (
+    SituacaoDoUsuario,
+    garantir_alteracao_permitida,
+    situacao_pedida,
+)
+from contas.domain.perfil import PerfilUsuario
 
 
 class CadastrarSolicitante:
@@ -58,3 +70,44 @@ class AlterarSenha:
         except SenhaFraca as erro:
             raise SenhaFraca(erro.motivos, campo="nova_senha") from erro
         self._repositorio.trocar_senha(usuario_id, nova_senha)
+
+
+class ListarUsuarios:
+    def __init__(self, repositorio: RepositorioGestaoDeUsuarios) -> None:
+        self._repositorio = repositorio
+
+    def executar(
+        self, filtros: FiltrosDeUsuarios, paginacao: Paginacao
+    ) -> PaginaDeItens[UsuarioGerenciado]:
+        return self._repositorio.listar(filtros, paginacao)
+
+
+class AlterarUsuario:
+    def __init__(self, repositorio: RepositorioGestaoDeUsuarios) -> None:
+        self._repositorio = repositorio
+
+    def executar(
+        self,
+        *,
+        usuario_id: int,
+        ator_id: int,
+        perfil: PerfilUsuario | None = None,
+        ativo: bool | None = None,
+    ) -> ResultadoDaAlteracao:
+        if perfil is None and ativo is None:
+            raise NenhumaAlteracaoNoUsuario()
+
+        def decidir(
+            atual: UsuarioGerenciado, gestores_ativos: int
+        ) -> SituacaoDoUsuario:
+            nova = situacao_pedida(atual.situacao, perfil=perfil, ativo=ativo)
+            garantir_alteracao_permitida(
+                ator_id=ator_id,
+                alvo_id=usuario_id,
+                atual=atual.situacao,
+                nova=nova,
+                gestores_ativos=gestores_ativos,
+            )
+            return nova
+
+        return self._repositorio.alterar_sob_trava(usuario_id, decidir)

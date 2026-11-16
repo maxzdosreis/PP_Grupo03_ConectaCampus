@@ -3,10 +3,15 @@ import estilos from './PaginacaoDeReservas.module.css'
 
 type PropriedadesDaPaginacao = {
   paginacao: Paginacao
+  nomeDosItens?: string
   aoMudarPagina: (pagina: number) => void
 }
 
-function PaginacaoDeReservas({ paginacao, aoMudarPagina }: PropriedadesDaPaginacao) {
+function PaginacaoDeReservas({
+  paginacao,
+  nomeDosItens = 'reservas',
+  aoMudarPagina,
+}: PropriedadesDaPaginacao) {
   const { pagina, total, total_de_paginas: totalDePaginas } = paginacao
   if (totalDePaginas <= 1) return null
 
@@ -20,7 +25,7 @@ function PaginacaoDeReservas({ paginacao, aoMudarPagina }: PropriedadesDaPaginac
         Anterior
       </button>
       <p className={estilos.posicao}>
-        Página {pagina} de {totalDePaginas} · {total} reservas
+        Página {pagina} de {totalDePaginas} · {total} {nomeDosItens}
       </p>
       <button
         type="button"

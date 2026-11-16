@@ -10,8 +10,9 @@ Catálogo das regras de negócio do Conecta Campus (REQ-12): o que a instituiç�
 
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
-| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Criação: RN-01 a RN-17, extraídas do glossário, das fichas de RF e das DEC-04 a DEC-13 (REQ-12). IDs na forma da fonte oficial; a conversão para o formato do PDF é da REQ-13. Sem aprovação. |
+| 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Criação: RN-01 a RN-17 (a RN-18 e a RN-19 entram em 16/11/2026), extraídas do glossário, das fichas de RF e das DEC-04 a DEC-13 (REQ-12). IDs na forma da fonte oficial; a conversão para o formato do PDF é da REQ-13. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Vigência de RN-03, RN-04, RN-10, RN-13 e RN-14: os CR-01 a CR-04 estão aplicados na especificação (REQ-13), com o código nas tarefas ESP-07, RES-11, AUT-12 e RES-12; RN-10 aponta para a exceção E6.8 do UC-10. O texto das regras não mudou (REQ-12 já trazia a decisão da Aula 7). Mudança editorial. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RN-18 (o Gestor não rebaixa nem desativa a própria conta) e RN-19 (o sistema nunca fica sem Gestor ativo), da [DEC-27](../decisoes/DEC-27.md) (AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Como ler
 
@@ -41,6 +42,8 @@ Catálogo das regras de negócio do Conecta Campus (REQ-12): o que a instituiç�
 | <a id="rn-15"></a>RN-15 | O Solicitante vê só as próprias reservas e o histórico delas, e uma reserva de outra pessoa é tratada como inexistente; o Atendente responsável vê todas. | [DEC-04](../decisoes/DEC-04.md); [RF-23](rf-reservas.md#rf-23); [glossário: histórico da reserva](../glossario.md#historico) | [RF-12](rf-reservas.md#rf-12), [RF-13](rf-reservas.md#rf-13), [RF-14](rf-reservas.md#rf-14), [RF-22](rf-reservas.md#rf-22), [RF-23](rf-reservas.md#rf-23) | [UC-10 E6-2](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-2) (404) | vigente |
 | <a id="rn-16"></a>RN-16 | A agenda do dia mostra a qualquer usuário identificado os horários ocupados por outras pessoas apenas com início, término e situação, nunca quem reservou, a finalidade nem o motivo. | [DEC-11](../decisoes/DEC-11.md); [RF-29](rf-agenda.md#rf-29) | [RF-29](rf-agenda.md#rf-29), [RF-30](rf-agenda.md#rf-30) | — | vigente |
 | <a id="rn-17"></a>RN-17 | O solicitante de uma reserva é sempre quem está identificado, e nunca é informado no pedido. | [DEC-04](../decisoes/DEC-04.md); [RF-11](rf-reservas.md#rf-11) | [RF-11](rf-reservas.md#rf-11) | — | vigente |
+| <a id="rn-18"></a>RN-18 | O Gestor não rebaixa o próprio perfil nem desativa a própria conta; quem faz a alteração é outro Gestor. | [DEC-27](../decisoes/DEC-27.md); [RF-43.1](rf-contas.md#rf-43-1); [glossário: usuário ativo](../glossario.md#usuario-ativo) | [RF-43](rf-contas.md#rf-43), [RF-43.1](rf-contas.md#rf-43-1) | [UC-23 E6.5](../casos-de-uso/fichas-resumidas.md#uc23-e6-5), [UC-23 E6.6](../casos-de-uso/fichas-resumidas.md#uc23-e6-6) (403) | vigente |
+| <a id="rn-19"></a>RN-19 | O sistema nunca fica sem Gestor ativo: rebaixar ou desativar o último Gestor ativo é recusado, seja quem for que peça e mesmo que dois pedidos cheguem juntos. | [DEC-27](../decisoes/DEC-27.md); [RF-43.2](rf-contas.md#rf-43-2); [glossário: Gestor](../glossario.md#gestor) | [RF-43](rf-contas.md#rf-43), [RF-43.2](rf-contas.md#rf-43-2) | [UC-23 E6.7](../casos-de-uso/fichas-resumidas.md#uc23-e6-7) (409) | vigente |
 
 ## Regras implícitas a confirmar
 

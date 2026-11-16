@@ -19,6 +19,7 @@ Modelo: Documento de Visão do RUP em quatro quadrantes (A3·s7), com o cabeçal
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Papéis Atendente responsável e Gestor do serviço na tabela de atores (enunciado §2), com a nota do perfil único do sistema mínimo ([DEC-25](decisoes/DEC-25.md)); vínculo com o catálogo de [regras de negócio](requisitos/regras-de-negocio.md). Nenhuma NS mudou (REQ-12). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos [CR-01](mudancas/CR-01-situacao-e-horario-da-reserva.md) a [CR-04](mudancas/CR-04-matricula-so-digitos.md) (REQ-13): NS-06, NS-09 e NS-12 com a regra nova; P-04, R-08, R-10 e R-12 e o fora do escopo de regras por espaço com a data da aplicação. Nenhuma necessidade, premissa ou risco novo. O código muda nas tarefas RES-11, RES-12, ESP-07 e AUT-12. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | NS-15 cita também RF-41, RF-41.1 e RF-41.2 (trocar a própria senha); fora do escopo passa a dizer só "Recuperar senha por e-mail" ([DEC-26](decisoes/DEC-26.md), [CR-06](mudancas/CR-06-trocar-a-propria-senha.md), AUT-10). Nenhuma necessidade nova. Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | NS-11 cita também RF-42 e RF-43 (gestão de usuários pelo Gestor); fora do escopo e P-06 mudam: o perfil e a situação da conta passam a ser alterados pelo Gestor pela tela ([DEC-27](decisoes/DEC-27.md), [CR-07](mudancas/CR-07-gestao-de-usuarios.md), AUT-11). Nenhuma necessidade nova. Sem aprovação. |
 
 ## Sumário
 
@@ -139,7 +140,7 @@ Lista fechada. O que não está em "dentro do escopo" nem aqui só entra por um 
 | Regras de uso diferentes por espaço, por dia da semana ou em feriados | [DEC-07](decisoes/DEC-07.md). O horário por espaço entra na especificação com o [CR-03](mudancas/CR-03-horario-por-espaco.md) (REQ-13; código na ESP-07); por dia da semana ou em feriados continua fora. |
 | Alterar data, horário ou espaço de um pedido já feito | Pede-se outro e cancela-se o anterior. |
 | Excluir reservas ou espaços | Reservas só mudam de situação; espaços são desativados ([DEC-06](decisoes/DEC-06.md)). |
-| Recuperar senha por e-mail; trocar o perfil pela tela | Quem esquece a senha continua dependendo da administração (Equipe de TI), porque a recuperação exigiria um servidor de e-mail. O perfil só é alterado pela administração. Trocar a própria senha, sabendo a atual, entra no 1.0 ([DEC-26](decisoes/DEC-26.md), [CR-06](mudancas/CR-06-trocar-a-propria-senha.md)). |
+| Recuperar senha por e-mail; criar usuário e redefinir a senha de outra pessoa pela tela | Quem esquece a senha continua dependendo da administração (Equipe de TI), porque a recuperação exigiria um servidor de e-mail. A Equipe de TI cria os usuários e redefine senhas pela administração; o Gestor altera o perfil e a situação da conta pela tela ([DEC-27](decisoes/DEC-27.md), [CR-07](mudancas/CR-07-gestao-de-usuarios.md)). Trocar a própria senha, sabendo a atual, entra no 1.0 ([DEC-26](decisoes/DEC-26.md), [CR-06](mudancas/CR-06-trocar-a-propria-senha.md)). |
 | Controle de presença no uso do espaço | — |
 | Relatórios e estatísticas de uso | — |
 | Aplicativo de celular instalável | — |
@@ -169,7 +170,7 @@ Premissa é o que o grupo assume como verdadeiro sem ter confirmado. Se uma prem
 | P-03 | Todos os horários são de Brasília ([fuso horário](glossario.md#fuso-horario)). | Regras de agenda e conflito precisam de fuso por espaço. |
 | P-04 | As regras de agenda são as mesmas para todos os espaços e todos os dias. | [DEC-07](decisoes/DEC-07.md). Deixa de valer na especificação desde o [CR-03](mudancas/CR-03-horario-por-espaco.md) (REQ-13; código na ESP-07): a DEC-07, decidida em 06/11/2026, traz o horário de funcionamento por espaço; duração e antecedência continuam iguais para todos. |
 | P-05 | Um pedido é de um espaço, num único dia, num [intervalo](glossario.md#intervalo-de-horario) contínuo. | Recorrência e vários espaços por pedido exigem novos requisitos. |
-| P-06 | Os usuários Gestor são criados pela Equipe de TI, nunca pelo cadastro público. | [DEC-04](decisoes/DEC-04.md). |
+| P-06 | Os usuários Gestor são criados pela Equipe de TI ou promovidos por outro Gestor, nunca pelo cadastro público. | [DEC-04](decisoes/DEC-04.md); [DEC-27](decisoes/DEC-27.md). |
 | P-07 | O acesso é por navegador, em português. | — |
 
 ## 4. Sucesso e risco

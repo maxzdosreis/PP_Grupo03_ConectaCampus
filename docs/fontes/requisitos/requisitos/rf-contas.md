@@ -23,6 +23,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação do CR-04 (DEC-09), com a implementação pendente na tarefa AUT-12 (REQ-13): RF-32.1 com a matrícula só de dígitos (o limite de 20 fica como limite técnico); Vínculos do RF-32 e do RF-32.1 com os CAs novos. A especificação está adiante do código de propósito. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RF-41 · Trocar a própria senha, RF-41.1 · Recusar a troca de senha inválida e RF-41.2 · Recusar tentativas de troca de senha em excesso, a partir da NS-15 ([DEC-26](../decisoes/DEC-26.md), [CR-06](../mudancas/CR-06-trocar-a-propria-senha.md)); [US-21](../historias/US-21-trocar-a-propria-senha.md) e UC-02 A4.4 e E4.3 a E4.6 (AUT-10). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RF-42 · Listar os usuários, RF-43 · Alterar o perfil e a situação da conta de um usuário, RF-43.1 · Recusar que o Gestor rebaixe ou desative a própria conta e RF-43.2 · Recusar que o sistema fique sem Gestor ativo, a partir da NS-11 ([DEC-27](../decisoes/DEC-27.md), [CR-07](../mudancas/CR-07-gestao-de-usuarios.md)); [US-22](../historias/US-22-gerir-usuarios.md), UC-23 e as RN-18 e RN-19 (AUT-11). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
 
 ## Cadastro
 
@@ -291,6 +292,78 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Código (complementar)** | `contas/infrastructure/models.py::UsuarioManager.create_superuser` |
 | **Regras de negócio** | [Gestor](../glossario.md#gestor), [Equipe de TI](../glossario.md#equipe-de-ti) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md); premissa P-06 da [Visão](../visao.md#premissas) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+## Gestão de usuários
+
+### <a id="rf-42"></a>RF-42 · Listar os usuários
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao Gestor listar os usuários, em páginas de 20 (até 100) e em ordem de nome, buscando por nome, e-mail ou matrícula e filtrando por perfil e por situação da conta, e ver de cada um o nome, o e-mail, a matrícula, o perfil, se a conta está ativa e as datas de cadastro e do último acesso, sem nunca ver senha nem credencial de ninguém. |
+| **Origem** | NS-11 |
+| **Funcionalidade** | Extra (AUT-11) |
+| **Prioridade (QFD)** | Normal — sem a lista, o Gestor não sabe quem pode promover ou bloquear; só quem cuida do serviço a vê. |
+| **Vínculos** | UC: [UC-23 Gerir usuários](../casos-de-uso/README.md#uc-23) (fluxo principal) — na ficha: [UC-23 passos 1 a 3](../casos-de-uso/fichas-resumidas.md#uc23-p1) · US/CA: [US-22 · CA-01](../historias/US-22-gerir-usuarios.md#us-22-ca-01) (TA-201), [US-22 · CA-08](../historias/US-22-gerir-usuarios.md#us-22-ca-08) (TA-208) |
+| **Evidência (complementar)** | `GET /api/usuarios/?busca=&perfil=&ativo=&pagina=&tamanho=`; tela `/usuarios` ("Usuários"), com o item no menu só para o Gestor; o Solicitante recebe 403 `ACAO_NAO_PERMITIDA` e o anônimo, 401. `contas/tests/test_api_gestao_de_usuarios.py::test_gestor_lista_os_usuarios_no_formato_padrao`, `::test_listagem_pagina_e_depois_da_ultima_devolve_vazio_com_200`, `::test_busca_por_nome_email_e_matricula`, `::test_resposta_nunca_traz_hash_de_senha_nem_token`, `::test_solicitante_nao_lista_usuarios`; `pages/PaginaUsuarios.test.tsx` ("mostra a tabela com a contagem da API como legenda e o perfil e a situação em texto") |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::ListarUsuarios`, `contas/infrastructure/repositorio_django.py::RepositorioGestaoDeUsuariosDjango`, `contas/api/views.py::UsuariosView`, `compartilhado/domain/paginacao.py::Paginacao`, `pages/PaginaUsuarios.tsx::PaginaUsuarios` |
+| **Regras de negócio** | [Usuário](../glossario.md#usuario), [perfil](../glossario.md#perfil), [usuário ativo](../glossario.md#usuario-ativo) |
+| **Decisões** | [DEC-27](../decisoes/DEC-27.md) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+### <a id="rf-43"></a>RF-43 · Alterar o perfil e a situação da conta de um usuário
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao Gestor promover um Solicitante a Gestor, rebaixar outro Gestor a Solicitante, desativar e reativar a conta de outra pessoa, depois de confirmar, e ver o usuário atualizado; pedir o estado em que o usuário já está não muda nada, a conta desativada deixa de entrar e de renovar a sessão e as reservas da pessoa continuam como estão. |
+| **Origem** | NS-11 |
+| **Funcionalidade** | Extra (AUT-11) |
+| **Prioridade (QFD)** | Normal — sem a alteração pela tela, dar ou tirar um acesso depende da Equipe de TI, que não é ator do negócio ([L-10](srs.md#l-10)). |
+| **Vínculos** | UC: [UC-23 Gerir usuários](../casos-de-uso/README.md#uc-23) (fluxo principal) — na ficha: [UC-23 passos 4 a 6](../casos-de-uso/fichas-resumidas.md#uc23-p4) · US/CA: [US-22 · CA-02](../historias/US-22-gerir-usuarios.md#us-22-ca-02) (TA-202), [US-22 · CA-03](../historias/US-22-gerir-usuarios.md#us-22-ca-03) (TA-203), [US-22 · CA-04](../historias/US-22-gerir-usuarios.md#us-22-ca-04) (TA-204), [US-22 · CA-05](../historias/US-22-gerir-usuarios.md#us-22-ca-05) (TA-205) |
+| **Evidência (complementar)** | `PATCH /api/usuarios/{id}/` com `perfil` e/ou `ativo`, idempotente, no limite de 30 por minuto por conta (429 `LIMITE_DE_TENTATIVAS`); tela `/usuarios` com as ações "Promover a Gestor", "Rebaixar a Solicitante", "Desativar" e "Reativar" e diálogo de confirmação. `contas/tests/test_api_gestao_de_usuarios.py::test_gestor_promove_um_solicitante`, `::test_gestor_desativa_e_reativa_um_solicitante`, `::test_pedir_o_estado_atual_responde_200_sem_mudar_nada`, `::test_desativado_nao_entra_e_recebe_a_mesma_resposta_de_credenciais_invalidas`, `::test_access_de_quem_foi_desativado_deixa_de_funcionar`, `::test_refresh_de_quem_foi_desativado_nao_renova_e_nao_rotaciona`, `::test_desativar_nao_mexe_nas_reservas_da_pessoa`, `::test_alteracoes_tem_limite_de_tentativas_por_usuario`; `pages/PaginaUsuarios.test.tsx` ("promover: confirma, chama a API com o perfil, mostra a mensagem e recarrega a lista") |
+| **Código (complementar)** | `contas/application/casos_de_uso.py::AlterarUsuario`, `contas/domain/gestao.py::situacao_pedida`, `contas/api/views.py::UsuarioDetalheView`, `contas/api/limites.py::LimiteDeGestaoDeUsuariosPorUsuario`, `components/usuarios/DialogoDeUsuario.tsx::DialogoDeUsuario` |
+| **Regras de negócio** | [RN-18](regras-de-negocio.md#rn-18), [RN-19](regras-de-negocio.md#rn-19). Glossário e detalhes: [Usuário ativo](../glossario.md#usuario-ativo), [perfil](../glossario.md#perfil), [sessão](../glossario.md#sessao), [tentativas em excesso](../glossario.md#tentativas-em-excesso) |
+| **Decisões** | [DEC-27](../decisoes/DEC-27.md) (o perfil e a situação são lidos do banco a cada pedido e valem na próxima ação, com a mesma credencial) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-43-1"></a>RF-43.1 · Recusar que o Gestor rebaixe ou desative a própria conta
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que o Gestor rebaixe o próprio perfil ou desative a própria conta, sem alterar o usuário e sem encerrar a sessão, e informar que outro Gestor deve fazer a alteração. |
+| **Pai** | [RF-43](#rf-43) |
+| **Origem** | NS-11 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Normal — um clique errado tiraria do Gestor o acesso que ele usa para desfazê-lo. |
+| **Vínculos** | UC: [UC-23 Gerir usuários](../casos-de-uso/README.md#uc-23) (exceção) — na ficha: [UC-23 E6.5](../casos-de-uso/fichas-resumidas.md#uc23-e6-5), [UC-23 E6.6](../casos-de-uso/fichas-resumidas.md#uc23-e6-6) · US/CA: [US-22 · CA-06](../historias/US-22-gerir-usuarios.md#us-22-ca-06) (TA-206) |
+| **Evidência (complementar)** | 403 `NAO_PODE_REBAIXAR_A_SI_MESMO` e `NAO_PODE_DESATIVAR_A_SI_MESMO`, nunca 401; na tela, as duas ações desabilitadas na linha do próprio Gestor, com a explicação em texto. `contas/tests/test_api_gestao_de_usuarios.py::test_gestor_nao_rebaixa_a_si_mesmo`, `::test_gestor_nao_desativa_a_si_mesmo`, `::test_unico_gestor_nao_se_rebaixa_nem_se_desativa`; `contas/tests/test_gestao_de_usuarios_dominio.py::test_o_proprio_ator_nao_se_rebaixa`; `pages/PaginaUsuarios.test.tsx` ("as ações do próprio usuário ficam desabilitadas, com a explicação em texto") |
+| **Código (complementar)** | `contas/domain/gestao.py::garantir_alteracao_permitida`, `contas/domain/excecoes.py::NaoPodeRebaixarASiMesmo`, `contas/domain/excecoes.py::NaoPodeDesativarASiMesmo` |
+| **Regras de negócio** | [RN-18](regras-de-negocio.md#rn-18). Glossário e detalhes: [Usuário ativo](../glossario.md#usuario-ativo), [perfil](../glossario.md#perfil) |
+| **Decisões** | [DEC-27](../decisoes/DEC-27.md) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-43-2"></a>RF-43.2 · Recusar que o sistema fique sem Gestor ativo
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que o Gestor rebaixe ou desative o último Gestor ativo, inclusive quando dois Gestores pedem ao mesmo tempo, sem alterar o usuário, e informar que antes é preciso promover ou reativar outro Gestor. |
+| **Pai** | [RF-43](#rf-43) |
+| **Origem** | NS-11 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Esperado — sem nenhum Gestor ativo, nenhum espaço é cadastrado e nenhum pedido é decidido, e só a Equipe de TI resolveria. |
+| **Vínculos** | UC: [UC-23 Gerir usuários](../casos-de-uso/README.md#uc-23) (exceção) — na ficha: [UC-23 E6.7](../casos-de-uso/fichas-resumidas.md#uc23-e6-7) · US/CA: [US-22 · CA-07](../historias/US-22-gerir-usuarios.md#us-22-ca-07) (TA-207) |
+| **Evidência (complementar)** | 409 `ULTIMO_GESTOR_ATIVO`; a contagem dos Gestores ativos é feita com as linhas travadas, e dois pedidos simultâneos deixam sempre um Gestor ativo. `contas/tests/test_gestao_de_usuarios_dominio.py::test_rebaixar_o_ultimo_gestor_ativo_e_recusado_mesmo_sendo_outra_pessoa`, `::test_desativar_o_ultimo_gestor_ativo_e_recusado`; `contas/tests/test_api_gestao_de_usuarios.py::test_ultimo_gestor_ativo_nao_e_rebaixado_nem_desativado_por_quem_ja_perdeu_o_perfil [x]`; `contas/tests/test_repositorio_gestao_de_usuarios.py::test_alterar_trava_o_alvo_e_os_gestores_ativos_em_ordem_de_id`; `contas/tests/test_concorrencia_de_gestao.py::test_dois_gestores_se_tirando_do_cargo_ao_mesmo_tempo_deixam_um_ativo [x]` |
+| **Código (complementar)** | `contas/domain/gestao.py::garantir_alteracao_permitida`, `contas/domain/excecoes.py::UltimoGestorAtivo`, `contas/infrastructure/repositorio_django.py::RepositorioGestaoDeUsuariosDjango` |
+| **Regras de negócio** | [RN-19](regras-de-negocio.md#rn-19). Glossário e detalhes: [Gestor](../glossario.md#gestor), [usuário ativo](../glossario.md#usuario-ativo) |
+| **Decisões** | [DEC-27](../decisoes/DEC-27.md) (a trava das linhas dos Gestores ativos contra a corrida) |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |

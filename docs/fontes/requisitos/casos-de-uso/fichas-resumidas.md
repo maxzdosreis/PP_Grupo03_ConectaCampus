@@ -20,6 +20,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | UC-07: a consulta em páginas, com o total, nos passos 2 e 4; alternativas novas A2.3 (ver outra página), A2.4 (página além da última) e A3.2 (mudar um critério recomeça da primeira página); a exceção E3.1 inclui a página e o tamanho inválidos; RF-12.2 nos RFs cobertos (RES-10). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator de UC-15 e UC-16: Gestor do serviço; UC-16 A5.1 (desfazer reservas): Atendente responsável. Só o rótulo do ator; metas e passos iguais ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (DEC-13), [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (DEC-05), [CR-03](../mudancas/CR-03-horario-por-espaco.md) (DEC-07) e [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (DEC-09), com o código nas tarefas RES-11, RES-12, ESP-07 e AUT-12 (REQ-13): UC-01 E3.1 (matrícula só de dígitos), UC-06 passo 4 (funcionamento do espaço), UC-07 passo 2 e UC-08 passo 3 (ações conforme o horário) e UC-09 passo 3 e A3.2 (tentativas recusadas no histórico). As fichas estão adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | UC-23 · Gerir usuários (ficha resumida), da [DEC-27](../decisoes/DEC-27.md) e do [CR-07](../mudancas/CR-07-gestao-de-usuarios.md) (AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -316,6 +317,49 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 **RFs cobertos:** [RF-07](../requisitos/rf-espacos.md#rf-07) → [passos 1 a 5](#uc16-p1) · [RF-07.1](../requisitos/rf-espacos.md#rf-07-1) → [E4.2](#uc16-e4-2) · [RF-08](../requisitos/rf-espacos.md#rf-08) → [A1.1](#uc16-a1-1) · [RF-08.1](../requisitos/rf-espacos.md#rf-08-1) → [E4.3](#uc16-e4-3) · [RF-09](../requisitos/rf-espacos.md#rf-09) → [E4.1](#uc16-e4-1) · [RF-10](../requisitos/rf-espacos.md#rf-10) → [E1.1](#uc16-e1-1)
 
 **Histórias derivadas:** [US-07 Desativar e reativar espaço](../historias/US-07-desativar-e-reativar-espaco.md)
+
+## <a id="uc-23"></a>UC-23 · Gerir usuários
+
+| Campo | Conteúdo |
+|---|---|
+| **Ator primário** | Gestor do serviço |
+| **Meta** | Dar ou tirar acessos: promover, rebaixar, desativar e reativar a conta de outra pessoa, sem deixar o sistema sem Gestor. |
+| **Precondição** | O ator está autenticado ([UC-02](UC-02-autenticar.md)) com o perfil Gestor. |
+| **Ficha completa relacionada** | [UC-02 Autenticar](UC-02-autenticar.md) (a conta desativada não entra nem renova a sessão). |
+
+**Fluxo principal**
+
+1. <a id="uc23-p1"></a>O Gestor pede a lista de usuários.
+2. <a id="uc23-p2"></a>O sistema mostra os usuários em páginas, em ordem de nome, com perfil e situação da conta.
+3. <a id="uc23-p3"></a>O Gestor encontra a pessoa, buscando por nome, e-mail ou matrícula e filtrando por perfil e situação, se precisar.
+4. <a id="uc23-p4"></a>O Gestor escolhe a pessoa e uma ação: promover, rebaixar, desativar ou reativar.
+5. <a id="uc23-p5"></a>O sistema pede a confirmação e o Gestor confirma.
+6. <a id="uc23-p6"></a>O sistema altera o perfil ou a situação da conta, informa que o usuário foi atualizado e mostra a lista atualizada.
+
+**Alternativas**
+
+- <a id="uc23-a3-1"></a>**A3.1** · Passar de página: o Gestor avança ou volta de página, e uma página depois da última mostra a lista vazia.
+- <a id="uc23-a5-1"></a>**A5.1** · Desistir: o Gestor volta sem confirmar, e nada é alterado.
+- <a id="uc23-a6-1"></a>**A6.1** · Pedir o estado em que a pessoa já está: o sistema informa que nada mudou, sem gravar.
+
+**Exceções**
+
+Na ordem em que o sistema confere.
+
+| Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
+|---|---|---|---|---|
+| <a id="uc23-e1-1"></a>E1.1 · Sem permissão ou sem identificação | O ator não está identificado, ou é Solicitante. | Quem não está identificado é levado a entrar; o Solicitante é informado de que não tem permissão. | Nada é mostrado nem alterado. | [RF-42](../requisitos/rf-contas.md#rf-42) |
+| <a id="uc23-e6-1"></a>E6.1 · Alterações em excesso | O ator já fez 30 alterações no último minuto. | O sistema informa em quantos segundos ele pode tentar de novo. | Nada é alterado; a sessão continua. | [RF-42](../requisitos/rf-contas.md#rf-42) |
+| <a id="uc23-e6-2"></a>E6.2 · Perfil inexistente | O perfil pedido não é Solicitante nem Gestor. | O sistema informa o campo e os perfis aceitos. | Nada é alterado. | [RF-43](../requisitos/rf-contas.md#rf-43) |
+| <a id="uc23-e6-3"></a>E6.3 · Nenhuma mudança informada | O pedido não traz perfil nem situação. | O sistema pede que se informe o perfil ou a situação. | Nada é alterado. | [RF-43](../requisitos/rf-contas.md#rf-43) |
+| <a id="uc23-e6-4"></a>E6.4 · Usuário inexistente | A pessoa indicada não existe. | O sistema informa que o usuário não foi encontrado. | Nada é alterado. | [RF-42](../requisitos/rf-contas.md#rf-42) |
+| <a id="uc23-e6-5"></a>E6.5 · Rebaixar a si mesmo | O Gestor pede para rebaixar o próprio perfil. | O sistema informa que outro Gestor deve fazer isso. | Nada é alterado; a sessão continua. | [RF-43.1](../requisitos/rf-contas.md#rf-43-1) |
+| <a id="uc23-e6-6"></a>E6.6 · Desativar a si mesmo | O Gestor pede para desativar a própria conta. | O sistema informa que outro Gestor deve fazer isso. | Nada é alterado; a sessão continua. | [RF-43.1](../requisitos/rf-contas.md#rf-43-1) |
+| <a id="uc23-e6-7"></a>E6.7 · Último Gestor ativo | O pedido rebaixaria ou desativaria o último Gestor ativo. | O sistema informa que antes é preciso promover ou reativar outro Gestor. | Nada é alterado. | [RF-43.2](../requisitos/rf-contas.md#rf-43-2) |
+
+**RFs cobertos:** [RF-42](../requisitos/rf-contas.md#rf-42) → [passos 1 a 3](#uc23-p1), [A3.1](#uc23-a3-1), [E1.1](#uc23-e1-1), [E6.1](#uc23-e6-1), [E6.4](#uc23-e6-4) · [RF-43](../requisitos/rf-contas.md#rf-43) → [passos 4 a 6](#uc23-p4), [A5.1](#uc23-a5-1), [A6.1](#uc23-a6-1), [E6.2](#uc23-e6-2), [E6.3](#uc23-e6-3) · [RF-43.1](../requisitos/rf-contas.md#rf-43-1) → [E6.5](#uc23-e6-5), [E6.6](#uc23-e6-6) · [RF-43.2](../requisitos/rf-contas.md#rf-43-2) → [E6.7](#uc23-e6-7)
+
+**Histórias derivadas:** [US-22 Gerir usuários](../historias/US-22-gerir-usuarios.md)
 
 ---
 

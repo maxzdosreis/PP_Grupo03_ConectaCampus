@@ -53,3 +53,19 @@ describe('PaginacaoDeReservas', () => {
     expect(aoMudarPagina.mock.calls).toEqual([[3], [1]])
   })
 })
+
+describe('PaginacaoDeReservas com outro nome de itens', () => {
+  it('usa o nome recebido no texto da posição', () => {
+    render(
+      <PaginacaoDeReservas
+        paginacao={paginacao()}
+        nomeDosItens="usuários"
+        aoMudarPagina={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('navigation', { name: 'Paginação' }).textContent).toContain(
+      'Página 2 de 3 · 45 usuários',
+    )
+  })
+})

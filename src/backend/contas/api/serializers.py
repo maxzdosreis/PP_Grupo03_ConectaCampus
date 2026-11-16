@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from compartilhado.api.paginacao import FiltrosDePaginaSerializer
+from contas.application.portas import FiltrosDeUsuarios
 from contas.domain.perfil import PerfilUsuario
 
 
@@ -43,3 +45,41 @@ class UsuarioSaidaSerializer(serializers.Serializer):
 
     def get_eh_gestor(self, usuario):
         return PerfilUsuario(usuario.perfil).eh_gestor
+
+
+class FiltrosDeUsuariosSerializer(FiltrosDePaginaSerializer):
+    busca = serializers.CharField(required=False, allow_blank=True)
+    perfil = serializers.ChoiceField(
+        choices=[(perfil.value, perfil.rotulo) for perfil in PerfilUsuario],
+        required=False,
+        allow_blank=True,
+    )
+    ativo = serializers.ChoiceField(
+        choices=["true", "false"], required=False, allow_blank=True
+    )
+
+    def para_filtros(self) -> FiltrosDeUsuarios:
+        dados = self.validated_data
+        return FiltrosDeUsuarios(
+            busca=dados.get("busca") or None,
+            perfil=PerfilUsuario(dados["perfil"]) if dados.get("perfil") else None,
+            ativo={"true": True, "false": False}.get(dados.get("ativo")),
+        )
+
+
+class AlteracaoDeUsuarioSerializer(serializers.Serializer):
+    perfil = serializers.CharField(required=False)
+    ativo = serializers.BooleanField(required=False)
+
+
+class UsuarioGerenciadoSaidaSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    nome = serializers.CharField()
+    email = serializers.EmailField()
+    matricula = serializers.CharField()
+    perfil = serializers.CharField(source="perfil.value")
+    perfil_rotulo = serializers.CharField(source="perfil.rotulo")
+    eh_gestor = serializers.BooleanField(source="perfil.eh_gestor")
+    ativo = serializers.BooleanField()
+    cadastrado_em = serializers.DateTimeField()
+    ultimo_acesso = serializers.DateTimeField(allow_null=True)

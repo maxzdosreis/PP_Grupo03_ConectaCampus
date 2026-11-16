@@ -1,6 +1,11 @@
 from collections.abc import Sequence
 
-from compartilhado.domain.erros import ConflitoDeEstado, DadosInvalidos
+from compartilhado.domain.erros import (
+    AcaoNaoPermitida,
+    ConflitoDeEstado,
+    DadosInvalidos,
+    RecursoNaoEncontrado,
+)
 
 
 class MatriculaInvalida(DadosInvalidos):
@@ -51,3 +56,43 @@ class MatriculaJaCadastrada(ConflitoDeEstado):
     codigo = "MATRICULA_JA_CADASTRADA"
     campo = "matricula"
     mensagem_padrao = "Já existe um usuário com esta matrícula."
+
+
+class UsuarioNaoEncontrado(RecursoNaoEncontrado):
+    codigo = "USUARIO_NAO_ENCONTRADO"
+    mensagem_padrao = "Usuário não encontrado."
+
+
+class PerfilInvalido(DadosInvalidos):
+    codigo = "PERFIL_INVALIDO"
+    campo = "perfil"
+    mensagem_padrao = "Perfil inválido. Use SOLICITANTE ou GESTOR."
+
+
+class NenhumaAlteracaoNoUsuario(DadosInvalidos):
+    codigo = "NENHUMA_ALTERACAO_INFORMADA"
+    mensagem_padrao = "Informe o perfil ou a situação (ativo) para alterar."
+
+
+class NaoPodeRebaixarASiMesmo(AcaoNaoPermitida):
+    codigo = "NAO_PODE_REBAIXAR_A_SI_MESMO"
+    mensagem_padrao = (
+        "Você não pode rebaixar o seu próprio perfil. "
+        "Peça a outro Gestor que faça a alteração."
+    )
+
+
+class NaoPodeDesativarASiMesmo(AcaoNaoPermitida):
+    codigo = "NAO_PODE_DESATIVAR_A_SI_MESMO"
+    mensagem_padrao = (
+        "Você não pode desativar a sua própria conta. "
+        "Peça a outro Gestor que faça a alteração."
+    )
+
+
+class UltimoGestorAtivo(ConflitoDeEstado):
+    codigo = "ULTIMO_GESTOR_ATIVO"
+    mensagem_padrao = (
+        "Esta é a última conta de Gestor ativa. Promova ou reative outro Gestor "
+        "antes de rebaixar ou desativar esta."
+    )
