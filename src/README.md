@@ -57,6 +57,53 @@ Estas duas **não ficam no `.env`**: o `docker-compose.yml` as monta a partir da
 
 As duas ficam em `environment:`, que tem precedência sobre o `env_file: .env`. Por isso um `.env` antigo, que ainda traga essas variáveis com as portas de antes, não muda nada e pode ficar como está. Não há como sobrescrevê-las pelo `.env`, de propósito: o defeito corrigido era justamente o valor escrito à mão que ficava fora de sincronia com a porta. Abrir a tela por outro host ou outra origem exigiria mudar o `docker-compose.yml`.
 
+## Modo de produção (opcional, INF-08)
+
+O `docker-compose.prod.yml` sobe o sistema sem as facilidades do desenvolvimento. **Nada do modo padrão muda**: o `docker-compose.yml`, os `Dockerfile` e o `.env.example` são os mesmos, e tudo do modo de produção vive em arquivos próprios (`docker-compose.prod.yml`, `backend/Dockerfile.prod`, `frontend/Dockerfile.prod`, `frontend/nginx.conf` e `.env.prod.example`). O passo a passo curto está no [README da raiz](../README.md#modo-de-produção-opcional); aqui ficam os detalhes. Todo comando abaixo roda dentro de `src` e leva `-f docker-compose.prod.yml --env-file .env.prod` (sem o `--env-file`, o Compose leria o `.env` de desenvolvimento).
+
+| Serviço | Imagem / build | Porta no seu computador | O que faz |
+|---|---|---|---|
+| `db` | `postgres:16-alpine` | nenhuma | Banco PostgreSQL só na rede interna, com volume próprio. |
+| `redis` | `redis:8-alpine` | nenhuma | Contador do limite de tentativas, sem persistência, como no modo padrão. |
+| `migrar` | `backend/Dockerfile.prod` | nenhuma | Tarefa de uso único: `python manage.py migrate --noinput` e sai. |
+| `backend` | `backend/Dockerfile.prod` (`python:3.12-slim`, só `requirements.txt`) | nenhuma (`expose` 8000, rede interna) | gunicorn (`config.wsgi:application`) como usuário `aplicacao`, sem root. Sobe depois de `db` e `redis` saudáveis e de `migrar` concluído. Healthcheck em `/api/health/` (banco e cache). |
+| `frontend` | `frontend/Dockerfile.prod` (build com `node:24-alpine`, servido por `nginx:1.29-alpine`) | `FRONTEND_PORT_HOST` → 80 (padrão **8080**) | nginx: serve a tela compilada e repassa `/api/`, `/admin/` e `/static/` ao `backend`. Sobe depois do `backend` saudável. |
+
+### Decisões
+
+- **a) Projeto, volume e rede com nome próprio.** O `name:` é `conecta-campus-prod` (o do modo padrão é `conecta-campus`), e o volume (`conecta-campus-prod_postgres_data`) e a rede (`conecta-campus-prod_rede`) têm `name:` explícito. Com o mesmo nome, o modo de produção reutilizaria o banco do desenvolvimento, e um `down -v` aqui o apagaria. Nenhum serviço monta o código-fonte (sem bind mount).
+- **b) Uma origem só.** O navegador fala só com o nginx, então a tela é construída com `VITE_API_URL=/api` (relativa) e **não é preciso CORS**. O Vite grava esse valor no JavaScript **em tempo de build** (build arg do `frontend`): para mudá-lo, reconstrua com `up -d --build`.
+- **c) Migração separada.** O servidor web não roda `migrate` a cada start: o serviço `migrar` roda uma vez, e o `backend` espera `service_completed_successfully`. Não há carga de dados de exemplo (o comando exige `DJANGO_DEBUG=True`); o primeiro Gestor sai de `createsuperuser`.
+- **d) Estáticos do admin com whitenoise**, coletados no build (`collectstatic`); `STATIC_ROOT` é `backend/staticfiles`. O `gunicorn` e o `whitenoise` entram em `requirements.txt` (também chegam à imagem de desenvolvimento, que não os usa).
+- **e) Só o nginx publica porta.** Banco, Redis e backend não têm `ports`.
+- **f) Segredos sem padrão.** `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DB_DATABASE`, `DB_USER` e `DB_PASSWORD` usam `${VAR:?...}`: faltando uma (ou vazia), o `up` falha dizendo qual. Além disso, o Django só aplica as regras de produção quando `DJANGO_MODO_PRODUCAO=1` (o compose de produção define): chave com 50 caracteres ou mais, com pelo menos 5 diferentes e que não comece com `troque-` nem `django-insecure-`; `DJANGO_DEBUG` falso; `DJANGO_ALLOWED_HOSTS` preenchida e sem `*`; `DB_HOST` definido. A variável própria existe porque `DJANGO_DEBUG=False` sozinho já é o padrão do modo de avaliação e dos testes, que usam a chave de exemplo.
+- **g) Limite de tentativas atrás do nginx.** O nginx manda o IP real em `X-Forwarded-For`, e o compose define `DJANGO_NUM_PROXIES=1` para o limite por IP (AUT-08) contar cada computador, e não o IP do nginx. Com outro proxy na frente, some 1.
+- **h) Healthchecks e logs.** O do `backend` chama `/api/health/` com o primeiro host de `DJANGO_ALLOWED_HOSTS` no cabeçalho `Host` (por isso essa variável deve listar hosts simples, sem porta nem curinga); o do nginx pede `/`. Os serviços de longa duração têm `restart: unless-stopped`, e os logs rodam em `json-file` com 3 arquivos de 10 MB.
+- **i) gunicorn:** `GUNICORN_WORKERS` (padrão 3) e `GUNICORN_TIMEOUT` (padrão 30 s), lidos no start.
+
+### Variáveis (`.env.prod`)
+
+O `.env.prod` nunca é versionado; o `.env.prod.example` lista só os nomes. **Obrigatórias:** `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`. **Opcionais (padrão entre parênteses):** `FRONTEND_PORT_HOST` (8080), `GUNICORN_WORKERS` (3), `GUNICORN_TIMEOUT` (30), `DJANGO_HTTPS` (0), `DJANGO_CSRF_TRUSTED_ORIGINS` (vazio), `DJANGO_NUM_PROXIES` (1), os cinco `LIMITE_*` e `JWT_ACCESS_MINUTES` e `JWT_REFRESH_DAYS` (iguais aos do `.env.example`).
+
+### HTTPS e `manage.py check --deploy`
+
+O compose **não tem TLS**: o nginx escuta HTTP na porta 80. Para uso real, ponha um proxy com certificado na frente e ligue `DJANGO_HTTPS=1`, que ativa o redirecionamento para HTTPS (menos no `/api/health/`), o HSTS de 1 ano (com subdomínios e `preload`; só declara a elegibilidade, e quem decide é o envio do domínio à lista), os cookies de sessão e CSRF `Secure` e a leitura de `X-Forwarded-Proto` (`SECURE_PROXY_SSL_HEADER`). O admin atrás do proxy precisa de `DJANGO_CSRF_TRUSTED_ORIGINS` com as origens `https://...` do sistema.
+
+O `python manage.py check --deploy` (rodado dentro do `backend` de produção) dá:
+
+- **Com `DJANGO_HTTPS=0` (padrão, sem TLS): 4 avisos, todos que dependem de TLS** (nenhum erro): `security.W004` (sem `SECURE_HSTS_SECONDS`), `security.W008` (`SECURE_SSL_REDIRECT` desligado), `security.W012` (`SESSION_COOKIE_SECURE`) e `security.W016` (`CSRF_COOKIE_SECURE`). Um cookie `Secure` e o HSTS sobre HTTP puro travariam o login e o navegador, por isso ficam desligados sem HTTPS.
+- **Com `DJANGO_HTTPS=1`: nenhum aviso** (`System check identified no issues`). Para conferir sem proxy: `docker compose -f docker-compose.prod.yml --env-file .env.prod exec -e DJANGO_HTTPS=1 backend python manage.py check --deploy`.
+
+Por "sem avisos críticos" entende-se: nenhum erro e nenhum aviso de segurança que não dependa de TLS.
+
+### Comandos úteis
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod ps
+docker compose -f docker-compose.prod.yml --env-file .env.prod logs -f backend
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec backend python manage.py check --deploy
+```
+
 ## Onde continuar
 
 - [Backend](backend/README.md): organização em contextos e camadas, formato das respostas, autenticação, comandos e o roteiro com `curl`.

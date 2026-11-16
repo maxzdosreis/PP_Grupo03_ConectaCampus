@@ -243,6 +243,8 @@ Ao mudar o `requirements.txt` ou o `requirements-dev.txt`, reconstrua a imagem d
 docker compose up --build -d backend
 ```
 
+O `requirements.txt` também traz `gunicorn` e `whitenoise`, usados só no [modo de produção opcional](../README.md#modo-de-produção-opcional-inf-08) (`Dockerfile.prod`, sem o `requirements-dev.txt`). Nesse modo o `settings.py` só aplica as regras estritas (chave forte, hosts, sem depuração) quando `DJANGO_MODO_PRODUCAO=1`; sem essa variável, tudo se comporta como descrito acima. As opções de HTTPS (`DJANGO_HTTPS`) e o número de proxies (`DJANGO_NUM_PROXIES`) ficam documentados lá.
+
 ## Roteiro alternativo com `curl`
 
 O mesmo roteiro da [demonstração pela tela](../../README.md#roteiro-da-demonstração), pela API, com os [dados de exemplo](../../README.md#dados-de-exemplo). Ele mostra também o **403** de um solicitante tentando confirmar, que a tela não oferece. Fica inteiro aqui, e não dividido entre os contextos, porque é uma sequência só, com o mesmo `$ACCESS` passando por contas, reservas e espaços.

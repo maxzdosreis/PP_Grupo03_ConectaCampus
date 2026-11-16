@@ -183,6 +183,40 @@ docker compose exec backend python manage.py carregar_dados_exemplo
 
 O `-d` sobe os serviços em segundo plano; espere a [verificação da API](#verificar-se-a-api-está-no-ar) responder 200 antes do último comando.
 
+## Modo de produção (opcional)
+
+Serve para rodar o sistema como se fosse publicado: a API no **gunicorn** (modo de depuração desligado, usuário sem privilégios), a tela compilada e servida pelo **nginx**, e chaves e senhas **obrigatórias**, sem valor padrão. **A avaliação não precisa dele**: o `docker compose up` das seções acima continua exatamente como está, e este modo usa outro projeto do Compose (`conecta-campus-prod`), com banco, rede e portas próprios, então os dois podem rodar ao mesmo tempo sem se misturar.
+
+1. **Crie o arquivo de configuração** (dentro de `src`; ele nunca vai para o Git) e preencha as cinco variáveis obrigatórias, seguindo as instruções do próprio arquivo. Para gerar a chave do Django: `python -c "import secrets; print(secrets.token_urlsafe(64))"`.
+
+   ```bash
+   cp .env.prod.example .env.prod
+   ```
+
+2. **Suba** (dentro de `src`; o `--env-file` é obrigatório, para não ler o `.env` de desenvolvimento):
+
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+   ```
+
+   O serviço `migrar` aplica as migrations e termina; o servidor web só sobe depois que ele conclui. Para rodá-lo sozinho de novo, depois de uma atualização: `docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm migrar`.
+
+3. **Abra** http://localhost:8080 (porta `FRONTEND_PORT_HOST`, padrão 8080 neste modo). A tela e a API respondem na mesma porta (`/api/`, e o admin em `/admin/`).
+
+4. **Crie o primeiro Gestor** (não há dados de exemplo neste modo):
+
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env.prod exec backend python manage.py createsuperuser
+   ```
+
+5. **Derrube** mantendo o banco, ou apagando-o junto com `-v` (confira que o comando tem `-f docker-compose.prod.yml`: ele só enxerga o projeto `conecta-campus-prod`):
+
+   ```bash
+   docker compose -f docker-compose.prod.yml --env-file .env.prod down
+   ```
+
+O compose **não termina HTTPS**: para usar de verdade na internet, ponha um proxy com TLS na frente do nginx e ligue `DJANGO_HTTPS=1`. Detalhes (variáveis, decisões, `manage.py check --deploy`) no [`src/README.md`](src/README.md#modo-de-produção-opcional-inf-08).
+
 ## Persistência
 
 Os dados ficam no PostgreSQL 16, no serviço `db` (imagem `postgres:16-alpine`), guardados no volume Docker **`conecta-campus_postgres_data`** (o Compose acrescenta o nome do projeto, `conecta-campus`, ao volume `postgres_data`). Eles se mantêm quando os serviços param (`Ctrl+C`, `docker compose stop` ou `docker compose down`) e quando o computador reinicia. Só são apagados com `docker compose down -v` ou removendo o volume. Rodar o comando de dados de exemplo de novo não duplica nada.
@@ -203,7 +237,7 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 
 ## Limitações conhecidas
 
-- **Configuração de desenvolvimento, não de produção:** a API roda no servidor de desenvolvimento do Django e a tela no do Vite, com o modo de depuração ligado, e o `.env.example` traz uma senha de banco e uma chave de exemplo. Serve para avaliar e demonstrar localmente, não para publicar.
+- **Modo de produção só como opção e incompleto:** o modo padrão é de desenvolvimento (servidor do Django e do Vite, depuração ligada, senha e chave de exemplo no `.env.example`) e serve para avaliar e demonstrar localmente. O [modo de produção](#modo-de-produção-opcional) (gunicorn e nginx, segredos obrigatórios) não inclui TLS (é preciso um proxy HTTPS na frente), backups do banco, monitoramento e coleta de logs, nem mais de um servidor: o Redis e o PostgreSQL rodam em um container cada, sem réplica, e o Redis, sem persistência.
 - **Fuso horário fixo:** datas e horários são sempre os de Brasília (America/Sao_Paulo), independentemente do fuso do computador.
 - **Regras de agenda iguais para todos os espaços:** funcionamento das 07:00 às 22:00, duração de 30 minutos a 3 horas e até 30 dias de antecedência valem para todos; não há horário próprio por espaço.
 - **Situação e horário da reserva independentes:** o Gestor pode concluir uma reserva antes do horário terminar e confirmar ou recusar depois de ele começar, qualquer um pode cancelar depois do uso, e uma reserva Solicitada que ninguém decidiu continua ocupando o horário mesmo depois da data.
@@ -223,7 +257,7 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 
 | Módulo | README | O que está lá |
 |---|---|---|
-| Execução | [`src/README.md`](src/README.md) | Serviços do Docker Compose, portas, volumes e cada variável do `.env.example`. |
+| Execução | [`src/README.md`](src/README.md) | Serviços do Docker Compose, portas, volumes, cada variável do `.env.example` e o modo de produção opcional. |
 | Backend | [`src/backend/README.md`](src/backend/README.md) | Organização em contextos e camadas, regra de dependência, formato das respostas, autenticação JWT, superusuário, comandos de teste e qualidade, roteiro com `curl`. |
 | Contas | [`src/backend/contas/README.md`](src/backend/contas/README.md) | Perfis, regras de cadastro e senha, endpoints de cadastro, login e usuário logado. |
 | Espaços | [`src/backend/espacos/README.md`](src/backend/espacos/README.md) | Regras dos espaços e endpoints de cadastrar, listar, editar, desativar e reativar. |
