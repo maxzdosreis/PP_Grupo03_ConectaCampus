@@ -101,3 +101,52 @@ def test_repositorio_django_relanca_integrity_error_de_outra_constraint(monkeypa
     # Act / Assert
     with pytest.raises(IntegrityError, match="outra constraint"):
         RepositorioUsuariosDjango().criar_solicitante(_dados(), SENHA)
+
+
+def test_dados_de_cadastro_devolve_nome_matricula_e_email_do_usuario(repositorio):
+    # Arrange
+    usuario = repositorio.criar_solicitante(_dados(), SENHA)
+
+    # Act / Assert
+    assert repositorio.dados_de_cadastro(usuario.id) == _dados()
+
+
+def test_senha_confere_compara_com_a_senha_do_usuario(repositorio):
+    # Arrange
+    usuario = repositorio.criar_solicitante(_dados(), SENHA)
+
+    # Act / Assert
+    assert repositorio.senha_confere(usuario.id, SENHA)
+    assert not repositorio.senha_confere(usuario.id, "Outra-Senha-2026!")
+
+
+def test_trocar_senha_faz_valer_so_a_nova(repositorio):
+    # Arrange
+    usuario = repositorio.criar_solicitante(_dados(), SENHA)
+
+    # Act
+    repositorio.trocar_senha(usuario.id, "Rede-Alta-73-nova")
+
+    # Assert
+    assert repositorio.senha_confere(usuario.id, "Rede-Alta-73-nova")
+    assert not repositorio.senha_confere(usuario.id, SENHA)
+
+
+@pytest.mark.django_db
+def test_trocar_senha_grava_so_o_hash_e_nao_mexe_nos_outros_campos():
+    # Arrange
+    repositorio = RepositorioUsuariosDjango()
+    usuario = repositorio.criar_solicitante(_dados(), SENHA)
+
+    # Act
+    repositorio.trocar_senha(usuario.id, "Rede-Alta-73-nova")
+
+    # Assert
+    gravado = Usuario.objects.get(pk=usuario.id)
+    assert gravado.password != "Rede-Alta-73-nova"
+    assert gravado.check_password("Rede-Alta-73-nova")
+    assert (gravado.nome, gravado.email, gravado.matricula) == (
+        "Ana Souza",
+        "ana@x.com",
+        "2026001",
+    )

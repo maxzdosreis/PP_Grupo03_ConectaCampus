@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
-import { entrar } from './autenticacao.ts'
+import { alterarSenha, entrar } from './autenticacao.ts'
 import { ErroDaApi, NOME_DA_TRAVA_DE_RENOVACAO, requisitar } from './cliente.ts'
 import {
   aoMudarSessao,
@@ -384,6 +384,34 @@ describe('cliente da API', () => {
     expect(autorizacao(chamadas()[0])).toBeUndefined()
     expect(lerSessao()?.access).toBe('access-1')
   })
+
+  it('400 SENHA_ATUAL_INCORRETA na troca de senha não renova nem encerra a sessão', async () => {
+    fetchFalso.mockResolvedValue(
+      resposta(400, {
+        erro: {
+          codigo: 'SENHA_ATUAL_INCORRETA',
+          mensagem: 'A senha atual está incorreta.',
+          campos: { senha_atual: ['A senha atual está incorreta.'] },
+        },
+      }),
+    )
+    const ouvinte = vi.fn()
+    const cancelar = aoMudarSessao(ouvinte)
+
+    const erro = await erroDe(alterarSenha({ senha_atual: 'errada', nova_senha: 'Rede-Alta-73' }))
+    cancelar()
+
+    expect(erro.status).toBe(400)
+    expect(erro.codigo).toBe('SENHA_ATUAL_INCORRETA')
+    expect(erro.campos).toEqual({ senha_atual: ['A senha atual está incorreta.'] })
+    expect(chamadas()).toHaveLength(1)
+    expect(chamadas()[0][0]).toBe(`${URL_DA_API}/auth/senha/`)
+    expect(autorizacao(chamadas()[0])).toBe('Bearer access-1')
+    expect(ouvinte).not.toHaveBeenCalled()
+    expect(lerSessao()?.access).toBe('access-1')
+    expect(lerSessao()?.refresh).toBe('refresh-1')
+  })
+
   const LIMITE_DE_TENTATIVAS = resposta(429, {
     erro: { codigo: 'LIMITE_DE_TENTATIVAS', mensagem: 'Muitas tentativas. Tente de novo em 42 segundos.' },
   })

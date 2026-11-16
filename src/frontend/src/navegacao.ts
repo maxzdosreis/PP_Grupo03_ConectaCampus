@@ -6,6 +6,7 @@ export type ItemDeNavegacao = {
 
 export const CAMINHO_DAS_RESERVAS = '/reservas'
 export const CAMINHO_DA_NOVA_RESERVA = '/reservas/nova'
+export const CAMINHO_DA_CONTA = '/conta'
 export const CAMINHO_DE_ENTRAR = '/entrar'
 export const CAMINHO_DO_CADASTRO = '/cadastro'
 export const PARAMETRO_DO_ESPACO = 'espaco'

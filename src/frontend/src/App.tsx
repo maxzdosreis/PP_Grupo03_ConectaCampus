@@ -7,6 +7,7 @@ import PaginaCadastro from './pages/PaginaCadastro.tsx'
 import PaginaEntrar from './pages/PaginaEntrar.tsx'
 import PaginaEspacos from './pages/PaginaEspacos.tsx'
 import PaginaInicial from './pages/PaginaInicial.tsx'
+import PaginaMinhaConta from './pages/PaginaMinhaConta.tsx'
 import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
 import PaginaNovaReserva from './pages/PaginaNovaReserva.tsx'
 import PaginaReserva from './pages/PaginaReserva.tsx'
@@ -23,6 +24,7 @@ function App() {
               <Route path="entrar" element={<PaginaEntrar />} />
               <Route path="cadastro" element={<PaginaCadastro />} />
               <Route element={<RotaProtegida />}>
+                <Route path="conta" element={<PaginaMinhaConta />} />
                 <Route path="espacos" element={<PaginaEspacos />} />
                 <Route path="reservas" element={<PaginaReservas />} />
                 <Route path="reservas/nova" element={<PaginaNovaReserva />} />

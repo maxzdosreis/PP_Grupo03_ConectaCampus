@@ -30,6 +30,15 @@ class RepositorioUsuarios(Protocol):
         corrida que passe pelas consultas acima.
         """
 
+    def dados_de_cadastro(self, usuario_id: int) -> DadosDeCadastro:
+        """Devolve nome, matrícula e e-mail do usuário, para a política de senha."""
+
+    def senha_confere(self, usuario_id: int, senha: str) -> bool:
+        """Diz se a senha é a atual do usuário (comparação pelo hash)."""
+
+    def trocar_senha(self, usuario_id: int, nova_senha: str) -> None:
+        """Grava a nova senha só com hash, numa transação."""
+
 
 class PoliticaDeSenha(Protocol):
     def validar(self, senha: str, dados: DadosDeCadastro) -> None:

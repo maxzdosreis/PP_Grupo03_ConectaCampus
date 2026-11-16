@@ -22,6 +22,11 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `DELETE /api/auth/logout/` | `contas:logout` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
 | `POST /api/auth/cadastro/` | `contas:cadastro` (corpo: novo usuário) | [RF-32](matriz.md#rf-32) | [NS-15](../visao.md#ns-15) | — |
 | `GET /api/auth/me/` | `contas:me` | [RF-35](matriz.md#rf-35) | [NS-11](../visao.md#ns-11) | — |
+| `POST /api/auth/senha/` | `contas:senha` (corpo: senha atual e nova senha válidas (AUT-10)) | [RF-41](matriz.md#rf-41) | [NS-11](../visao.md#ns-11), [NS-15](../visao.md#ns-15) | — |
+| `GET /api/auth/senha/` | `contas:senha` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `PUT /api/auth/senha/` | `contas:senha` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `PATCH /api/auth/senha/` | `contas:senha` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
+| `DELETE /api/auth/senha/` | `contas:senha` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
 | `GET /api/espacos/` | `espacos:lista` | [RF-01](matriz.md#rf-01), [RF-02](matriz.md#rf-02) | [NS-01](../visao.md#ns-01) | — |
 | `POST /api/espacos/` | `espacos:lista` (corpo: novo espaço) | [RF-05](matriz.md#rf-05) | [NS-02](../visao.md#ns-02) | — |
 | `GET /api/espacos/tipos/` | `espacos:tipos` | [RF-04](matriz.md#rf-04) | [NS-01](../visao.md#ns-01) | — |
@@ -51,6 +56,7 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `/` | PaginaInicial | [RF-36](matriz.md#rf-36), [RF-40](matriz.md#rf-40) | [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14), [NS-16](../visao.md#ns-16) | — |
 | `/entrar` | PaginaEntrar | [RF-33](matriz.md#rf-33) | [NS-11](../visao.md#ns-11) | — |
 | `/cadastro` | PaginaCadastro | [RF-32](matriz.md#rf-32) | [NS-15](../visao.md#ns-15) | — |
+| `/conta` | PaginaMinhaConta | [RF-41](matriz.md#rf-41) | [NS-11](../visao.md#ns-11), [NS-15](../visao.md#ns-15) | — |
 | `/espacos` | PaginaEspacos | [RF-01](matriz.md#rf-01), [RF-02](matriz.md#rf-02), [RF-04](matriz.md#rf-04), [RF-05](matriz.md#rf-05), [RF-06](matriz.md#rf-06), [RF-07](matriz.md#rf-07), [RF-08](matriz.md#rf-08) | [NS-01](../visao.md#ns-01), [NS-02](../visao.md#ns-02) | — |
 | `/reservas` | PaginaReservas | [RF-12](matriz.md#rf-12), [RF-12.2](matriz.md#rf-12-2), [RF-13](matriz.md#rf-13), [RF-15](matriz.md#rf-15), [RF-16](matriz.md#rf-16) | [NS-07](../visao.md#ns-07), [NS-08](../visao.md#ns-08), [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10), [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |
 | `/reservas/nova` | PaginaNovaReserva | [RF-11](matriz.md#rf-11), [RF-28](matriz.md#rf-28), [RF-29](matriz.md#rf-29), [RF-30](matriz.md#rf-30), [RF-31](matriz.md#rf-31), [RF-35](matriz.md#rf-35) | [NS-03](../visao.md#ns-03), [NS-05](../visao.md#ns-05), [NS-06](../visao.md#ns-06), [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |

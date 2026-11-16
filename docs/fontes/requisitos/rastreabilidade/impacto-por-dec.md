@@ -38,6 +38,7 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 | [DEC-23](#dec-23) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-24](#dec-24) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-25](#dec-25) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
+| [DEC-26](#dec-26) | Decidida | 3 | 0 | 1 | 7 | 7 (0) | decidida: outra resposta só por CR (comportamental) |
 
 ## <a id="dec-13"></a>DEC-13 · Mudança de situação em relação ao horário da reserva
 
@@ -703,3 +704,28 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 - **TA:** —
 - **Endpoint ou tela:** nenhum
 - **Código:** nenhum
+
+## <a id="dec-26"></a>DEC-26 · O usuário autenticado pode trocar a própria senha
+
+| Campo | Conteúdo |
+|---|---|
+| **Estado** | Decidida ([ficha](../decisoes/DEC-26.md)) |
+| **Pergunta** | A troca da própria senha, hoje listada como fora do escopo na [Visão](../visao.md#fora-do-escopo), entra no 1.0? Se entrar, como tratar a senha atual errada, as sessões abertas em outros aparelhos e o limite de tentativas? |
+| **Opção adotada** | **a)** O usuário autenticado, de qualquer perfil, troca **só a própria** senha informando a senha atual e a nova ([RF-41](../requisitos/rf-contas.md#rf-41)). A conta vem sempre da identificação, nunca de um dado do pedido. **b)** A senha nova segue a **mesma** política de senha do cadastro e precisa ser diferente da atual; as conferências vêm nesta ordem: limite de tentativas, campos informados, senha atual, igual à atual, política ([RF-41.1](../requisitos/rf-contas.md#rf-41-1)). **c)** Errar a senha atual é um erro de validação com código próprio (`SENHA_ATUAL_INCORRETA`, 400), **nunca** um 401: um 401 faria o navegador renovar ou encerrar a sessão, e a pessoa seria deslogada por errar a senha. **d)** A troca tem limite de 5 tentativas por minuto **por conta**, e não por origem do pedido (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`), porque no Docker todos os acessos chegam da mesma origem ([RF-41.2](../requisitos/rf-contas.md#rf-41-2)). **e)** Depois da troca, a credencial de renovação das **outras** sessões da conta é revogada e a da sessão atual continua; o aparelho informa a própria credencial de renovação para a API saber qual manter, e sem ela todas são revogadas. **f)** A credencial de **acesso** já emitida não é revogável e vale até expirar (30 minutos): isso fica documentado como limitação conhecida ([L-04](../requisitos/srs.md#l-04)). **g)** **Fora do escopo:** recuperar a senha esquecida por e-mail, que exigiria um servidor de e-mail ([Notificações](../visao.md#fora-do-escopo)); quem esquece a senha continua dependendo da administração (Equipe de TI). |
+| **Responsável** | Max Zimmermann dos Reis (grupo). |
+| **Prazo** | Decidida em 16/11/2026. |
+| **Tipo de mudança se a resposta for outra** | decidida: outra resposta só por CR (comportamental) |
+| **Regressão estimada** | 7 TAs a rever (0 manuais), de 7 CAs em 1 histórias: 0 CAs dependem diretamente da DEC e 7 verificam os RF afetados |
+
+- **RF:** [RF-41](matriz.md#rf-41), [RF-41.1](matriz.md#rf-41-1), [RF-41.2](matriz.md#rf-41-2)
+- **RNF:** nenhum
+- **UC (passo, alternativa ou exceção):**
+  - RF-41: [UC-02](../casos-de-uso/README.md#uc-02) · alternativa (trocar a própria senha) — [UC-02 A4.4](../casos-de-uso/UC-02-autenticar.md#a4-4)
+  - RF-41.1: [UC-02](../casos-de-uso/README.md#uc-02) · exceção — [UC-02 E4.4](../casos-de-uso/UC-02-autenticar.md#e4-4), [UC-02 E4.5](../casos-de-uso/UC-02-autenticar.md#e4-5), [UC-02 E4.6](../casos-de-uso/UC-02-autenticar.md#e4-6)
+  - RF-41.2: [UC-02](../casos-de-uso/README.md#uc-02) · exceção — [UC-02 E4.3](../casos-de-uso/UC-02-autenticar.md#e4-3)
+- **US:** [US-21](../historias/US-21-trocar-a-propria-senha.md)
+- **CA que dependem da DEC:** —
+- **CA dos RF afetados (regressão):** US-21: [CA-01](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-01), [CA-02](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-02), [CA-03](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-03), [CA-04](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-04), [CA-05](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-05), [CA-06](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-06), [CA-07](../historias/US-21-trocar-a-propria-senha.md#us-21-ca-07)
+- **TA:** [TA-194](../historias/US-21-trocar-a-propria-senha.md#ta-194), [TA-195](../historias/US-21-trocar-a-propria-senha.md#ta-195), [TA-196](../historias/US-21-trocar-a-propria-senha.md#ta-196), [TA-197](../historias/US-21-trocar-a-propria-senha.md#ta-197), [TA-198](../historias/US-21-trocar-a-propria-senha.md#ta-198), [TA-199](../historias/US-21-trocar-a-propria-senha.md#ta-199), [TA-200](../historias/US-21-trocar-a-propria-senha.md#ta-200)
+- **Endpoint ou tela:** `POST /api/auth/senha/`; `/conta`
+- **Código:** `contas/application/casos_de_uso.py::AlterarSenha`, `contas/api/views.py::AlterarSenhaView`, `components/sessao/FormularioDeTrocaDeSenha.tsx::FormularioDeTrocaDeSenha`, `pages/PaginaMinhaConta.tsx::PaginaMinhaConta`, `contas/domain/excecoes.py::SenhaAtualIncorreta`, `contas/domain/excecoes.py::NovaSenhaIgualAAtual`, `contas/domain/excecoes.py::SenhaFraca`, `contas/api/limites.py::LimiteDeTrocaDeSenhaPorUsuario`

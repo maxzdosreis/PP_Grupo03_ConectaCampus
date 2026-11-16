@@ -44,6 +44,11 @@ _TABELA = [
     ("contas:logout",             "DELETE", None,                  405,   405,   405,   405),
     ("contas:cadastro",           "POST",   "novo_usuario",        LIVRE, LIVRE, LIVRE, LIVRE),
     ("contas:me",                 "GET",    None,                  401,   200,   200,   200),
+    ("contas:senha",              "POST",   "trocar_senha",        401,   200,   200,   200),
+    ("contas:senha",              "GET",    None,                  401,   405,   405,   405),
+    ("contas:senha",              "PUT",    None,                  401,   405,   405,   405),
+    ("contas:senha",              "PATCH",  None,                  401,   405,   405,   405),
+    ("contas:senha",              "DELETE", None,                  401,   405,   405,   405),
     ("espacos:lista",             "GET",    None,                  401,   200,   200,   200),
     ("espacos:lista",             "POST",   "novo_espaco",         401,   403,   403,   201),
     ("espacos:tipos",             "GET",    None,                  200,   200,   200,   200),
@@ -110,6 +115,10 @@ CORPOS = {
         "matricula": "2026099",
         "email": "davi@exemplo.com",
         "senha": SENHA,
+    },
+    "trocar_senha": lambda cenario: {
+        "senha_atual": "senha-de-teste-123",
+        "nova_senha": "Nova-Quadra-2027!",
     },
     "novo_espaco": lambda cenario: {
         "nome": "Ginásio Novo",

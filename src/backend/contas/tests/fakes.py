@@ -41,6 +41,18 @@ class RepositorioUsuariosEmMemoria(RepositorioUsuarios):
         self.senhas[usuario.id] = senha
         return usuario
 
+    def dados_de_cadastro(self, usuario_id: int) -> DadosDeCadastro:
+        usuario = self.criados[usuario_id]
+        return DadosDeCadastro(
+            nome=usuario.nome, matricula=usuario.matricula, email=usuario.email
+        )
+
+    def senha_confere(self, usuario_id: int, senha: str) -> bool:
+        return self.senhas[usuario_id] == senha
+
+    def trocar_senha(self, usuario_id: int, nova_senha: str) -> None:
+        self.senhas[usuario_id] = nova_senha
+
     def _gerar_id(self) -> int:
         usuario_id = self._proximo_id
         self._proximo_id += 1

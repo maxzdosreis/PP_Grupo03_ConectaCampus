@@ -41,6 +41,21 @@ class RepositorioUsuariosDjango(RepositorioUsuarios):
             raise excecao() from erro
         return _para_cadastrado(usuario)
 
+    def dados_de_cadastro(self, usuario_id: int) -> DadosDeCadastro:
+        usuario = Usuario.objects.get(pk=usuario_id)
+        return DadosDeCadastro(
+            nome=usuario.nome, matricula=usuario.matricula, email=usuario.email
+        )
+
+    def senha_confere(self, usuario_id: int, senha: str) -> bool:
+        return Usuario.objects.get(pk=usuario_id).check_password(senha)
+
+    def trocar_senha(self, usuario_id: int, nova_senha: str) -> None:
+        with transaction.atomic():
+            usuario = Usuario.objects.select_for_update().get(pk=usuario_id)
+            usuario.set_password(nova_senha)
+            usuario.save(update_fields=["password"])
+
 
 def _excecao_de_unicidade(erro: IntegrityError):
     diagnostico = getattr(erro.__cause__, "diag", None)

@@ -16,6 +16,7 @@ Ficha do caso de uso UC-02 do [índice](README.md#uc-02). Autenticar é a precon
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | "Fora das exceções": com o serviço que conta as tentativas (Redis) fora do ar, a entrada é recusada sem conferir nada (AUT-08). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | A4.1 com a troca da credencial de renovação a cada uso e duas janelas renovando ao mesmo tempo; A4.3 encerra a sessão também no sistema (a credencial de renovação deixa de valer; a de acesso vale até expirar, lacuna L-04 reduzida); E4.1 inclui a credencial de renovação já trocada ou de uma sessão encerrada; pós-condições, RNF-F13 e anexo (AUT-09). Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | A4.1: só uma janela renova, e a outra espera essa renovação terminar, sem tempo fixo (achado da revisão do PR: uma renovação da outra janela que demorasse mais de 1 s encerrava as duas, AUT-09). Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | A4.4 · Trocar a própria senha e as exceções E4.3 (tentativas em excesso), E4.4 (senha atual incorreta), E4.5 (senha nova igual à atual) e E4.6 (senha nova fora da política), na ordem real das conferências; RF-41, RF-41.1 e RF-41.2 nos RFs cobertos, RNF-F02, RNF-F12 e RNF-F13 e no anexo ([DEC-26](../decisoes/DEC-26.md), [CR-06](../mudancas/CR-06-trocar-a-propria-senha.md), AUT-10). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -82,9 +83,13 @@ Quando o usuário volta ao sistema com uma sessão guardada, o sistema confere o
 
 Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema encerra a identificação neste navegador e revoga a credencial de renovação da sessão: daí em diante, ela não renova em nenhum lugar, nem numa cópia. Informa "Você saiu da sua conta." e mostra a página inicial sem nenhuma identificação, mesmo que a revogação não possa ser confirmada no momento (por exemplo, sem conexão). Pedir para sair com uma credencial já revogada ou vencida tem a mesma resposta. A credencial de acesso já emitida não é revogada e vale até expirar, em até 30 minutos ([lacuna L-04](../requisitos/srs.md#l-04)).
 
+#### <a id="a4-4"></a>A4.4 · Trocar a própria senha
+
+Em qualquer momento depois do passo 4, o usuário pede para trocar a própria senha e informa a senha atual e a nova. O sistema confere, nesta ordem, que não houve tentativas de troca demais no último minuto ([E4.3](#e4-3)), que as duas senhas foram informadas, que a senha atual é a da conta ([E4.4](#e4-4)), que a nova é diferente da atual ([E4.5](#e4-5)) e que a nova cumpre a mesma [política de senha](../glossario.md#politica-de-senha) do cadastro ([E4.6](#e4-6)). Cumpridas as conferências, o sistema grava a nova senha só como hash e informa "Senha alterada com sucesso.". O usuário continua identificado, sem entrar de novo. As sessões abertas em outros aparelhos deixam de ser renovadas: a credencial de renovação de cada uma é revogada, e elas terminam como em [E4.1](#e4-1) quando precisarem renovar; só a sessão em que a troca foi feita continua renovando. A credencial de acesso já emitida nesses aparelhos não é revogada e vale até expirar, em até 30 minutos ([lacuna L-04](../requisitos/srs.md#l-04)). Só a senha de quem está identificado pode ser trocada: nenhuma outra conta é indicada no pedido.
+
 ## Exceções
 
-A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
+A meta é interrompida: **nenhuma sessão é iniciada ou mantida**, salvo nas exceções E4.3 a E4.6, da troca de senha, em que a sessão continua e só a troca é recusada.
 
 #### <a id="e3-1"></a>E3.1 · Tentativas de entrada em excesso
 
@@ -121,7 +126,35 @@ A meta é interrompida: **nenhuma sessão é iniciada ou mantida**.
 - **Estado depois:** a conta perde o acesso na hora, mesmo com a credencial ainda dentro do prazo; nada é gravado em nome dela depois disso.
 - **Requisito:** [RF-34.1](../requisitos/rf-contas.md#rf-34-1) e [RNF-F07](../requisitos/rnf.md#rnf-f07).
 
-**Fora das exceções:** credenciais forjadas, adulteradas ou fora do padrão são tratadas como ausência de identificação ([RNF-F10](../requisitos/rnf.md#rnf-f10)); o perfil nunca vem do pedido, sempre da conta ([RNF-F09](../requisitos/rnf.md#rnf-f09)). A renovação da credencial ([A4.1](#a4-1)) não tem limite de tentativas: ela não depende de senha e não há o que adivinhar ([RNF-F12](../requisitos/rnf.md#rnf-f12)). Se o serviço que conta as tentativas estiver fora do ar, a entrada é recusada antes de qualquer conferência, com "Serviço temporariamente indisponível. Tente de novo em alguns instantes.": nenhuma tentativa é conferida sem contagem ([UC-22 E2.2](fichas-resumidas.md#uc22-e2-2)).
+#### <a id="e4-3"></a>E4.3 · Tentativas de troca de senha em excesso
+
+- **Condição:** na [A4.4](#a4-4), antes de qualquer outra conferência, já houve 5 tentativas de troca de senha da mesma conta no último minuto, com acerto ou erro.
+- **Resultado para o ator:** "Muitas tentativas. Tente de novo em N segundos.", com o tempo que falta. Até esse tempo passar, nem a senha atual certa é aceita; depois, o usuário tenta de novo. O limite vale por conta, e não por origem do pedido.
+- **Estado depois:** a senha não muda, nem a sessão; a senha atual nem é conferida, e a tentativa recusada não conta para o limite.
+- **Requisito:** [RF-41.2](../requisitos/rf-contas.md#rf-41-2) e [RNF-F12](../requisitos/rnf.md#rnf-f12).
+
+#### <a id="e4-4"></a>E4.4 · Senha atual incorreta
+
+- **Condição:** na [A4.4](#a4-4), a senha atual informada não é a da conta.
+- **Resultado para o ator:** "A senha atual está incorreta.", junto ao campo da senha atual. Nada é dito sobre a política de senha nem sobre a senha nova. O usuário confere a senha e tenta de novo; a sessão continua.
+- **Estado depois:** a senha não muda; o usuário **não** é desidentificado por ter errado a senha.
+- **Requisito:** [RF-41.1](../requisitos/rf-contas.md#rf-41-1).
+
+#### <a id="e4-5"></a>E4.5 · Senha nova igual à atual
+
+- **Condição:** na [A4.4](#a4-4), a senha atual está correta, mas a nova é igual a ela.
+- **Resultado para o ator:** "A nova senha deve ser diferente da senha atual.", junto ao campo da senha nova.
+- **Estado depois:** a senha não muda; a sessão continua.
+- **Requisito:** [RF-41.1](../requisitos/rf-contas.md#rf-41-1).
+
+#### <a id="e4-6"></a>E4.6 · Senha nova fora da política
+
+- **Condição:** na [A4.4](#a4-4), a senha atual está correta e a nova é diferente dela, mas não cumpre a política de senha (mínimo de 8 caracteres, não só de números, não comum, não parecida com o e-mail, o nome ou a matrícula da conta).
+- **Resultado para o ator:** os motivos da recusa, junto ao campo da senha nova, nas mesmas palavras do cadastro.
+- **Estado depois:** a senha não muda; a sessão continua.
+- **Requisito:** [RF-41.1](../requisitos/rf-contas.md#rf-41-1) e [RNF-F02](../requisitos/rnf.md#rnf-f02).
+
+**Fora das exceções:** na troca de senha ([A4.4](#a4-4)), uma senha atual ou nova em branco é recusada com a indicação de que o campo é obrigatório, junto a ele, antes de qualquer conferência de senha ([lacuna L-14](../requisitos/srs.md#l-14)). Credenciais forjadas, adulteradas ou fora do padrão são tratadas como ausência de identificação ([RNF-F10](../requisitos/rnf.md#rnf-f10)); o perfil nunca vem do pedido, sempre da conta ([RNF-F09](../requisitos/rnf.md#rnf-f09)). A renovação da credencial ([A4.1](#a4-1)) não tem limite de tentativas: ela não depende de senha e não há o que adivinhar ([RNF-F12](../requisitos/rnf.md#rnf-f12)). Se o serviço que conta as tentativas estiver fora do ar, a entrada é recusada antes de qualquer conferência, com "Serviço temporariamente indisponível. Tente de novo em alguns instantes.": nenhuma tentativa é conferida sem contagem ([UC-22 E2.2](fichas-resumidas.md#uc22-e2-2)).
 
 ## Pós-condições e garantias
 
@@ -151,6 +184,9 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [RF-34.1](../requisitos/rf-contas.md#rf-34-1) | Encerrar a sessão expirada | [E4.1](#e4-1), [E4.2](#e4-2) |
 | [RF-35](../requisitos/rf-contas.md#rf-35) | Consultar os próprios dados | [A4.2](#a4-2) |
 | [RF-36](../requisitos/rf-contas.md#rf-36) | Sair | [A4.3](#a4-3) |
+| [RF-41](../requisitos/rf-contas.md#rf-41) | Trocar a própria senha | [A4.4](#a4-4) |
+| [RF-41.1](../requisitos/rf-contas.md#rf-41-1) | Recusar a troca de senha inválida | [E4.4](#e4-4), [E4.5](#e4-5), [E4.6](#e4-6) |
+| [RF-41.2](../requisitos/rf-contas.md#rf-41-2) | Recusar tentativas de troca de senha em excesso | [E4.3](#e4-3) |
 
 [RF-38](../requisitos/rf-gerais.md#rf-38) é transversal ([passo 4](#p4), [A4.3](#a4-3) e todas as exceções).
 
@@ -166,8 +202,9 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [RNF-F08](../requisitos/rnf.md#rnf-f08) · Perfil relido a cada operação | [A4.2](#a4-2) |
 | [RNF-F09](../requisitos/rnf.md#rnf-f09) · Identidade e perfil nunca vêm do pedido | garantia de sucesso |
 | [RNF-F10](../requisitos/rnf.md#rnf-f10) · Credenciais forjadas recusadas | [E4.1](#e4-1) |
-| [RNF-F12](../requisitos/rnf.md#rnf-f12) · Limite de tentativas de entrada e de cadastro | [E3.1](#e3-1) |
-| [RNF-F13](../requisitos/rnf.md#rnf-f13) · Revogação e troca da credencial de renovação | [A4.1](#a4-1), [A4.3](#a4-3), [E4.1](#e4-1) |
+| [RNF-F02](../requisitos/rnf.md#rnf-f02) · Política de senha | [E4.6](#e4-6) |
+| [RNF-F12](../requisitos/rnf.md#rnf-f12) · Limite de tentativas de entrada e de cadastro | [E3.1](#e3-1), [E4.3](#e4-3) |
+| [RNF-F13](../requisitos/rnf.md#rnf-f13) · Revogação e troca da credencial de renovação | [A4.1](#a4-1), [A4.3](#a4-3), [A4.4](#a4-4), [E4.1](#e4-1) |
 | [RNF-U01](../requisitos/rnf.md#rnf-u01) · Mensagens em português que orientam a correção | todas as exceções |
 
 ## Questões em aberto
@@ -176,7 +213,8 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 |---|---|
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Fixa a validade da sessão e que o cadastro público nunca cria Gestor. |
 | [DEC-09](../decisoes/DEC-09.md) · Formato da matrícula | A matrícula mostrada em [A4.2](#a4-2) não é conferida com a instituição. |
-| [Lacuna L-04](../requisitos/srs.md#l-04) | Sair ([A4.3](#a4-3)) revoga a credencial de renovação, mas não a de acesso, que vale até expirar (até 30 minutos). |
+| [Lacuna L-04](../requisitos/srs.md#l-04) | Sair ([A4.3](#a4-3)) e trocar a senha ([A4.4](#a4-4)) revogam a credencial de renovação, mas não a de acesso, que vale até expirar (até 30 minutos). |
+| [DEC-26](../decisoes/DEC-26.md) · Trocar a própria senha entra no 1.0 | Cria a [A4.4](#a4-4) e as exceções E4.3 a E4.6; a recuperação de senha por e-mail continua fora do escopo. |
 | [Lacuna L-14](../requisitos/srs.md#l-14) | A recusa de [E3.2](#e3-2) não tem RF próprio. |
 
 ## Anexo — Evidência (complementar)
@@ -196,5 +234,10 @@ Ponte para os critérios e testes de aceite (REQ-05 e REQ-06). Testes a partir d
 | [E3.3](#e3-3) | `contas/tests/test_api_autenticacao.py::test_senha_errada_email_inexistente_e_inativo_respondem_igual`; `pages/PaginaEntrar.test.tsx` (credenciais inválidas no aviso do topo) |
 | [E4.1](#e4-1) | `contas/tests/test_api_autenticacao.py::test_refresh_invalido_responde_401_no_formato_padrao`, `::test_me_com_access_expirado_responde_401`, `::test_token_adulterado_responde_401 [x]`, `::test_access_usado_como_refresh_responde_401`; `api/cliente.test.ts` (renovação recusada lança a sessão expirada); `components/sessao/SessaoProvider.test.tsx` (expiração leva ao login com o caminho atual); `contas/tests/test_api_autenticacao.py::test_renovacao_troca_o_refresh_e_o_antigo_passa_a_ser_recusado` |
 | [E4.2](#e4-2) | `contas/tests/test_api_autenticacao.py::test_access_de_usuario_desativado_depois_do_login_responde_401`, `::test_access_de_usuario_excluido_responde_401`, `::test_refresh_de_usuario_inativo_responde_401`, `::test_refresh_de_usuario_excluido_responde_401` |
+| [A4.4](#a4-4) | `contas/tests/test_api_alterar_senha.py::test_troca_com_sucesso_responde_200_e_a_nova_senha_passa_a_valer`, `::test_troca_guarda_so_o_hash_da_senha`, `::test_troca_revoga_os_refresh_das_outras_sessoes_e_mantem_a_atual`, `::test_troca_nao_revoga_os_refresh_de_outra_pessoa`, `::test_access_ja_emitido_continua_valendo_depois_da_troca`, `::test_pessoa_so_troca_a_propria_senha_mesmo_enviando_outro_id`; `contas/tests/test_alterar_senha.py::test_troca_valida_passa_a_valer_a_nova_senha_e_nao_a_antiga`; `pages/PaginaMinhaConta.test.tsx` |
+| [E4.3](#e4-3) | `contas/tests/test_api_alterar_senha.py::test_sexta_troca_seguida_responde_429_traduzido_pelo_tratador`, `::test_limite_de_troca_e_por_usuario_e_nao_por_ip`, `::test_limite_de_troca_vem_das_settings_a_cada_requisicao` |
+| [E4.4](#e4-4) | `contas/tests/test_api_alterar_senha.py::test_senha_atual_errada_responde_400_com_codigo_proprio_e_nunca_401`, `::test_politica_so_e_revelada_depois_de_provar_a_senha_atual`; `api/cliente.test.ts` (400 na troca não renova nem encerra a sessão); `pages/PaginaMinhaConta.test.tsx` |
+| [E4.5](#e4-5) | `contas/tests/test_api_alterar_senha.py::test_nova_senha_igual_a_atual_responde_400`; `contas/tests/test_alterar_senha.py::test_nova_senha_igual_a_atual_lanca_nova_senha_igual_a_atual` |
+| [E4.6](#e4-6) | `contas/tests/test_api_alterar_senha.py::test_nova_senha_que_viola_a_politica_responde_400_senha_fraca [x]`; `contas/tests/test_alterar_senha.py::test_nova_senha_fraca_lanca_senha_fraca_no_campo_da_nova_senha` |
 
-**Histórias derivadas:** [US-02 Entrar no sistema](../historias/US-02-entrar-no-sistema.md), [US-03 Manter e encerrar a sessão](../historias/US-03-manter-e-encerrar-a-sessao.md). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).
+**Histórias derivadas:** [US-02 Entrar no sistema](../historias/US-02-entrar-no-sistema.md), [US-03 Manter e encerrar a sessão](../historias/US-03-manter-e-encerrar-a-sessao.md), [US-21 Trocar a própria senha](../historias/US-21-trocar-a-propria-senha.md). Cobertura de cada alternativa e exceção: [historias/README.md](../historias/README.md#cobertura-uc--usca).

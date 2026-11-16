@@ -1,6 +1,7 @@
 from django.urls import path
 
 from contas.api.views import (
+    AlterarSenhaView,
     CadastroView,
     LoginView,
     RenovarTokenView,
@@ -16,4 +17,5 @@ urlpatterns = [
     path("refresh/", RenovarTokenView.as_view(), name="refresh"),
     path("logout/", SairView.as_view(), name="logout"),
     path("me/", UsuarioAtualView.as_view(), name="me"),
+    path("senha/", AlterarSenhaView.as_view(), name="senha"),
 ]

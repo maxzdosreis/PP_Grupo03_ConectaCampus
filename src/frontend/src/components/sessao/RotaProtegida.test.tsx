@@ -36,6 +36,21 @@ describe('RotaProtegida', () => {
     expect(screen.queryByTestId('local')).toBeNull()
   })
 
+  it('sem sessão, a tela Minha conta leva para /entrar com ?proximo=/conta', () => {
+    renderizarComProvedores(
+      <Routes>
+        <Route element={<RotaProtegida />}>
+          <Route path="/conta" element={<p>Minha conta</p>} />
+        </Route>
+        <Route path="/entrar" element={<LocalAtual />} />
+      </Routes>,
+      { caminho: '/conta' },
+    )
+
+    expect(screen.getByTestId('local').textContent).toBe('/entrar?proximo=%2Fconta')
+    expect(screen.queryByText('Minha conta')).toBeNull()
+  })
+
   it('com sessão, mostra a página', () => {
     renderizar(valorDaSessao({ usuario: USUARIO_SOLICITANTE }))
 
