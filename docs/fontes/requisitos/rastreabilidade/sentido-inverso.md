@@ -48,6 +48,8 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `PATCH /api/reservas/{id}/situacao/` | `reservas:situacao` (corpo: `CANCELADA` com motivo) | [RF-17](matriz.md#rf-17), [RF-18](matriz.md#rf-18), [RF-19](matriz.md#rf-19), [RF-20](matriz.md#rf-20), [RF-21](matriz.md#rf-21) | [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10) | — |
 | `GET /api/reservas/{id}/historico/` | `reservas:historico` | [RF-22](matriz.md#rf-22) | [NS-11](../visao.md#ns-11), [NS-12](../visao.md#ns-12) | — |
 | `DELETE /api/reservas/{id}/historico/` | `reservas:historico` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
+| `GET /api/usuarios/` | `usuarios:lista` | [RF-42](matriz.md#rf-42) | [NS-11](../visao.md#ns-11) | — |
+| `PATCH /api/usuarios/{id}/` | `usuarios:detalhe` (corpo: desativar o usuário do cenário (AUT-11)) | [RF-43](matriz.md#rf-43) | [NS-11](../visao.md#ns-11) | — |
 
 ## Telas
 
@@ -61,6 +63,7 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `/reservas` | PaginaReservas | [RF-12](matriz.md#rf-12), [RF-12.2](matriz.md#rf-12-2), [RF-13](matriz.md#rf-13), [RF-15](matriz.md#rf-15), [RF-16](matriz.md#rf-16) | [NS-07](../visao.md#ns-07), [NS-08](../visao.md#ns-08), [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10), [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |
 | `/reservas/nova` | PaginaNovaReserva | [RF-11](matriz.md#rf-11), [RF-28](matriz.md#rf-28), [RF-29](matriz.md#rf-29), [RF-30](matriz.md#rf-30), [RF-31](matriz.md#rf-31), [RF-35](matriz.md#rf-35) | [NS-03](../visao.md#ns-03), [NS-05](../visao.md#ns-05), [NS-06](../visao.md#ns-06), [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |
 | `/reservas/:reservaId` | PaginaReserva | [RF-03](matriz.md#rf-03), [RF-14](matriz.md#rf-14), [RF-16](matriz.md#rf-16), [RF-22](matriz.md#rf-22) | [NS-01](../visao.md#ns-01), [NS-07](../visao.md#ns-07), [NS-08](../visao.md#ns-08), [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10), [NS-11](../visao.md#ns-11), [NS-12](../visao.md#ns-12) | — |
+| `/usuarios` | PaginaUsuarios | [RF-42](matriz.md#rf-42), [RF-43](matriz.md#rf-43) | [NS-11](../visao.md#ns-11) | — |
 | `*` | PaginaNaoEncontrada | **sem RF** | — | sem RF: [L-17](../requisitos/srs.md#l-17) |
 | `/admin/` | Django admin (config/urls.py) | [RF-37](matriz.md#rf-37) | [NS-11](../visao.md#ns-11) | ver [L-10](../requisitos/srs.md#l-10) |
 

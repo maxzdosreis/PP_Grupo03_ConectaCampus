@@ -21,6 +21,7 @@ Diagrama UML de casos de uso do Conecta Campus, índice dos casos de uso (UC-xx)
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RF → UC: RF-41 (UC-02 A4.4), RF-41.1 (E4.4, E4.5 e E4.6) e RF-41.2 (E4.3), e no índice; a contagem passa a 66 RF (a AUT-10 trocar a própria senha, [DEC-26](../decisoes/DEC-26.md)). Nenhum caso de uso novo e nenhuma mudança nos diagramas. Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Três atores no diagrama do negócio: Atendente responsável (UC-17, UC-18, UC-19) e Gestor do serviço (UC-14, UC-15, UC-16), ambos generalizando o Solicitante, com a nota do perfil único ([DEC-25](../decisoes/DEC-25.md)); imagens regeradas. Nenhum caso de uso, meta ou RF mudou (REQ-12). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | RF → UC: RF-24.1 (recusa por horário do [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)) em UC-10 E6.8 e no índice; a contagem passa a 63 RF; UC-13 também guarda as tentativas recusadas ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md)). Código nas tarefas RES-11 e RES-12 (REQ-13). Mudança comportamental da especificação. Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | UC-23 · Gerir usuários (Gestor do serviço, diagrama do negócio) e RF → UC do RF-42, RF-43, RF-43.1 e RF-43.2; a contagem passa a 70 RF ([DEC-27](../decisoes/DEC-27.md), [CR-07](../mudancas/CR-07-gestao-de-usuarios.md), AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -104,7 +105,7 @@ A cor só reforça o estereótipo `«subfunção»`, que já aparece escrito: o 
 | [UC-04 Solicitar reserva](UC-04-solicitar-reserva.md) | completa, com o [fluxo de decisão](UC-04-solicitar-reserva.md#fluxo-de-decisão) | UC-04, com UC-05 e UC-13 (passos) e a extensão UC-06 (alternativa A3.1) |
 | [UC-10 Alterar situação da reserva](UC-10-alterar-situacao-da-reserva.md) | completa, com a tabela de variações | UC-10 e os filhos UC-11, UC-17, UC-18 e UC-19, com UC-12 e UC-13 (passos) |
 | [UC-14 Cadastrar espaço](UC-14-cadastrar-espaco.md) | completa | UC-14 |
-| [Fichas resumidas](fichas-resumidas.md) | resumida | UC-01, UC-03, UC-06, UC-07, UC-08, UC-09, UC-15, UC-16; apoio: UC-20, UC-21, UC-22 |
+| [Fichas resumidas](fichas-resumidas.md) | resumida | UC-01, UC-03, UC-06, UC-07, UC-08, UC-09, UC-15, UC-16, UC-23; apoio: UC-20, UC-21, UC-22 |
 
 Fonte do fluxo de decisão: [`fluxo-solicitar-reserva.puml`](fluxo-solicitar-reserva.puml) (diagrama de atividade, A3·s17), com as imagens geradas como as dos diagramas de casos de uso.
 
@@ -162,6 +163,7 @@ Nível: **objetivo** = objetivo do usuário (o "nível do mar"); **subfunção**
 | <a id="uc-20"></a>UC-20 | Criar usuário Gestor | Dar a uma pessoa do setor dos espaços o perfil Gestor. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-37](../requisitos/rf-contas.md#rf-37) | [US-17 Criar o primeiro Gestor](../historias/US-17-criar-o-primeiro-gestor.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-20) |
 | <a id="uc-21"></a>UC-21 | Carregar dados de exemplo | Ter usuários, espaços e reservas coerentes para demonstrar o sistema, com um comando. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-39](../requisitos/rf-gerais.md#rf-39) | [US-18 Carregar os dados de exemplo](../historias/US-18-carregar-os-dados-de-exemplo.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-21) |
 | <a id="uc-22"></a>UC-22 | Verificar se o sistema está no ar | Saber se o sistema, o banco de dados e o cache respondem, antes de usar ou demonstrar. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-40](../requisitos/rf-gerais.md#rf-40) | [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-22) |
+| <a id="uc-23"></a>UC-23 | Gerir usuários | Dar ou tirar acessos: promover, rebaixar, desativar e reativar a conta de outra pessoa, sem deixar o sistema sem Gestor. | Gestor do serviço | — | objetivo | [RF-42](../requisitos/rf-contas.md#rf-42), [RF-43](../requisitos/rf-contas.md#rf-43), [RF-43.1](../requisitos/rf-contas.md#rf-43-1), [RF-43.2](../requisitos/rf-contas.md#rf-43-2) | [US-22 Gerir usuários](../historias/US-22-gerir-usuarios.md) | [Ficha resumida](fichas-resumidas.md#uc-23) |
 
 ## Rastreabilidade RF → UC
 
@@ -232,6 +234,10 @@ Todos os 66 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "C
 | [RF-41](../requisitos/rf-contas.md#rf-41) | Trocar a própria senha | [UC-02 Autenticar](#uc-02) | alternativa (trocar a própria senha) — [UC-02 A4.4](UC-02-autenticar.md#a4-4) | — |
 | [RF-41.1](../requisitos/rf-contas.md#rf-41-1) | Recusar a troca de senha inválida | [UC-02 Autenticar](#uc-02) | exceção — [UC-02 E4.4](UC-02-autenticar.md#e4-4), [UC-02 E4.5](UC-02-autenticar.md#e4-5), [UC-02 E4.6](UC-02-autenticar.md#e4-6) | — |
 | [RF-41.2](../requisitos/rf-contas.md#rf-41-2) | Recusar tentativas de troca de senha em excesso | [UC-02 Autenticar](#uc-02) | exceção — [UC-02 E4.3](UC-02-autenticar.md#e4-3) | — |
+| [RF-42](../requisitos/rf-contas.md#rf-42) | Listar os usuários | [UC-23 Gerir usuários](#uc-23) | fluxo principal — [UC-23 passos 1 a 3](fichas-resumidas.md#uc23-p1) | — |
+| [RF-43](../requisitos/rf-contas.md#rf-43) | Alterar o perfil e a situação da conta de um usuário | [UC-23 Gerir usuários](#uc-23) | fluxo principal — [UC-23 passos 4 a 6](fichas-resumidas.md#uc23-p4) | — |
+| [RF-43.1](../requisitos/rf-contas.md#rf-43-1) | Recusar que o Gestor rebaixe ou desative a própria conta | [UC-23 Gerir usuários](#uc-23) | exceção — [UC-23 E6.5](fichas-resumidas.md#uc23-e6-5), [UC-23 E6.6](fichas-resumidas.md#uc23-e6-6) | — |
+| [RF-43.2](../requisitos/rf-contas.md#rf-43-2) | Recusar que o sistema fique sem Gestor ativo | [UC-23 Gerir usuários](#uc-23) | exceção — [UC-23 E6.7](fichas-resumidas.md#uc23-e6-7) | — |
 | [RF-38](../requisitos/rf-gerais.md#rf-38) | Ver o resultado de cada operação | — (todos) | transversal (qualidade de todos os casos de uso) | — |
 | [RF-39](../requisitos/rf-gerais.md#rf-39) | Carregar dados de exemplo | [UC-21 Carregar dados de exemplo](#uc-21) | fluxo principal — [UC-21 passos 1 a 4](fichas-resumidas.md#uc21-p1) | — |
 | [RF-40](../requisitos/rf-gerais.md#rf-40) | Verificar se o sistema está no ar | [UC-22 Verificar se o sistema está no ar](#uc-22) | fluxo principal — [UC-22 passos 1 a 3](fichas-resumidas.md#uc22-p1) | — |

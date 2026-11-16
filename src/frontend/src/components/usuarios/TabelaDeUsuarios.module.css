@@ -1,0 +1,68 @@
+.rolagem {
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-medio);
+  background-color: var(--cor-superficie);
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.legenda {
+  padding: var(--espaco-3) var(--espaco-4);
+  text-align: left;
+  color: var(--cor-texto-suave);
+}
+
+.tabela th,
+.tabela td {
+  padding: var(--espaco-2) var(--espaco-4);
+  border-top: 1px solid var(--cor-borda);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabela thead th {
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-fundo);
+}
+
+.tabela tbody th {
+  font-weight: 600;
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.acao {
+  padding: var(--espaco-1) var(--espaco-3);
+  font-size: var(--fonte-pequena);
+  color: var(--cor-primaria);
+  background-color: var(--cor-superficie);
+}
+
+.acao:hover {
+  color: var(--cor-sobre-primaria);
+}
+
+.tabela .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ajuda {
+  margin: var(--espaco-1) 0 0;
+  font-size: var(--fonte-pequena);
+  color: var(--cor-texto-suave);
+  white-space: normal;
+}
+
+.acao:disabled {
+  cursor: not-allowed;
+}

@@ -445,6 +445,31 @@ describe('cliente da API', () => {
     expect(ouvinte).not.toHaveBeenCalled()
     expect(lerSessao()).toMatchObject({ access: 'access-1', refresh: 'refresh-1' })
   })
+  it.each([
+    [403, 'NAO_PODE_REBAIXAR_A_SI_MESMO'],
+    [403, 'ACAO_NAO_PERMITIDA'],
+    [409, 'ULTIMO_GESTOR_ATIVO'],
+  ])(
+    'erro de regra %i %s numa requisição autenticada não renova o token nem encerra a sessão',
+    async (status, codigo) => {
+      fetchFalso.mockResolvedValue(
+        resposta(status, { erro: { codigo, mensagem: 'Recusado pela regra.' } }),
+      )
+      const ouvinte = vi.fn()
+      const cancelar = aoMudarSessao(ouvinte)
+
+      const erro = await erroDe(requisitar('/usuarios/2/', { method: 'PATCH', body: '{}' }))
+      cancelar()
+
+      expect(erro.status).toBe(status)
+      expect(erro.codigo).toBe(codigo)
+      expect(chamadas()).toHaveLength(1)
+      expect(chamadasDeRenovacao()).toHaveLength(0)
+      expect(ouvinte).not.toHaveBeenCalled()
+      expect(lerSessao()).toMatchObject({ access: 'access-1', refresh: 'refresh-1' })
+    },
+  )
+
   it('503 SERVICO_INDISPONIVEL no login vira o erro com a mensagem do servidor, sem renovar nem limpar a sessão', async () => {
     fetchFalso.mockResolvedValue(
       resposta(503, {

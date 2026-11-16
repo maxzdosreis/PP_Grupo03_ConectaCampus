@@ -111,3 +111,11 @@ def _registrar_tentativa(chave, *, agora, janela, limite):
         keys=[nome], args=[agora, janela, limite, f"{agora}:{uuid4().hex}"]
     )
     return bool(permitida), None if permitida else float(espera)
+
+
+class LimiteDeGestaoDeUsuariosPorUsuario(LimiteDeTentativas):
+    scope = "gestao_usuarios_usuario"
+    configuracao = "LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO"
+
+    def get_cache_key(self, request, view):
+        return self._chave(request.user.pk)

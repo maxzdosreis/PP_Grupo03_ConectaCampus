@@ -51,6 +51,8 @@
 | `reservas:situacao` | `/api/reservas/{id}/situacao/` | PATCH | `CANCELADA` com motivo | 401 | 200 | 404 | 200 |
 | `reservas:historico` | `/api/reservas/{id}/historico/` | GET | — | 401 | 200 | 404 | 200 |
 | `reservas:historico` | `/api/reservas/{id}/historico/` | DELETE | — | 401 | 405 | 405 | 405 |
+| `usuarios:lista` | `/api/usuarios/` | GET | — | 401 | 403 | 403 | 200 |
+| `usuarios:detalhe` | `/api/usuarios/{id}/` | PATCH | desativar o usuário do cenário (AUT-11) | 401 | 403 | 403 | 200 |
 
 ## Leitura
 
@@ -76,3 +78,4 @@
 | Perfil lido do banco a cada requisição | `config/tests/test_perfil_lido_do_banco.py` |
 | CORS só para a origem configurada | `config/tests/test_cors.py` |
 | Campos extras no PATCH de situação ignorados | `reservas/tests/test_api_situacao_reserva.py::test_campos_extras_no_corpo_nao_alteram_a_reserva` |
+- **Gestão de usuários (AUT-11):** `usuarios:lista` e `usuarios:detalhe` são só do Gestor: quem não é Gestor recebe 403 `ACAO_NAO_PERMITIDA` antes de qualquer outra coisa (o Gestor que pede um método que a rota não tem, como DELETE, recebe 405: `test_outros_metodos_do_detalhe_respondem_405`) e o anônimo, 401. O perfil é lido do banco a cada pedido, então um Gestor rebaixado perde o acesso com a mesma credencial. Não há exclusão de usuário. Alterar tem limite de tentativas por usuário (429 `LIMITE_DE_TENTATIVAS`, `LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO`). As recusas de regra (próprio Gestor, último Gestor) são 403 e 409, nunca 401. Provas em `contas/tests/test_api_gestao_de_usuarios.py` e `contas/tests/test_concorrencia_de_gestao.py`.

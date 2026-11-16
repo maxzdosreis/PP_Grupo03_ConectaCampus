@@ -14,17 +14,17 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 |---|---|---|---|
 | NS com pelo menos um RF | 16 | 17 | 94% |
 | NS que chegam a um TA | 16 | 17 | 94% |
-| RF com NS de origem | 66 | 66 | 100% |
-| RN com pelo menos um RF | 17 | 17 | 100% |
-| RF com UC (sem o transversal) | 65 | 65 | 100% |
-| RF com US e CA (sem o transversal) | 65 | 65 | 100% |
-| CA com TA | 200 | 200 | 100% |
-| TA automatizados | 172 | 200 | 86% |
-| TA manuais (roteiro) | 3 | 200 | 2% |
-| TA pendentes (regra decidida, código na tarefa citada) | 25 | 200 | 12% |
-| RF com endpoint ou tela | 65 | 66 | 98% |
-| RF com código citado | 65 | 66 | 98% |
-| RF com a cadeia completa | 64 | 66 | 97% |
+| RF com NS de origem | 70 | 70 | 100% |
+| RN com pelo menos um RF | 19 | 19 | 100% |
+| RF com UC (sem o transversal) | 69 | 69 | 100% |
+| RF com US e CA (sem o transversal) | 69 | 69 | 100% |
+| CA com TA | 208 | 208 | 100% |
+| TA automatizados | 180 | 208 | 87% |
+| TA manuais (roteiro) | 3 | 208 | 1% |
+| TA pendentes (regra decidida, código na tarefa citada) | 25 | 208 | 12% |
+| RF com endpoint ou tela | 69 | 70 | 99% |
+| RF com código citado | 69 | 70 | 99% |
+| RF com a cadeia completa | 68 | 70 | 97% |
 
 TA manuais: TA-04, TA-181, TA-188 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
 
@@ -44,7 +44,7 @@ TA pendentes: TA-02, TA-03, TA-06, TA-07, TA-38, TA-69, TA-70, TA-74, TA-80, TA-
 | [NS-08](../visao.md#ns-08) | 4 | 5 | 2 | 3 | 17 | 17 (0) |
 | [NS-09](../visao.md#ns-09) | 9 | 10 | 7 | 9 | 41 | 41 (0) |
 | [NS-10](../visao.md#ns-10) | 1 | 3 | 3 | 7 | 15 | 15 (0) |
-| [NS-11](../visao.md#ns-11) | 10 | 17 | 7 | 18 | 58 | 58 (1) |
+| [NS-11](../visao.md#ns-11) | 14 | 21 | 8 | 19 | 66 | 66 (1) |
 | [NS-12](../visao.md#ns-12) | 1 | 1 | 1 | 7 | 15 | 15 (0) |
 | [NS-13](../visao.md#ns-13) | 1 | 18 | 11 | 17 | 47 | 47 (0) |
 | [NS-14](../visao.md#ns-14) | 1 | 5 | 5 | 8 | 22 | 22 (0) |
@@ -60,9 +60,9 @@ TA pendentes: TA-02, TA-03, TA-06, TA-07, TA-38, TA-69, TA-70, TA-74, TA-80, TA-
 | F2 | Cadastrar a solicitação | 1 | 1 | 1 | 6 | 6 (0) |
 | F3 | Consultar por dois ou mais critérios | 5 | 2 | 3 | 21 | 21 (0) |
 | F4 | Alterar a situação | 6 | 5 | 9 | 27 | 27 (0) |
-| F5 | Impedir operações inválidas | 31 | 13 | 18 | 86 | 86 (0) |
+| F5 | Impedir operações inválidas | 33 | 14 | 19 | 88 | 88 (0) |
 | F6 | Mensagens de sucesso e erro | 1 | 0 | 0 | 0 | 0 (0) |
-| Extra | Além das seis | 17 | 10 | 17 | 66 | 66 (3) |
+| Extra | Além das seis | 19 | 11 | 18 | 72 | 72 (3) |
 
 ## RNF por forma de verificação
 
