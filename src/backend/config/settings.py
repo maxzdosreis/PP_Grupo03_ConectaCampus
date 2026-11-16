@@ -64,10 +64,50 @@ def _lista(nome):
     ]
 
 
+def _exigir_configuracao_de_producao(chave, debug, hosts, host_do_banco):
+    if debug:
+        raise ImproperlyConfigured(
+            "DJANGO_DEBUG precisa ser False no modo de produção (DJANGO_MODO_PRODUCAO)."
+        )
+    if (
+        len(chave) < _TAMANHO_MINIMO_DA_CHAVE
+        or len(set(chave)) < 5
+        or chave.startswith(_PREFIXOS_DE_CHAVE_DE_EXEMPLO)
+    ):
+        raise ImproperlyConfigured(
+            f"DJANGO_SECRET_KEY precisa ter pelo menos {_TAMANHO_MINIMO_DA_CHAVE} "
+            "caracteres aleatórios e não pode ser a chave de exemplo no modo de "
+            "produção. Gere uma com: "
+            'python -c "import secrets; print(secrets.token_urlsafe(64))"'
+        )
+    if not hosts or "*" in hosts:
+        raise ImproperlyConfigured(
+            "DJANGO_ALLOWED_HOSTS precisa listar os hosts do sistema (sem '*') no "
+            "modo de produção."
+        )
+    if not host_do_banco:
+        raise ImproperlyConfigured(
+            "A variável de ambiente DB_HOST não está definida (obrigatória no modo "
+            "de produção)."
+        )
+
+
+_TAMANHO_MINIMO_DA_CHAVE = 50
+_PREFIXOS_DE_CHAVE_DE_EXEMPLO = ("troque-", "django-insecure-")
+
+MODO_DE_PRODUCAO = _booleano("DJANGO_MODO_PRODUCAO")
+
 SECRET_KEY = _obrigatoria("DJANGO_SECRET_KEY")
 DEBUG = _booleano("DJANGO_DEBUG")
 ALLOWED_HOSTS = _lista("DJANGO_ALLOWED_HOSTS")
 CORS_ALLOWED_ORIGINS = _lista("CORS_ALLOWED_ORIGINS")
+_HOST_DO_BANCO = (
+    os.environ.get("DB_HOST", "").strip()
+    if MODO_DE_PRODUCAO
+    else os.environ.get("DB_HOST", "db")
+)
+if MODO_DE_PRODUCAO:
+    _exigir_configuracao_de_producao(SECRET_KEY, DEBUG, ALLOWED_HOSTS, _HOST_DO_BANCO)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -89,6 +129,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    *(["whitenoise.middleware.WhiteNoiseMiddleware"] if MODO_DE_PRODUCAO else []),
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -122,7 +163,7 @@ DATABASES = {
         "NAME": _obrigatoria("DB_DATABASE"),
         "USER": _obrigatoria("DB_USER"),
         "PASSWORD": _obrigatoria("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST", "db"),
+        "HOST": _HOST_DO_BANCO,
         "PORT": os.environ.get("DB_PORT", "5432"),
         "OPTIONS": {"connect_timeout": 5},
     }
@@ -159,6 +200,26 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+if MODO_DE_PRODUCAO:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        },
+    }
+
+if _booleano("DJANGO_HTTPS"):
+    SECURE_SSL_REDIRECT = True
+    SECURE_REDIRECT_EXEMPT = [r"^api/health/$"]  # o healthcheck chega por HTTP
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = _lista("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -173,7 +234,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "EXCEPTION_HANDLER": "compartilhado.api.tratador_de_erros.tratar_excecao",
-    "NUM_PROXIES": 0,
+    # Quantos proxies confiáveis ficam na frente (o nginx do modo de produção conta 1).
+    "NUM_PROXIES": _inteiro("DJANGO_NUM_PROXIES", 0),
 }
 
 LIMITE_LOGIN_POR_EMAIL = _taxa("LIMITE_LOGIN_POR_EMAIL", "5/min")

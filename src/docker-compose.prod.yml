@@ -1,0 +1,139 @@
+# Modo de produção OPCIONAL (INF-08). O docker-compose.yml padrão não muda.
+# Sempre com --env-file .env.prod (sem ele o Compose leria o .env de desenvolvimento).
+#
+# O name é DIFERENTE do padrão de propósito: o Compose prefixa volumes e rede com o nome
+# do projeto, e com o mesmo nome um "down -v" aqui apagaria o banco do desenvolvimento.
+# Volume e rede também levam name: explícito, para nem um "-p" errado os misturar.
+name: conecta-campus-prod
+
+# Segredos obrigatórios abaixo usam ${VAR:?...}: sem valor, o compose para e diz qual falta.
+# Sem env_file: só entra no backend o que está listado.
+# O serviço "migrar" é uso único (migrate e sai); o servidor web não migra a cada start.
+# VITE_API_URL do frontend é argumento de BUILD: mudá-la exige "up --build".
+x-log: &log
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-ambiente-da-aplicacao: &ambiente
+  DJANGO_MODO_PRODUCAO: "1"
+  DJANGO_DEBUG: "False"
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?defina DJANGO_SECRET_KEY no .env.prod (veja .env.prod.example)}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?defina DJANGO_ALLOWED_HOSTS no .env.prod (veja .env.prod.example)}
+  DB_DATABASE: ${DB_DATABASE:?defina DB_DATABASE no .env.prod (veja .env.prod.example)}
+  DB_USER: ${DB_USER:?defina DB_USER no .env.prod (veja .env.prod.example)}
+  DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env.prod (veja .env.prod.example)}
+  DB_HOST: db
+  DB_PORT: "5432"
+  REDIS_URL: redis://redis:6379/0
+  DJANGO_HTTPS: ${DJANGO_HTTPS:-0}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+  DJANGO_NUM_PROXIES: ${DJANGO_NUM_PROXIES:-1}
+  LIMITE_LOGIN_POR_EMAIL: ${LIMITE_LOGIN_POR_EMAIL:-5/min}
+  LIMITE_LOGIN_POR_IP: ${LIMITE_LOGIN_POR_IP:-20/min}
+  LIMITE_CADASTRO_POR_IP: ${LIMITE_CADASTRO_POR_IP:-10/hour}
+  LIMITE_TROCA_DE_SENHA_POR_USUARIO: ${LIMITE_TROCA_DE_SENHA_POR_USUARIO:-5/min}
+  LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO: ${LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO:-30/min}
+  JWT_ACCESS_MINUTES: ${JWT_ACCESS_MINUTES:-30}
+  JWT_REFRESH_DAYS: ${JWT_REFRESH_DAYS:-1}
+
+x-imagem-do-backend: &construcao-do-backend
+  build:
+    context: ./backend
+    dockerfile: Dockerfile.prod
+  image: conecta-campus-prod-backend
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?defina DB_DATABASE no .env.prod (veja .env.prod.example)}
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no .env.prod (veja .env.prod.example)}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env.prod (veja .env.prod.example)}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 10
+    logging: *log
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+    logging: *log
+
+  migrar:
+    <<: *construcao-do-backend
+    restart: "no"
+    command: python manage.py migrate --noinput
+    environment:
+      <<: *ambiente
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *log
+
+  backend:
+    <<: *construcao-do-backend
+    restart: unless-stopped
+    environment:
+      <<: *ambiente
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-30}
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrar:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os, urllib.request as u; h = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')[0].strip(); u.urlopen(u.Request('http://127.0.0.1:8000/api/health/', headers={'Host': h}), timeout=4)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    logging: *log
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: /api
+    image: conecta-campus-prod-frontend
+    restart: unless-stopped
+    ports:
+      # Padrão 8080, diferente do modo de desenvolvimento (5173), para os dois coexistirem.
+      - "${FRONTEND_PORT_HOST:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *log
+
+volumes:
+  postgres_data:
+    name: conecta-campus-prod_postgres_data
+
+networks:
+  default:
+    name: conecta-campus-prod_rede
