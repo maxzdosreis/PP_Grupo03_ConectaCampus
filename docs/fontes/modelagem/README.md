@@ -19,6 +19,7 @@
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Plano do PDF: a capa sai da folga, porque não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md), Aula 7; GES-02). Mudança editorial. |
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Serviço `redis` (AUT-08): Figura 1, seção 1, componentes, relações e relações sem import; evidência seta → import gerada de novo. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Relação `contas.api` → `redis`: a contagem de tentativas é um script atômico no Redis (AUT-08, achado da revisão do PR). |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RES-12 (CR-02): Figura 3 com `ResultadoDoRegistro` e os campos novos do `RegistroDeSituacao` e o método `Reserva.registrar_tentativa_recusada`; Figura 6 com o caminho "tenta mudar → recusa → registra → relança" (o caminho feliz passa a vir primeiro, por causa da ordem das chamadas no código); imagens geradas de novo. Sem aprovação. |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -217,7 +218,7 @@ O terceiro lê os `sequenceDiagram` (seção 3), só com `ast` (não importa nad
 ## Decisões da seção 2
 
 - <a id="decisao-2a"></a>**a) Nomes reais.** O backlog cita "HistoricoSituacao", mas a classe é `RegistroDeSituacao` (`reservas/domain/registro_de_situacao.py`); o "histórico" é a sequência de registros de uma reserva (`RepositorioReservas.listar_historico`). A figura usa os nomes do código, sem tradução nem acento. O verificador recusa uma classe com outro nome (prova abaixo).
-- <a id="decisao-2b"></a>**b) Onze caixas:** `EspacoEsportivo` e `TipoEspaco` (espacos); `Reserva`, `SituacaoReserva`, `RegistroDeSituacao`, `Solicitante`, `IntervaloDeHorario`, `Ator` e `PapelDoAtor` (reservas); `Usuario` («Django model», porque é ali que ele existe) e `PerfilUsuario` (contas). As regras que são funções de módulo (`regras_de_agenda`, `conflito_de_horario.garantir_horario_livre`) ficaram numa frase do texto: uma caixa «módulo» a mais não cabia em 16 cm. `EstadoDoEspaco` (estado lido, para recusar gravação desatualizada) e `DadosDeCadastro` (entrada do cadastro) são detalhes de gravação e de entrada; exceções vão para a seção 3; repositórios e `*Model` são persistência (seção 1).
+- <a id="decisao-2b"></a>**b) Doze caixas:** `EspacoEsportivo` e `TipoEspaco` (espacos); `Reserva`, `SituacaoReserva`, `RegistroDeSituacao`, `ResultadoDoRegistro`, `Solicitante`, `IntervaloDeHorario`, `Ator` e `PapelDoAtor` (reservas); `Usuario` («Django model», porque é ali que ele existe) e `PerfilUsuario` (contas). As regras que são funções de módulo (`regras_de_agenda`, `conflito_de_horario.garantir_horario_livre`) ficaram numa frase do texto: uma caixa «módulo» a mais não cabia em 16 cm. `EstadoDoEspaco` (estado lido, para recusar gravação desatualizada) e `DadosDeCadastro` (entrada do cadastro) são detalhes de gravação e de entrada; exceções vão para a seção 3; repositórios e `*Model` são persistência (seção 1).
 - <a id="decisao-2c"></a>**c) Atributos e responsabilidades.** Atributos com nome e tipo do código, em notação Python. Um atributo mostrado como linha (composição ou associação) não se repete dentro da caixa, para a figura caber; o rótulo da linha é o nome do atributo. Como responsabilidades, só os métodos públicos que carregam regra. **Ajuste:** `eh_final`, `ocupa_horario` e `eh_gestor` são `@property` no código, não métodos; entram entre os atributos, com tipo (`eh_final: bool`), como as propriedades só de leitura de `EspacoEsportivo` (`nome`, `tipo`, `capacidade`, `ativo`). Nada de `__eq__`, `__repr__` ou funções privadas.
 - <a id="decisao-2d"></a>**d) Relacionamentos como estão no código:** composição `Reserva` → `Solicitante` (1), `IntervaloDeHorario` (1) e `RegistroDeSituacao` (0..*, `registros_pendentes`: a entidade guarda só os registros ainda não gravados; o histórico gravado é lido pelo repositório); associação a `SituacaoReserva` e `Ator` → `PapelDoAtor`; **referência por id**, tracejada e sem seta, com o atributo no rótulo: `Reserva.espaco_id` → `EspacoEsportivo`, `Solicitante.usuario_id` e `RegistroDeSituacao.autor_usuario_id` → `Usuario`. No banco são `BigIntegerField`, sem chave estrangeira; a única `ForeignKey` dos models é `RegistroDeSituacaoModel.reserva`, dentro de `reservas`. **Ator × Usuario:** uma nota presa ao `Ator` diz que a API o monta a partir de `request.user` por duck typing (`reservas/api/autenticacao.py`), e que `PapelDoAtor` e `PerfilUsuario` são enums separados de propósito (contrato `reservas não importa contas`). **`Solicitante` é cópia:** nome e matrícula do momento do pedido, imutáveis (`@dataclass(frozen=True)`) e gravados em colunas próprias de `ReservaModel` (`solicitante_nome`, `solicitante_matricula`); a lista e o histórico mostram quem pediu mesmo se o cadastro mudar. **Ajuste:** `Usuario.perfil` é `CharField` (`str`), não `PerfilUsuario`; `Usuario.eh_gestor` delega a `PerfilUsuario(self.perfil).eh_gestor`. A dependência `Usuario ⇢ PerfilUsuario` ficou no texto: a seta empurrava `PerfilUsuario` para baixo e a figura passava de 16,6 cm de altura.
 - <a id="decisao-2e"></a>**e) Máquina de estados** gerada da tabela: as cinco transições de `TRANSICOES_PERMITIDAS`, `[*] → SOLICITADA` (`Reserva.solicitar`, o caminho de toda reserva nova por convenção da aplicação; ver Pendências) e os três finais (`eh_final`) → `[*]`. Rótulo = `rotulo_da_acao · papéis [· motivo obrigatório]`, com os papéis de `DESTINOS_POR_PAPEL` ("Solicitante (só o dono)", porque `visivel_para` limita o solicitante às próprias reservas) e o motivo de `SITUACOES_QUE_EXIGEM_MOTIVO`. SOLICITADA e CONFIRMADA ficam no estado composto "Ocupa o horário" (`SITUACOES_QUE_OCUPAM_HORARIO`). A legenda diz que as transições não dependem do horário (DEC-13) e que qualquer outra é recusada sem mudar nada; a ordem das verificações fica para a seção 3.
@@ -287,14 +288,16 @@ Cada número do `autonumber` → onde está no código (caminhos a partir de `sr
 |---|---|---|---|
 | 1 | `PATCH /api/reservas/{id}/situacao/` com Bearer | `reservas/api/urls.py` (`situacao`) → `ReservaSituacaoView.patch` | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso` |
 | 2 | `executar(…, ator=ator_autenticado(request))` | `reservas/api/views.py::ReservaSituacaoView.patch` → `AlterarSituacaoReserva.executar`; `reservas/api/autenticacao.py::ator_autenticado` | `reservas/tests/test_api_permissoes.py::test_gestor_confirma` |
-| 3–4 | `obter_por_id(reserva_id)` e a visibilidade | `reservas/application/casos_de_uso.py::_obter_ou_falhar`; `reservas/domain/reserva.py::Reserva.visivel_para` | `reservas/tests/test_alterar_situacao.py::test_reserva_inexistente_lanca_reserva_nao_encontrada`; `reservas/tests/test_api_permissoes.py::test_solicitante_cancelando_a_de_outra_pessoa_responde_404_sem_mudar_nada` |
+| 3–4 | `obter_por_id(reserva_id)` e a visibilidade | `reservas/application/casos_de_uso.py::_obter_ou_falhar`; `reservas/domain/reserva.py::Reserva.visivel_para` | `reservas/tests/test_alterar_situacao.py::test_reserva_inexistente_lanca_reserva_nao_encontrada`; `reservas/tests/test_api_tentativas_recusadas.py::test_solicitante_que_nao_e_dono_recebe_404_e_nada_e_registrado` |
 | 5 | `alterar_situacao(…)` e a ordem da nota | `reservas/domain/reserva.py::Reserva.alterar_situacao` | `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros`; `reservas/tests/test_permissoes_reserva.py::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` |
-| 6 | `TransicaoDeSituacaoInvalida` sobe, nada muda | `reservas/domain/reserva.py::Reserva.alterar_situacao`; `reservas/domain/situacao.py::TRANSICOES_PERMITIDAS` | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra`; `reservas/tests/test_alterar_situacao.py::test_transicao_proibida_lanca_erro_e_preserva_a_reserva` |
-| 7 | 409 `TRANSICAO_DE_SITUACAO_INVALIDA` | `compartilhado/api/tratador_de_erros.py::tratar_excecao`; `reservas/domain/excecoes.py::TransicaoDeSituacaoInvalida` | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico` |
-| 8 | Confirmada + registro pendente | `reservas/domain/reserva.py::Reserva.alterar_situacao` | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca` |
-| 9 | `salvar(reserva)` (nota: bloqueio e situação de origem) | `reservas/infrastructure/repositorio_django.py::_obter_model_para_salvar`, `_exigir_situacao_de_origem` | `reservas/tests/test_repositorio_reservas.py::test_salvar_reserva_existente_bloqueia_a_linha`; `reservas/tests/test_repositorio_reservas.py::test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar`; `reservas/tests/test_concorrencia_de_situacao.py::test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente` |
-| 10 | reserva Confirmada | `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.salvar` | `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida` |
-| 11 | 200 "Reserva confirmada com sucesso." | `reservas/api/views.py::ReservaSituacaoView.patch` (`resposta_sucesso`) | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao`; `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` |
+| 6 | Confirmada + registro pendente | `reservas/domain/reserva.py::Reserva.alterar_situacao` | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca` |
+| 7 | `salvar(reserva)` (nota: bloqueio e situação de origem) | `reservas/infrastructure/repositorio_django.py::_obter_model_para_salvar`, `_exigir_situacao_de_origem` | `reservas/tests/test_repositorio_reservas.py::test_salvar_reserva_existente_bloqueia_a_linha`; `reservas/tests/test_repositorio_reservas.py::test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar`; `reservas/tests/test_concorrencia_de_situacao.py::test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente` |
+| 8 | reserva Confirmada | `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.salvar` | `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida` |
+| 9 | 200 "Reserva confirmada com sucesso." | `reservas/api/views.py::ReservaSituacaoView.patch` (`resposta_sucesso`) | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao`; `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` |
+| 10 | `TransicaoDeSituacaoInvalida` é lançada, nada muda | `reservas/domain/reserva.py::Reserva.alterar_situacao`; `reservas/domain/situacao.py::TRANSICOES_PERMITIDAS` | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra`; `reservas/tests/test_alterar_situacao.py::test_transicao_proibida_lanca_erro_e_preserva_a_reserva` |
+| 11–12 | `registrar_tentativa_recusada(…)` e o registro RECUSADA | `reservas/domain/reserva.py::Reserva.registrar_tentativa_recusada`; `reservas/domain/registro_de_situacao.py::RegistroDeSituacao` | `reservas/tests/test_tentativa_recusada_no_dominio.py::test_tentativa_recusada_tem_ator_momento_pedida_resultado_e_codigo`; `reservas/tests/test_tentativa_recusada_no_dominio.py::test_tentativa_recusada_nao_altera_a_reserva_nem_os_pendentes` |
+| 13 | `gravar_tentativa_recusada(reserva_id, registro)` (nota: transação própria) | `reservas/application/casos_de_uso.py::AlterarSituacaoReserva._registrar_tentativa`; `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.gravar_tentativa_recusada` | `reservas/tests/test_api_tentativas_recusadas.py::test_transicao_invalida_e_recusada_mas_a_tentativa_fica_gravada`; `reservas/tests/test_tentativas_recusadas.py::test_tentativa_recusada_gera_um_registro_e_relanca_a_excecao_original` |
+| 14–15 | a mesma exceção chega à view: 409 `TRANSICAO_DE_SITUACAO_INVALIDA` | `compartilhado/api/tratador_de_erros.py::tratar_excecao`; `reservas/domain/excecoes.py::TransicaoDeSituacaoInvalida` | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos`; `reservas/tests/test_tentativas_recusadas.py::test_falha_ao_registrar_a_tentativa_nao_esconde_o_erro_de_negocio` |
 
 ## Correspondência domínio → banco (fora do PDF)
 
@@ -310,7 +313,7 @@ A regra vive no domínio (ou no caso de uso, quando depende de outros registros)
 | | | motivo obrigatório para RECUSADA e CANCELADA (`_exigir_motivo_se_necessario`) | `CheckConstraint` `reservas_reserva_motivo_obrigatorio` |
 | `IntervaloDeHorario` (colunas `inicio` e `fim` de `ReservaModel`) | — | término depois do início (`HorarioInvalido`) | `CheckConstraint` `reservas_reserva_fim_apos_inicio` |
 | `Solicitante` (colunas `solicitante_*` de `ReservaModel`) | — | cópia imutável do usuário | `solicitante_usuario_id` é `BigIntegerField`, sem chave estrangeira para `contas` |
-| `RegistroDeSituacao` | `RegistroDeSituacaoModel` (`reservas_registro_de_situacao`) | situações válidas e anterior ≠ nova (`_validar_situacoes`) | `CheckConstraint` `reservas_registro_de_situacao_situacoes_validas` e `..._anterior_diferente_da_nova`; `ForeignKey` para `ReservaModel` com `PROTECT` (mesmo contexto) |
+| `RegistroDeSituacao` | `RegistroDeSituacaoModel` (`reservas_registro_de_situacao`) | situações válidas; anterior ≠ nova só na mudança aceita; resultado, código do erro e situação pedida coerentes (`_validar_aceita`, `_validar_recusada`) | `CheckConstraint` `reservas_registro_de_situacao_situacoes_validas`, `..._anterior_diferente_da_nova` (só `ACEITA`) e `..._resultado_coerente`; `ForeignKey` para `ReservaModel` com `PROTECT` (mesmo contexto) |
 | `Usuario` | o próprio model (`contas.Usuario`) | e-mail e matrícula únicos: `existe_email` e `existe_matricula` em `CadastrarSolicitante` | `UniqueConstraint(Lower("email"))` `contas_usuario_email_unico_sem_caixa`; `unique=True` em `email` e `matricula` |
 
 Sem restrição no banco, de propósito: as regras de agenda (horário de funcionamento, duração e antecedência; decisão e da RES-09), que podem mudar e não podem invalidar reservas antigas, e a tabela de transições, que só vale para mudanças novas.
@@ -375,7 +378,7 @@ Nenhuma. A lista `EXCECOES` do script está vazia: todo import entre módulos ma
 
 - **Seção 2 dentro do orçamento.** Medida em A4 pelo mesmo método (margens de 2,5 cm, texto 11 pt, tabelas 9 pt, figuras a 16 cm; Chromium do `mermaid-cli`): **36,8 cm, ~1,49 página**. As figuras somam 18,6 cm (Figura 3: 15,3 cm; Figura 4: 3,3 cm). Para caber, a legenda do texto virou uma linha só, e os parágrafos de responsabilidades e de decisões ficaram curtos; o detalhe está nas decisões da seção 2 e na correspondência com o banco, acima. Na mesma medição, a seção 1 dá 42,3 cm (~1,7 página), e não os 39,6 cm registrados na DOC-01: a diferença é do CSS da medição, que não ficou registrado. Se valer a medida nova, a folga cai de 0,4 para 0,3 página.
 - **Legibilidade das figuras no limite.** Numa página de 605 px (16 cm), o texto das figuras 3 e 4 fica com cerca de 5,7 e 5,5 px (fonte de 16 px × 605 / largura natural de 1693 e 1771 px), cerca de 4 pt impresso; o da seção 1 fica com ~4,6 px pela mesma conta. Estreitar a Figura 3 (tirar `situacao_anterior`, por exemplo) só aumenta a altura dela a 16 cm (num teste, 1551 px de largura deram 16,7 cm de altura) e estoura o orçamento. Se a DOC-04 achar pequeno no PDF, as saídas são uma página em paisagem para as figuras 1 e 3, ou menos atributos.
-- **Divergências encontradas (o diagrama segue o código):** (1) backlog "HistoricoSituacao" × código `RegistroDeSituacao`; (2) `eh_final`, `ocupa_horario` e `eh_gestor` pedidos como métodos são `@property`; (3) `Usuario.perfil` é `str` no model, com os valores de `PerfilUsuario`; (4) a `Reserva` guarda só os registros pendentes (`registros_pendentes`), e o histórico gravado é lido pelo repositório. Glossário × código: nenhuma divergência nova; as 11 classes estão na coluna "Nome no código" (o verificador não avisou nada). As divergências que o glossário já registra continuam valendo (dois nomes para o perfil, `PapelDoAtor` × `PerfilUsuario`; "permitidas" × "disponíveis").
+- **Divergências encontradas (o diagrama segue o código):** (1) backlog "HistoricoSituacao" × código `RegistroDeSituacao`; (2) `eh_final`, `ocupa_horario` e `eh_gestor` pedidos como métodos são `@property`; (3) `Usuario.perfil` é `str` no model, com os valores de `PerfilUsuario`; (4) a `Reserva` guarda só os registros pendentes (`registros_pendentes`), e o histórico gravado é lido pelo repositório. Glossário × código: nenhuma divergência nova; as 12 classes estão na coluna "Nome no código" (o verificador não avisou nada). As divergências que o glossário já registra continuam valendo (dois nomes para o perfil, `PapelDoAtor` × `PerfilUsuario`; "permitidas" × "disponíveis").
 - **"Reserva nova só por `Reserva.solicitar`" é convenção, não invariante da classe** (achado da revisão). O construtor de `Reserva` é público e valida só o que vale em qualquer situação (`espaco_id`, finalidade, situação, motivo em Recusada e Cancelada, `criada_em` com fuso); início no futuro, regras de agenda e o registro inicial `None → SOLICITADA` só existem em `Reserva.solicitar`. Fora dos testes, quem chama o construtor é só o repositório, para reconstituir (`reservas/infrastructure/repositorio_django.py`), e quem cria reserva nova é só `CriarReserva` (`reservas/application/casos_de_uso.py`). O texto da seção 2 diz isso. Tornar a regra da classe exigiria mudar o código (por exemplo, um construtor de reconstituição separado ou um id obrigatório na reconstituição), fora do escopo desta tarefa.
 - **Seção 3 dentro do alvo.** Medida em A4 pelo mesmo método, agora registrado: HTML gerado com o `marked` e medido no Chromium do próprio `minlag/mermaid-cli:12.0.0`, com `body { width: 16cm; font: 11pt/1.35 Arial }`, `h2` 14 pt, `h3` 12 pt, parágrafos com 6 pt de margem embaixo, tabelas 9 pt, `code` 10 pt e figuras a 16 cm (área útil de 16 × 24,7 cm). Com esse CSS, as seções 1 e 2 dão 42,2 e 37,3 cm, as mesmas medidas da DOC-02. **Seção 3: 33,9 cm, ~1,37 página** (figuras: 9,3 + 8,9 cm). A primeira versão do texto dava 40,5 cm (1,64 página); o detalhe veio para as decisões da seção 3 e para a tabela passo → teste, e não foi preciso tirar retornos nem juntar participantes. **Seções 1 a 3: 113,5 cm, ~4,59 páginas**, então sobram 1,41 página: 1 para a seção 4 e 0,41 para a capa e as quebras de página.
 - **Legibilidade das figuras 5 e 6 no limite**, como a da seção 1: a 16 cm (605 px), o texto fica com cerca de 4,4 e 4,6 px (fonte de 16 px × 605 / 2206 e 2082 px naturais), ~3,5 pt impresso. Quebrar mais as mensagens só tira ~90 px de largura e aumenta a altura; trocar a ordem dos participantes deixou a Figura 5 mais larga (2292 px). Se a DOC-04 achar pequeno no PDF, a saída é a mesma das figuras 1 e 3: uma página em paisagem, que aqui cabe na folga de 0,41.
@@ -441,16 +444,17 @@ Saída de `python scripts/verificar_modelo_do_dominio.py` em 16/11/2026 (caminho
 | modelo-do-dominio.mmd | TipoEspaco.GINASIO | espacos/domain/tipo_espaco.py:7 |
 | modelo-do-dominio.mmd | TipoEspaco.QUADRA_DE_AREIA | espacos/domain/tipo_espaco.py:8 |
 | modelo-do-dominio.mmd | TipoEspaco.QUADRA_DE_TENIS | espacos/domain/tipo_espaco.py:9 |
-| modelo-do-dominio.mmd | classe Reserva | reservas/domain/reserva.py:37 |
-| modelo-do-dominio.mmd | Reserva.id: int \| None | reservas/domain/reserva.py:50 |
-| modelo-do-dominio.mmd | Reserva.espaco_id: int | reservas/domain/reserva.py:51 |
-| modelo-do-dominio.mmd | Reserva.finalidade: str | reservas/domain/reserva.py:54 |
-| modelo-do-dominio.mmd | Reserva.motivo_da_situacao: str \| None | reservas/domain/reserva.py:56 |
-| modelo-do-dominio.mmd | Reserva.criada_em: datetime | reservas/domain/reserva.py:59 |
-| modelo-do-dominio.mmd | Reserva.solicitar() | reservas/domain/reserva.py:63 |
-| modelo-do-dominio.mmd | Reserva.alterar_situacao() | reservas/domain/reserva.py:152 |
-| modelo-do-dominio.mmd | Reserva.visivel_para() | reservas/domain/reserva.py:114 |
-| modelo-do-dominio.mmd | Reserva.acoes_permitidas_para() | reservas/domain/reserva.py:119 |
+| modelo-do-dominio.mmd | classe Reserva | reservas/domain/reserva.py:41 |
+| modelo-do-dominio.mmd | Reserva.id: int \| None | reservas/domain/reserva.py:54 |
+| modelo-do-dominio.mmd | Reserva.espaco_id: int | reservas/domain/reserva.py:55 |
+| modelo-do-dominio.mmd | Reserva.finalidade: str | reservas/domain/reserva.py:58 |
+| modelo-do-dominio.mmd | Reserva.motivo_da_situacao: str \| None | reservas/domain/reserva.py:60 |
+| modelo-do-dominio.mmd | Reserva.criada_em: datetime | reservas/domain/reserva.py:63 |
+| modelo-do-dominio.mmd | Reserva.solicitar() | reservas/domain/reserva.py:67 |
+| modelo-do-dominio.mmd | Reserva.alterar_situacao() | reservas/domain/reserva.py:156 |
+| modelo-do-dominio.mmd | Reserva.visivel_para() | reservas/domain/reserva.py:118 |
+| modelo-do-dominio.mmd | Reserva.acoes_permitidas_para() | reservas/domain/reserva.py:123 |
+| modelo-do-dominio.mmd | Reserva.registrar_tentativa_recusada() | reservas/domain/reserva.py:186 |
 | modelo-do-dominio.mmd | classe SituacaoReserva | reservas/domain/situacao.py:7 |
 | modelo-do-dominio.mmd | SituacaoReserva.eh_final: bool | reservas/domain/situacao.py:23 |
 | modelo-do-dominio.mmd | SituacaoReserva.ocupa_horario: bool | reservas/domain/situacao.py:27 |
@@ -468,12 +472,18 @@ Saída de `python scripts/verificar_modelo_do_dominio.py` em 16/11/2026 (caminho
 | modelo-do-dominio.mmd | IntervaloDeHorario.hora_inicio: time | reservas/domain/intervalo_de_horario.py:14 |
 | modelo-do-dominio.mmd | IntervaloDeHorario.hora_fim: time | reservas/domain/intervalo_de_horario.py:15 |
 | modelo-do-dominio.mmd | IntervaloDeHorario.sobrepoe() | reservas/domain/intervalo_de_horario.py:30 |
-| modelo-do-dominio.mmd | classe RegistroDeSituacao | reservas/domain/registro_de_situacao.py:9 |
-| modelo-do-dominio.mmd | RegistroDeSituacao.situacao_anterior: SituacaoReserva \| None | reservas/domain/registro_de_situacao.py:10 |
-| modelo-do-dominio.mmd | RegistroDeSituacao.motivo: str \| None | reservas/domain/registro_de_situacao.py:12 |
-| modelo-do-dominio.mmd | RegistroDeSituacao.autor_usuario_id: int | reservas/domain/registro_de_situacao.py:13 |
-| modelo-do-dominio.mmd | RegistroDeSituacao.autor_nome: str | reservas/domain/registro_de_situacao.py:14 |
-| modelo-do-dominio.mmd | RegistroDeSituacao.registrado_em: datetime | reservas/domain/registro_de_situacao.py:15 |
+| modelo-do-dominio.mmd | classe RegistroDeSituacao | reservas/domain/registro_de_situacao.py:17 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.situacao_anterior: SituacaoReserva \| None | reservas/domain/registro_de_situacao.py:25 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.motivo: str \| None | reservas/domain/registro_de_situacao.py:27 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.autor_usuario_id: int | reservas/domain/registro_de_situacao.py:28 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.autor_nome: str | reservas/domain/registro_de_situacao.py:29 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.registrado_em: datetime | reservas/domain/registro_de_situacao.py:30 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.resultado: ResultadoDoRegistro | reservas/domain/registro_de_situacao.py:31 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.codigo_do_erro: str \| None | reservas/domain/registro_de_situacao.py:32 |
+| modelo-do-dominio.mmd | RegistroDeSituacao.situacao_pedida: str \| None | reservas/domain/registro_de_situacao.py:33 |
+| modelo-do-dominio.mmd | classe ResultadoDoRegistro | reservas/domain/registro_de_situacao.py:11 |
+| modelo-do-dominio.mmd | ResultadoDoRegistro.ACEITA | reservas/domain/registro_de_situacao.py:12 |
+| modelo-do-dominio.mmd | ResultadoDoRegistro.RECUSADA | reservas/domain/registro_de_situacao.py:13 |
 | modelo-do-dominio.mmd | classe Ator | reservas/domain/ator.py:11 |
 | modelo-do-dominio.mmd | Ator.usuario_id: int | reservas/domain/ator.py:12 |
 | modelo-do-dominio.mmd | Ator.nome: str | reservas/domain/ator.py:13 |
@@ -491,26 +501,26 @@ Saída de `python scripts/verificar_modelo_do_dominio.py` em 16/11/2026 (caminho
 | modelo-do-dominio.mmd | PerfilUsuario.eh_gestor: bool | contas/domain/perfil.py:13 |
 | modelo-do-dominio.mmd | PerfilUsuario.SOLICITANTE | contas/domain/perfil.py:5 |
 | modelo-do-dominio.mmd | PerfilUsuario.GESTOR | contas/domain/perfil.py:6 |
-| modelo-do-dominio.mmd | Reserva → Solicitante (composição, solicitante) | reservas/domain/reserva.py:52 `Solicitante` |
-| modelo-do-dominio.mmd | Reserva → IntervaloDeHorario (composição, intervalo) | reservas/domain/reserva.py:53 `IntervaloDeHorario` |
-| modelo-do-dominio.mmd | Reserva → RegistroDeSituacao (composição, registros_pendentes) | reservas/domain/reserva.py:102 `tuple[RegistroDeSituacao, ...]` |
-| modelo-do-dominio.mmd | Reserva → SituacaoReserva (associação, situacao) | reservas/domain/reserva.py:55 `SituacaoReserva` |
+| modelo-do-dominio.mmd | Reserva → Solicitante (composição, solicitante) | reservas/domain/reserva.py:56 `Solicitante` |
+| modelo-do-dominio.mmd | Reserva → IntervaloDeHorario (composição, intervalo) | reservas/domain/reserva.py:57 `IntervaloDeHorario` |
+| modelo-do-dominio.mmd | Reserva → RegistroDeSituacao (composição, registros_pendentes) | reservas/domain/reserva.py:106 `tuple[RegistroDeSituacao, ...]` |
+| modelo-do-dominio.mmd | Reserva → SituacaoReserva (associação, situacao) | reservas/domain/reserva.py:59 `SituacaoReserva` |
+| modelo-do-dominio.mmd | RegistroDeSituacao → ResultadoDoRegistro (associação, resultado) | reservas/domain/registro_de_situacao.py:31 `ResultadoDoRegistro` |
 | modelo-do-dominio.mmd | Ator → PapelDoAtor (associação, papel) | reservas/domain/ator.py:14 `PapelDoAtor` |
-| modelo-do-dominio.mmd | Reserva.espaco_id ‥ EspacoEsportivo (por id) | reservas/domain/reserva.py:51; reservas/infrastructure/models.py:42 BigIntegerField |
-| modelo-do-dominio.mmd | Solicitante.usuario_id ‥ Usuario (por id) | reservas/domain/solicitante.py:9; reservas/infrastructure/models.py:43 BigIntegerField |
-| modelo-do-dominio.mmd | RegistroDeSituacao.autor_usuario_id ‥ Usuario (por id) | reservas/domain/registro_de_situacao.py:13; reservas/infrastructure/models.py:135 BigIntegerField |
+| modelo-do-dominio.mmd | Reserva.espaco_id ‥ EspacoEsportivo (por id) | reservas/domain/reserva.py:55; reservas/infrastructure/models.py:52 BigIntegerField |
+| modelo-do-dominio.mmd | Solicitante.usuario_id ‥ Usuario (por id) | reservas/domain/solicitante.py:9; reservas/infrastructure/models.py:53 BigIntegerField |
+| modelo-do-dominio.mmd | RegistroDeSituacao.autor_usuario_id ‥ Usuario (por id) | reservas/domain/registro_de_situacao.py:28; reservas/infrastructure/models.py:145 BigIntegerField |
 | modelo-do-dominio.mmd | nota de Ator | reservas/api/autenticacao.py:15 `Ator(usuario_id=usuario.pk, nome=usuario.nome, papel=papel)` |
-| (banco) | FK dentro de reservas: ReservaModel | reservas/infrastructure/models.py:113 |
 | estados-da-reserva.mmd | CONFIRMADA → CANCELADA: Cancelar · Gestor ou Solicitante (só o dono) · motivo obrigatório | reservas/domain/situacao.py:54; rótulo reservas/domain/situacao.py:42; papéis reservas/domain/situacao.py:64 |
 | estados-da-reserva.mmd | CONFIRMADA → CONCLUIDA: Concluir · Gestor | reservas/domain/situacao.py:54; rótulo reservas/domain/situacao.py:43; papéis reservas/domain/situacao.py:64 |
 | estados-da-reserva.mmd | SOLICITADA → CANCELADA: Cancelar · Gestor ou Solicitante (só o dono) · motivo obrigatório | reservas/domain/situacao.py:47; rótulo reservas/domain/situacao.py:42; papéis reservas/domain/situacao.py:64 |
 | estados-da-reserva.mmd | SOLICITADA → CONFIRMADA: Confirmar · Gestor | reservas/domain/situacao.py:47; rótulo reservas/domain/situacao.py:40; papéis reservas/domain/situacao.py:64 |
 | estados-da-reserva.mmd | SOLICITADA → RECUSADA: Recusar · Gestor · motivo obrigatório | reservas/domain/situacao.py:47; rótulo reservas/domain/situacao.py:41; papéis reservas/domain/situacao.py:64 |
-| estados-da-reserva.mmd | [*] → SOLICITADA | reservas/domain/reserva.py:86 Reserva.solicitar |
+| estados-da-reserva.mmd | [*] → SOLICITADA | reservas/domain/reserva.py:90 Reserva.solicitar |
 | estados-da-reserva.mmd | CANCELADA, CONCLUIDA, RECUSADA → [*] | reservas/domain/situacao.py:46 (eh_final: sem destinos) |
 | estados-da-reserva.mmd | grupo 'ocupa o horário': CONFIRMADA, SOLICITADA | reservas/domain/situacao.py:80 |
-| estados-da-reserva.mmd | janela do Gestor: a partir do término = CONCLUIDA | reservas/domain/situacao.py:86 |
-| estados-da-reserva.mmd | janela do Gestor: antes do início = CANCELADA, RECUSADA | reservas/domain/situacao.py:88 |
+| estados-da-reserva.mmd | janela do Gestor: a partir do término = CONCLUIDA | reservas/domain/situacao.py:84 |
+| estados-da-reserva.mmd | janela do Gestor: antes do início = CANCELADA, RECUSADA | reservas/domain/situacao.py:86 |
 
 ## Evidência: passo → código (seção 3)
 
@@ -519,28 +529,32 @@ Saída de `python scripts/verificar_fluxo_principal.py` em 16/11/2026 (caminhos 
 | Figura | Passo | Mensagem | Código (src/backend/, arquivo:linha) |
 |---|---|---|---|
 | confirmar-reserva.mmd | 1 | PATCH /api/reservas/{id}/situacao/ com Bearer, situacao CONFIRMADA | reservas/api/urls.py:21 → ReservaSituacaoView.patch reservas/api/views.py:66 |
-| confirmar-reserva.mmd | 2 | executar(reserva_id=…, nova_situacao=…, ator=ator_autenticado(reque… | chamada reservas/api/views.py:71 → def reservas/application/casos_de_uso.py:91 |
-| confirmar-reserva.mmd | 3 | obter_por_id(reserva_id) | chamada reservas/application/casos_de_uso.py:156 → def reservas/infrastructure/repositorio_django.py:48 |
-| confirmar-reserva.mmd | 4 | reserva lida (visivel_para(ator): o gestor vê todas) | retorno de obter_por_id: reservas/infrastructure/repositorio_django.py:50 |
-| confirmar-reserva.mmd | 5 | alterar_situacao(nova_situacao, motivo=None, ator=ator, agora=relog… | chamada reservas/application/casos_de_uso.py:100 → def reservas/domain/reserva.py:152 |
-| confirmar-reserva.mmd | 6 | TransicaoDeSituacaoInvalida sobe: situação, motivo e registros inta… | raise reservas/domain/reserva.py:166 |
-| confirmar-reserva.mmd | 7 | 409 TRANSICAO_DE_SITUACAO_INVALIDA (tratar_excecao) “Não é possível… | compartilhado/api/tratador_de_erros.py:30 (ConflitoDeEstado → 409); mensagem reservas/domain/excecoes.py:89 |
-| confirmar-reserva.mmd | 8 | situacao = CONFIRMADA + registro pendente SOLICITADA → CONFIRMADA | retorno de alterar_situacao: reservas/domain/reserva.py:152 |
-| confirmar-reserva.mmd | 9 | salvar(reserva) | chamada reservas/application/casos_de_uso.py:103 → def reservas/infrastructure/repositorio_django.py:27 |
-| confirmar-reserva.mmd | 10 | reserva CONFIRMADA | retorno de salvar: reservas/infrastructure/repositorio_django.py:46 |
-| confirmar-reserva.mmd | 11 | 200 “Reserva confirmada com sucesso.” | resposta_sucesso reservas/api/views.py:77 |
+| confirmar-reserva.mmd | 2 | executar(reserva_id=…, nova_situacao=…, ator=ator_autenticado(reque… | chamada reservas/api/views.py:71 → def reservas/application/casos_de_uso.py:95 |
+| confirmar-reserva.mmd | 3 | obter_por_id(reserva_id) | chamada reservas/application/casos_de_uso.py:204 → def reservas/infrastructure/repositorio_django.py:63 |
+| confirmar-reserva.mmd | 4 | reserva lida (visivel_para(ator): o gestor vê todas) | retorno de obter_por_id: reservas/infrastructure/repositorio_django.py:65 |
+| confirmar-reserva.mmd | 5 | alterar_situacao(nova_situacao, motivo=None, ator=ator, agora=relog… | chamada reservas/application/casos_de_uso.py:106 → def reservas/domain/reserva.py:156 |
+| confirmar-reserva.mmd | 6 | situacao = CONFIRMADA + registro pendente SOLICITADA → CONFIRMADA | retorno de alterar_situacao: reservas/domain/reserva.py:156 |
+| confirmar-reserva.mmd | 7 | salvar(reserva) | chamada reservas/application/casos_de_uso.py:109 → def reservas/infrastructure/repositorio_django.py:30 |
+| confirmar-reserva.mmd | 8 | reserva CONFIRMADA | retorno de salvar: reservas/infrastructure/repositorio_django.py:49 |
+| confirmar-reserva.mmd | 9 | 200 “Reserva confirmada com sucesso.” | resposta_sucesso reservas/api/views.py:77 |
+| confirmar-reserva.mmd | 10 | lança TransicaoDeSituacaoInvalida: situação, motivo e registros int… | retorno de alterar_situacao: reservas/domain/reserva.py:156 |
+| confirmar-reserva.mmd | 11 | registrar_tentativa_recusada(situacao_pedida, motivo=…, ator=ator, … | chamada reservas/application/casos_de_uso.py:133 → def reservas/domain/reserva.py:186 |
+| confirmar-reserva.mmd | 12 | registro RECUSADA: situação anterior = nova = RECUSADA, pedida CONF… | retorno de registrar_tentativa_recusada: reservas/domain/reserva.py:205 |
+| confirmar-reserva.mmd | 13 | gravar_tentativa_recusada(reserva_id, registro) | chamada reservas/application/casos_de_uso.py:140 → def reservas/infrastructure/repositorio_django.py:51 |
+| confirmar-reserva.mmd | 14 | TransicaoDeSituacaoInvalida segue, a mesma: falhar ao registrar não… | raise reservas/domain/reserva.py:170 |
+| confirmar-reserva.mmd | 15 | 409 TRANSICAO_DE_SITUACAO_INVALIDA (tratar_excecao) “Não é possível… | compartilhado/api/tratador_de_erros.py:30 (ConflitoDeEstado → 409); mensagem reservas/domain/excecoes.py:89 |
 | solicitar-reserva.mmd | 1 | POST /api/reservas/ com Bearer Quadra Central, amanhã, início–término | reservas/api/urls.py:16 → ReservasView.post reservas/api/views.py:43 |
-| solicitar-reserva.mmd | 2 | executar(solicitante= solicitante_autenticado(request), …) | chamada reservas/api/views.py:46 → def reservas/application/casos_de_uso.py:39 |
-| solicitar-reserva.mmd | 3 | Reserva.solicitar(…, agora=relogio()) | chamada reservas/application/casos_de_uso.py:49 → def reservas/domain/reserva.py:63 |
-| solicitar-reserva.mmd | 4 | reserva SOLICITADA + registro pendente None → SOLICITADA | retorno de solicitar: reservas/domain/reserva.py:99 |
-| solicitar-reserva.mmd | 5 | obter_espaco_reservavel(espaco_id) | chamada reservas/application/casos_de_uso.py:58 → def reservas/infrastructure/consulta_de_espacos.py:6 |
-| solicitar-reserva.mmd | 6 | listar_que_ocupam_horario(espaco_id, data) | chamada reservas/application/casos_de_uso.py:59 → def reservas/infrastructure/repositorio_django.py:69 |
-| solicitar-reserva.mmd | 7 | [Solicitada 10:00–11:00] | retorno de listar_que_ocupam_horario: reservas/infrastructure/repositorio_django.py:75 |
-| solicitar-reserva.mmd | 8 | garantir_horario_livre(reserva, existentes) | chamada reservas/application/casos_de_uso.py:62 → def reservas/domain/conflito_de_horario.py:8 |
+| solicitar-reserva.mmd | 2 | executar(solicitante= solicitante_autenticado(request), …) | chamada reservas/api/views.py:46 → def reservas/application/casos_de_uso.py:43 |
+| solicitar-reserva.mmd | 3 | Reserva.solicitar(…, agora=relogio()) | chamada reservas/application/casos_de_uso.py:53 → def reservas/domain/reserva.py:67 |
+| solicitar-reserva.mmd | 4 | reserva SOLICITADA + registro pendente None → SOLICITADA | retorno de solicitar: reservas/domain/reserva.py:103 |
+| solicitar-reserva.mmd | 5 | obter_espaco_reservavel(espaco_id) | chamada reservas/application/casos_de_uso.py:62 → def reservas/infrastructure/consulta_de_espacos.py:6 |
+| solicitar-reserva.mmd | 6 | listar_que_ocupam_horario(espaco_id, data) | chamada reservas/application/casos_de_uso.py:63 → def reservas/infrastructure/repositorio_django.py:84 |
+| solicitar-reserva.mmd | 7 | [Solicitada 10:00–11:00] | retorno de listar_que_ocupam_horario: reservas/infrastructure/repositorio_django.py:90 |
+| solicitar-reserva.mmd | 8 | garantir_horario_livre(reserva, existentes) | chamada reservas/application/casos_de_uso.py:66 → def reservas/domain/conflito_de_horario.py:8 |
 | solicitar-reserva.mmd | 9 | ConflitoDeHorario sobe: salvar não é chamado, nada é gravado | raise reservas/domain/conflito_de_horario.py:16 |
 | solicitar-reserva.mmd | 10 | 409 CONFLITO_DE_HORARIO (tratar_excecao) “Este espaço já tem uma re… | compartilhado/api/tratador_de_erros.py:30 (ConflitoDeEstado → 409); mensagem reservas/domain/excecoes.py:146 |
-| solicitar-reserva.mmd | 11 | salvar(reserva) | chamada reservas/application/casos_de_uso.py:63 → def reservas/infrastructure/repositorio_django.py:27 |
-| solicitar-reserva.mmd | 12 | reserva com id, SOLICITADA | retorno de salvar: reservas/infrastructure/repositorio_django.py:46 |
+| solicitar-reserva.mmd | 11 | salvar(reserva) | chamada reservas/application/casos_de_uso.py:67 → def reservas/infrastructure/repositorio_django.py:30 |
+| solicitar-reserva.mmd | 12 | reserva com id, SOLICITADA | retorno de salvar: reservas/infrastructure/repositorio_django.py:49 |
 | solicitar-reserva.mmd | 13 | 201 “Reserva solicitada com sucesso. Aguarde a confirmação do gestor.” | resposta_sucesso reservas/api/views.py:49 |
 
 ## Para a DOC-04 (decisões técnicas e montagem do PDF)

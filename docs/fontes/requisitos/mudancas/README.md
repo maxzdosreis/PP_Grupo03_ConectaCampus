@@ -21,6 +21,7 @@ Usada depois da primeira baseline; o fluxo está no [README da fonte oficial](..
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | CR-06 · Trocar a própria senha, aberto e aplicado na especificação e no código no mesmo PR (AUT-10, [DEC-26](../decisoes/DEC-26.md)). Os CR-01 a CR-05 não mudaram. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | CR-07 · Gestão de usuários pelo Gestor, aberto e aplicado na especificação e no código no mesmo PR (AUT-11, [DEC-27](../decisoes/DEC-27.md)). Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | CR-01 implementado na tarefa RES-11 (seção 9 do CR); CR-02 a CR-04 seguem com o código pendente. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12 (seção 9 do CR); CR-03 e CR-04 seguem com o código pendente. Sem aprovação. |
 
 ## Índice
 
@@ -28,7 +29,7 @@ Usada depois da primeira baseline; o fluxo está no [README da fonte oficial](..
 |---|---|---|---|---|---|
 | — | Modelo de CR (não é um pedido) | — | — | — | [modelo-cr.md](modelo-cr.md) |
 | CR-01 | Mudança de situação em relação ao horário da reserva | [DEC-13](../decisoes/DEC-13.md) | Implementado (tarefa RES-11) | RES-11 | [CR-01](CR-01-situacao-e-horario-da-reserva.md) |
-| CR-02 | Tentativas recusadas no histórico da reserva | [DEC-05](../decisoes/DEC-05.md) | Aplicado na especificação; código pendente (tarefa RES-12) | RES-12 | [CR-02](CR-02-tentativas-recusadas-no-historico.md) |
+| CR-02 | Tentativas recusadas no histórico da reserva | [DEC-05](../decisoes/DEC-05.md) | Implementado (tarefa RES-12) | RES-12 | [CR-02](CR-02-tentativas-recusadas-no-historico.md) |
 | CR-03 | Horário de funcionamento por espaço e duração sugerida | [DEC-07](../decisoes/DEC-07.md) | Aplicado na especificação; código pendente (tarefa ESP-07) | ESP-07 | [CR-03](CR-03-horario-por-espaco.md) |
 | CR-04 | Matrícula só com dígitos | [DEC-09](../decisoes/DEC-09.md) | Aplicado na especificação; código pendente (tarefa AUT-12) | AUT-12 | [CR-04](CR-04-matricula-so-digitos.md) |
 | CR-05 | Atendente responsável e Gestor do serviço nos artefatos de ator misto (US-13, US-12, US-03) | [DEC-25](../decisoes/DEC-25.md) | Aplicado na especificação (US-13 dividida em US-13 e US-20) | REQ-13 | [CR-05](CR-05-atendente-e-gestor-nos-artefatos-mistos.md) |

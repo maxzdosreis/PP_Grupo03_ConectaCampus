@@ -11,6 +11,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | Versão | Data | Autor | Alteração e referência da aprovação |
 |---|---|---|---|
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Criação pela divisão da US-13 (CR-05, REQ-13): os critérios do cancelamento pelo Atendente responsável (os CAs de cancelar qualquer reserva, só antes do início, a recusa depois do início, e a tentativa de cancelar uma Concluída no histórico) saem da US-13 com os mesmos TAs, renumerados. Nenhuma obrigação nova. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12: CA-04 sem a marca de implementação pendente, com o TA-193 apontando os testes. Mudança comportamental no código; o CA não mudou. Sem aprovação. |
 
 ## Index Card
 
@@ -81,7 +82,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22), [RF-24](../requisitos/rf-reservas.md#rf-24)
 - **TA:** [TA-193](#ta-193)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-12)
 
 ## Testes de aceite
 
@@ -92,4 +92,4 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | <a id="ta-190"></a>TA-190 | [CA-01](#us-20-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva`; `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida [x]` |
 | <a id="ta-191"></a>TA-191 | [CA-02](#us-20-ca-02) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_antes_do_inicio_funciona [x]`; `reservas/tests/test_momento_da_mudanca.py::test_alteracao_segue_a_regra_do_momento_da_dec_13 [x]`; `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva` |
 | <a id="ta-192"></a>TA-192 | [CA-03](#us-20-ca-03) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_cancelar_confirmada_depois_do_inicio_o_gestor_nao_pode`; `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_no_instante_do_inicio_responde_409 [x]`; `reservas/tests/test_momento_da_mudanca.py::test_mensagem_de_recusar_ou_cancelar_apos_o_inicio_diz_o_verbo_e_o_inicio [x]` |
-| <a id="ta-193"></a>TA-193 | [CA-04](#us-20-ca-04) | pendente | implementação pendente (tarefa RES-12) — TA a criar junto com o código ([CR-02 · CA-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md#5-critérios-de-aceite)). |
+| <a id="ta-193"></a>TA-193 | [CA-04](#us-20-ca-04) | automatizado | `reservas/tests/test_api_tentativas_recusadas.py::test_gestor_cancelando_concluida_e_recusado_e_a_tentativa_aparece_no_historico`; `reservas/tests/test_tentativas_recusadas.py::test_tentativa_recusada_gera_um_registro_e_relanca_a_excecao_original [x]` |

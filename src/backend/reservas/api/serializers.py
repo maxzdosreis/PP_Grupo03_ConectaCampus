@@ -202,6 +202,16 @@ class RegistroDeSituacaoSaidaSerializer(serializers.Serializer):
     motivo = serializers.CharField(allow_null=True)
     autor = AutorDoRegistroSaidaSerializer(source="*")
     registrado_em = serializers.DateTimeField()
+    resultado = serializers.CharField(source="resultado.value")
+    situacao_pedida = serializers.CharField()
+    situacao_pedida_rotulo = serializers.SerializerMethodField()
+    codigo_do_erro = serializers.CharField(allow_null=True)
+
+    def get_situacao_pedida_rotulo(self, registro):
+        try:
+            return SituacaoReserva(registro.situacao_pedida).rotulo
+        except ValueError:
+            return None
 
     def get_situacao_anterior(self, registro):
         anterior = registro.situacao_anterior

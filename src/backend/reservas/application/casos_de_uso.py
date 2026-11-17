@@ -1,7 +1,9 @@
+import logging
 from collections.abc import Callable
 from dataclasses import replace
 from datetime import date, datetime, time
 
+from compartilhado.domain.erros import ErroDeDominio
 from reservas.application.ocupacao_do_dia import HorarioOcupado, OcupacaoDoDia
 from reservas.application.portas import ConsultaDeEspacos
 from reservas.application.repositorio import (
@@ -23,6 +25,8 @@ from reservas.domain.regras_de_agenda import (
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 from reservas.domain.solicitante import Solicitante
+
+logger = logging.getLogger(__name__)
 
 
 class CriarReserva:
@@ -97,10 +101,47 @@ class AlterarSituacaoReserva:
         ator: Ator,
     ) -> Reserva:
         reserva = _obter_ou_falhar(self._repositorio, reserva_id, ator)
-        reserva.alterar_situacao(
-            nova_situacao, motivo=motivo, ator=ator, agora=self._relogio()
-        )
-        return self._repositorio.salvar(reserva)
+        agora = self._relogio()
+        try:
+            reserva.alterar_situacao(
+                nova_situacao, motivo=motivo, ator=ator, agora=agora
+            )
+            return self._repositorio.salvar(reserva)
+        except ErroDeDominio as erro:
+            if _foi_pedida_uma_situacao(nova_situacao):
+                self._registrar_tentativa(
+                    reserva_id, nova_situacao, motivo, ator, agora, erro
+                )
+            raise
+
+    def _registrar_tentativa(
+        self,
+        reserva_id: int,
+        nova_situacao: SituacaoReserva | str,
+        motivo: str | None,
+        ator: Ator,
+        agora: datetime,
+        erro: ErroDeDominio,
+    ) -> None:
+        try:
+            atual = _obter_ou_falhar(self._repositorio, reserva_id, ator)
+            registro = atual.registrar_tentativa_recusada(
+                nova_situacao,
+                motivo=motivo,
+                ator=ator,
+                agora=agora,
+                codigo_do_erro=erro.codigo,
+            )
+            self._repositorio.gravar_tentativa_recusada(reserva_id, registro)
+        except Exception:
+            logger.exception(
+                "Não foi possível registrar a tentativa recusada na reserva %s.",
+                reserva_id,
+            )
+
+
+def _foi_pedida_uma_situacao(nova_situacao: SituacaoReserva | str | None) -> bool:
+    return bool(str(nova_situacao or "").strip())
 
 
 class ConsultarHistoricoDaReserva:

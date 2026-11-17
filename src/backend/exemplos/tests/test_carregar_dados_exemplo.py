@@ -28,6 +28,7 @@ from reservas.application.repositorio import (
 )
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
+from reservas.domain.registro_de_situacao import ResultadoDoRegistro
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 from reservas.tests.historico import verificar_historico_coerente
@@ -232,7 +233,11 @@ def test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes():
 
     # Assert
     concluida = next(r for r in _reservas() if r.situacao is SituacaoReserva.CONCLUIDA)
-    historico = RepositorioReservasDjango().listar_historico(concluida.id)
+    historico = [
+        registro
+        for registro in RepositorioReservasDjango().listar_historico(concluida.id)
+        if registro.resultado is ResultadoDoRegistro.ACEITA
+    ]
     assert [r.situacao_nova for r in historico] == [
         SituacaoReserva.SOLICITADA,
         SituacaoReserva.CONFIRMADA,
@@ -242,6 +247,30 @@ def test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes():
     assert solicitada < confirmada < concluida.intervalo.inicio() < concluida_em
     assert abs(agora - timedelta(days=3) - solicitada) < timedelta(minutes=1)
     assert historico[-1].autor_nome == GESTOR.nome
+
+
+def test_reservas_de_exemplo_mostram_tentativas_recusadas_no_historico():
+    # Act
+    _carregar()
+
+    # Assert
+    repositorio = RepositorioReservasDjango()
+    tentativas = [
+        registro
+        for reserva in _reservas()
+        for registro in repositorio.listar_historico(reserva.id)
+        if registro.resultado is ResultadoDoRegistro.RECUSADA
+    ]
+    assert [t.codigo_do_erro for t in tentativas].count("ACAO_NAO_PERMITIDA") == 1
+    assert {t.codigo_do_erro for t in tentativas} == {
+        "ACAO_NAO_PERMITIDA",
+        "CONCLUSAO_ANTES_DO_TERMINO",
+        "TRANSICAO_DE_SITUACAO_INVALIDA",
+    }
+    assert len(tentativas) == 4
+    for reserva in _reservas():
+        historico = repositorio.listar_historico(reserva.id)
+        assert historico[-1].situacao_nova is reserva.situacao
 
 
 def test_reservas_que_ocupam_horario_nao_se_sobrepoem():

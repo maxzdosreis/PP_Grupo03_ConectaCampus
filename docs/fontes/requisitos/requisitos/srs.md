@@ -29,6 +29,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | AUT-10: RF-41, RF-41.1 e RF-41.2 nas tabelas (resumo, 4.1, 4.2, 6.1 a 6.4, QFD e auditoria; 66 fichas, 41 RF principais), a tela `/conta` e a rota `POST /api/auth/senha/`; DEC-26 na seção 6.3; a L-04 passa a cobrir também a troca de senha ([DEC-26](../decisoes/DEC-26.md), [CR-06](../mudancas/CR-06-trocar-a-propria-senha.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | AUT-11: RF-42, RF-43, RF-43.1 e RF-43.2 nas tabelas (resumo, 4.1, 4.2, 6.1 a 6.4, QFD e auditoria; 70 fichas, 43 RF principais), a tela `/usuarios` e as rotas `GET /api/usuarios/` e `PATCH /api/usuarios/{id}/`; DEC-27 na seção 6.3; a lacuna L-10 (b) fechada, com a gestão de usuários pelo Gestor ([DEC-27](../decisoes/DEC-27.md), [CR-07](../mudancas/CR-07-gestao-de-usuarios.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | L-01 e L-18 fechadas e auditoria do RF-16, RF-18, RF-19, RF-20 e RF-24.1 com o código da RES-11 (CR-01 implementado); evidência do RF-24.1. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | L-02 fechada e auditoria do RF-22 com o código da RES-12 (CR-02 implementado); resumo da auditoria: 9 ✘, 7 em Completo. Sem aprovação. |
 
 ## Sumário
 
@@ -344,7 +345,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | [DEC-02](../decisoes/DEC-02.md) | Decidida | — | REST-04 |
 | [DEC-03](../decisoes/DEC-03.md) | Decidida | — | REST-04 |
 | [DEC-04](../decisoes/DEC-04.md) | Decidida | RF-05, RF-10, RF-11, RF-13, RF-23, RF-27, RF-32, RF-33, RF-34, RF-36, RF-37 | RNF-F01 a RNF-F04, RNF-F09, RNF-F13; REST-08 |
-| [DEC-05](../decisoes/DEC-05.md) | Decidida (CR-02) | RF-22 | RNF-R02 |
+| [DEC-05](../decisoes/DEC-05.md) | Decidida (CR-02, implementado) | RF-22 | RNF-R02 |
 | [DEC-06](../decisoes/DEC-06.md) | Decidida | RF-06, RF-07, RF-08, RF-11.3, RF-20 | RNF-R05 |
 | [DEC-07](../decisoes/DEC-07.md) | Decidida (CR-03) | RF-05, RF-06, RF-11.5, RF-28, RF-30, RF-31 | — |
 | [DEC-08](../decisoes/DEC-08.md) | Decidida | — | RNF-S03 |
@@ -472,7 +473,7 @@ Comportamento que uma necessidade pede e o sistema não tem, comportamento sem t
 | ID | Tipo | Lacuna | Afeta | Proposta |
 |---|---|---|---|---|
 | <a id="l-01"></a>L-01 | NS × comportamento | A NS-09 fala em registrar que o uso **aconteceu**, mas o Gestor conclui uma reserva antes do término; também confirma ou recusa depois do início, qualquer um cancela depois do uso, e uma Solicitada não decidida continua ocupando horário depois da data. | RF-16 a RF-21; NS-09 | **Fechada** — [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (a [DEC-13](../decisoes/DEC-13.md), decidida em 06/11/2026: concluir só a partir do término; recusar e cancelar, pelo Gestor, só antes do início). Aplicado na especificação em 10/11/2026 (REQ-13) e implementado na RES-11 em 16/11/2026. |
-| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **CR** — [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (a [DEC-05](../decisoes/DEC-05.md), decidida em 06/11/2026: as tentativas recusadas entram no histórico); fecha com a RES-12. Aplicado na especificação em 10/11/2026 (REQ-13); o código ainda não muda. |
+| <a id="l-02"></a>L-02 | NS × comportamento | O modelo de aceite do professor inclui "tentativa registrada com data, ator e resultado"; o histórico só registra as mudanças aceitas. | RF-22; RNF-R02 | **Fechada** — [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (a [DEC-05](../decisoes/DEC-05.md), decidida em 06/11/2026: as tentativas recusadas entram no histórico). Aplicado na especificação em 10/11/2026 (REQ-13) e implementado na RES-12 em 17/11/2026. |
 | <a id="l-03"></a>L-03 | RNF ausente | Não havia limite de tentativas de entrada: nada impedia adivinhar senhas por tentativa e erro. | RF-33; NS-11 | **Resolvida pela AUT-08:** [RF-33.2](rf-contas.md#rf-33-2) (a recusa e o tempo de espera) e [RNF-F12](rnf.md#rnf-f12) (limites por e-mail e por origem no login e por origem no cadastro). Fica a limitação do contador no Redis sem persistência, nas [limitações conhecidas do README da raiz](../../../../README.md#limitações-conhecidas). |
 | <a id="l-04"></a>L-04 | RNF ausente | Sair não invalida a credencial de acesso: uma cópia dela continua valendo até expirar (até 30 min). A parte da credencial de renovação foi resolvida pela AUT-09: sair a revoga, e cada renovação a troca ([RNF-F13](rnf.md#rnf-f13)). | RF-36; RNF-F03; RNF-F13 | **Aceitar** ([limitação conhecida do README da raiz](../../../../README.md#limitações-conhecidas); [DEC-04](../decisoes/DEC-04.md), decisão c da AUT-03). |
 | <a id="l-05"></a>L-05 | Comportamento | A consulta de reservas não era paginada: a lista do Gestor sem critério devolvia todas as reservas, e o tempo e o tamanho da resposta cresciam com elas. Medido antes: p95 de 378 ms com 1.000 reservas (meta atendida) e de 1.743 ms com 5.000 (meta estourada). | RF-12; RNF-P01 | **Resolvida pela RES-10:** [RF-12.2](rf-reservas.md#rf-12-2) (a consulta vem em páginas de até 20, contadas e cortadas no banco, com o total) e [RNF-P01](rnf.md#rnf-p01) (medido de novo: p95 de 34 ms com 1.000 reservas e de 45 ms com 5.000, inclusive a última página do Gestor sem critério; [medição](rnf.md#medição)). |
@@ -533,7 +534,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-19 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | O código só conclui a partir do término, como a NS-09 pede ([DEC-13](../decisoes/DEC-13.md); [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), lacuna [L-01](#l-01) fechada na RES-11). |
 | RF-20 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | O código só deixa o Gestor cancelar antes do início ([DEC-13](../decisoes/DEC-13.md); [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), RES-11). |
 | RF-21 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o cancelamento pelo Solicitante continua sem restrição de horário, como o código ([DEC-13](../decisoes/DEC-13.md) decidida). |
-| RF-22 | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ | Co: o código ainda não registra as tentativas recusadas. A ficha já diz que entram ([DEC-05](../decisoes/DEC-05.md) decidida; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), lacuna [L-02](#l-02)); fecha com a RES-12. |
+| RF-22 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Código e testes da RES-12 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md)): as tentativas recusadas entram no histórico ([L-02](#l-02) fechada). |
 | RF-23 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-24 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-24.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Código e testes da RES-11 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)). |
@@ -607,7 +608,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-S05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar antes da entrega ([L-09](#l-09)). |
 
-**Resumo:** 10 ✘ em 103 fichas, todos com ação: 8 em Completo (DEC-13, DEC-05 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
+**Resumo:** 9 ✘ em 103 fichas, todos com ação: 7 em Completo (DEC-13 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
 
 ## 10. Checklist de revisão por pares
 

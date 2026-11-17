@@ -20,10 +20,13 @@ ESPERA_MAXIMA_S = 10
 class _RepositorioQueEsperaOutraLeitura(RepositorioReservasDjango):
     def __init__(self, barreira: threading.Barrier) -> None:
         self._barreira = barreira
+        self._ja_esperou = False
 
     def obter_por_id(self, reserva_id: int) -> Reserva | None:
         reserva = super().obter_por_id(reserva_id)
-        self._barreira.wait(timeout=ESPERA_MAXIMA_S)
+        if not self._ja_esperou:
+            self._ja_esperou = True
+            self._barreira.wait(timeout=ESPERA_MAXIMA_S)
         return reserva
 
 
@@ -88,5 +91,7 @@ def test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente():
     assert isinstance(recusa, ReservaDesatualizada)
     assert recusa.situacao_atual is situacao_final
     historico = repositorio.listar_historico(reserva_id)
-    assert len(historico) == 2
+    assert len(historico) == 3
+    tentativas = [r for r in historico if r.resultado.value == "RECUSADA"]
+    assert [t.codigo_do_erro for t in tentativas] == ["RESERVA_DESATUALIZADA"]
     verificar_historico_coerente(historico, situacao_final)

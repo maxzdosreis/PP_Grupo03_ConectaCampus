@@ -10,8 +10,8 @@ O `Solicitante` sai do token, nunca do corpo (2). `Reserva.solicitar` aplica as 
 
 ![Figura 6 — Confirmar a reserva](confirmar-reserva.png)
 
-**Figura 6 — Confirmar a reserva.** `PATCH /api/reservas/{id}/situacao/` pelo gestor, com a transição inválida como rejeição.
+**Figura 6 — Confirmar a reserva.** `PATCH /api/reservas/{id}/situacao/` pelo gestor, com a transição inválida como rejeição, que fica registrada no histórico.
 
-Reserva que quem pede não pode ver dá 404 (3–4). `alterar_situacao` confere situação, papel, `TRANSICOES_PERMITIDAS` e motivo, nessa ordem, antes de mudar qualquer coisa (5). Recusada → Confirmada não está na tabela: a exceção sobe com a reserva intacta, sem `salvar`, e o diálogo mostra o 409 com a opção de atualizar a lista (6–7). Só a mudança efetiva gera registro (DEC-05), gravado com a reserva na mesma transação (8–11).
+Reserva que quem pede não pode ver dá 404 (3–4), sem registro. `alterar_situacao` confere situação, papel, `TRANSICOES_PERMITIDAS` e motivo, nessa ordem, antes de mudar qualquer coisa (5). Numa Solicitada, a mudança e o registro dela são gravados numa transação só (6–9). Recusada → Confirmada não está na tabela: a exceção sobe com a reserva intacta, sem `salvar` (10). Como a reserva é visível ao ator, o caso de uso monta o registro da tentativa recusada (11–12) e o repositório o grava numa transação própria, confirmada antes de a recusa seguir (13): a recusa não o desfaz. A mesma exceção chega à view, e o diálogo mostra o 409 com a opção de atualizar a lista (14–15).
 
 **Concorrência e fora das figuras.** Pedidos simultâneos esbarram na restrição de exclusão do PostgreSQL (o mesmo 409 de conflito); decisões simultâneas, no bloqueio da linha com a situação lida (409 `RESERVA_DESATUALIZADA`). As demais recusas estão nas notas, a consulta e o histórico só leem, e os critérios de aceite de cada recusa estão nas histórias US-08 e US-14.

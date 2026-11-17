@@ -12,7 +12,10 @@ from reservas.application.repositorio import (
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
-from reservas.domain.registro_de_situacao import RegistroDeSituacao
+from reservas.domain.registro_de_situacao import (
+    RegistroDeSituacao,
+    ResultadoDoRegistro,
+)
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SITUACOES_QUE_OCUPAM_HORARIO, SituacaoReserva
 from reservas.domain.solicitante import Solicitante
@@ -44,6 +47,15 @@ class RepositorioReservasDjango(RepositorioReservas):
             raise
         reserva.marcar_registros_como_gravados()
         return _para_entidade(model)
+
+    def gravar_tentativa_recusada(
+        self, reserva_id: int, registro: RegistroDeSituacao
+    ) -> None:
+        with transaction.atomic():
+            model = ReservaModel.objects.filter(pk=reserva_id).first()
+            if model is None:
+                raise ReservaNaoEncontrada(reserva_id)
+            _registro_para_model(registro, model).save()
 
     def obter_por_id(self, reserva_id: int) -> Reserva | None:
         model = ReservaModel.objects.filter(pk=reserva_id).first()
@@ -203,6 +215,9 @@ def _para_registro(model: RegistroDeSituacaoModel) -> RegistroDeSituacao:
         autor_usuario_id=model.autor_usuario_id,
         autor_nome=model.autor_nome,
         registrado_em=model.registrado_em.astimezone(FUSO_HORARIO),
+        resultado=ResultadoDoRegistro(model.resultado),
+        codigo_do_erro=model.codigo_do_erro or None,
+        situacao_pedida=model.situacao_pedida,
     )
 
 
@@ -218,4 +233,7 @@ def _registro_para_model(
         autor_usuario_id=registro.autor_usuario_id,
         autor_nome=registro.autor_nome,
         registrado_em=registro.registrado_em,
+        resultado=registro.resultado.value,
+        codigo_do_erro=registro.codigo_do_erro or "",
+        situacao_pedida=registro.situacao_pedida,
     )

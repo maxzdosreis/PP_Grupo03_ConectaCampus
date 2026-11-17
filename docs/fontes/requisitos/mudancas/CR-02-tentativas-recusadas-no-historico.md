@@ -4,7 +4,7 @@
 |---|---|
 | **CR-02 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha (aprovador da fonte oficial) |
 
-Pedido de mudança aberto a partir da resposta do professor à [DEC-05](../decisoes/DEC-05.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa RES-12)\". O **código não mudou**: quem o muda é a tarefa **RES-12**, que também cria os testes de aceite e marca o CR como implementado.
+Pedido de mudança aberto a partir da resposta do professor à [DEC-05](../decisoes/DEC-05.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8) e **implementado em 17/11/2026 pela tarefa RES-12** (seção 9): o código, os testes de aceite, as figuras e os READMEs dizem o mesmo que a especificação.
 
 ## Histórico de revisões
 
@@ -15,6 +15,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-05](../decis
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13): RF, RN, UC, histórias, CAs e TAs com a regra nova, listados na [seção 8](#8-aplicação-na-especificação-req-13). Estado: aplicado na especificação; código pendente (tarefa RES-12). A especificação está adiante do código de propósito, e cada CA novo leva a marca "implementação pendente (tarefa RES-12)". Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementado na tarefa RES-12 (seção 9): código, migration, testes, figuras, dados de exemplo e READMEs; os cinco CAs com a marca "implementação pendente" passam a automatizados; os três pontos que a seção 8 deixou abertos foram decididos. Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -23,7 +24,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-05](../decis
 | **Motivo** | Resposta do professor à [DEC-05](../decisoes/DEC-05.md) na Aula 7 (06/11/2026): "Deve ficar registrado sim, para ter o histórico completo da reserva." Decisão do grupo, nos pontos que a resposta não cobriu: as tentativas recusadas entram no próprio histórico da reserva (não num log separado), com ator, momento, situação pedida, resultado e código do erro; só se registram tentativas sobre uma reserva visível ao ator (a de outro Solicitante continua "não encontrada" e não é registrada, para não revelar a reserva). |
 | **Solicitante** | O professor, como representante do cliente. |
 | **Responsável** | O grupo. |
-| **Estado** | **Aplicado na especificação; código pendente (tarefa RES-12)** (10/11/2026, REQ-13). |
+| **Estado** | **Implementado** (17/11/2026, tarefa RES-12); aplicado na especificação em 10/11/2026 (REQ-13). |
 | **Origem** | [DEC-05](../decisoes/DEC-05.md) e lacuna [L-02](../requisitos/srs.md#l-02). |
 | **Baseline vigente** | Nenhuma aprovada: a [candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata (aprovação na REQ-07). |
 | **Tarefa que implementa** | RES-12 |
@@ -137,7 +138,7 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 
 ## 8. Aplicação na especificação (REQ-13)
 
-Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a especificação está adiante do código de propósito, e cada critério abaixo leva a marca "implementação pendente (tarefa RES-12)" até a tarefa RES-12 implementar a regra e criar o teste de aceite dele. Os testes que existem hoje verificam a regra anterior, e nenhum TA novo cita um deles.
+Aplicado na especificação em 10/11/2026. Na data da aplicação, o código ainda não mudava: a especificação estava adiante do código de propósito, e cada critério abaixo levava a marca de implementação pendente até a tarefa RES-12. Ela implementou a regra em 17/11/2026 e criou o teste de aceite de cada um (seção 9).
 
 **O que mudou:**
 
@@ -147,15 +148,15 @@ Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a esp
 - US/CA/TA: [US-12](../historias/US-12-ver-detalhe-e-historico.md), [US-13](../historias/US-13-cancelar-uma-reserva.md) e [US-14](../historias/US-14-confirmar-uma-reserva.md) (CAs novos); [US-08](../historias/US-08-solicitar-reserva.md) (CA da criação registrada esclarecido: o pedido recusado não cria reserva, logo não tem histórico); [US-15](../historias/US-15-recusar-uma-reserva.md) e [US-16](../historias/US-16-concluir-uma-reserva.md) (CAs de registro marcados); os CAs de recusa por transição não permitida marcados em [US-13](../historias/US-13-cancelar-uma-reserva.md), [US-14](../historias/US-14-confirmar-uma-reserva.md), [US-15](../historias/US-15-recusar-uma-reserva.md) e [US-16](../historias/US-16-concluir-uma-reserva.md).
 - Documentos: [glossário](../glossario.md) (histórico, registro de situação), [Visão](../visao.md) (NS-12, R-08), [SRS](../requisitos/srs.md) (auditoria e lacuna L-02).
 
-**CAs novos (5, todos com a marca "implementação pendente (tarefa RES-12)")**
+**CAs novos (5; a marca de implementação pendente saiu em 17/11/2026, quando a tarefa RES-12 os implementou)**
 
 | CA | Título | Tipo | TA | Pedido do CR | Implementação |
 |---|---|---|---|---|---|
-| [US-20 · CA-04](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-04) | Cancelamento recusado fica no histórico | registro | [TA-193](../historias/US-20-cancelar-qualquer-reserva.md#ta-193) | CR-02 · CA-02 | implementação pendente (tarefa RES-12) |
-| [US-13 · CA-10](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-10) | Reserva de outra pessoa não é registrada | acesso | [TA-146](../historias/US-13-cancelar-uma-reserva.md#ta-146) | CR-02 · CA-03 | implementação pendente (tarefa RES-12) |
-| [US-14 · CA-12](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-12) | Tentativa sem permissão fica no histórico | registro | [TA-158](../historias/US-14-confirmar-uma-reserva.md#ta-158) | CR-02 · CA-01 | implementação pendente (tarefa RES-12) |
-| [US-12 · CA-03](../historias/US-12-ver-detalhe-e-historico.md#us-12-ca-03) | Tentativa recusada na linha do tempo | sucesso | [TA-127](../historias/US-12-ver-detalhe-e-historico.md#ta-127) | CR-02 · CA-04 | implementação pendente (tarefa RES-12) |
-| [US-12 · CA-11](../historias/US-12-ver-detalhe-e-historico.md#us-12-ca-11) | O histórico é um registro de fatos, com as tentativas recusadas | registro | [TA-135](../historias/US-12-ver-detalhe-e-historico.md#ta-135) | derivado da seção 4 do CR | implementação pendente (tarefa RES-12) |
+| [US-20 · CA-04](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-04) | Cancelamento recusado fica no histórico | registro | [TA-193](../historias/US-20-cancelar-qualquer-reserva.md#ta-193) | CR-02 · CA-02 | implementado (tarefa RES-12, 17/11/2026) |
+| [US-13 · CA-10](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-10) | Reserva de outra pessoa não é registrada | acesso | [TA-146](../historias/US-13-cancelar-uma-reserva.md#ta-146) | CR-02 · CA-03 | implementado (tarefa RES-12, 17/11/2026) |
+| [US-14 · CA-12](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-12) | Tentativa sem permissão fica no histórico | registro | [TA-158](../historias/US-14-confirmar-uma-reserva.md#ta-158) | CR-02 · CA-01 | implementado (tarefa RES-12, 17/11/2026) |
+| [US-12 · CA-03](../historias/US-12-ver-detalhe-e-historico.md#us-12-ca-03) | Tentativa recusada na linha do tempo | sucesso | [TA-127](../historias/US-12-ver-detalhe-e-historico.md#ta-127) | CR-02 · CA-04 | implementado (tarefa RES-12, 17/11/2026) |
+| [US-12 · CA-11](../historias/US-12-ver-detalhe-e-historico.md#us-12-ca-11) | O histórico é um registro de fatos, com as tentativas recusadas | registro | [TA-135](../historias/US-12-ver-detalhe-e-historico.md#ta-135) | derivado da seção 4 do CR | implementado (tarefa RES-12, 17/11/2026) |
 
 **CAs antigos marcados:** [US-12 · CA-10](../historias/US-12-ver-detalhe-e-historico.md#us-12-ca-10) (substituído em parte), [US-13 · CA-05](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-05) (substituído em parte), [US-13 · CA-07](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-07) (com ponto aberto), [US-13 · CA-08](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-08) (substituído em parte), [US-14 · CA-08](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-08) (substituído em parte), [US-14 · CA-10](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-10) (com ponto aberto), [US-14 · CA-11](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-11) (substituído em parte), [US-15 · CA-04](../historias/US-15-recusar-uma-reserva.md#us-15-ca-04) (substituído em parte), [US-15 · CA-08](../historias/US-15-recusar-uma-reserva.md#us-15-ca-08) (substituído em parte), [US-16 · CA-06](../historias/US-16-concluir-uma-reserva.md#us-16-ca-06) (substituído em parte), [US-16 · CA-08](../historias/US-16-concluir-uma-reserva.md#us-16-ca-08) (substituído em parte). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpre até a tarefa RES-12.
 
@@ -165,3 +166,29 @@ Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a esp
 - Se a leitura desatualizada ([E7.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e7-1), `RESERVA_DESATUALIZADA`) entra como tentativa recusada; os CAs da [US-13](../historias/US-13-cancelar-uma-reserva.md) e da [US-14](../historias/US-14-confirmar-uma-reserva.md) que descrevem esse caso levam a nota "ponto aberto".
 - Como gravar a situação pedida quando ela é desconhecida (`SITUACAO_INVALIDA`).
 - As Figuras 3 e 4 da modelagem não foram alteradas nesta tarefa.
+
+## 9. Implementação (RES-12)
+
+Implementado em 17/11/2026. As decisões que a seção 8 deixou para a tarefa:
+
+| Ponto | Decisão |
+|---|---|
+| Situação não informada ([E6.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-1)) | **Não entra.** É erro de formato do pedido, conferido antes de procurar a reserva; sem situação não há "situação pedida" para gravar. A mesma regra vale para a situação em branco. |
+| Leitura desatualizada ([E7.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e7-1), `RESERVA_DESATUALIZADA`) | **Entra.** É uma exceção de domínio sobre reserva visível ao ator. O registro diz a situação que a reserva tem de fato (o caso de uso a lê de novo) e é gravado depois de a gravação recusada ser desfeita. Os CAs "ponto aberto" da [US-13](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-07) e da [US-14](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-10) foram completados. |
+| Situação pedida desconhecida ([E6.3](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-3), `SITUACAO_INVALIDA`) | **Entra, com o texto pedido**, sem espaços repetidos e cortado em 20 caracteres (`SITUACAO_PEDIDA_MAXIMO_CARACTERES`). O campo é texto livre; só a tentativa recusada pode ter um valor que não é uma situação. |
+| Modelo | O mesmo `RegistroDeSituacao` ganha `resultado` (`ACEITA` ou `RECUSADA`), `codigo_do_erro` e `situacao_pedida`. Na tentativa, a situação anterior e a nova são a que a reserva tinha, porque nada mudou. Um tipo separado duplicaria a leitura, a ordem cronológica e o serializer. |
+| Quem registra | `Reserva.registrar_tentativa_recusada(...)`, no domínio, recebe o `agora` (nunca o relógio do sistema) e não conhece o banco. Quem orquestra "tenta mudar → o domínio recusa → registra → relança" é `AlterarSituacaoReserva`. |
+| Gravar mesmo com a mudança recusada | Não há `ATOMIC_REQUESTS` nem middleware de transação. A recusa do domínio acontece antes de qualquer gravação; no E7.1, o `salvar` desfaz a própria transação. Em ambos os casos o repositório grava a tentativa numa **transação própria** (`gravar_tentativa_recusada`), confirmada antes de a exceção seguir para a API, e o caso de uso relança **a mesma** exceção. |
+| Falha ao gravar a tentativa | Não esconde o erro de negócio: vai para o log técnico (`logger.exception`) e a exceção original segue. |
+| Quem vê | A tentativa só é gravada se o ator vê a reserva (a de outra pessoa sai como 404 antes) e só é lida por quem vê a reserva: o Solicitante dono e o Gestor. |
+| Não são tentativas | Erro de validação do corpo, reserva inexistente ou alheia (404), 401 e qualquer exceção que não seja de domínio. |
+| Compatibilidade | A API do histórico mantém todos os campos de antes e acrescenta `resultado`, `situacao_pedida`, `situacao_pedida_rotulo` e `codigo_do_erro` (vazio nas aceitas). Os registros que já existiam viram `ACEITA` na migration `0003`, que é reversível (a volta apaga as tentativas, que o esquema antigo não guarda). |
+| Crescimento | O registro cresce a cada tentativa recusada, sem limite, e o Gestor não tem como apagá-lo. |
+
+**O que mudou**
+
+- Código: `reservas/domain/registro_de_situacao.py` (`ResultadoDoRegistro`, campos novos e validações), `reservas/domain/reserva.py` (`registrar_tentativa_recusada`), `reservas/application/casos_de_uso.py` (`AlterarSituacaoReserva`), `reservas/application/repositorio.py` e `reservas/infrastructure/repositorio_django.py` (`gravar_tentativa_recusada`), `reservas/infrastructure/models.py` e a migration `0003_tentativas_recusadas_no_historico`, `reservas/api/serializers.py` e, no frontend, `LinhaDoTempo.tsx` e `motivosDasTentativas.ts`.
+- Testes: `test_tentativa_recusada_no_dominio.py`, `test_tentativas_recusadas.py`, `test_api_tentativas_recusadas.py` e `test_migracao_do_historico.py` (novos); `test_repositorio_reservas.py`, `test_api_historico.py`, `test_alterar_situacao.py`, `test_concorrencia_de_situacao.py` e `exemplos/tests/test_carregar_dados_exemplo.py` (ajustados); `LinhaDoTempo.test.tsx` (novo).
+- Documentos: RF-22 (evidência e código), RNF-R02, RN-14 (vigente), UC-10 (exceções, E7.1, evidência e questões em aberto), UC-09, US-12 a US-16 e US-20 (CAs, Situação e TAs), SRS (L-02 fechada), glossário, Visão (NS-12, R-08), `docs/fontes/testes_de_reservas.md` e a rastreabilidade (regenerada).
+- Figuras da modelagem: Figura 3 (`modelo-do-dominio.mmd`, com `ResultadoDoRegistro` e os campos novos) e Figura 6 (`confirmar-reserva.mmd`, com o caminho "tenta mudar → recusa → registra → relança").
+- Dados de exemplo: quatro tentativas recusadas, pelo mesmo caso de uso, para a linha do tempo mostrar as duas situações.

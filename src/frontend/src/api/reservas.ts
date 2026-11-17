@@ -98,6 +98,10 @@ export type RegistroDeSituacao = {
   motivo: string | null
   autor: { nome: string }
   registrado_em: string
+  resultado?: 'ACEITA' | 'RECUSADA'
+  situacao_pedida?: string
+  situacao_pedida_rotulo?: string | null
+  codigo_do_erro?: string | null
 }
 
 export function solicitarReserva(dados: DadosDaReserva) {

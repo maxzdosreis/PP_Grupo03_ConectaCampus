@@ -18,6 +18,6 @@
 - **Referência por id entre contextos**, sem chave estrangeira; o espaço é conferido por `espacos.publico`.
 - **`Solicitante` é cópia** de id, nome e matrícula no momento do pedido: a lista e o histórico mostram quem pediu mesmo que o cadastro mude.
 - **`PapelDoAtor` ≠ `PerfilUsuario`**, pelo contrato `reservas não importa contas`; a API monta o `Ator` a partir de `request.user`.
-- **`RegistroDeSituacao` sai da `Reserva`**, gravado na mesma transação e só nas mudanças aceitas (DEC-05). O horário só limita o Gestor (DEC-13): concluir a partir do término e recusar ou cancelar antes do início; confirmar e o cancelamento do Solicitante não dependem dele.
+- **`RegistroDeSituacao` sai da `Reserva`**, gravado na mesma transação nas mudanças aceitas; a tentativa recusada também vira um registro (`ResultadoDoRegistro.RECUSADA`, com a situação pedida e o código do erro), gravado em transação própria (DEC-05, RES-12). O horário só limita o Gestor (DEC-13): concluir a partir do término e recusar ou cancelar antes do início; confirmar e o cancelamento do Solicitante não dependem dele.
 
 **No banco** repetem-se `ExclusionConstraint`, `UniqueConstraint(Lower("nome"))` e `CheckConstraint`. **Fora do diagrama:** `EstadoDoEspaco`, `DadosDeCadastro`, exceções, repositórios, `*Model`.
