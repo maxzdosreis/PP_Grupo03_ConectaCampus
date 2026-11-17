@@ -617,6 +617,7 @@ def _dados_do_registro(reserva_model, **sobrescritas):
         "registrado_em": AGORA,
     }
     dados.update(sobrescritas)
+    dados.setdefault("situacao_pedida", dados["situacao_nova"])
     return dados
 
 
@@ -871,3 +872,133 @@ def test_listar_pagina_depois_do_fim_so_conta():
     assert pagina.total == 7
     assert len(consultas.captured_queries) == 1
     assert "COUNT(*)" in consultas.captured_queries[0]["sql"]
+
+
+def _registro_de_tentativa(reserva, **sobrescritas):
+    dados = {
+        "situacao_pedida": S.CONFIRMADA,
+        "motivo": None,
+        "ator": GESTOR,
+        "agora": AGORA + timedelta(minutes=5),
+        "codigo_do_erro": "TRANSICAO_DE_SITUACAO_INVALIDA",
+    }
+    dados.update(sobrescritas)
+    return reserva.registrar_tentativa_recusada(**dados)
+
+
+def test_gravar_tentativa_recusada_nao_muda_a_reserva_e_entra_no_historico(
+    repositorio,
+):
+    # Arrange
+    salva = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    registro = _registro_de_tentativa(salva, codigo_do_erro="ACAO_NAO_PERMITIDA")
+
+    # Act
+    repositorio.gravar_tentativa_recusada(salva.id, registro)
+
+    # Assert
+    depois = repositorio.obter_por_id(salva.id)
+    assert (depois.situacao, depois.motivo_da_situacao) == (S.SOLICITADA, None)
+    criacao, tentativa = repositorio.listar_historico(salva.id)
+    assert criacao.situacao_nova is S.SOLICITADA
+    assert tentativa == registro
+    verificar_historico_coerente([criacao, tentativa], depois.situacao)
+
+
+def test_gravar_tentativa_recusada_de_reserva_inexistente_lanca_nao_encontrada(
+    repositorio,
+):
+    # Arrange
+    reserva = _solicitar()
+    registro = _registro_de_tentativa(reserva)
+
+    # Act / Assert
+    with pytest.raises(ReservaNaoEncontrada):
+        repositorio.gravar_tentativa_recusada(ID_INEXISTENTE, registro)
+
+
+def test_tentativa_recusada_guarda_o_texto_pedido_mesmo_sem_ser_uma_situacao(
+    repositorio,
+):
+    # Arrange
+    salva = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    registro = _registro_de_tentativa(
+        salva, situacao_pedida="em análise", codigo_do_erro="SITUACAO_INVALIDA"
+    )
+
+    # Act
+    repositorio.gravar_tentativa_recusada(salva.id, registro)
+
+    # Assert
+    tentativa = repositorio.listar_historico(salva.id)[-1]
+    assert tentativa.situacao_pedida == "em análise"
+    assert tentativa.codigo_do_erro == "SITUACAO_INVALIDA"
+
+
+def test_historico_mistura_aceitas_e_recusadas_na_ordem_de_registro(repositorio):
+    # Arrange
+    salva = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    repositorio.gravar_tentativa_recusada(
+        salva.id,
+        _registro_de_tentativa(salva, agora=AGORA + timedelta(minutes=1)),
+    )
+    salva.alterar_situacao(
+        S.CONFIRMADA, ator=GESTOR, agora=AGORA + timedelta(minutes=2)
+    )
+    repositorio.salvar(salva)
+
+    # Act
+    historico = repositorio.listar_historico(salva.id)
+
+    # Assert
+    assert [r.resultado.value for r in historico] == ["ACEITA", "RECUSADA", "ACEITA"]
+    assert [r.registrado_em for r in historico] == sorted(
+        r.registrado_em for r in historico
+    )
+
+
+@pytest.mark.django_db
+def test_banco_recusa_registro_recusado_incoerente():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    salva = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    modelo = RegistroDeSituacaoModel.objects.get(reserva_id=salva.id)
+
+    # Act / Assert
+    modelo.pk = None
+    modelo.resultado = "RECUSADA"
+    modelo.codigo_do_erro = ""
+    modelo.situacao_pedida = "CONFIRMADA"
+    with pytest.raises(IntegrityError, match="resultado_coerente"):
+        modelo.save()
+
+
+@pytest.mark.django_db
+def test_texto_do_registro_diz_se_foi_criacao_mudanca_ou_tentativa_recusada():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    salva = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    salva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=AGORA)
+    repositorio.salvar(salva)
+    repositorio.gravar_tentativa_recusada(
+        salva.id,
+        _registro_de_tentativa(
+            salva,
+            situacao_pedida=S.CONCLUIDA,
+            codigo_do_erro="CONCLUSAO_ANTES_DO_TERMINO",
+        ),
+    )
+
+    # Act
+    textos = [
+        str(registro)
+        for registro in RegistroDeSituacaoModel.objects.filter(reserva_id=salva.id)
+    ]
+
+    # Assert
+    assert textos == [
+        f"Reserva #{salva.id}: criada como Solicitada",
+        f"Reserva #{salva.id}: Solicitada → Confirmada",
+        f"Reserva #{salva.id}: tentativa recusada de CONCLUIDA "
+        "(CONCLUSAO_ANTES_DO_TERMINO)",
+    ]

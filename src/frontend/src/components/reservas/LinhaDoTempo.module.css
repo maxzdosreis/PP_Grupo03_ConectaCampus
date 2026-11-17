@@ -46,3 +46,12 @@
 .motivo {
   color: var(--cor-texto-suave);
 }
+
+.recusada::before {
+  border-style: dashed;
+  border-color: var(--cor-erro);
+}
+
+.icone {
+  margin-right: var(--espaco-1);
+}

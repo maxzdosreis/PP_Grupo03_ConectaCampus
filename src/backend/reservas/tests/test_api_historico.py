@@ -108,6 +108,10 @@ def test_registro_nao_expoe_o_id_do_autor(cliente_gestor, reserva_id):
         "motivo",
         "autor",
         "registrado_em",
+        "resultado",
+        "situacao_pedida",
+        "situacao_pedida_rotulo",
+        "codigo_do_erro",
     }
     assert registro["autor"] == {"nome": "Ana Souza"}
 
@@ -128,7 +132,9 @@ def test_cancelamento_aparece_com_o_motivo(cliente_solicitante, reserva_id):
     assert registros[-1]["autor"] == {"nome": "Ana Souza"}
 
 
-def test_tentativa_recusada_nao_aparece_no_historico(cliente_solicitante, reserva_id):
+def test_tentativa_recusada_aparece_no_historico_sem_quebrar_a_cadeia(
+    cliente_solicitante, reserva_id
+):
     # Arrange
     recusada = _alterar(cliente_solicitante, reserva_id, {"situacao": "CONFIRMADA"})
 
@@ -137,7 +143,10 @@ def test_tentativa_recusada_nao_aparece_no_historico(cliente_solicitante, reserv
 
     # Assert
     assert recusada.status_code == 403
-    assert [r["situacao_nova"] for r in registros] == ["SOLICITADA"]
+    assert [r["resultado"] for r in registros] == ["ACEITA", "RECUSADA"]
+    assert registros[-1]["situacao_pedida"] == "CONFIRMADA"
+    assert registros[-1]["codigo_do_erro"] == "ACAO_NAO_PERMITIDA"
+    verificar_historico_coerente(registros, "SOLICITADA")
 
 
 def test_solicitante_pedindo_historico_de_outra_pessoa_recebe_404(

@@ -10,6 +10,7 @@ classDiagram
 %% classe: Reserva = reservas.domain.reserva.Reserva
 %% classe: SituacaoReserva = reservas.domain.situacao.SituacaoReserva
 %% classe: RegistroDeSituacao = reservas.domain.registro_de_situacao.RegistroDeSituacao
+%% classe: ResultadoDoRegistro = reservas.domain.registro_de_situacao.ResultadoDoRegistro
 %% classe: Solicitante = reservas.domain.solicitante.Solicitante
 %% classe: IntervaloDeHorario = reservas.domain.intervalo_de_horario.IntervaloDeHorario
 %% classe: Ator = reservas.domain.ator.Ator
@@ -60,6 +61,7 @@ classDiagram
       alterar_situacao(nova, motivo, ator, agora) None
       visivel_para(ator) bool
       acoes_permitidas_para(ator, agora) list[SituacaoReserva]
+      registrar_tentativa_recusada(situacao_pedida, motivo, ator, agora, codigo_do_erro) RegistroDeSituacao
     }
     class SituacaoReserva {
       <<enumeration>>
@@ -91,6 +93,14 @@ classDiagram
       autor_usuario_id: int
       autor_nome: str
       registrado_em: datetime
+      resultado: ResultadoDoRegistro
+      codigo_do_erro: str | None
+      situacao_pedida: str | None
+    }
+    class ResultadoDoRegistro {
+      <<enumeration>>
+      ACEITA
+      RECUSADA
     }
     class Ator {
       <<objeto de valor>>
@@ -126,6 +136,7 @@ classDiagram
   Reserva "1" *-- "1" IntervaloDeHorario : intervalo
   Reserva "1" *-- "0..*" RegistroDeSituacao : registros_pendentes
   Reserva --> "1" SituacaoReserva : situacao
+  RegistroDeSituacao --> "1" ResultadoDoRegistro : resultado
   Ator --> "1" PapelDoAtor : papel
   Reserva "0..*" .. "1" EspacoEsportivo : espaco_id
   Solicitante "0..*" .. "1" Usuario : usuario_id

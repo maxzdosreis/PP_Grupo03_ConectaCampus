@@ -17,6 +17,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03, CA-04, CA-10 novos, com a implementação pendente na tarefa RES-11 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)); CA-12, CA-14 novos, com a implementação pendente na tarefa RES-12 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-125 a TA-133 passam a TA-137 a TA-149 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Divisão pelo [CR-05](../mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md) (REQ-13): os CAs do cancelamento pelo Atendente responsável passam para a [US-20](US-20-cancelar-qualquer-reserva.md), com os mesmos TAs, renumerados; a US-13 fica com o Solicitante. CAs e TAs renumerados. Mudança de escopo da história, sem obrigação nova. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12: CA-10 sem a marca de implementação pendente, com o TA-146 apontando os testes; o ponto aberto do CA-07 (leitura desatualizada) resolvido: entra como tentativa recusada; as Situações dos CA-05 e CA-08 dizem que o código cumpria a regra anterior até a RES-12, e o TA-144 deixa de citar os testes da regra anterior. Mudança comportamental no código. Sem aprovação. |
 
 ## Index Card
 
@@ -93,7 +94,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
 - **TA:** [TA-141](#ta-141)
-- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código ainda cumpre até a tarefa RES-12.
+- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-13-ca-06"></a>US-13 · CA-06 · Cancelar sem motivo (exceção)
 
@@ -108,11 +109,11 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 
 - **Dado** uma reserva Solicitada que o Solicitante vê na lista e que o Gestor recusa nesse meio-tempo
 - **Quando** o Solicitante confirma o cancelamento sobre a leitura antiga
-- **Então** o sistema informa "Esta reserva já está Recusada: ela foi alterada enquanto você decidia. Atualize a lista e tente de novo." e oferece atualizar a lista; vale só a recusa do Gestor, e o histórico não ganha um registro de cancelamento
+- **Então** o sistema informa "Esta reserva já está Recusada: ela foi alterada enquanto você decidia. Atualize a lista e tente de novo." e oferece atualizar a lista; vale só a recusa do Gestor, e o histórico não ganha um registro de cancelamento, só a tentativa recusada com o código `RESERVA_DESATUALIZADA`
 - **Origem:** [UC-10 E7.1](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e7-1)
 - **RF:** [RF-21](../requisitos/rf-reservas.md#rf-21) (a garantia é o [RNF-R04](../requisitos/rnf.md#rnf-r04))
 - **TA:** [TA-143](#ta-143)
-- **Situação:** ponto aberto do [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md): se a recusa por leitura desatualizada entra no histórico como tentativa fica para a tarefa RES-12 ("a definir na RES-12"). Até lá, este CA vale como está.
+- **Situação:** ponto aberto do [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) resolvido na tarefa RES-12 (17/11/2026): a recusa por leitura desatualizada entra no histórico como tentativa recusada, com o código `RESERVA_DESATUALIZADA`. O histórico não ganha um registro de cancelamento; ganha só essa tentativa.
 
 #### <a id="us-13-ca-08"></a>US-13 · CA-08 · Cancelamento registrado no histórico (registro)
 
@@ -123,7 +124,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-144](#ta-144)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
-- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-12; não valem como prova da regra nova.
+- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-13-ca-09"></a>US-13 · CA-09 · Reserva de outra pessoa é tratada como inexistente (acesso)
 
@@ -143,7 +144,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22), [RF-23](../requisitos/rf-reservas.md#rf-23)
 - **TA:** [TA-146](#ta-146)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-12)
 
 ## Testes de aceite
 
@@ -157,7 +157,7 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | <a id="ta-140"></a>TA-140 | [CA-04](#us-13-ca-04) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes`; `components/reservas/TabelaDeReservas.test.tsx`: `sem ações mostra "—" e "Nenhuma ação disponível" para leitor de tela` |
 | <a id="ta-141"></a>TA-141 | [CA-05](#us-13-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos` |
 | <a id="ta-142"></a>TA-142 | [CA-06](#us-13-ca-06) | automatizado | `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `reservas/tests/test_alterar_situacao.py::test_recusar_ou_cancelar_sem_motivo_lanca_erro_e_preserva_a_reserva [x]` |
-| <a id="ta-143"></a>TA-143 | [CA-07](#us-13-ca-07) | automatizado | `reservas/tests/test_repositorio_reservas.py::test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar`; `reservas/tests/test_reserva.py::test_reserva_desatualizada_vira_409_com_a_situacao_atual`; `pages/PaginaReservas.test.tsx`: `409 mostra o aviso no diálogo com "Atualizar lista", que fecha e recarrega` |
-| <a id="ta-144"></a>TA-144 | [CA-08](#us-13-ca-08) | automatizado | `reservas/tests/test_api_historico.py::test_cancelamento_aparece_com_o_motivo`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico` |
+| <a id="ta-143"></a>TA-143 | [CA-07](#us-13-ca-07) | automatizado | `reservas/tests/test_repositorio_reservas.py::test_alteracao_sobre_leitura_desatualizada_e_recusada_sem_gravar`; `reservas/tests/test_tentativas_recusadas.py::test_leitura_desatualizada_vira_tentativa_com_a_situacao_que_o_banco_tem`; `reservas/tests/test_reserva.py::test_reserva_desatualizada_vira_409_com_a_situacao_atual`; `pages/PaginaReservas.test.tsx`: `409 mostra o aviso no diálogo com "Atualizar lista", que fecha e recarrega` |
+| <a id="ta-144"></a>TA-144 | [CA-08](#us-13-ca-08) | automatizado | `reservas/tests/test_api_historico.py::test_cancelamento_aparece_com_o_motivo`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_aparece_no_historico_sem_quebrar_a_cadeia` |
 | <a id="ta-145"></a>TA-145 | [CA-09](#us-13-ca-09) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_cancelando_a_de_outra_pessoa_responde_404_sem_mudar_nada`; `reservas/tests/test_alterar_situacao.py::test_reserva_de_outra_pessoa_para_o_solicitante_lanca_nao_encontrada` |
-| <a id="ta-146"></a>TA-146 | [CA-10](#us-13-ca-10) | pendente | implementação pendente (tarefa RES-12) — TA a criar junto com o código ([CR-02 · CA-03](../mudancas/CR-02-tentativas-recusadas-no-historico.md#5-critérios-de-aceite)). |
+| <a id="ta-146"></a>TA-146 | [CA-10](#us-13-ca-10) | automatizado | `reservas/tests/test_api_tentativas_recusadas.py::test_solicitante_que_nao_e_dono_recebe_404_e_nada_e_registrado`; `reservas/tests/test_tentativas_recusadas.py::test_reserva_de_outra_pessoa_nao_gera_registro`; `reservas/tests/test_tentativa_recusada_no_dominio.py::test_tentativa_de_quem_nao_ve_a_reserva_e_nao_encontrada` |

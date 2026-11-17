@@ -21,6 +21,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator de UC-15 e UC-16: Gestor do serviço; UC-16 A5.1 (desfazer reservas): Atendente responsável. Só o rótulo do ator; metas e passos iguais ([DEC-25](../decisoes/DEC-25.md), REQ-12). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicação na especificação dos [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (DEC-13), [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (DEC-05), [CR-03](../mudancas/CR-03-horario-por-espaco.md) (DEC-07) e [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (DEC-09), com o código nas tarefas RES-11, RES-12, ESP-07 e AUT-12 (REQ-13): UC-01 E3.1 (matrícula só de dígitos), UC-06 passo 4 (funcionamento do espaço), UC-07 passo 2 e UC-08 passo 3 (ações conforme o horário) e UC-09 passo 3 e A3.2 (tentativas recusadas no histórico). As fichas estão adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | UC-23 · Gerir usuários (ficha resumida), da [DEC-27](../decisoes/DEC-27.md) e do [CR-07](../mudancas/CR-07-gestao-de-usuarios.md) (AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | UC-09 A3.2: o código da RES-12 (CR-02) mostra as tentativas recusadas. Fichas sem outra mudança. Sem aprovação. |
 
 ## Sumário
 
@@ -226,7 +227,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 **Alternativas**
 
 - <a id="uc09-a3-1"></a>**A3.1** · Reserva sem registros (gravada antes de existir o histórico): "Nenhuma mudança registrada."
-- <a id="uc09-a3-2"></a>**A3.2** · Tentativas recusadas aparecem, distintas das mudanças aceitas ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), código na tarefa RES-12).
+- <a id="uc09-a3-2"></a>**A3.2** · Tentativas recusadas aparecem, distintas das mudanças aceitas ([DEC-05](../decisoes/DEC-05.md), decidida na Aula 7; [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), implementado na tarefa RES-12 em 17/11/2026).
 
 **Exceções**
 

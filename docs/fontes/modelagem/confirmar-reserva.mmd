@@ -28,14 +28,19 @@ sequenceDiagram
   CASO->>REPO: obter_por_id(reserva_id)
   REPO-->>CASO: reserva lida (visivel_para(ator):<br/>o gestor vê todas)
   CASO->>RES: alterar_situacao(nova_situacao, motivo=None,<br/>ator=ator, agora=relogio())
-  alt reserva lida RECUSADA (Ginásio Coberto): transição não permitida
-    RES--xVIEW: TransicaoDeSituacaoInvalida sobe: situação,<br/>motivo e registros intactos, salvar não é chamado
-    VIEW-->>NAV: 409 TRANSICAO_DE_SITUACAO_INVALIDA<br/>(tratar_excecao) “Não é possível alterar<br/>uma reserva Recusada para Confirmada.”
-  else reserva lida SOLICITADA (a da Figura 5): SOLICITADA → CONFIRMADA
+  alt reserva lida SOLICITADA (a da Figura 5): SOLICITADA → CONFIRMADA
     RES-->>CASO: situacao = CONFIRMADA + registro<br/>pendente SOLICITADA → CONFIRMADA
     CASO->>REPO: salvar(reserva)
     Note over REPO: transaction.atomic: select_for_update<br/>da linha. Situação gravada ≠ a de<br/>origem (decisão simultânea) → 409<br/>RESERVA_DESATUALIZADA. Senão, UPDATE<br/>+ bulk_create do registro
     REPO-->>CASO: reserva CONFIRMADA
     VIEW-->>NAV: 200 “Reserva confirmada<br/>com sucesso.”
+  else reserva lida RECUSADA (Ginásio Coberto): transição não permitida
+    RES-->>CASO: lança TransicaoDeSituacaoInvalida: situação,<br/>motivo e registros intactos, salvar não é chamado
+    CASO->>RES: registrar_tentativa_recusada(situacao_pedida, motivo=…,<br/>ator=ator, agora=agora, codigo_do_erro=…)
+    RES-->>CASO: registro RECUSADA: situação anterior = nova =<br/>RECUSADA, pedida CONFIRMADA, código do erro
+    CASO->>REPO: gravar_tentativa_recusada(reserva_id, registro)
+    Note over REPO: transaction.atomic PRÓPRIA: um INSERT no<br/>histórico, confirmado (commit) agora, antes<br/>de a recusa seguir: ela não o desfaz
+    CASO--xVIEW: TransicaoDeSituacaoInvalida segue, a mesma:<br/>falhar ao registrar não esconde o erro de negócio
+    VIEW-->>NAV: 409 TRANSICAO_DE_SITUACAO_INVALIDA<br/>(tratar_excecao) “Não é possível alterar<br/>uma reserva Recusada para Confirmada.”
   end
-  Note over NAV,REPO: Verificações, na ordem do código (qualquer recusa deixa reserva e histórico como estavam):<br/>situacao no corpo → 400 DADOS_INVALIDOS · visível ao ator → 404 RESERVA_NAO_ENCONTRADA<br/>situação conhecida → 400 SITUACAO_INVALIDA · o papel pode → 403 ACAO_NAO_PERMITIDA<br/>transição permitida → 409 TRANSICAO_DE_SITUACAO_INVALIDA (desenhada)<br/>motivo até 300 caracteres → 400 TEXTO_MUITO_LONGO · motivo para recusar ou cancelar → 400 MOTIVO_OBRIGATORIO<br/>ainda na situação lida → 409 RESERVA_DESATUALIZADA
+  Note over NAV,REPO: Verificações, na ordem do código (qualquer recusa deixa a reserva como estava e, se a reserva é visível ao ator, grava a tentativa no histórico):<br/>situacao no corpo → 400 DADOS_INVALIDOS · visível ao ator → 404 RESERVA_NAO_ENCONTRADA<br/>situação conhecida → 400 SITUACAO_INVALIDA · o papel pode → 403 ACAO_NAO_PERMITIDA<br/>transição permitida → 409 TRANSICAO_DE_SITUACAO_INVALIDA (desenhada)<br/>motivo até 300 caracteres → 400 TEXTO_MUITO_LONGO · motivo para recusar ou cancelar → 400 MOTIVO_OBRIGATORIO<br/>ainda na situação lida → 409 RESERVA_DESATUALIZADA

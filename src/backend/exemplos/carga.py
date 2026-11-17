@@ -2,6 +2,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from compartilhado.domain.erros import ErroDeDominio
 from contas.api.dependencias import cadastrar_solicitante
 from contas.domain.cadastro import DadosDeCadastro
 from contas.domain.perfil import PerfilUsuario
@@ -20,7 +21,9 @@ from exemplos.dados import (
     SOLICITANTES,
     USUARIOS,
     EspacoDeExemplo,
+    MudancaDeExemplo,
     ReservaDeExemplo,
+    TentativaRecusadaDeExemplo,
     UsuarioDeExemplo,
 )
 from reservas.api.dependencias import (
@@ -125,14 +128,50 @@ def _criar_reserva(
         hora_fim=exemplo.hora_fim,
         finalidade=exemplo.finalidade,
     )
-    for mudanca in exemplo.mudancas:
-        alterada_em = agora - timedelta(days=mudanca.ha_dias)
-        alterar_situacao_reserva(relogio=_relogio_em(alterada_em)).executar(
-            reserva_id=reserva.id,
-            nova_situacao=mudanca.situacao,
-            motivo=mudanca.motivo,
-            ator=gestor,
+    ator_do_solicitante = Ator(
+        usuario_id=solicitante.usuario_id,
+        nome=solicitante.nome,
+        papel=PapelDoAtor.SOLICITANTE,
+    )
+    for passo in exemplo.mudancas:
+        momento = agora - timedelta(days=passo.ha_dias)
+        if isinstance(passo, MudancaDeExemplo):
+            _alterar_situacao(reserva.id, passo, momento, gestor)
+        else:
+            ator = ator_do_solicitante if passo.pelo_solicitante else gestor
+            _tentar_e_ser_recusado(reserva.id, passo, momento, ator)
+
+
+def _alterar_situacao(
+    reserva_id: int, mudanca: MudancaDeExemplo, momento: datetime, ator: Ator
+) -> None:
+    alterar_situacao_reserva(relogio=_relogio_em(momento)).executar(
+        reserva_id=reserva_id,
+        nova_situacao=mudanca.situacao,
+        motivo=mudanca.motivo,
+        ator=ator,
+    )
+
+
+def _tentar_e_ser_recusado(
+    reserva_id: int,
+    tentativa: TentativaRecusadaDeExemplo,
+    momento: datetime,
+    ator: Ator,
+) -> None:
+    try:
+        alterar_situacao_reserva(relogio=_relogio_em(momento)).executar(
+            reserva_id=reserva_id,
+            nova_situacao=tentativa.situacao,
+            motivo=tentativa.motivo,
+            ator=ator,
         )
+    except ErroDeDominio:
+        return
+    raise RuntimeError(
+        "A tentativa de exemplo deveria ser recusada, mas foi aceita: "
+        f"{tentativa.situacao} na reserva {reserva_id}."
+    )
 
 
 def _relogio_em(momento: datetime) -> Callable[[], datetime]:

@@ -134,6 +134,7 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         self._historico: dict[int, list[RegistroDeSituacao]] = {}
         self._proximo_id = 1
         self.chamadas_de_salvar = 0
+        self.tentativas_registradas = 0
 
     def salvar(self, reserva: Reserva) -> Reserva:
         self.chamadas_de_salvar += 1
@@ -150,6 +151,14 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         self._historico.setdefault(reserva_id, []).extend(reserva.registros_pendentes)
         reserva.marcar_registros_como_gravados()
         return _copiar(reserva, reserva_id)
+
+    def gravar_tentativa_recusada(
+        self, reserva_id: int, registro: RegistroDeSituacao
+    ) -> None:
+        if reserva_id not in self._reservas:
+            raise ReservaNaoEncontrada(reserva_id)
+        self.tentativas_registradas += 1
+        self._historico.setdefault(reserva_id, []).append(registro)
 
     def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
         registros = self._historico.get(reserva_id, [])

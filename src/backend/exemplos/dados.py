@@ -31,6 +31,14 @@ class MudancaDeExemplo:
 
 
 @dataclass(frozen=True)
+class TentativaRecusadaDeExemplo:
+    situacao: SituacaoReserva
+    pelo_solicitante: bool = False
+    motivo: str | None = None
+    ha_dias: int = 0
+
+
+@dataclass(frozen=True)
 class ReservaDeExemplo:
     espaco: str
     solicitante_email: str
@@ -38,7 +46,7 @@ class ReservaDeExemplo:
     hora_inicio: time
     hora_fim: time
     finalidade: str
-    mudancas: tuple[MudancaDeExemplo, ...] = ()
+    mudancas: tuple[MudancaDeExemplo | TentativaRecusadaDeExemplo, ...] = ()
     solicitada_ha_dias: int = 0
 
 
@@ -100,6 +108,11 @@ RESERVAS = (
         hora_inicio=time(10, 0),
         hora_fim=time(11, 0),
         finalidade="Treino de vôlei do time da Computação",
+        mudancas=(
+            TentativaRecusadaDeExemplo(
+                SituacaoReserva.CONFIRMADA, pelo_solicitante=True
+            ),
+        ),
     ),
     ReservaDeExemplo(
         espaco=CAMPO_PRINCIPAL,
@@ -109,7 +122,10 @@ RESERVAS = (
         hora_fim=time(16, 0),
         finalidade="Partida do campeonato intercursos",
         solicitada_ha_dias=1,
-        mudancas=(MudancaDeExemplo(SituacaoReserva.CONFIRMADA),),
+        mudancas=(
+            MudancaDeExemplo(SituacaoReserva.CONFIRMADA),
+            TentativaRecusadaDeExemplo(SituacaoReserva.CONCLUIDA),
+        ),
     ),
     ReservaDeExemplo(
         espaco=GINASIO_COBERTO,
@@ -123,6 +139,11 @@ RESERVAS = (
             MudancaDeExemplo(
                 SituacaoReserva.RECUSADA,
                 motivo="O ginásio estará fechado para um evento institucional.",
+            ),
+            TentativaRecusadaDeExemplo(
+                SituacaoReserva.CANCELADA,
+                pelo_solicitante=True,
+                motivo="Quero desistir do pedido.",
             ),
         ),
     ),
@@ -151,6 +172,9 @@ RESERVAS = (
         mudancas=(
             MudancaDeExemplo(SituacaoReserva.CONFIRMADA, ha_dias=2),
             MudancaDeExemplo(SituacaoReserva.CONCLUIDA),
+            TentativaRecusadaDeExemplo(
+                SituacaoReserva.CANCELADA, motivo="Cancelar depois de concluída."
+            ),
         ),
     ),
 )

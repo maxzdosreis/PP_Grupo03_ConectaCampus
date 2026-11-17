@@ -16,6 +16,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03, CA-07 novos, com a implementação pendente na tarefa RES-11 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-145 a TA-151 passam a TA-165 a TA-173 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12: as Situações dos CA-04 e CA-08 dizem que o código cumpria a regra anterior até a RES-12, e o TA-168 deixa de citar os testes da regra anterior. Mudança comportamental no código; os CAs não mudaram. Sem aprovação. |
 
 ## Index Card
 
@@ -84,7 +85,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
 - **TA:** [TA-164](#ta-164)
-- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código ainda cumpre até a tarefa RES-12.
+- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-15-ca-05"></a>US-15 · CA-05 · Motivo longo demais (exceção)
 
@@ -123,7 +124,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-168](#ta-168)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
-- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-14 · CA-12](US-14-confirmar-uma-reserva.md#us-14-ca-12), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-12; não valem como prova da regra nova.
+- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-14 · CA-12](US-14-confirmar-uma-reserva.md#us-14-ca-12), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-15-ca-09"></a>US-15 · CA-09 · Só o Gestor recusa (acesso)
 
@@ -147,5 +148,5 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | <a id="ta-165"></a>TA-165 | [CA-05](#us-15-ca-05) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
 | <a id="ta-166"></a>TA-166 | [CA-06](#us-15-ca-06) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo`; `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `pages/PaginaReservas.test.tsx`: `erro no motivo aparece embaixo do campo, que recebe o foco` |
 | <a id="ta-167"></a>TA-167 | [CA-07](#us-15-ca-07) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_no_instante_do_inicio_responde_409 [x]`; `reservas/tests/test_momento_da_mudanca.py::test_mensagem_de_recusar_ou_cancelar_apos_o_inicio_diz_o_verbo_e_o_inicio [x]`; `reservas/tests/test_alterar_situacao.py::test_recusar_ou_cancelar_depois_do_inicio_lanca_erro_do_dominio [x]`; `reservas/tests/test_propriedades_do_momento.py::test_gestor_so_recusa_ou_cancela_se_agora_e_antes_do_inicio` |
-| <a id="ta-168"></a>TA-168 | [CA-08](#us-15-ca-08) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico` |
+| <a id="ta-168"></a>TA-168 | [CA-08](#us-15-ca-08) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem` |
 | <a id="ta-169"></a>TA-169 | [CA-09](#us-15-ca-09) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |

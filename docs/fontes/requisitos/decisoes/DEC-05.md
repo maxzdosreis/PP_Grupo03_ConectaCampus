@@ -8,11 +8,11 @@
 |---|---|
 | **Estado da decisão** | Decidida. Resposta do professor na Aula 7 (06/11/2026); a resposta muda o comportamento implementado e segue pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md). |
 | **Pergunta** | Uma tentativa recusada de mudar a situação de uma reserva (perfil sem permissão, transição não permitida, motivo ausente) precisa ficar registrada? Se sim, onde e quem a consulta? |
-| **Opção implementada até o CR-02** | **a)** Não registrar. O [histórico](../glossario.md#historico) guarda só a criação e as mudanças aceitas. Uma recusa não altera a reserva e não gera [registro de situação](../glossario.md#registro-de-situacao). |
+| **Opção implementada até o CR-02** | **a)** Não registrar (vigente até 16/11/2026). O [histórico](../glossario.md#historico) guarda só a criação e as mudanças aceitas. Uma recusa não altera a reserva e não gera [registro de situação](../glossario.md#registro-de-situacao). |
 | **Resposta do professor** | "Deve ficar registrado sim, para ter o histórico completo da reserva." |
 | **Decisão do grupo** | As tentativas recusadas entram no próprio histórico da reserva (não num log separado), com ator, momento, situação pedida, resultado e código do erro. Só se registram tentativas sobre uma reserva visível ao ator: a de outro Solicitante continua "não encontrada" e não é registrada, para não revelar a reserva. |
 | **Decisão** | Toda tentativa recusada de mudar a situação de uma reserva visível ao ator fica no histórico dessa reserva, com ator, momento, situação pedida, resultado e código do erro, sem mudar a situação. |
-| **Implementação** | [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), tarefa RES-12. Até ela, o código continua com a opção a. |
+| **Implementação** | [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), tarefa RES-12, implementada em 17/11/2026: o código registra as tentativas recusadas (a opção c). |
 | **Motivo** | O histórico é o registro de negócio da reserva; uma recusa não muda nada nela. O modelo de critério de aceite do professor (CA-04: "tentativa registrada com data, ator e resultado", A3·s23–24) fica atendido só em parte. |
 | **Alternativas** | **b)** Registrar só em log técnico, sem tela, consultado pela Equipe de TI. **c)** Registrar no histórico de negócio também as recusas, com o resultado, visíveis na linha do tempo. A decisão é a c, com a restrição da reserva visível ao ator. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor. |
@@ -31,3 +31,4 @@
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Decidida na Aula 7: resposta do professor e decisão do grupo registradas; a opção a passa a "implementada até o CR-02"; CR-02 aberto, implementação na RES-12 (GES-02). |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Artefatos afetados com 15 critérios e 15 testes de aceite, depois de aplicar o CR-02 na especificação, com os CAs novos das US-12 a US-14 (REQ-13). Estado e opção sem mudança. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | US-20 nova (divisão da US-13 pelo CR-05, REQ-13) entre as histórias afetadas. Estado e opção sem mudança. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementada na tarefa RES-12 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), seção 9): o código registra as tentativas recusadas. Estado e decisão sem mudança. Sem aprovação. |

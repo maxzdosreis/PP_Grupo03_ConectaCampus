@@ -16,6 +16,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Atendente responsável ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-02, CA-04, CA-07 novos, com a implementação pendente na tarefa RES-11 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-152 a TA-157 passam a TA-174 a TA-182 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12: as Situações dos CA-06 e CA-08 dizem que o código cumpria a regra anterior até a RES-12. Mudança comportamental no código; os CAs e os TAs não mudaram. Sem aprovação. |
 
 ## Index Card
 
@@ -103,7 +104,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **Origem:** [UC-10 E6.5](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-5)
 - **RF:** [RF-24](../requisitos/rf-reservas.md#rf-24)
 - **TA:** [TA-175](#ta-175)
-- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código ainda cumpre até a tarefa RES-12.
+- **Situação:** em parte substituído (a cláusula "o mesmo histórico": a tentativa recusada passa a entrar no histórico) por [US-20 · CA-04](US-20-cancelar-qualquer-reserva.md#us-20-ca-04), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). O TA deste CA verifica a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-16-ca-07"></a>US-16 · CA-07 · Concluir antes do término (exceção)
 
@@ -124,7 +125,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-177](#ta-177)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
-- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-14 · CA-12](US-14-confirmar-uma-reserva.md#us-14-ca-12), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-12; não valem como prova da regra nova.
+- **Situação:** em parte substituído (a regra das tentativas recusadas) por [US-14 · CA-12](US-14-confirmar-uma-reserva.md#us-14-ca-12), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-16-ca-09"></a>US-16 · CA-09 · Só o Gestor conclui (acesso)
 

@@ -16,6 +16,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03, CA-11 novos, com a implementação pendente na tarefa RES-12 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-115 a TA-124 passam a TA-125 a TA-136 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Papéis da história com os três papéis da [DEC-25](../decisoes/DEC-25.md) ([CR-05](../mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md), REQ-13); os CAs seguem dizendo "Gestor" para o perfil. Mudança editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-02 implementado na tarefa RES-12: CA-03 e CA-11 sem a marca de implementação pendente, com os TA-127 e TA-135 apontando os testes; a Situação do CA-10 passa a dizer que o código cumpria a regra anterior até a RES-12 e o TA-134 deixa de citar o teste da regra anterior. Mudança comportamental no código; os CAs não mudaram. Sem aprovação. |
 
 ## Index Card
 
@@ -73,7 +74,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-127](#ta-127)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-12)
 
 #### <a id="us-12-ca-04"></a>US-12 · CA-04 · Decidir a partir do detalhe (alternativa)
 
@@ -138,7 +138,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-134](#ta-134)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md)
-- **Situação:** em parte substituído (a regra das tentativas recusadas) por [CA-11](#us-12-ca-11), [CA-03](#us-12-ca-03), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-12; não valem como prova da regra nova.
+- **Situação:** em parte substituído (a regra das tentativas recusadas) por [CA-11](#us-12-ca-11), [CA-03](#us-12-ca-03), pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-12 (implementada em 17/11/2026); o texto fica como registro da regra anterior. Vale a regra do CA que o substitui.
 
 #### <a id="us-12-ca-11"></a>US-12 · CA-11 · O histórico é um registro de fatos, com as tentativas recusadas (registro)
 
@@ -149,7 +149,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-22](../requisitos/rf-reservas.md#rf-22)
 - **TA:** [TA-135](#ta-135)
 - **Depende de:** [DEC-05](../decisoes/DEC-05.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-12)
 
 #### <a id="us-12-ca-12"></a>US-12 · CA-12 · Quem vê o detalhe e o histórico (acesso)
 
@@ -168,13 +167,13 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 |---|---|---|---|
 | <a id="ta-125"></a>TA-125 | [CA-01](#us-12-ca-01) | automatizado | `reservas/tests/test_api_consulta_reservas.py::test_detalhe_devolve_a_reserva_no_mesmo_formato_da_criacao`; `pages/PaginaReserva.test.tsx`: `mostra os dados da reserva com o nome do espaço e as datas formatadas`; `pages/PaginaReserva.test.tsx`: `mostra o motivo junto da situação quando houver`; `pages/PaginaReserva.test.tsx`: `sem ações, não mostra nenhum botão` |
 | <a id="ta-126"></a>TA-126 | [CA-02](#us-12-ca-02) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `reservas/tests/test_api_historico.py::test_registrado_em_sai_em_iso_8601_no_fuso_de_sao_paulo`; `reservas/tests/test_api_historico.py::test_cancelamento_aparece_com_o_motivo`; `pages/PaginaReserva.test.tsx`: `mostra a linha do tempo em ordem, com data e hora, autor e motivo` |
-| <a id="ta-127"></a>TA-127 | [CA-03](#us-12-ca-03) | pendente | implementação pendente (tarefa RES-12) — TA a criar junto com o código ([CR-02 · CA-04](../mudancas/CR-02-tentativas-recusadas-no-historico.md#5-critérios-de-aceite)). |
+| <a id="ta-127"></a>TA-127 | [CA-03](#us-12-ca-03) | automatizado | `reservas/tests/test_api_tentativas_recusadas.py::test_tentativa_depois_da_confirmacao_aparece_distinta_da_mudanca_aceita`; `reservas/tests/test_api_tentativas_recusadas.py::test_historico_mistura_aceitas_e_recusadas_em_ordem_cronologica`; `components/reservas/LinhaDoTempo.test.tsx`: `mostra a tentativa recusada com texto, ícone e o motivo legível do código`; `components/reservas/LinhaDoTempo.test.tsx`: `mantém a ordem que o backend mandou, sem reordenar` |
 | <a id="ta-128"></a>TA-128 | [CA-04](#us-12-ca-04) | automatizado | `pages/PaginaReserva.test.tsx`: `os botões vêm de acoes_disponiveis, com nome acessível com contexto`; `pages/PaginaReserva.test.tsx`: `uma ação concluída recarrega a reserva e o histórico e põe o foco no título`; `pages/PaginaReserva.test.tsx`: `no 409, o diálogo oferece "Atualizar reserva", que recarrega o detalhe` |
 | <a id="ta-129"></a>TA-129 | [CA-05](#us-12-ca-05) | automatizado | `pages/PaginaReserva.test.tsx`: `"Voltar para as reservas" volta para a lista com os filtros de antes`; `pages/PaginaReserva.test.tsx`: `quem entrou direto pelo link volta para /reservas`; `components/reservas/TabelaDeReservas.test.tsx`: `o link leva no state a URL da lista com os filtros, para o "Voltar"` |
 | <a id="ta-130"></a>TA-130 | [CA-06](#us-12-ca-06) | automatizado | `pages/PaginaReserva.test.tsx`: `histórico vazio mostra "Nenhuma mudança registrada."` |
 | <a id="ta-131"></a>TA-131 | [CA-07](#us-12-ca-07) | automatizado | `reservas/tests/test_api_permissoes.py::test_detalhe_de_outra_pessoa_para_o_solicitante_responde_404`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_inexistente_responde_404`; `pages/PaginaReserva.test.tsx`: `404 mostra "Reserva não encontrada", sem detalhe nem histórico`; `pages/PaginaReserva.test.tsx`: `id "%s" na URL mostra o mesmo estado, sem chamar a API` |
 | <a id="ta-132"></a>TA-132 | [CA-08](#us-12-ca-08) | automatizado | `reservas/tests/test_api_historico.py::test_solicitante_pedindo_historico_de_outra_pessoa_recebe_404`; `reservas/tests/test_api_historico.py::test_historico_de_reserva_inexistente_responde_404` |
 | <a id="ta-133"></a>TA-133 | [CA-09](#us-12-ca-09) | automatizado | `pages/PaginaReserva.test.tsx`: `se o histórico falhar, o erro fica só na seção e "Tentar novamente" busca de novo` |
-| <a id="ta-134"></a>TA-134 | [CA-10](#us-12-ca-10) | automatizado | `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao`; `reservas/tests/test_api_historico.py::test_registro_nao_expoe_o_id_do_autor` |
-| <a id="ta-135"></a>TA-135 | [CA-11](#us-12-ca-11) | pendente | implementação pendente (tarefa RES-12) — TA a criar junto com o código ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md#4-diferença) (seção 4, o "depois")). |
+| <a id="ta-134"></a>TA-134 | [CA-10](#us-12-ca-10) | automatizado | `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao`; `reservas/tests/test_api_historico.py::test_registro_nao_expoe_o_id_do_autor` |
+| <a id="ta-135"></a>TA-135 | [CA-11](#us-12-ca-11) | automatizado | `reservas/tests/test_api_tentativas_recusadas.py::test_historico_mantem_os_campos_anteriores_e_acrescenta_os_novos`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_aparece_no_historico_sem_quebrar_a_cadeia`; `reservas/tests/test_api_historico.py::test_historico_nao_aceita_alteracao_nem_exclusao`; `reservas/tests/test_api_historico.py::test_registro_nao_expoe_o_id_do_autor`; `reservas/tests/test_api_tentativas_recusadas.py::test_gestor_concluindo_antes_do_termino_e_recusado_mas_a_tentativa_fica_gravada` |
 | <a id="ta-136"></a>TA-136 | [CA-12](#us-12-ca-12) | automatizado | `reservas/tests/test_api_permissoes.py::test_gestor_ve_o_detalhe_de_qualquer_reserva`; `reservas/tests/test_api_consulta_reservas.py::test_detalhe_sem_login_responde_401`; `reservas/tests/test_api_historico.py::test_historico_sem_login_responde_401`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |

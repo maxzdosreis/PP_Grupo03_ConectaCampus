@@ -15,7 +15,11 @@ from reservas.domain.excecoes import (
 )
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.momento import exigir_fuso
-from reservas.domain.registro_de_situacao import RegistroDeSituacao
+from reservas.domain.registro_de_situacao import (
+    SITUACAO_PEDIDA_MAXIMO_CARACTERES,
+    RegistroDeSituacao,
+    ResultadoDoRegistro,
+)
 from reservas.domain.regras_de_agenda import garantir_regras_de_agenda
 from reservas.domain.situacao import (
     DESTINOS_DE_TRANSICAO,
@@ -179,6 +183,30 @@ class Reserva:
         self.motivo_da_situacao = motivo_normalizado
         self._registros_pendentes.append(registro)
 
+    def registrar_tentativa_recusada(
+        self,
+        situacao_pedida: SituacaoReserva | str,
+        *,
+        motivo: str | None,
+        ator: Ator,
+        agora: datetime,
+        codigo_do_erro: str,
+    ) -> RegistroDeSituacao:
+        exigir_fuso(agora, "agora")
+        if not self.visivel_para(ator):
+            raise ReservaNaoEncontrada(self.id)
+        return RegistroDeSituacao(
+            situacao_anterior=self.situacao,
+            situacao_nova=self.situacao,
+            motivo=normalizar_espacos(motivo)[:MOTIVO_MAXIMO_CARACTERES] or None,
+            autor_usuario_id=ator.usuario_id,
+            autor_nome=ator.nome,
+            registrado_em=agora,
+            resultado=ResultadoDoRegistro.RECUSADA,
+            codigo_do_erro=codigo_do_erro,
+            situacao_pedida=_texto_da_situacao_pedida(situacao_pedida),
+        )
+
     def __eq__(self, outra: object) -> bool:
         if not isinstance(outra, Reserva):
             return NotImplemented
@@ -253,6 +281,11 @@ def _exigir_motivo_se_necessario(situacao: SituacaoReserva, motivo: str | None) 
 def _exigir_permissao(papel: PapelDoAtor, nova: SituacaoReserva) -> None:
     if nova in DESTINOS_DE_TRANSICAO and not papel_pode_levar_a(papel, nova):
         raise AlteracaoDeSituacaoNaoPermitida(nova)
+
+
+def _texto_da_situacao_pedida(pedida: SituacaoReserva | str) -> str:
+    texto = pedida.value if isinstance(pedida, SituacaoReserva) else str(pedida)
+    return normalizar_espacos(texto)[:SITUACAO_PEDIDA_MAXIMO_CARACTERES]
 
 
 def _converter_situacao(situacao: SituacaoReserva | str | None) -> SituacaoReserva:

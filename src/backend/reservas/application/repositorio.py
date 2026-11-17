@@ -71,6 +71,17 @@ class RepositorioReservas(Protocol):
         lança ConflitoDeHorario.
         """
 
+    def gravar_tentativa_recusada(
+        self, reserva_id: int, registro: RegistroDeSituacao
+    ) -> None:
+        """Grava, numa transação própria e já confirmada, a tentativa recusada.
+
+        Não toca na reserva: só acrescenta o registro ao histórico dela. A
+        transação é independente de qualquer outra, para a recusa de uma mudança
+        não desfazer o registro da tentativa (DEC-05). Id inexistente lança
+        ReservaNaoEncontrada.
+        """
+
     def obter_por_id(self, reserva_id: int) -> Reserva | None:
         """Devolve a reserva ou None; o caso de uso decide se a ausência é erro."""
 

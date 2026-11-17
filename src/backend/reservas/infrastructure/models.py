@@ -8,6 +8,10 @@ from django.contrib.postgres.fields import (
 )
 from django.db import models
 
+from reservas.domain.registro_de_situacao import (
+    SITUACAO_PEDIDA_MAXIMO_CARACTERES,
+    ResultadoDoRegistro,
+)
 from reservas.domain.reserva import (
     FINALIDADE_MAXIMO_CARACTERES,
     MOTIVO_MAXIMO_CARACTERES,
@@ -22,6 +26,12 @@ SITUACAO_CHOICES = [(situacao.value, situacao.rotulo) for situacao in SituacaoRe
 _VALORES_DAS_SITUACOES = [situacao.value for situacao in SituacaoReserva]
 
 _SITUACAO_MAXIMO_CARACTERES = max(len(situacao.value) for situacao in SituacaoReserva)
+
+RESULTADO_CHOICES = [
+    (ResultadoDoRegistro.ACEITA.value, "Aceita"),
+    (ResultadoDoRegistro.RECUSADA.value, "Recusada"),
+]
+_CODIGO_DO_ERRO_MAXIMO_CARACTERES = 60
 
 SOLICITANTE_NOME_MAXIMO_CARACTERES = 150
 SOLICITANTE_MATRICULA_MAXIMO_CARACTERES = 20
@@ -137,6 +147,21 @@ class RegistroDeSituacaoModel(models.Model):
         "nome do autor", max_length=SOLICITANTE_NOME_MAXIMO_CARACTERES
     )
     registrado_em = models.DateTimeField("registrado em")
+    resultado = models.CharField(
+        "resultado",
+        max_length=max(len(valor) for valor, _ in RESULTADO_CHOICES),
+        choices=RESULTADO_CHOICES,
+        default=ResultadoDoRegistro.ACEITA.value,
+    )
+    codigo_do_erro = models.CharField(
+        "código do erro",
+        max_length=_CODIGO_DO_ERRO_MAXIMO_CARACTERES,
+        blank=True,
+        default="",
+    )
+    situacao_pedida = models.CharField(
+        "situação pedida", max_length=SITUACAO_PEDIDA_MAXIMO_CARACTERES, default=""
+    )
 
     class Meta:
         db_table = "reservas_registro_de_situacao"
@@ -158,13 +183,33 @@ class RegistroDeSituacaoModel(models.Model):
                 name="reservas_registro_de_situacao_situacoes_validas",
             ),
             models.CheckConstraint(
-                condition=~models.Q(situacao_anterior=models.F("situacao_nova")),
+                condition=models.Q(resultado=ResultadoDoRegistro.RECUSADA.value)
+                | ~models.Q(situacao_anterior=models.F("situacao_nova")),
                 name="reservas_registro_de_situacao_anterior_diferente_da_nova",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(resultado=ResultadoDoRegistro.ACEITA.value)
+                    & models.Q(codigo_do_erro="")
+                    & models.Q(situacao_pedida=models.F("situacao_nova"))
+                )
+                | (
+                    models.Q(resultado=ResultadoDoRegistro.RECUSADA.value)
+                    & ~models.Q(codigo_do_erro="")
+                    & ~models.Q(situacao_pedida="")
+                    & models.Q(situacao_anterior=models.F("situacao_nova"))
+                ),
+                name="reservas_registro_de_situacao_resultado_coerente",
             ),
         )
 
     def __str__(self):
         nova = self.get_situacao_nova_display()
+        if self.resultado == ResultadoDoRegistro.RECUSADA.value:
+            return (
+                f"Reserva #{self.reserva_id}: tentativa recusada de "
+                f"{self.situacao_pedida} ({self.codigo_do_erro})"
+            )
         if not self.situacao_anterior:
             return f"Reserva #{self.reserva_id}: criada como {nova}"
         anterior = self.get_situacao_anterior_display()

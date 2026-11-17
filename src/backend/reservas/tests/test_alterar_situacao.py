@@ -295,20 +295,6 @@ def test_registro_da_mudanca_usa_o_relogio_injetado_e_o_ator(repositorio):
     )
 
 
-def test_alteracao_recusada_nao_registra_no_historico(repositorio):
-    # Arrange
-    reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-
-    # Act
-    with pytest.raises(MotivoObrigatorio):
-        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
-            ator=GESTOR, reserva_id=reserva.id, nova_situacao=SituacaoReserva.RECUSADA
-        )
-
-    # Assert
-    assert repositorio.listar_historico(reserva.id) == []
-
-
 def test_concluir_antes_do_termino_lanca_erro_do_dominio_e_preserva_a_reserva(
     repositorio,
 ):
@@ -325,7 +311,8 @@ def test_concluir_antes_do_termino_lanca_erro_do_dominio_e_preserva_a_reserva(
         )
     assert erro.value.codigo == "CONCLUSAO_ANTES_DO_TERMINO"
     assert _retrato(repositorio, reserva.id) == antes
-    assert repositorio.listar_historico(reserva.id) == []
+    (tentativa,) = repositorio.listar_historico(reserva.id)
+    assert tentativa.resultado.value == "RECUSADA"
 
 
 @pytest.mark.parametrize("nova", [SituacaoReserva.RECUSADA, SituacaoReserva.CANCELADA])
