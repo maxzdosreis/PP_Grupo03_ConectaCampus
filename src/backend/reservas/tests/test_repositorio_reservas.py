@@ -27,6 +27,7 @@ from reservas.tests.fakes import (
     BRUNO,
     DEPOIS_DO_TERMINO,
     DIA,
+    FUNCIONAMENTO_PADRAO,
     GESTOR,
     ID_INEXISTENTE,
     RepositorioReservasEmMemoria,
@@ -59,6 +60,7 @@ def _solicitar(**sobrescritas):
         "hora_fim": time(11, 0),
         "finalidade": "Treino do time de vôlei",
         "agora": AGORA,
+        "funcionamento": FUNCIONAMENTO_PADRAO,
     }
     dados.update(sobrescritas)
     return Reserva.solicitar(**dados)
@@ -1002,3 +1004,92 @@ def test_texto_do_registro_diz_se_foi_criacao_mudanca_ou_tentativa_recusada():
         f"Reserva #{salva.id}: tentativa recusada de CONCLUIDA "
         "(CONCLUSAO_ANTES_DO_TERMINO)",
     ]
+
+
+def test_listar_ativas_a_partir_de_traz_as_que_terminam_depois_do_momento(repositorio):
+    # Arrange: espaço 3, no dia DIA
+    _salvar_na_situacao(repositorio, S.SOLICITADA, finalidade="Cedo")
+    _salvar_na_situacao(
+        repositorio,
+        S.CONFIRMADA,
+        finalidade="Em andamento",
+        hora_inicio=time(14, 0),
+        hora_fim=time(15, 0),
+    )
+    _salvar_na_situacao(
+        repositorio,
+        S.SOLICITADA,
+        finalidade="Termina a meia-noite",
+        hora_inicio=time(23, 0),
+        hora_fim=time(0, 0),
+    )
+    _salvar_na_situacao(
+        repositorio,
+        S.CANCELADA,
+        motivo="Chuva",
+        finalidade="Cancelada",
+        hora_inicio=time(16, 0),
+        hora_fim=time(17, 0),
+    )
+    _salvar_na_situacao(
+        repositorio, S.SOLICITADA, finalidade="Outro espaço", espaco_id=4
+    )
+    momento = datetime(2026, 10, 25, 14, 30, tzinfo=FUSO_HORARIO)
+
+    # Act
+    ativas = repositorio.listar_ativas_a_partir_de(3, momento)
+
+    # Assert
+    assert _finalidades(ativas) == ["Em andamento", "Termina a meia-noite"]
+
+
+def test_listar_ativas_a_partir_de_nao_traz_a_que_ja_terminou_nem_a_que_termina_agora(
+    repositorio,
+):
+    # Arrange
+    _salvar_na_situacao(repositorio, S.CONFIRMADA, finalidade="Das 10 as 11")
+
+    # Act
+    no_termino = repositorio.listar_ativas_a_partir_de(
+        3, datetime(2026, 10, 25, 11, 0, tzinfo=FUSO_HORARIO)
+    )
+    um_minuto_antes = repositorio.listar_ativas_a_partir_de(
+        3, datetime(2026, 10, 25, 10, 59, tzinfo=FUSO_HORARIO)
+    )
+
+    # Assert
+    assert no_termino == []
+    assert _finalidades(um_minuto_antes) == ["Das 10 as 11"]
+
+
+def test_reserva_que_termina_a_meia_noite_volta_do_banco_com_o_mesmo_intervalo(
+    repositorio,
+):
+    # Arrange
+    salva = _salvar_na_situacao(
+        repositorio, S.SOLICITADA, hora_inicio=time(23, 0), hora_fim=time(0, 0)
+    )
+
+    # Act
+    lida = repositorio.obter_por_id(salva.id)
+
+    # Assert
+    assert lida.intervalo == salva.intervalo
+    assert lida.intervalo.data == DIA
+    assert lida.intervalo.hora_fim == time(0, 0)
+    assert lida.intervalo.fim() == datetime(2026, 10, 26, 0, 0, tzinfo=FUSO_HORARIO)
+
+
+def test_reserva_ate_a_meia_noite_so_aparece_no_dia_em_que_comecou(repositorio):
+    # Arrange
+    _salvar_na_situacao(
+        repositorio, S.SOLICITADA, hora_inicio=time(23, 0), hora_fim=time(0, 0)
+    )
+
+    # Act
+    do_dia = repositorio.listar_que_ocupam_horario(3, DIA)
+    do_seguinte = repositorio.listar_que_ocupam_horario(3, DIA_SEGUINTE)
+
+    # Assert
+    assert len(do_dia) == 1
+    assert do_seguinte == []

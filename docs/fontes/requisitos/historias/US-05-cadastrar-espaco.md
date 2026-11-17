@@ -16,6 +16,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Index Card: o papel da história passa a ser Gestor do serviço ([DEC-25](../decisoes/DEC-25.md)); meta, valor, critérios e testes de aceite iguais (REQ-12). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03 novos, com a implementação pendente na tarefa ESP-07 ([CR-03](../mudancas/CR-03-horario-por-espaco.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-32 a TA-42 passam a TA-36 a TA-47 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | ESP-07 (CR-03): o CA-03 e o TA-38 passam de pendente a automatizado, com os testes do horário padrão no cadastro; a marca "implementação pendente" e a frase do "Pronta quando" que a explicava saem. Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -29,7 +30,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | **Prioridade** | Normal — [RF-05](../requisitos/rf-espacos.md#rf-05) e [RF-05.1](../requisitos/rf-espacos.md#rf-05-1) são normais (F1 do enunciado). |
 | **Estimativa (Custo em Semanas)** | 0,5 (retrospectiva: domínio, persistência e API das ESP-01 a ESP-03 e o formulário da FE-02). |
 | **Conversa** | "Dois espaços podem ter o mesmo nome, em prédios diferentes?" → não, adotado provisoriamente ([DEC-10](../decisoes/DEC-10.md)). "Um espaço pode ser excluído?" → nunca, só desativado ([DEC-06](../decisoes/DEC-06.md), [US-07](US-07-desativar-e-reativar-espaco.md)). "Os tipos são fixos?" → sim, cinco tipos na ordem do negócio. |
-| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). Os CAs marcados com implementação pendente só contam quando a tarefa citada os implementar e criar o TA deles. |
+| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). |
 
 ## INVEST
 
@@ -73,7 +74,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-05](../requisitos/rf-espacos.md#rf-05)
 - **TA:** [TA-38](#ta-38)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-05-ca-04"></a>US-05 · CA-04 · Cadastrar outro espaço (alternativa)
 
@@ -166,7 +166,7 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 |---|---|---|---|
 | <a id="ta-36"></a>TA-36 | [CA-01](#us-05-ca-01) | automatizado | `espacos/tests/test_api_espacos.py::test_cadastrar_espaco_valido_responde_201_com_o_espaco`; `espacos/tests/test_api_espacos.py::test_espaco_cadastrado_aparece_na_listagem`; `espacos/tests/test_api_espacos.py::test_cadastrar_aceita_capacidade_numerica_em_texto`; `espacos/tests/test_casos_de_uso.py::test_cadastrar_espaco_valido_devolve_com_id_e_aparece_na_listagem`; `espacos/tests/test_espaco_esportivo.py::test_criacao_valida_normaliza_nome_e_converte_tipo` |
 | <a id="ta-37"></a>TA-37 | [CA-02](#us-05-ca-02) | automatizado | `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_lista_todos_os_tipos_na_ordem_do_enum`; `espacos/tests/test_api_espacos.py::test_tipos_de_espaco_nao_exigem_login` |
-| <a id="ta-38"></a>TA-38 | [CA-03](#us-05-ca-03) | pendente | implementação pendente (tarefa ESP-07) — TA a criar junto com o código ([CR-03 · CA-04](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
+| <a id="ta-38"></a>TA-38 | [CA-03](#us-05-ca-03) | automatizado | `espacos/tests/test_api_horario_do_espaco.py::test_cadastrar_sem_horario_grava_o_padrao_das_07_as_00_00`; `espacos/tests/test_horario_de_funcionamento.py::test_cadastrar_sem_horario_grava_o_padrao_das_07_a_meia_noite`; `pages/PaginaEspacos.test.tsx`: `o cadastro já vem com o horário padrão, e o fechamento 00:00 é explicado como meia-noite` |
 | <a id="ta-39"></a>TA-39 | [CA-04](#us-05-ca-04) | automatizado | `pages/PaginaEspacos.test.tsx`: `cadastro com sucesso mostra o toast, limpa o formulário e recarrega a lista` |
 | <a id="ta-40"></a>TA-40 | [CA-05](#us-05-ca-05) | automatizado | `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [sem-nome, capacidade-texto, capacidade-acima-do-banco]`; `pages/PaginaEspacos.test.tsx`: `erro de campo aparece embaixo do campo, recebe o foco e some ao editar` |
 | <a id="ta-41"></a>TA-41 | [CA-06](#us-05-ca-06) | automatizado | `espacos/tests/test_espaco_esportivo.py::test_nome_vazio_e_recusado_como_campo_obrigatorio [x]`; `espacos/tests/test_api_espacos.py::test_cadastro_invalido_responde_erro_e_preserva_a_listagem [nome-so-com-espacos]` |

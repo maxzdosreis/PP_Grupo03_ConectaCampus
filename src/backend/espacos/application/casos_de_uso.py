@@ -1,6 +1,14 @@
+from datetime import time
+
+from espacos.application.portas import ReservasDoEspaco
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
-from espacos.domain.excecoes import EspacoNaoEncontrado, NomeDeEspacoJaCadastrado
+from espacos.domain.excecoes import (
+    EspacoNaoEncontrado,
+    HorarioIncompativelComReservas,
+    NomeDeEspacoJaCadastrado,
+)
+from espacos.domain.horario_de_funcionamento import HorarioDeFuncionamento
 from espacos.domain.tipo_espaco import TipoEspaco
 
 
@@ -9,9 +17,20 @@ class CadastrarEspaco:
         self._repositorio = repositorio
 
     def executar(
-        self, *, nome: str, tipo: TipoEspaco | str, capacidade: int
+        self,
+        *,
+        nome: str,
+        tipo: TipoEspaco | str,
+        capacidade: int,
+        abertura: time | None = None,
+        fechamento: time | None = None,
     ) -> EspacoEsportivo:
-        espaco = EspacoEsportivo(nome=nome, tipo=tipo, capacidade=capacidade)
+        espaco = EspacoEsportivo(
+            nome=nome,
+            tipo=tipo,
+            capacidade=capacidade,
+            horario=_horario_informado(abertura, fechamento),
+        )
         if self._repositorio.existe_com_nome(espaco.nome):
             raise NomeDeEspacoJaCadastrado()
         return self._repositorio.salvar(espaco)
@@ -46,8 +65,11 @@ class VerificarEspacoDisponivel:
 
 
 class EditarEspaco:
-    def __init__(self, repositorio: RepositorioEspacos) -> None:
+    def __init__(
+        self, repositorio: RepositorioEspacos, reservas: ReservasDoEspaco
+    ) -> None:
         self._repositorio = repositorio
+        self._reservas = reservas
 
     def executar(
         self,
@@ -56,15 +78,35 @@ class EditarEspaco:
         nome: str | None = None,
         tipo: TipoEspaco | str | None = None,
         capacidade: int | None = None,
+        abertura: time | None = None,
+        fechamento: time | None = None,
     ) -> EspacoEsportivo:
         espaco = _obter_ou_falhar(self._repositorio, espaco_id)
         nome_anterior = espaco.nome
-        espaco.alterar_dados(nome=nome, tipo=tipo, capacidade=capacidade)
+        horario_anterior = espaco.horario
+        espaco.alterar_dados(
+            nome=nome,
+            tipo=tipo,
+            capacidade=capacidade,
+            abertura=abertura,
+            fechamento=fechamento,
+        )
+        if espaco.horario != horario_anterior:
+            self._garantir_reservas_dentro_do_horario(espaco_id, espaco.horario)
         if espaco.nome != nome_anterior and self._repositorio.existe_com_nome(
             espaco.nome, ignorar_id=espaco_id
         ):
             raise NomeDeEspacoJaCadastrado()
         return self._repositorio.salvar(espaco)
+
+    def _garantir_reservas_dentro_do_horario(
+        self, espaco_id: int, horario: HorarioDeFuncionamento
+    ) -> None:
+        fora = self._reservas.contar_ativas_fora_da_janela(
+            espaco_id, horario.abertura_em_minutos, horario.fechamento_em_minutos
+        )
+        if fora:
+            raise HorarioIncompativelComReservas(fora)
 
 
 class DesativarEspaco:
@@ -94,3 +136,9 @@ def _obter_ou_falhar(
     if espaco is None:
         raise EspacoNaoEncontrado(espaco_id)
     return espaco
+
+
+def _horario_informado(
+    abertura: time | None, fechamento: time | None
+) -> HorarioDeFuncionamento:
+    return HorarioDeFuncionamento.padrao().com(abertura=abertura, fechamento=fechamento)

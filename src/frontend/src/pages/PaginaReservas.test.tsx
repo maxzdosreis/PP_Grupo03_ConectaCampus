@@ -43,6 +43,8 @@ const GINASIO: Espaco = {
   tipo_rotulo: 'Ginásio',
   capacidade: 50,
   ativo: true,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 const QUADRA: Espaco = {
@@ -52,6 +54,8 @@ const QUADRA: Espaco = {
   tipo_rotulo: 'Quadra poliesportiva',
   capacidade: 20,
   ativo: false,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 const SOLICITADA: Reserva = {

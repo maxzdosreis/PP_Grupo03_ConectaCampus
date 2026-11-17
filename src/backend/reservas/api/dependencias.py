@@ -8,11 +8,24 @@ from reservas.application.casos_de_uso import (
     ConsultarHistoricoDaReserva,
     ConsultarOcupacaoDoDia,
     ConsultarReservas,
+    ContarReservasAtivasForaDaJanela,
     CriarReserva,
     ObterReserva,
 )
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+
+
+class ReservasDoEspacoViaCasoDeUso:
+    def contar_ativas_fora_da_janela(
+        self, espaco_id: int, abertura_em_minutos: int, fechamento_em_minutos: int
+    ) -> int:
+        caso_de_uso = ContarReservasAtivasForaDaJanela(
+            RepositorioReservasDjango(), timezone.now
+        )
+        return caso_de_uso.executar(
+            espaco_id, abertura_em_minutos, fechamento_em_minutos
+        )
 
 
 def agora() -> datetime:

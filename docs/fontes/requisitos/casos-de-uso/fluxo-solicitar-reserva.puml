@@ -50,7 +50,23 @@ if (O início ainda não passou?) then (não)
 else (sim)
 endif
 
-if (6. [UC-05] Está dentro do horário de funcionamento?) then (não)
+if (7. O espaço está identificado por um número positivo? (antes de consultar o espaço: CR-03)) then (não)
+  :E7.1 Espaço não identificado; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (8. [UC-05] O espaço existe? (antes das regras de agenda: o horário é dele)) then (não)
+  :E8.1 Espaço inexistente; <<#FFE5E5>>
+  end
+else (sim)
+endif
+if (O espaço aceita pedidos (está ativo)?) then (não)
+  :E8.2 Espaço inativo; <<#FFE5E5>>
+  end
+else (sim)
+endif
+
+if (6. [UC-05] Está dentro do horário de funcionamento do espaço?) then (não)
   :E6.1 Fora do horário de funcionamento; <<#FFE5E5>>
   end
 else (sim)
@@ -66,24 +82,8 @@ if (A data está dentro da antecedência máxima?) then (não)
 else (sim)
 endif
 
-if (7. O espaço está identificado por um número positivo? (depois da agenda: lacuna L-12)) then (não)
-  :E7.1 Espaço não identificado; <<#FFE5E5>>
-  end
-else (sim)
-endif
-if (A finalidade é válida?) then (não)
+if (A finalidade é válida? (depois das regras de agenda: lacuna L-12)) then (não)
   :E7.2 Finalidade em branco ou longa demais; <<#FFE5E5>>
-  end
-else (sim)
-endif
-
-if (8. [UC-05] O espaço existe?) then (não)
-  :E8.1 Espaço inexistente; <<#FFE5E5>>
-  end
-else (sim)
-endif
-if (O espaço aceita pedidos (está ativo)?) then (não)
-  :E8.2 Espaço inativo; <<#FFE5E5>>
   end
 else (sim)
 endif

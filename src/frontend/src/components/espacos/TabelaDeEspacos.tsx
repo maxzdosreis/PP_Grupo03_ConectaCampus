@@ -1,6 +1,7 @@
 import { useId, type Ref } from 'react'
 import { Link } from 'react-router'
 import type { Espaco } from '../../api/espacos.ts'
+import { formatarFuncionamento } from '../../formatacao.ts'
 import { caminhoParaReservar } from '../../navegacao.ts'
 import Etiqueta from '../etiqueta/Etiqueta.tsx'
 import estilos from './TabelaDeEspacos.module.css'
@@ -38,6 +39,7 @@ function TabelaDeEspacos({ espacos, legenda, gestao, ref }: PropriedadesDaTabela
             <th scope="col" className={estilos.numero}>
               Capacidade
             </th>
+            <th scope="col">Funcionamento</th>
             <th scope="col">Situação</th>
             <th scope="col">Ações</th>
           </tr>
@@ -48,6 +50,7 @@ function TabelaDeEspacos({ espacos, legenda, gestao, ref }: PropriedadesDaTabela
               <th scope="row">{espaco.nome}</th>
               <td>{espaco.tipo_rotulo}</td>
               <td className={estilos.numero}>{espaco.capacidade}</td>
+              <td>{formatarFuncionamento(espaco.abertura, espaco.fechamento)}</td>
               <td>
                 <Etiqueta variante={espaco.ativo ? 'sucesso' : 'neutra'}>
                   {espaco.ativo ? 'Ativo' : 'Inativo'}

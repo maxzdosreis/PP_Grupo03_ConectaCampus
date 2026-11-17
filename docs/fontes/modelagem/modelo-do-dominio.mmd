@@ -7,6 +7,7 @@ classDiagram
 %% Mapeamento classe → código, conferido por scripts/verificar_modelo_do_dominio.py:
 %% classe: EspacoEsportivo = espacos.domain.espaco_esportivo.EspacoEsportivo
 %% classe: TipoEspaco = espacos.domain.tipo_espaco.TipoEspaco
+%% classe: HorarioDeFuncionamento = espacos.domain.horario_de_funcionamento.HorarioDeFuncionamento
 %% classe: Reserva = reservas.domain.reserva.Reserva
 %% classe: SituacaoReserva = reservas.domain.situacao.SituacaoReserva
 %% classe: RegistroDeSituacao = reservas.domain.registro_de_situacao.RegistroDeSituacao
@@ -23,6 +24,7 @@ classDiagram
 %% referencia-por-id: RegistroDeSituacao.autor_usuario_id -> Usuario | reservas.infrastructure.models.RegistroDeSituacaoModel.autor_usuario_id
 %% Notas presas a uma classe e o trecho do código que prova o que elas dizem:
 %% nota: Ator | src/backend/reservas/api/autenticacao.py | Ator(usuario_id=usuario.pk, nome=usuario.nome, papel=papel)
+%% nota: HorarioDeFuncionamento | src/backend/espacos/domain/horario_de_funcionamento.py | return MINUTOS_NO_DIA if minutos == 0 else minutos
 
   note "Legenda<br/>namespace = contexto · «…» = papel da classe<br/>◆ composição: parte da Reserva<br/>→ associação: atributo desse tipo<br/>‥ tracejada sem seta: referência por id<br/>nota tracejada: explica a classe<br/>1, 0..*: multiplicidade · sublinhado: de classe"
 
@@ -34,7 +36,8 @@ classDiagram
       tipo: TipoEspaco
       capacidade: int
       ativo: bool
-      alterar_dados(nome, tipo, capacidade) None
+      horario: HorarioDeFuncionamento
+      alterar_dados(nome, tipo, capacidade, abertura, fechamento) None
       desativar() None
       ativar() None
       garantir_que_esta_ativo() None
@@ -46,6 +49,16 @@ classDiagram
       GINASIO
       QUADRA_DE_AREIA
       QUADRA_DE_TENIS
+    }
+    class HorarioDeFuncionamento {
+      <<objeto de valor>>
+      abertura_em_minutos: int
+      fechamento_em_minutos: int
+      padrao()$ HorarioDeFuncionamento
+      de_horas(abertura, fechamento)$ HorarioDeFuncionamento
+      abertura() time
+      fechamento() time
+      com(abertura, fechamento) HorarioDeFuncionamento
     }
   }
 
@@ -136,9 +149,11 @@ classDiagram
   Reserva "1" *-- "1" IntervaloDeHorario : intervalo
   Reserva "1" *-- "0..*" RegistroDeSituacao : registros_pendentes
   Reserva --> "1" SituacaoReserva : situacao
+  EspacoEsportivo --> "1" HorarioDeFuncionamento : horario
   RegistroDeSituacao --> "1" ResultadoDoRegistro : resultado
   Ator --> "1" PapelDoAtor : papel
   Reserva "0..*" .. "1" EspacoEsportivo : espaco_id
   Solicitante "0..*" .. "1" Usuario : usuario_id
   RegistroDeSituacao "0..*" .. "1" Usuario : autor_usuario_id
   note for Ator "Montado pela API a partir de request.user<br/>(duck typing); PapelDoAtor ≠ PerfilUsuario"
+  note for HorarioDeFuncionamento "Minutos desde a meia-noite local, de 0 a 1440:<br/>o fechamento 1440 é a meia-noite do FIM do dia (00:00),<br/>padrão 07:00–00:00; reservas o recebe por espacos.publico"

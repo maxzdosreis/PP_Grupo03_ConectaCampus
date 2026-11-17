@@ -38,6 +38,8 @@ const GINASIO: Espaco = {
   tipo_rotulo: 'Ginásio',
   capacidade: 50,
   ativo: true,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 const QUADRA: Espaco = {
@@ -47,6 +49,8 @@ const QUADRA: Espaco = {
   tipo_rotulo: 'Quadra poliesportiva',
   capacidade: 20,
   ativo: false,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 function lista(dados: Espaco[], mensagem: string): RespostaSucesso<Espaco[]> {
@@ -208,10 +212,14 @@ describe('PaginaEspacos', () => {
       nome: 'Ginásio A',
       tipo: 'GINASIO',
       capacidade: '50',
+      abertura: '07:00',
+      fechamento: '00:00',
     })
     expect(valorDe('Nome')).toBe('')
     expect(valorDe('Tipo')).toBe('')
     expect(valorDe('Capacidade')).toBe('')
+    expect(valorDe('Abertura')).toBe('07:00')
+    expect(valorDe('Fechamento')).toBe('00:00')
     await waitFor(() => expect(listarEspacos).toHaveBeenCalledTimes(2))
   })
 
@@ -254,6 +262,74 @@ describe('PaginaEspacos', () => {
     const nome = secaoDoCadastro().getByLabelText('Nome')
     await waitFor(() => expect(document.activeElement).toBe(nome))
     expect(secaoDoCadastro().getByText('Já existe um espaço com este nome.')).toBeTruthy()
+  })
+
+  it('o cadastro já vem com o horário padrão, e o fechamento 00:00 é explicado como meia-noite', async () => {
+    renderizar()
+    await secaoDaLista().findByRole('table')
+
+    expect(valorDe('Abertura')).toBe('07:00')
+    expect(valorDe('Fechamento')).toBe('00:00')
+    expect(secaoDoCadastro().getByText('Meia-noite: o espaço fecha no fim do dia.')).toBeTruthy()
+  })
+
+  it('trocar o fechamento muda a dica e o horário vai no cadastro', async () => {
+    vi.mocked(cadastrarEspaco).mockResolvedValue({
+      mensagem: 'Espaço cadastrado com sucesso.',
+      dados: GINASIO,
+    })
+    renderizar()
+    await secaoDaLista().findByRole('table')
+    await preencherFormulario({ nome: 'Ginásio A', tipo: 'GINASIO', capacidade: '50' })
+
+    const fechamento = secaoDoCadastro().getByLabelText('Fechamento')
+    await userEvent.clear(fechamento)
+    await userEvent.type(fechamento, '22:00')
+    expect(
+      secaoDoCadastro().getByText('Use 00:00 para fechar à meia-noite, no fim do dia.'),
+    ).toBeTruthy()
+    await enviarFormulario()
+
+    expect(cadastrarEspaco).toHaveBeenCalledWith({
+      nome: 'Ginásio A',
+      tipo: 'GINASIO',
+      capacidade: '50',
+      abertura: '07:00',
+      fechamento: '22:00',
+    })
+  })
+
+  it('erro do horário aparece embaixo do campo Fechamento, que recebe o foco', async () => {
+    const mensagem = 'O fechamento deve ser depois da abertura.'
+    vi.mocked(cadastrarEspaco).mockRejectedValue(
+      new ErroDaApi(400, 'HORARIO_DE_FUNCIONAMENTO_INVALIDO', mensagem, {
+        fechamento: [mensagem],
+      }),
+    )
+    renderizar()
+    await secaoDaLista().findByRole('table')
+    await preencherFormulario({ nome: 'Ginásio A', tipo: 'GINASIO', capacidade: '50' })
+
+    await enviarFormulario()
+
+    const fechamento = secaoDoCadastro().getByLabelText('Fechamento')
+    await waitFor(() => expect(document.activeElement).toBe(fechamento))
+    expect(fechamento.getAttribute('aria-invalid')).toBe('true')
+    expect(secaoDoCadastro().getByText(mensagem)).toBeTruthy()
+  })
+
+  it('a tabela mostra o funcionamento de cada espaço', async () => {
+    vi.mocked(listarEspacos).mockResolvedValue({
+      mensagem: '2 espaços encontrados.',
+      dados: [GINASIO, { ...QUADRA, abertura: '08:00', fechamento: '22:00' }],
+    })
+    renderizar()
+
+    const tabela = await secaoDaLista().findByRole('table')
+
+    expect(within(tabela).getByRole('columnheader', { name: 'Funcionamento' })).toBeTruthy()
+    expect(within(tabela).getByText('07:00 às meia-noite')).toBeTruthy()
+    expect(within(tabela).getByText('08:00 às 22:00')).toBeTruthy()
   })
 
   it('erro sem campos aparece num aviso no topo do formulário', async () => {
@@ -349,6 +425,42 @@ describe('PaginaEspacos', () => {
       await waitFor(() => expect(listarEspacos).toHaveBeenCalledTimes(2))
       const regiao = await secaoDaLista().findByRole('region', { name: '2 espaços encontrados.' })
       await waitFor(() => expect(document.activeElement).toBe(regiao))
+    })
+
+    it('o diálogo traz o horário do espaço e envia só o horário alterado', async () => {
+      vi.mocked(editarEspaco).mockResolvedValue(
+        espacoAtualizado({ ...GINASIO, fechamento: '22:00' }),
+      )
+      renderizar()
+      const dialogo = await abrirDialogo('Editar o espaço Ginásio A', 'Editar espaço')
+      expect(valorNoDialogo(dialogo, 'Abertura')).toBe('07:00')
+      expect(valorNoDialogo(dialogo, 'Fechamento')).toBe('00:00')
+
+      await userEvent.clear(dialogo.getByLabelText('Fechamento'))
+      await userEvent.type(dialogo.getByLabelText('Fechamento'), '22:00')
+      await userEvent.click(dialogo.getByRole('button', { name: 'Salvar alterações' }))
+
+      expect(editarEspaco).toHaveBeenCalledWith(1, { fechamento: '22:00' })
+      expect(await screen.findByText('Espaço atualizado com sucesso.')).toBeTruthy()
+    })
+
+    it('recusa por reservas ativas fora da nova janela aparece no aviso do diálogo', async () => {
+      const mensagem =
+        'Não é possível alterar o horário: 2 reservas ativas ficariam fora do novo horário. ' +
+        'Cancele ou conclua essas reservas antes de reduzir o horário.'
+      vi.mocked(editarEspaco).mockRejectedValue(
+        new ErroDaApi(409, 'HORARIO_INCOMPATIVEL_COM_RESERVAS', mensagem),
+      )
+      renderizar()
+      const dialogo = await abrirDialogo('Editar o espaço Ginásio A', 'Editar espaço')
+      await userEvent.clear(dialogo.getByLabelText('Fechamento'))
+      await userEvent.type(dialogo.getByLabelText('Fechamento'), '18:00')
+
+      await userEvent.click(dialogo.getByRole('button', { name: 'Salvar alterações' }))
+
+      const aviso = await dialogo.findByRole('alert')
+      expect(aviso.textContent).toContain(mensagem)
+      expect(screen.getByRole('dialog', { name: 'Editar espaço' })).toBeTruthy()
     })
 
     it('a capacidade inválida aparece embaixo do campo, que recebe o foco', async () => {

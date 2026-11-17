@@ -56,6 +56,36 @@ function CamposDoEspaco({ dados, tipos, errosDosCampos, aoAlterar }: Propriedade
           />
         )}
       </Campo>
+      <Campo rotulo="Abertura" erro={errosDosCampos.abertura}>
+        {(controle) => (
+          <input
+            {...controle}
+            type="time"
+            name="abertura"
+            value={dados.abertura}
+            onChange={(evento) => aoAlterar('abertura', evento.target.value)}
+          />
+        )}
+      </Campo>
+      <Campo
+        rotulo="Fechamento"
+        dica={
+          dados.fechamento === '00:00'
+            ? 'Meia-noite: o espaço fecha no fim do dia.'
+            : 'Use 00:00 para fechar à meia-noite, no fim do dia.'
+        }
+        erro={errosDosCampos.fechamento}
+      >
+        {(controle) => (
+          <input
+            {...controle}
+            type="time"
+            name="fechamento"
+            value={dados.fechamento}
+            onChange={(evento) => aoAlterar('fechamento', evento.target.value)}
+          />
+        )}
+      </Campo>
     </>
   )
 }

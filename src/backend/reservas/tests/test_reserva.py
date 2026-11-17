@@ -21,6 +21,7 @@ from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import (
     FINALIDADE_MAXIMO_CARACTERES,
     MOTIVO_MAXIMO_CARACTERES,
+    Reserva,
 )
 from reservas.domain.situacao import SituacaoReserva
 from reservas.tests.fakes import (
@@ -28,10 +29,12 @@ from reservas.tests.fakes import (
     ANA,
     ATOR_ANA,
     DEPOIS_DO_TERMINO,
+    DIA,
     GESTOR,
     OUTRA_PESSOA,
     UTC,
     exatamente,
+    funcionamento,
     momento_para,
     motivo_para,
     reserva_reconstituida,
@@ -191,13 +194,41 @@ def test_reconstituir_reserva_com_data_passada_e_aceito():
     assert reserva.situacao is S.CONCLUIDA
 
 
-def test_solicitar_fora_do_horario_de_funcionamento_e_recusado():
+def test_solicitar_fora_do_horario_de_funcionamento_do_espaco_e_recusado():
     # Act
     with pytest.raises(ForaDoHorarioDeFuncionamento) as erro:
-        reserva_solicitada(hora_inicio=time(22, 0), hora_fim=time(23, 0))
+        reserva_solicitada(
+            hora_inicio=time(22, 0),
+            hora_fim=time(23, 0),
+            funcionamento=funcionamento("08:00", "22:00"),
+        )
 
     # Assert
     assert erro.value.campo == "hora_fim"
+
+
+def test_solicitar_ate_a_meia_noite_no_horario_padrao_termina_no_fim_do_dia():
+    # Act
+    reserva = reserva_solicitada(hora_inicio=time(23, 0), hora_fim=time(0, 0))
+
+    # Assert
+    assert reserva.intervalo.data == DIA
+    assert reserva.intervalo.fim() == datetime(2026, 10, 26, 0, 0, tzinfo=FUSO_HORARIO)
+    assert reserva.situacao is S.SOLICITADA
+
+
+def test_solicitar_exige_o_funcionamento_do_espaco():
+    # Act / Assert
+    with pytest.raises(TypeError):
+        Reserva.solicitar(
+            espaco_id=3,
+            solicitante=ANA,
+            data=DIA,
+            hora_inicio=time(10, 0),
+            hora_fim=time(11, 0),
+            finalidade="Treino do time de vôlei",
+            agora=AGORA,
+        )
 
 
 def test_data_retroativa_e_checada_antes_do_horario_de_funcionamento():

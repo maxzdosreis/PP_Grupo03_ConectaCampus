@@ -1,11 +1,10 @@
 import pytest
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
-from reservas.application.portas import EspacoReservavel
-from reservas.tests.fakes import ConsultaDeEspacosEmMemoria
+from reservas.tests.fakes import ConsultaDeEspacosEmMemoria, espaco_reservavel
 
-QUADRA = EspacoReservavel(id=1, nome="Quadra Coberta")
-GINASIO_ANTIGO = EspacoReservavel(id=2, nome="Ginásio Antigo")
+QUADRA = espaco_reservavel(1, "Quadra Coberta")
+GINASIO_ANTIGO = espaco_reservavel(2, "Ginásio Antigo")
 ID_INEXISTENTE = 9999
 
 

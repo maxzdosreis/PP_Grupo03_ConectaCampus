@@ -18,6 +18,7 @@ from espacos.domain.excecoes import (
     NomeDeEspacoMuitoLongo,
     TipoDeEspacoInvalido,
 )
+from espacos.domain.horario_de_funcionamento import HorarioDeFuncionamento
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.tests.fakes import novo_espaco
 
@@ -432,7 +433,13 @@ def test_capacidade_invalida_vira_400_marcando_o_campo():
 def test_estado_de_origem_guarda_o_que_foi_lido_enquanto_o_estado_muda():
     # Arrange
     espaco = novo_espaco(nome="  Quadra   Central ")
-    lido = EstadoDoEspaco("Quadra Central", TipoEspaco.GINASIO, 20, True)
+    lido = EstadoDoEspaco(
+        "Quadra Central",
+        TipoEspaco.GINASIO,
+        20,
+        True,
+        HorarioDeFuncionamento.padrao(),
+    )
 
     # Act
     espaco.alterar_dados(capacidade=35)
@@ -441,7 +448,11 @@ def test_estado_de_origem_guarda_o_que_foi_lido_enquanto_o_estado_muda():
     # Assert
     assert espaco.estado_de_origem == lido
     assert espaco.estado == EstadoDoEspaco(
-        "Quadra Central", TipoEspaco.GINASIO, 35, False
+        "Quadra Central",
+        TipoEspaco.GINASIO,
+        35,
+        False,
+        HorarioDeFuncionamento.padrao(),
     )
 
 

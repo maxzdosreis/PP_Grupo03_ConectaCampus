@@ -5,7 +5,7 @@ Recebe as solicitações de reserva, impede conflito de horário e pedidos fora 
 ## Regras
 
 - **Reserva** (`domain/reserva.py`): espaço (`espaco_id`), solicitante (`Solicitante`: id, nome e matrícula copiados do usuário logado no momento), horário (`IntervaloDeHorario`: data, início e fim), finalidade (até `FINALIDADE_MAXIMO_CARACTERES`, 200), situação, motivo da situação (até `MOTIVO_MAXIMO_CARACTERES`, 300) e `criada_em`.
-- **Nova solicitação** (`Reserva.solicitar`) nasce `SOLICITADA` e é recusada, nesta ordem: campos ausentes ou término igual ou antes do início (`HorarioInvalido`); horário que já passou (`DataRetroativa`); fora do horário de funcionamento; duração fora dos limites; antecedência maior que a máxima ([regras de agenda](#regras-de-agenda)). Depois, o caso de uso `CriarReserva` confere o espaço (inexistente → 404, inativo → 409) e o conflito de horário.
+- **Nova solicitação** (`Reserva.solicitar`) nasce `SOLICITADA` e é recusada, nesta ordem: campos ausentes ou término igual ou antes do início (`HorarioInvalido`); horário que já passou (`DataRetroativa`); identificador do espaço que não é positivo; espaço (inexistente → 404, inativo → 409), porque o horário de funcionamento é dele; fora do horário de funcionamento do espaço; duração fora dos limites; antecedência maior que a máxima ([regras de agenda](#regras-de-agenda)); finalidade; e, por fim, o conflito de horário. O horário de funcionamento chega por `espacos.publico` (porta `ConsultaDeEspacos`, `EspacoReservavel.funcionamento`).
 - **Conflito de horário** (`garantir_horario_livre`, `domain/conflito_de_horario.py`): outra reserva do mesmo espaço, `SOLICITADA` ou `CONFIRMADA` (`SITUACOES_QUE_OCUPAM_HORARIO`), com horário sobreposto. Os intervalos são semiabertos: 10:00–11:00 e 11:00–12:00 não conflitam. A mensagem mostra o horário e a situação da reserva que ocupa, nunca quem reservou. Uma constraint do banco garante o mesmo contra pedidos simultâneos.
 - **Situações e transições** (`domain/situacao.py`, tabela única `TRANSICOES_PERMITIDAS`): veja [Alterar a situação](#alterar-a-situação-de-uma-reserva). Recusar e cancelar exigem motivo (`SITUACOES_QUE_EXIGEM_MOTIVO`). Recusar, cancelar ou concluir libera o horário. O Gestor só conclui a partir do término e só recusa ou cancela antes do início ([janela de horário do Gestor](#janela-de-horário-do-gestor)).
 - **Quem pode** (`DESTINOS_POR_PAPEL`): o Gestor confirma, recusa, conclui e cancela; o Solicitante só cancela, e só as próprias. A permissão é checada antes da transição, então um Solicitante que tenta confirmar recebe sempre 403. `acoes_disponiveis` (cada reserva da API) sai da mesma regra (`acoes_permitidas_para`), por isso os botões da tela e o que a API aceita nunca divergem.
@@ -66,45 +66,45 @@ Outros erros: sem token → **401** `NAO_AUTENTICADO`; espaço inexistente → *
 
 ## Regras de agenda
 
-Toda nova solicitação precisa respeitar estes limites, iguais para todos os espaços (constantes de `domain/regras_de_agenda.py`, DEC-07):
+Toda nova solicitação precisa respeitar estes limites. O horário de funcionamento é **de cada espaço** (padrão 07:00 às 00:00, vindo do cadastro de espaços); a duração e a antecedência são iguais para todos (constantes de `domain/regras_de_agenda.py`, DEC-07):
 
 | Regra | Valor | Erro (400) e campo |
 |---|---|---|
-| Horário de funcionamento | início a partir das **07:00** e término até as **22:00** | `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_inicio` (antes da abertura) ou `hora_fim` (depois do fechamento) |
+| Horário de funcionamento **do espaço** | início a partir da abertura do espaço e término até o fechamento dele, no mesmo dia do início. O fechamento `00:00` é a **meia-noite do fim do dia**: das 23:00 às 00:00 é aceito; um término depois da meia-noite não existe (23:30–00:30 é um término antes do início, `HORARIO_INVALIDO`) e começar às 00:00 só vale num espaço que abre a essa hora | `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_inicio` (antes da abertura) ou `hora_fim` (depois do fechamento) |
 | Duração | de **30 minutos** a **3 horas**, com as bordas incluídas | `DURACAO_INVALIDA` em `hora_fim` |
 | Antecedência máxima | até **30 dias** a partir de hoje (fuso de São Paulo) | `ANTECEDENCIA_EXCEDIDA` em `data`, com a data limite na mensagem |
 
-As regras valem só ao solicitar. Reservas já gravadas continuam válidas se os limites mudarem. Por exemplo, pedir 06:00–07:00 responde:
+As regras valem só ao solicitar. Reservas já gravadas continuam válidas se os limites mudarem. Por exemplo, pedir 06:00–07:00 num espaço que funciona das 07:00 às 00:00 responde (a mensagem traz o horário do espaço):
 
 ```json
-{"erro": {"codigo": "FORA_DO_HORARIO_DE_FUNCIONAMENTO", "mensagem": "Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período.", "campos": {"hora_inicio": ["Os espaços funcionam das 07:00 às 22:00. Escolha um horário dentro desse período."]}}}
+{"erro": {"codigo": "FORA_DO_HORARIO_DE_FUNCIONAMENTO", "mensagem": "O espaço funciona das 07:00 às 00:00. Escolha um horário dentro desse período.", "campos": {"hora_inicio": ["O espaço funciona das 07:00 às 00:00. Escolha um horário dentro desse período."]}}}
 ```
 
-Os valores vigentes saem de `GET /api/reservas/regras-de-agenda/`, que não exige login. É deles que a tela de nova reserva monta a dica acima dos campos de data e horário:
+Os valores globais vigentes saem de `GET /api/reservas/regras-de-agenda/`, que não exige login: a duração sugerida (1 hora, só para a tela preencher o término ao informar o início, no máximo o fechamento do espaço; nunca é limite), a mínima, a máxima, a antecedência e a data limite. É deles que a tela de nova reserva monta a dica acima dos campos de data e horário; o horário de cada espaço vem da consulta de espaços (`abertura` e `fechamento`):
 
 ```bash
 curl http://localhost:8000/api/reservas/regras-de-agenda/
 ```
 
 ```json
-{"mensagem": "Regras de agenda.", "dados": {"horario_de_abertura": "07:00", "horario_de_fechamento": "22:00", "duracao_minima_em_minutos": 30, "duracao_maxima_em_minutos": 180, "antecedencia_maxima_em_dias": 30, "data_limite": "2026-11-29"}}
+{"mensagem": "Regras de agenda.", "dados": {"duracao_sugerida_em_minutos": 60, "duracao_minima_em_minutos": 30, "duracao_maxima_em_minutos": 180, "antecedencia_maxima_em_dias": 30, "data_limite": "2026-11-29"}}
 ```
 
 `data_limite` é hoje + 30 dias e muda a cada dia.
 
 ## Agenda do dia
 
-`GET /api/reservas/ocupacao/?espaco=<id>&data=<AAAA-MM-DD>` (login obrigatório, qualquer perfil) mostra os horários ocupados de um espaço num dia e as janelas livres. É a única forma de um Solicitante ver horários de reservas que não são dele, por isso a resposta traz **só** o intervalo e a situação: nunca nome, matrícula, id, finalidade nem motivo de quem reservou. Os livres são calculados no backend com as [regras de agenda](#regras-de-agenda): janelas menores que a duração mínima não aparecem e, para hoje, elas começam no próximo múltiplo de 5 minutos. É ajuda, não regra: a solicitação continua sendo validada só ao enviar.
+`GET /api/reservas/ocupacao/?espaco=<id>&data=<AAAA-MM-DD>` (login obrigatório, qualquer perfil) mostra os horários ocupados de um espaço num dia e as janelas livres, dentro do horário de funcionamento **do espaço** (`horario_de_abertura` e `horario_de_fechamento`, como "HH:MM"; o fechamento `00:00` é a meia-noite do fim do dia, e uma reserva das 23:00 às 00:00 aparece só na agenda do dia em que começou). É a única forma de um Solicitante ver horários de reservas que não são dele, por isso a resposta traz **só** o intervalo e a situação: nunca nome, matrícula, id, finalidade nem motivo de quem reservou. Os livres são calculados no backend com as [regras de agenda](#regras-de-agenda): janelas menores que a duração mínima não aparecem e, para hoje, elas começam no próximo múltiplo de 5 minutos. É ajuda, não regra: a solicitação continua sendo validada só ao enviar.
 
 ```bash
 curl "http://localhost:8000/api/reservas/ocupacao/?espaco=1&data=AAAA-MM-DD" -H "Authorization: Bearer $ACCESS"
 ```
 
 ```json
-{"mensagem": "1 horário ocupado neste dia.", "dados": {"data": "2026-10-31", "horario_de_abertura": "07:00", "horario_de_fechamento": "22:00", "reservavel": true, "motivo_indisponivel": null, "ocupados": [{"hora_inicio": "10:00", "hora_fim": "11:00", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada"}], "livres": [{"hora_inicio": "07:00", "hora_fim": "10:00"}, {"hora_inicio": "11:00", "hora_fim": "22:00"}]}}
+{"mensagem": "1 horário ocupado neste dia.", "dados": {"data": "2026-10-31", "horario_de_abertura": "07:00", "horario_de_fechamento": "00:00", "reservavel": true, "motivo_indisponivel": null, "ocupados": [{"hora_inicio": "10:00", "hora_fim": "11:00", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada"}], "livres": [{"hora_inicio": "07:00", "hora_fim": "10:00"}, {"hora_inicio": "11:00", "hora_fim": "00:00"}]}}
 ```
 
-Para uma data em que não é possível reservar (ontem, hoje depois das 22:00 ou além da antecedência máxima), `reservavel` é `false`, `livres` vem vazio e `motivo_indisponivel` traz a mesma mensagem que a solicitação receberia (ex.: "Não é possível reservar um horário que já passou."). Espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; inativo → **409** `ESPACO_INATIVO`; sem `espaco` ou `data` → **400** `DADOS_INVALIDOS` com o campo em `campos`.
+Para uma data em que não é possível reservar (ontem, hoje depois do fechamento do espaço ou além da antecedência máxima), `reservavel` é `false`, `livres` vem vazio e `motivo_indisponivel` traz a mesma mensagem que a solicitação receberia (ex.: "Não é possível reservar um horário que já passou."). Espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; inativo → **409** `ESPACO_INATIVO`; sem `espaco` ou `data` → **400** `DADOS_INVALIDOS` com o campo em `campos`.
 
 ## Consultar reservas
 
@@ -317,7 +317,7 @@ Se o banco foi criado antes do histórico (RES-07), as reservas antigas aparecem
 |---|---|
 | Situações, transições, quem pode cada uma, motivo obrigatório | `domain/situacao.py` |
 | Regras da reserva, visibilidade e ações permitidas | `domain/reserva.py` (mensagens em `domain/excecoes.py`) |
-| Horário de funcionamento, duração, antecedência, horários livres | `domain/regras_de_agenda.py` |
+| Horário de funcionamento do espaço (`funcionamento.py`), duração, duração sugerida, antecedência, horários livres | `domain/funcionamento.py` e `domain/regras_de_agenda.py` |
 | Conflito de horário | `domain/conflito_de_horario.py` |
 | Casos de uso (`CriarReserva`, `ConsultarReservas`, `ObterReserva`, `AlterarSituacaoReserva`, `ConsultarHistoricoDaReserva`, `ConsultarOcupacaoDoDia`) | `application/casos_de_uso.py` |
 | Como um espaço é consultado | `application/portas.py` e `infrastructure/consulta_de_espacos.py` |

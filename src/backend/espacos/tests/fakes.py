@@ -1,3 +1,4 @@
+from espacos.application.portas import ReservasDoEspaco
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
@@ -8,6 +9,18 @@ from espacos.domain.excecoes import (
 from espacos.domain.tipo_espaco import TipoEspaco
 
 ID_INEXISTENTE = 9999
+
+
+class ReservasDoEspacoFake(ReservasDoEspaco):
+    def __init__(self, fora_da_janela: int = 0) -> None:
+        self.fora_da_janela = fora_da_janela
+        self.consultas: list[tuple[int, int, int]] = []
+
+    def contar_ativas_fora_da_janela(
+        self, espaco_id: int, abertura_em_minutos: int, fechamento_em_minutos: int
+    ) -> int:
+        self.consultas.append((espaco_id, abertura_em_minutos, fechamento_em_minutos))
+        return self.fora_da_janela
 
 
 def novo_espaco(**sobrescritas) -> EspacoEsportivo:
@@ -83,4 +96,5 @@ def _copiar(espaco: EspacoEsportivo, espaco_id: int | None) -> EspacoEsportivo:
         tipo=espaco.tipo,
         capacidade=espaco.capacidade,
         ativo=espaco.ativo,
+        horario=espaco.horario,
     )

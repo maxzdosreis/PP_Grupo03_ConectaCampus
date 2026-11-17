@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, time, timedelta
 
 import pytest
 from hypothesis import given
@@ -7,7 +7,6 @@ from hypothesis import strategies as st
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ConflitoDeHorario
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
-from reservas.domain.regras_de_agenda import HORARIO_DE_ABERTURA, HORARIO_DE_FECHAMENTO
 from reservas.domain.situacao import SITUACOES_QUE_OCUPAM_HORARIO, SituacaoReserva
 from reservas.infrastructure.models import ReservaModel
 from reservas.infrastructure.repositorio_django import _para_intervalo
@@ -199,7 +198,7 @@ def test_mensagem_do_conflito_nao_depende_de_quem_reservou(cenario, data):
 
 
 _HORAS_DO_FUNCIONAMENTO = st.lists(
-    st.times(min_value=HORARIO_DE_ABERTURA, max_value=HORARIO_DE_FECHAMENTO),
+    st.times(min_value=time(7, 0), max_value=time(22, 0)),
     min_size=2,
     max_size=2,
     unique=True,

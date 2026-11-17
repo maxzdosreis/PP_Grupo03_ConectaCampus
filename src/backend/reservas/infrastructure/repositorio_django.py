@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
@@ -82,6 +82,16 @@ class RepositorioReservasDjango(RepositorioReservas):
         consulta = ReservaModel.objects.filter(
             espaco_id=espaco_id,
             inicio__date=data,
+            situacao__in=SITUACOES_QUE_OCUPAM_HORARIO,
+        ).order_by("inicio", "id")
+        return [_para_entidade(model) for model in consulta]
+
+    def listar_ativas_a_partir_de(
+        self, espaco_id: int, momento: datetime
+    ) -> list[Reserva]:
+        consulta = ReservaModel.objects.filter(
+            espaco_id=espaco_id,
+            fim__gt=momento,
             situacao__in=SITUACOES_QUE_OCUPAM_HORARIO,
         ).order_by("inicio", "id")
         return [_para_entidade(model) for model in consulta]

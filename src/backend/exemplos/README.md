@@ -21,6 +21,7 @@ O que ele cria (usuários com as senhas, espaços, reservas de cada situação) 
 - **Datas relativas ao dia em que roda.** As reservas em aberto ficam sempre no futuro (amanhã, +2 e +3 dias). Cada reserva é solicitada e alterada com um relógio fixo no momento certo, então todas têm histórico coerente: a Concluída (ontem, 18:00–19:30) foi solicitada 3 dias atrás, confirmada há 2 dias e concluída agora.
 - **Trava de segurança.** Com `DJANGO_DEBUG=False` o comando recusa rodar ("Os dados de exemplo só podem ser carregados com DJANGO_DEBUG=True, porque criam usuários com senhas conhecidas."). O `.env.example` já vem com `True`.
 - **Horário de conflito.** `CONFLITO_PARA_DEMONSTRACAO` (Quadra Poliesportiva Central, amanhã, 10:30–11:30) sobrepõe a reserva Solicitada e é o 409 do roteiro da demonstração.
+- **Horário por espaço.** A Quadra de Areia Norte funciona das 08:00 às 22:00 e os outros espaços têm o padrão (07:00 às 00:00); a reserva Confirmada do Campo de Futebol Principal vai das 21:00 às 00:00, para mostrar o término à meia-noite. Tudo passa por `CadastrarEspaco` e `CriarReserva`: se um horário de exemplo violasse o horário do espaço, o comando falharia.
 - Os e-mails são `@exemplo.com`, mas nunca `ana@exemplo.com` nem a matrícula `2026001`, que são os do [exemplo de cadastro](../contas/README.md#cadastrar-um-solicitante): assim o exemplo funciona num banco com os dados carregados.
 
 Para apagar tudo e carregar de novo, veja [Recomeçar do zero](../../../README.md#recomeçar-do-zero) no README da raiz.

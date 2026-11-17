@@ -22,7 +22,14 @@ def test_verificar_espaco_disponivel_devolve_dto_com_id_e_nome():
     disponivel = publico.verificar_espaco_disponivel(salvo.id)
 
     # Assert
-    assert disponivel == publico.EspacoDisponivel(id=salvo.id, nome="Ginásio Central")
+    assert disponivel == publico.EspacoDisponivel(
+        id=salvo.id,
+        nome="Ginásio Central",
+        abertura="07:00",
+        fechamento="00:00",
+        abertura_em_minutos=7 * 60,
+        fechamento_em_minutos=24 * 60,
+    )
 
 
 def test_espaco_disponivel_e_imutavel():
@@ -50,3 +57,16 @@ def test_verificar_espaco_inativo_lanca_espaco_inativo():
     # Act / Assert
     with pytest.raises(EspacoInativo):
         publico.verificar_espaco_disponivel(inativo.id)
+
+
+def test_sem_consulta_de_reservas_registrada_e_erro_de_configuracao(monkeypatch):
+    # Arrange
+    from django.core.exceptions import ImproperlyConfigured
+
+    from espacos.infrastructure import consulta_de_reservas
+
+    monkeypatch.setattr(consulta_de_reservas, "_registrada", None)
+
+    # Act / Assert
+    with pytest.raises(ImproperlyConfigured, match="Nenhuma consulta de reservas"):
+        consulta_de_reservas.consulta_registrada()

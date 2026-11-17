@@ -21,6 +21,7 @@ from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.tests.fakes import (
     ID_INEXISTENTE,
     RepositorioEspacosEmMemoria,
+    ReservasDoEspacoFake,
     dados_validos,
     nomes,
     novo_espaco,
@@ -154,7 +155,7 @@ def test_editar_mantendo_o_proprio_nome_nao_acusa_duplicidade(repositorio, nome)
     cadastrado = CadastrarEspaco(repositorio).executar(**dados_validos())
 
     # Act
-    editado = EditarEspaco(repositorio).executar(
+    editado = EditarEspaco(repositorio, ReservasDoEspacoFake()).executar(
         cadastrado.id, nome=nome, capacidade=80
     )
 
@@ -168,7 +169,9 @@ def test_editar_o_tipo_grava_o_tipo_novo_e_mantem_o_resto(repositorio):
     cadastrado = CadastrarEspaco(repositorio).executar(**dados_validos())
 
     # Act
-    editado = EditarEspaco(repositorio).executar(cadastrado.id, tipo="QUADRA_DE_AREIA")
+    editado = EditarEspaco(repositorio, ReservasDoEspacoFake()).executar(
+        cadastrado.id, tipo="QUADRA_DE_AREIA"
+    )
 
     # Assert
     guardado = repositorio.obter_por_id(cadastrado.id)
@@ -189,7 +192,9 @@ def test_editar_para_o_nome_de_outro_espaco_lanca_conflito_sem_gravar(repositori
 
     # Act
     with pytest.raises(NomeDeEspacoJaCadastrado):
-        EditarEspaco(repositorio).executar(outro.id, nome="ginásio a", capacidade=5)
+        EditarEspaco(repositorio, ReservasDoEspacoFake()).executar(
+            outro.id, nome="ginásio a", capacidade=5
+        )
 
     # Assert
     guardado = repositorio.obter_por_id(outro.id)
@@ -203,7 +208,7 @@ def test_editar_com_dado_invalido_nao_grava(repositorio):
 
     # Act
     with pytest.raises(CapacidadeInvalida):
-        EditarEspaco(repositorio).executar(
+        EditarEspaco(repositorio, ReservasDoEspacoFake()).executar(
             cadastrado.id, nome="Ginásio Novo", capacidade=0
         )
 
@@ -239,7 +244,7 @@ def test_ativar_grava_o_espaco_ativo(repositorio):
 @pytest.mark.parametrize(
     "executar",
     [
-        lambda repositorio: EditarEspaco(repositorio).executar(
+        lambda repositorio: EditarEspaco(repositorio, ReservasDoEspacoFake()).executar(
             ID_INEXISTENTE, capacidade=10
         ),
         lambda repositorio: DesativarEspaco(repositorio).executar(ID_INEXISTENTE),

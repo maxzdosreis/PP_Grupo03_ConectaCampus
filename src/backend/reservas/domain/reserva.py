@@ -5,7 +5,6 @@ from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
     ConclusaoAntesDoTermino,
-    DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
     MudancaAposOInicio,
@@ -13,6 +12,7 @@ from reservas.domain.excecoes import (
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
 )
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
 from reservas.domain.intervalo_de_horario import IntervaloDeHorario
 from reservas.domain.momento import exigir_fuso
 from reservas.domain.registro_de_situacao import (
@@ -20,7 +20,10 @@ from reservas.domain.registro_de_situacao import (
     RegistroDeSituacao,
     ResultadoDoRegistro,
 )
-from reservas.domain.regras_de_agenda import garantir_regras_de_agenda
+from reservas.domain.regras_de_agenda import (
+    garantir_inicio_no_futuro,
+    garantir_regras_de_agenda,
+)
 from reservas.domain.situacao import (
     DESTINOS_DE_TRANSICAO,
     SITUACOES_QUE_EXIGEM_MOTIVO,
@@ -52,7 +55,7 @@ class Reserva:
         id: int | None = None,
     ) -> None:
         self.id = id
-        self.espaco_id = _validar_espaco_id(espaco_id)
+        self.espaco_id = validar_espaco_id(espaco_id)
         self.solicitante = _exigir(solicitante, "solicitante", "Solicitante")
         self.intervalo = _exigir(intervalo, "intervalo", "Horário")
         self.finalidade = _normalizar_finalidade(finalidade)
@@ -74,14 +77,14 @@ class Reserva:
         hora_fim: time,
         finalidade: str,
         agora: datetime,
+        funcionamento: FuncionamentoDoEspaco,
     ) -> "Reserva":
         exigir_fuso(agora, "agora")
         intervalo = IntervaloDeHorario(
             data=data, hora_inicio=hora_inicio, hora_fim=hora_fim
         )
-        if intervalo.inicio() <= agora:
-            raise DataRetroativa()
-        garantir_regras_de_agenda(intervalo, agora)
+        garantir_inicio_no_futuro(intervalo, agora)
+        garantir_regras_de_agenda(intervalo, agora, funcionamento)
         reserva = cls(
             espaco_id=espaco_id,
             solicitante=solicitante,
@@ -239,7 +242,7 @@ def _exigir(valor, campo: str, rotulo: str):
     return valor
 
 
-def _validar_espaco_id(espaco_id: int | None) -> int:
+def validar_espaco_id(espaco_id: int | None) -> int:
     if espaco_id is None:
         raise CampoObrigatorioAusente("espaco_id", "Espaço")
     if isinstance(espaco_id, bool) or not isinstance(espaco_id, int):

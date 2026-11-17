@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    globalSetup: ['./src/fusoDosTestes.ts'],
     setupFiles: ['./src/configuracaoDosTestes.ts'],
     env: { VITE_API_URL: 'http://localhost:8000/api' },
   },

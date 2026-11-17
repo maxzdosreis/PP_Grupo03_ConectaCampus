@@ -62,8 +62,7 @@ export type SituacaoDeReserva = {
 }
 
 export type RegrasDeAgenda = {
-  horario_de_abertura: string
-  horario_de_fechamento: string
+  duracao_sugerida_em_minutos: number
   duracao_minima_em_minutos: number
   duracao_maxima_em_minutos: number
   antecedencia_maxima_em_dias: number

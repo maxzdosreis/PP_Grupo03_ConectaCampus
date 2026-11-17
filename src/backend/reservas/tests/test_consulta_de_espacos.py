@@ -4,6 +4,7 @@ from django.urls import reverse
 from compartilhado.api.tratador_de_erros import tratar_excecao
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.portas import EspacoReservavel
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
 
 ID_INEXISTENTE = 9999
@@ -28,7 +29,11 @@ def test_espaco_ativo_cadastrado_pela_api_vira_espaco_reservavel(cliente_gestor)
     espaco = ConsultaDeEspacosViaFachada().obter_espaco_reservavel(cadastrado["id"])
 
     # Assert
-    assert espaco == EspacoReservavel(id=cadastrado["id"], nome="Ginásio Central")
+    assert espaco == EspacoReservavel(
+        id=cadastrado["id"],
+        nome="Ginásio Central",
+        funcionamento=FuncionamentoDoEspaco(7 * 60, 24 * 60),
+    )
 
 
 @pytest.mark.django_db

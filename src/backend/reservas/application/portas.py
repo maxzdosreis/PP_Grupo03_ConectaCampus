@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from typing import Protocol
 
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
+
 
 @dataclass(frozen=True)
 class EspacoReservavel:
     id: int
     nome: str
+    funcionamento: FuncionamentoDoEspaco
 
 
 class ConsultaDeEspacos(Protocol):

@@ -1,5 +1,5 @@
 from collections.abc import Iterable, Iterator
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 
 from reservas.domain.excecoes import (
     AntecedenciaExcedida,
@@ -7,21 +7,28 @@ from reservas.domain.excecoes import (
     DuracaoInvalida,
     ForaDoHorarioDeFuncionamento,
 )
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.momento import exigir_fuso
 
-HORARIO_DE_ABERTURA = time(7, 0)
-HORARIO_DE_FECHAMENTO = time(22, 0)
+DURACAO_SUGERIDA = timedelta(hours=1)
 DURACAO_MINIMA = timedelta(minutes=30)
 DURACAO_MAXIMA = timedelta(hours=3)
 ANTECEDENCIA_MAXIMA_EM_DIAS = 30
 GRANULARIDADE_DOS_HORARIOS_LIVRES = timedelta(minutes=5)
 
 
-def garantir_regras_de_agenda(intervalo: IntervaloDeHorario, agora: datetime) -> None:
-    _garantir_horario_de_funcionamento(intervalo)
+def garantir_regras_de_agenda(
+    intervalo: IntervaloDeHorario, agora: datetime, funcionamento: FuncionamentoDoEspaco
+) -> None:
+    _garantir_horario_de_funcionamento(intervalo, funcionamento)
     _garantir_duracao(intervalo)
     _garantir_antecedencia(intervalo.data, agora)
+
+
+def garantir_inicio_no_futuro(intervalo: IntervaloDeHorario, agora: datetime) -> None:
+    if intervalo.inicio() <= agora:
+        raise DataRetroativa()
 
 
 def data_limite_para_reservar(agora: datetime) -> date:
@@ -30,29 +37,37 @@ def data_limite_para_reservar(agora: datetime) -> date:
     return hoje + timedelta(days=ANTECEDENCIA_MAXIMA_EM_DIAS)
 
 
-def garantir_data_reservavel(data: date, agora: datetime) -> None:
+def garantir_data_reservavel(
+    data: date, agora: datetime, funcionamento: FuncionamentoDoEspaco
+) -> None:
     exigir_fuso(agora, "agora")
-    if _no_horario(data, HORARIO_DE_FECHAMENTO) <= agora:
+    if funcionamento.fecha_em(data) <= agora:
         raise DataRetroativa()
     _garantir_antecedencia(data, agora)
 
 
-def motivo_de_indisponibilidade(data: date, agora: datetime) -> str | None:
+def motivo_de_indisponibilidade(
+    data: date, agora: datetime, funcionamento: FuncionamentoDoEspaco
+) -> str | None:
     try:
-        garantir_data_reservavel(data, agora)
+        garantir_data_reservavel(data, agora, funcionamento)
     except (DataRetroativa, AntecedenciaExcedida) as erro:
         return erro.mensagem
     return None
 
 
 def horarios_livres(
-    ocupados: Iterable[IntervaloDeHorario], *, data: date, agora: datetime
+    ocupados: Iterable[IntervaloDeHorario],
+    *,
+    data: date,
+    agora: datetime,
+    funcionamento: FuncionamentoDoEspaco,
 ) -> list[IntervaloDeHorario]:
     exigir_fuso(agora, "agora")
     janelas = _janelas_entre(
         sorted(ocupados, key=IntervaloDeHorario.inicio),
-        _primeiro_inicio_possivel(data, agora),
-        _no_horario(data, HORARIO_DE_FECHAMENTO),
+        _primeiro_inicio_possivel(data, agora, funcionamento),
+        funcionamento.fecha_em(data),
     )
     return [
         IntervaloDeHorario(data=data, hora_inicio=inicio.time(), hora_fim=fim.time())
@@ -61,15 +76,14 @@ def horarios_livres(
     ]
 
 
-def _garantir_horario_de_funcionamento(intervalo: IntervaloDeHorario) -> None:
-    if intervalo.hora_inicio < HORARIO_DE_ABERTURA:
-        raise ForaDoHorarioDeFuncionamento(
-            "hora_inicio", HORARIO_DE_ABERTURA, HORARIO_DE_FECHAMENTO
-        )
-    if intervalo.hora_fim > HORARIO_DE_FECHAMENTO:
-        raise ForaDoHorarioDeFuncionamento(
-            "hora_fim", HORARIO_DE_ABERTURA, HORARIO_DE_FECHAMENTO
-        )
+def _garantir_horario_de_funcionamento(
+    intervalo: IntervaloDeHorario, funcionamento: FuncionamentoDoEspaco
+) -> None:
+    abertura, fechamento = funcionamento.abertura(), funcionamento.fechamento()
+    if intervalo.inicio() < funcionamento.abre_em(intervalo.data):
+        raise ForaDoHorarioDeFuncionamento("hora_inicio", abertura, fechamento)
+    if intervalo.fim() > funcionamento.fecha_em(intervalo.data):
+        raise ForaDoHorarioDeFuncionamento("hora_fim", abertura, fechamento)
 
 
 def _garantir_duracao(intervalo: IntervaloDeHorario) -> None:
@@ -84,12 +98,10 @@ def _garantir_antecedencia(data: date, agora: datetime) -> None:
         raise AntecedenciaExcedida(ANTECEDENCIA_MAXIMA_EM_DIAS, data_limite)
 
 
-def _no_horario(data: date, horario: time) -> datetime:
-    return datetime.combine(data, horario, tzinfo=FUSO_HORARIO)
-
-
-def _primeiro_inicio_possivel(data: date, agora: datetime) -> datetime:
-    return max(_no_horario(data, HORARIO_DE_ABERTURA), _proximo_inicio_redondo(agora))
+def _primeiro_inicio_possivel(
+    data: date, agora: datetime, funcionamento: FuncionamentoDoEspaco
+) -> datetime:
+    return max(funcionamento.abre_em(data), _proximo_inicio_redondo(agora))
 
 
 def _proximo_inicio_redondo(agora: datetime) -> datetime:

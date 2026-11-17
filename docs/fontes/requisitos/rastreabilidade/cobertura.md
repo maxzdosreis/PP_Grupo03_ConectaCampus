@@ -19,16 +19,16 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 | RF com UC (sem o transversal) | 69 | 69 | 100% |
 | RF com US e CA (sem o transversal) | 69 | 69 | 100% |
 | CA com TA | 208 | 208 | 100% |
-| TA automatizados | 195 | 208 | 94% |
+| TA automatizados | 201 | 208 | 97% |
 | TA manuais (roteiro) | 3 | 208 | 1% |
-| TA pendentes (regra decidida, código na tarefa citada) | 10 | 208 | 5% |
+| TA pendentes (regra decidida, código na tarefa citada) | 4 | 208 | 2% |
 | RF com endpoint ou tela | 69 | 70 | 99% |
 | RF com código citado | 70 | 70 | 100% |
 | RF com a cadeia completa | 69 | 70 | 99% |
 
 TA manuais: TA-04, TA-181, TA-188 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
 
-TA pendentes: TA-02, TA-03, TA-06, TA-07, TA-38, TA-69, TA-70, TA-74, TA-80, TA-82 (a especificação está adiante do código de propósito; cada um aponta para a tarefa que o implementa).
+TA pendentes: TA-02, TA-03, TA-06, TA-07 (a especificação está adiante do código de propósito; cada um aponta para a tarefa que o implementa).
 
 ## Por necessidade (NS)
 

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { formatarData, formatarDataHora, formatarDuracao, formatarIntervalo } from './formatacao.ts'
+import {
+  formatarData,
+  formatarDataHora,
+  formatarDuracao,
+  formatarFuncionamento,
+  formatarIntervalo,
+} from './formatacao.ts'
 
 describe('formatacao', () => {
   it.each([
@@ -30,5 +36,12 @@ describe('formatacao', () => {
     [180, '3 h'],
   ])('formatarDuracao(%i) devolve %s', (minutos, esperado) => {
     expect(formatarDuracao(minutos)).toBe(esperado)
+  })
+
+  it.each([
+    ['07:00', '00:00', '07:00 às meia-noite'],
+    ['08:00', '22:00', '08:00 às 22:00'],
+  ])('formatarFuncionamento(%s, %s) devolve %s', (abertura, fechamento, esperado) => {
+    expect(formatarFuncionamento(abertura, fechamento)).toBe(esperado)
   })
 })

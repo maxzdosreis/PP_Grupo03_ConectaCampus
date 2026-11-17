@@ -25,6 +25,7 @@ IGNORADOS = {
     "reservas.models": "reexporta reservas/infrastructure/models.py para o Django descobrir os models",
     "contas.models": "reexporta contas/infrastructure/models.py para o Django descobrir os models",
     "contas.admin": "administração do Django (/admin/), fora da API e da arquitetura em camadas",
+    "reservas.apps": "ao iniciar, registra em espacos.publico a consulta de reservas que o cadastro de espaços usa (composição; só pela fachada)",
 }
 FRONTEND_IGNORADOS = {
     "src/frontend/src/configuracaoDosTestes.ts": "configuração do Vitest (setupFiles)",

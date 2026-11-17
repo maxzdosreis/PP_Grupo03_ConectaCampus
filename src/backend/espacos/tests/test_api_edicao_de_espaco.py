@@ -49,6 +49,8 @@ def test_editar_responde_200_e_a_listagem_mostra_os_dados_novos(
         "tipo_rotulo": "Ginásio",
         "capacidade": 45,
         "ativo": True,
+        "abertura": "07:00",
+        "fechamento": "00:00",
     }
     assert resposta.data["dados"] == esperado
     assert _espaco_na_listagem(cliente_gestor, espaco_id) == esperado

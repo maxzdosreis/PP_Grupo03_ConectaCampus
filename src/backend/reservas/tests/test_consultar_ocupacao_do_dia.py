@@ -1,17 +1,13 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 import pytest
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.casos_de_uso import ConsultarOcupacaoDoDia
 from reservas.application.ocupacao_do_dia import HorarioOcupado
-from reservas.application.portas import EspacoReservavel
 from reservas.domain.excecoes import AntecedenciaExcedida, DataRetroativa
-from reservas.domain.regras_de_agenda import (
-    HORARIO_DE_ABERTURA,
-    HORARIO_DE_FECHAMENTO,
-    data_limite_para_reservar,
-)
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO
+from reservas.domain.regras_de_agenda import data_limite_para_reservar
 from reservas.domain.situacao import SituacaoReserva
 from reservas.tests.fakes import (
     AGORA,
@@ -20,14 +16,17 @@ from reservas.tests.fakes import (
     ID_INEXISTENTE,
     ConsultaDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
+    espaco_reservavel,
+    funcionamento,
     intervalo,
     reserva_reconstituida,
 )
 
 S = SituacaoReserva
-QUADRA = EspacoReservavel(id=1, nome="Quadra Coberta")
-CAMPO = EspacoReservavel(id=2, nome="Campo Norte")
-GINASIO_INATIVO = EspacoReservavel(id=3, nome="Ginásio Antigo")
+QUADRA = espaco_reservavel(1, "Quadra Coberta")
+CAMPO = espaco_reservavel(2, "Campo Norte")
+GINASIO_INATIVO = espaco_reservavel(3, "Ginásio Antigo")
+QUADRA_DE_DIA = espaco_reservavel(4, "Quadra de Dia", funcionamento("08:00", "18:00"))
 
 
 @pytest.fixture
@@ -38,7 +37,8 @@ def repositorio():
 @pytest.fixture
 def consulta():
     return ConsultaDeEspacosEmMemoria(
-        [QUADRA, CAMPO, GINASIO_INATIVO], ids_inativos=[GINASIO_INATIVO.id]
+        [QUADRA, CAMPO, GINASIO_INATIVO, QUADRA_DE_DIA],
+        ids_inativos=[GINASIO_INATIVO.id],
     )
 
 
@@ -84,10 +84,10 @@ def test_dia_sem_reservas_tem_o_funcionamento_inteiro_livre(consultar):
 
     # Assert
     assert ocupacao.data == DIA
-    assert ocupacao.horario_de_abertura == HORARIO_DE_ABERTURA
-    assert ocupacao.horario_de_fechamento == HORARIO_DE_FECHAMENTO
+    assert ocupacao.horario_de_abertura == time(7, 0)
+    assert ocupacao.horario_de_fechamento == time(0, 0)
     assert ocupacao.ocupados == ()
-    assert _livres_como_texto(ocupacao) == ["07:00–22:00"]
+    assert _livres_como_texto(ocupacao) == ["07:00–00:00"]
     assert ocupacao.reservavel is True
     assert ocupacao.motivo_indisponivel is None
 
@@ -114,7 +114,7 @@ def test_so_solicitadas_e_confirmadas_ocupam_e_o_resto_fica_livre(
     assert _livres_como_texto(ocupacao) == [
         "07:00–08:00",
         "09:00–10:00",
-        "11:00–22:00",
+        "11:00–00:00",
     ]
 
 
@@ -143,3 +143,50 @@ def test_data_indisponivel_nao_tem_livres_e_traz_o_motivo(
     assert ocupacao.motivo_indisponivel == mensagem
     assert ocupacao.livres == ()
     assert len(ocupacao.ocupados) == 1
+
+
+def test_espaco_com_horario_proprio_mostra_a_sua_janela_e_os_livres_dela(
+    consultar, repositorio
+):
+    # Arrange
+    _salvar(repositorio, S.CONFIRMADA, "12:00", "13:00", espaco_id=QUADRA_DE_DIA.id)
+
+    # Act
+    ocupacao = consultar.executar(espaco_id=QUADRA_DE_DIA.id, data=DIA)
+
+    # Assert
+    assert ocupacao.horario_de_abertura == time(8, 0)
+    assert ocupacao.horario_de_fechamento == time(18, 0)
+    assert _livres_como_texto(ocupacao) == ["08:00–12:00", "13:00–18:00"]
+
+
+def test_reserva_ate_a_meia_noite_aparece_na_agenda_do_dia_dela_e_nao_na_do_seguinte(
+    consultar, repositorio
+):
+    # Arrange
+    _salvar(repositorio, S.SOLICITADA, "23:00", "00:00")
+
+    # Act
+    do_dia = consultar.executar(espaco_id=QUADRA.id, data=DIA)
+    do_seguinte = consultar.executar(espaco_id=QUADRA.id, data=DIA + timedelta(days=1))
+
+    # Assert
+    assert [h.intervalo for h in do_dia.ocupados] == [intervalo("23:00", "00:00")]
+    assert _livres_como_texto(do_dia) == ["07:00–23:00"]
+    assert do_seguinte.ocupados == ()
+    assert _livres_como_texto(do_seguinte) == ["07:00–00:00"]
+
+
+def test_hoje_depois_do_fechamento_do_espaco_nao_e_reservavel(repositorio, consulta):
+    # Arrange
+    agora = datetime(2026, 10, 21, 18, 30, tzinfo=FUSO_HORARIO)
+    consultar = ConsultarOcupacaoDoDia(repositorio, consulta, lambda: agora)
+
+    # Act
+    de_dia = consultar.executar(espaco_id=QUADRA_DE_DIA.id, data=agora.date())
+    padrao = consultar.executar(espaco_id=QUADRA.id, data=agora.date())
+
+    # Assert
+    assert de_dia.reservavel is False
+    assert de_dia.motivo_indisponivel == DataRetroativa().mensagem
+    assert padrao.reservavel is True

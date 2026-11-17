@@ -6,6 +6,7 @@ from espacos.application.casos_de_uso import (
     ListarEspacos,
     ObterEspaco,
 )
+from espacos.infrastructure.consulta_de_reservas import consulta_registrada
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 
 
@@ -22,7 +23,7 @@ def obter_espaco() -> ObterEspaco:
 
 
 def editar_espaco() -> EditarEspaco:
-    return EditarEspaco(RepositorioEspacosDjango())
+    return EditarEspaco(RepositorioEspacosDjango(), consulta_registrada())
 
 
 def desativar_espaco() -> DesativarEspaco:

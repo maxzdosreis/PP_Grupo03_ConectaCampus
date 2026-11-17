@@ -40,7 +40,7 @@ class ForaDoHorarioDeFuncionamento(DadosInvalidos):
     def __init__(self, campo: str, abertura: time, fechamento: time) -> None:
         self.campo = campo
         super().__init__(
-            f"Os espaços funcionam das {abertura:%H:%M} às {fechamento:%H:%M}. "
+            f"O espaço funciona das {abertura:%H:%M} às {fechamento:%H:%M}. "
             "Escolha um horário dentro desse período."
         )
 

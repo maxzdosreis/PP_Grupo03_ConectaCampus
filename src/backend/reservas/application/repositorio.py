@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Protocol
 
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
@@ -100,6 +100,12 @@ class RepositorioReservas(Protocol):
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         """Lista as reservas Solicitadas ou Confirmadas do espaço naquele dia."""
+
+    def listar_ativas_a_partir_de(
+        self, espaco_id: int, momento: datetime
+    ) -> list[Reserva]:
+        """Lista as reservas Solicitadas ou Confirmadas do espaço que terminam
+        depois do momento (as futuras e a que está em andamento), por início."""
 
     def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
         """Lista o histórico da reserva por registrado_em e, no empate, na ordem

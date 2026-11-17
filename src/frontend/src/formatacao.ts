@@ -9,6 +9,11 @@ export function formatarIntervalo(data: string, inicio: string, fim: string): st
 
 const MINUTOS_POR_HORA = 60
 
+export function formatarFuncionamento(abertura: string, fechamento: string): string {
+  const termino = fechamento === '00:00' ? 'meia-noite' : fechamento
+  return `${abertura} às ${termino}`
+}
+
 export function formatarDuracao(minutos: number): string {
   const horas = Math.floor(minutos / MINUTOS_POR_HORA)
   const restantes = minutos % MINUTOS_POR_HORA

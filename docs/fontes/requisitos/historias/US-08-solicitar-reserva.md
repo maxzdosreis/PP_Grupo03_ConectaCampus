@@ -16,6 +16,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-03, CA-04, CA-08, CA-14, CA-16 novos, com a implementação pendente na tarefa ESP-07 ([CR-03](../mudancas/CR-03-horario-por-espaco.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-62 a TA-82 passam a TA-67 a TA-92 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | ESP-07 (CR-03): CA-03, CA-04, CA-08, CA-14 e CA-16 passam de pendente a automatizado, com os testes novos (TA-69, TA-70, TA-74, TA-80 e TA-82); a marca "implementação pendente" sai; TA-79, TA-81 e TA-83 trocam os testes da regra anterior pelos de borda por espaço; as linhas Situação do CA-02 e do CA-13 passam a dizer que descrevem a regra anterior ao CR-03. Nenhum Dado/Quando/Então muda. Sem aprovação. |
 
 ## Index Card
 
@@ -29,7 +30,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | **Prioridade** | Normal — [RF-11](../requisitos/rf-reservas.md#rf-11), [RF-11.1](../requisitos/rf-reservas.md#rf-11-1), [RF-11.3](../requisitos/rf-reservas.md#rf-11-3), [RF-11.4](../requisitos/rf-reservas.md#rf-11-4) e [RF-22](../requisitos/rf-reservas.md#rf-22) são normais (F2 e F5 do enunciado). |
 | **Estimativa (Custo em Semanas)** | 1,2 (retrospectiva: domínio, conflito, persistência e caso de uso das RES-01 a RES-04, as regras de agenda da RES-09 e a tela da FE-03). |
 | **Conversa** | "Quais são o horário de funcionamento, a duração e a antecedência reais?" → [DEC-07](../decisoes/DEC-07.md), decidida na Aula 7: funcionamento das 07:00 às 00:00 por padrão e configurável por espaço, duração sugerida de 1 h, mínimo de 30 min, máximo de 3 h e 30 dias ([CR-03](../mudancas/CR-03-horario-por-espaco.md), tarefa ESP-07). "Um pedido Solicitado que ninguém decidiu continua ocupando o horário depois da data?" → sim, por decisão do grupo ([DEC-13](../decisoes/DEC-13.md), decidida na Aula 7). "Pode pedir num espaço desativado?" → não, e as reservas que ele já tinha continuam valendo ([DEC-06](../decisoes/DEC-06.md)). "A mensagem de conflito pode dizer quem reservou?" → não ([RNF-F06](../requisitos/rnf.md#rnf-f06)). "Em que ordem as regras são conferidas?" → a real, da ficha; a da finalidade diverge do RF-11 ([L-12](../requisitos/srs.md#l-12)). |
-| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). Os CAs marcados com implementação pendente só contam quando a tarefa citada os implementar e criar o TA deles. |
+| **Pronta quando** | Todos os CAs abaixo têm o TA passando na verificação do PR, esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). |
 
 ## INVEST
 
@@ -64,7 +65,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11](../requisitos/rf-reservas.md#rf-11), [RF-28](../requisitos/rf-agenda.md#rf-28)
 - **TA:** [TA-68](#ta-68)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md)
-- **Situação:** em parte substituído (a regra do horário de funcionamento apresentado, agora o do espaço, e da duração sugerida) por [CA-08](#us-08-ca-08), pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa ESP-07; não valem como prova da regra nova.
+- **Situação:** em parte substituído (a regra do horário de funcionamento apresentado, agora o do espaço, e da duração sugerida) por [CA-08](#us-08-ca-08), pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md) (REQ-13). Este CA descreve a regra anterior ao CR-03, implementado na ESP-07 em 17/11/2026: o texto e o TA ficam como histórico, e a prova da regra vigente é a do CA que o substitui.
 
 #### <a id="us-08-ca-03"></a>US-08 · CA-03 · Pedido até a meia-noite no horário padrão (sucesso)
 
@@ -75,7 +76,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11](../requisitos/rf-reservas.md#rf-11), [RF-11.5](../requisitos/rf-reservas.md#rf-11-5)
 - **TA:** [TA-69](#ta-69)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-08-ca-04"></a>US-08 · CA-04 · Pedido depois das 22:00 aceito (sucesso)
 
@@ -86,7 +86,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5)
 - **TA:** [TA-70](#ta-70)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-08-ca-05"></a>US-08 · CA-05 · Pedir a partir de um espaço já consultado (alternativa)
 
@@ -124,7 +123,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-28](../requisitos/rf-agenda.md#rf-28)
 - **TA:** [TA-74](#ta-74)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-08-ca-09"></a>US-08 · CA-09 · Nenhum espaço aceita pedidos (exceção)
 
@@ -171,7 +169,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5)
 - **TA:** [TA-79](#ta-79)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md)
-- **Situação:** substituído por [CA-14](#us-08-ca-14), [CA-03](#us-08-ca-03), [CA-04](#us-08-ca-04), pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa ESP-07; não valem como prova da regra nova.
+- **Situação:** substituído por [CA-14](#us-08-ca-14), [CA-03](#us-08-ca-03), [CA-04](#us-08-ca-04), pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md) (REQ-13). Este CA descreve a regra anterior ao CR-03, implementado na ESP-07 em 17/11/2026: o texto e o TA ficam como histórico, e a prova da regra vigente é a do CA que o substitui.
 
 #### <a id="us-08-ca-14"></a>US-08 · CA-14 · Fora do horário de um espaço com horário próprio (exceção)
 
@@ -182,7 +180,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5)
 - **TA:** [TA-80](#ta-80)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-08-ca-15"></a>US-08 · CA-15 · Duração fora dos limites (exceção)
 
@@ -203,7 +200,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-11.5](../requisitos/rf-reservas.md#rf-11-5)
 - **TA:** [TA-82](#ta-82)
 - **Depende de:** [DEC-07](../decisoes/DEC-07.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-03](../mudancas/CR-03-horario-por-espaco.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa ESP-07)
 
 #### <a id="us-08-ca-17"></a>US-08 · CA-17 · Além da antecedência máxima (exceção)
 
@@ -308,21 +304,21 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 |---|---|---|---|
 | <a id="ta-67"></a>TA-67 | [CA-01](#us-08-ca-01) | automatizado | `reservas/tests/test_api_reservas.py::test_solicitacao_valida_responde_201_com_a_reserva`; `reservas/tests/test_criar_reserva.py::test_solicitacao_valida_e_salva_como_solicitada`; `reservas/tests/test_reserva.py::test_solicitar_cria_reserva_solicitada_com_criada_em_igual_a_agora`; `pages/PaginaNovaReserva.test.tsx`: `com sucesso, mostra o toast e o resumo; "Solicitar outra reserva" volta ao formulário com o espaço mantido` |
 | <a id="ta-68"></a>TA-68 | [CA-02](#us-08-ca-02) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `pede só os espaços ativos e mostra "Nome (Tipo)" no seletor`; `pages/PaginaNovaReserva.test.tsx`: `mostra quem está solicitando, com o nome e a matrícula do usuário logado`; `pages/PaginaNovaReserva.test.tsx`: `mostra a dica da agenda com os valores vindos da API, sem limites nos campos`; `components/reservas/dicaDaAgenda.test.ts`: `monta a dica só com os valores recebidos da API`; `reservas/tests/test_api_regras_de_agenda.py::test_regras_de_agenda_sem_login_respondem_200_com_as_constantes_do_dominio` |
-| <a id="ta-69"></a>TA-69 | [CA-03](#us-08-ca-03) | pendente | implementação pendente (tarefa ESP-07) — TA a criar junto com o código ([CR-03 · CA-01](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
-| <a id="ta-70"></a>TA-70 | [CA-04](#us-08-ca-04) | pendente | implementação pendente (tarefa ESP-07) — TA a criar junto com o código ([CR-03 · CA-02](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
+| <a id="ta-69"></a>TA-69 | [CA-03](#us-08-ca-03) | automatizado | `reservas/tests/test_api_horario_do_espaco.py::test_pedido_das_23_as_00_no_horario_padrao_e_aceito_e_termina_a_meia_noite`; `reservas/tests/test_regras_de_agenda.py::test_bordas_do_horario_e_da_duracao_por_espaco [x]`; `reservas/tests/test_criar_reserva.py::test_pedido_ate_a_meia_noite_e_aceito_no_horario_padrao`; `reservas/tests/test_reserva.py::test_solicitar_ate_a_meia_noite_no_horario_padrao_termina_no_fim_do_dia` |
+| <a id="ta-70"></a>TA-70 | [CA-04](#us-08-ca-04) | automatizado | `reservas/tests/test_api_horario_do_espaco.py::test_pedido_depois_das_22_no_horario_padrao_e_aceito`; `reservas/tests/test_regras_de_agenda.py::test_bordas_do_horario_e_da_duracao_por_espaco [x]` |
 | <a id="ta-71"></a>TA-71 | [CA-05](#us-08-ca-05) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `pré-seleciona o espaço ativo informado em ?espaco=`; `pages/PaginaNovaReserva.test.tsx`: `ignora ?espaco= de um espaço inexistente ou inativo` |
 | <a id="ta-72"></a>TA-72 | [CA-06](#us-08-ca-06) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `sem as regras de agenda, o formulário funciona sem a dica`; `pages/PaginaNovaReserva.test.tsx`: `o erro %s da agenda aparece embaixo do campo do domínio` |
 | <a id="ta-73"></a>TA-73 | [CA-07](#us-08-ca-07) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `com sucesso, mostra o toast e o resumo; "Solicitar outra reserva" volta ao formulário com o espaço mantido` |
-| <a id="ta-74"></a>TA-74 | [CA-08](#us-08-ca-08) | pendente | implementação pendente (tarefa ESP-07) — TA a criar junto com o código ([CR-03 · CA-05](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
+| <a id="ta-74"></a>TA-74 | [CA-08](#us-08-ca-08) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `ao informar o início, sugere o término uma hora depois, vinda da API`; `pages/PaginaNovaReserva.test.tsx`: `é só sugestão: um término de 45 minutos digitado vai como foi escrito`; `components/reservas/terminoSugerido.test.ts`: `soma a duração sugerida ao início`; `reservas/tests/test_api_horario_do_espaco.py::test_regras_de_agenda_trazem_a_duracao_sugerida_de_1_hora`; `reservas/tests/test_regras_de_agenda.py::test_duracao_sugerida_e_so_sugestao_e_45_minutos_continua_valido` |
 | <a id="ta-75"></a>TA-75 | [CA-09](#us-08-ca-09) | automatizado | `pages/PaginaNovaReserva.test.tsx`: `sem espaços ativos, mostra o estado vazio com um link para os espaços` |
 | <a id="ta-76"></a>TA-76 | [CA-10](#us-08-ca-10) | automatizado | `reservas/tests/test_api_reservas.py::test_campos_ausentes_respondem_400_com_cada_campo`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [data-inexistente]` |
 | <a id="ta-77"></a>TA-77 | [CA-11](#us-08-ca-11) | automatizado | `reservas/tests/test_intervalo_de_horario.py::test_fim_igual_ou_antes_do_inicio_e_recusado [x]`; `reservas/tests/test_criar_reserva.py::test_fim_igual_ou_antes_do_inicio_lanca_horario_invalido [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [fim-antes-do-inicio]`; `pages/PaginaNovaReserva.test.tsx`: `término antes do início aparece embaixo de Término` |
 | <a id="ta-78"></a>TA-78 | [CA-12](#us-08-ca-12) | automatizado | `reservas/tests/test_reserva.py::test_solicitar_com_inicio_igual_a_agora_e_recusado`; `reservas/tests/test_reserva.py::test_solicitar_um_minuto_depois_de_agora_e_aceito`; `reservas/tests/test_reserva.py::test_solicitar_para_ontem_e_recusado`; `reservas/tests/test_criar_reserva.py::test_horario_no_passado_lanca_data_retroativa_antes_de_consultar_o_espaco`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [data-retroativa]`; `pages/PaginaNovaReserva.test.tsx`: `data retroativa aparece embaixo de Data, que recebe o foco, e some ao editar` |
-| <a id="ta-79"></a>TA-79 | [CA-13](#us-08-ca-13) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_horario_nas_bordas_do_funcionamento_e_aceito [x]`; `reservas/tests/test_regras_de_agenda.py::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [antes-da-abertura]`; `pages/PaginaNovaReserva.test.tsx`: `o erro %s da agenda aparece embaixo do campo do domínio` |
-| <a id="ta-80"></a>TA-80 | [CA-14](#us-08-ca-14) | pendente | implementação pendente (tarefa ESP-07) — TA a criar junto com o código ([CR-03 · CA-03](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
-| <a id="ta-81"></a>TA-81 | [CA-15](#us-08-ca-15) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_duracao_nas_bordas_e_aceita [x]`; `reservas/tests/test_regras_de_agenda.py::test_duracao_fora_dos_limites_e_recusada_no_termino [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [duracao-acima-da-maxima]` |
-| <a id="ta-82"></a>TA-82 | [CA-16](#us-08-ca-16) | pendente | implementação pendente (tarefa ESP-07) — regra já cumprida pelo código; o teste que a fixa com o horário padrão novo nasce na tarefa ([CR-03 · CA-06](../mudancas/CR-03-horario-por-espaco.md#5-critérios-de-aceite)). |
-| <a id="ta-83"></a>TA-83 | [CA-17](#us-08-ca-17) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_data_no_limite_da_antecedencia_e_aceita`; `reservas/tests/test_regras_de_agenda.py::test_data_alem_da_antecedencia_e_recusada_com_a_data_limite`; `reservas/tests/test_regras_de_agenda.py::test_data_limite_conta_hoje_no_fuso_de_sao_paulo`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [alem-da-antecedencia]` |
+| <a id="ta-79"></a>TA-79 | [CA-13](#us-08-ca-13) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_bordas_do_horario_e_da_duracao_por_espaco [x]`; `reservas/tests/test_regras_de_agenda.py::test_mensagem_de_fora_do_horario_cita_o_horario_do_espaco [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [antes-da-abertura]`; `pages/PaginaNovaReserva.test.tsx`: `o erro %s da agenda aparece embaixo do campo do domínio` |
+| <a id="ta-80"></a>TA-80 | [CA-14](#us-08-ca-14) | automatizado | `reservas/tests/test_api_horario_do_espaco.py::test_pedido_que_passa_do_fechamento_do_espaco_e_recusado_junto_ao_termino`; `reservas/tests/test_api_horario_do_espaco.py::test_pedido_fora_do_horario_do_espaco_cita_o_horario_dele`; `reservas/tests/test_regras_de_agenda.py::test_mensagem_de_fora_do_horario_cita_o_horario_do_espaco`; `reservas/tests/test_criar_reserva.py::test_pedido_usa_o_horario_do_espaco_obtido_pela_consulta` |
+| <a id="ta-81"></a>TA-81 | [CA-15](#us-08-ca-15) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_bordas_do_horario_e_da_duracao_por_espaco [x]`; `reservas/tests/test_regras_de_agenda.py::test_duracao_menor_que_o_minimo_segue_recusada_com_a_mensagem_de_sempre [x]`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [duracao-acima-da-maxima]` |
+| <a id="ta-82"></a>TA-82 | [CA-16](#us-08-ca-16) | automatizado | `reservas/tests/test_api_horario_do_espaco.py::test_limites_de_duracao_continuam_os_mesmos_no_horario_padrao`; `reservas/tests/test_regras_de_agenda.py::test_duracao_menor_que_o_minimo_segue_recusada_com_a_mensagem_de_sempre [x]` |
+| <a id="ta-83"></a>TA-83 | [CA-17](#us-08-ca-17) | automatizado | `reservas/tests/test_regras_de_agenda.py::test_data_no_limite_da_antecedencia_e_aceita_inclusive_ate_a_meia_noite`; `reservas/tests/test_regras_de_agenda.py::test_data_alem_da_antecedencia_e_recusada_com_a_data_limite`; `reservas/tests/test_regras_de_agenda.py::test_data_limite_conta_hoje_no_fuso_de_sao_paulo`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [alem-da-antecedencia]` |
 | <a id="ta-84"></a>TA-84 | [CA-18](#us-08-ca-18) | automatizado | `reservas/tests/test_reserva.py::test_data_retroativa_e_checada_antes_do_horario_de_funcionamento`; `reservas/tests/test_reserva.py::test_horario_de_funcionamento_e_checado_antes_da_duracao`; `reservas/tests/test_reserva.py::test_duracao_e_checada_antes_da_antecedencia`; `reservas/tests/test_propriedades_da_agenda.py::test_solicitar_aceita_so_o_que_respeita_as_regras_e_recusa_pela_primeira_violada` |
 | <a id="ta-85"></a>TA-85 | [CA-19](#us-08-ca-19) | automatizado | `reservas/tests/test_reserva.py::test_finalidade_vazia_e_recusada [x]`; `reservas/tests/test_reserva.py::test_finalidade_no_limite_e_aceita`; `reservas/tests/test_reserva.py::test_finalidade_acima_do_limite_e_recusada`; `reservas/tests/test_api_reservas.py::test_dado_invalido_responde_400_sem_salvar [sem-finalidade]` (a posição da finalidade depois da data não tem teste que a fixe: [L-12](../requisitos/srs.md#l-12)) |
 | <a id="ta-86"></a>TA-86 | [CA-20](#us-08-ca-20) | automatizado | `reservas/tests/test_reserva.py::test_espaco_id_vazio_e_recusado_como_obrigatorio`; `reservas/tests/test_reserva.py::test_espaco_id_que_nao_e_inteiro_positivo_e_recusado [x]` |
