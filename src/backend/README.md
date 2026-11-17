@@ -269,7 +269,7 @@ Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/
    curl -X POST http://localhost:8000/api/reservas/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"espaco_id": 1, "data": "AAAA-MM-DD", "hora_inicio": "10:30", "hora_fim": "11:30", "finalidade": "Treino de futsal"}'
    ```
 
-   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`; 22:00–23:00 → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_fim`; 10:00–14:00 → **400** `DURACAO_INVALIDA`; uma data daqui a 40 dias → **400** `ANTECEDENCIA_EXCEDIDA` (ver [Regras de agenda](reservas/README.md#regras-de-agenda)).
+   Outras entradas inválidas prontas: a Quadra de Tênis 2 (inativa) → **409** `ESPACO_INATIVO`; uma data de ontem → **400** `DATA_RETROATIVA`; 06:00–07:00 → **400** `FORA_DO_HORARIO_DE_FUNCIONAMENTO` em `hora_inicio` (o espaço abre às 07:00; o horário de cada espaço está no [README de espaços](espacos/README.md#horário-de-funcionamento)); 23:30–00:30 → **400** `HORARIO_INVALIDO` (não existe término depois da meia-noite); 10:00–14:00 → **400** `DURACAO_INVALIDA`; uma data daqui a 40 dias → **400** `ANTECEDENCIA_EXCEDIDA` (ver [Regras de agenda](reservas/README.md#regras-de-agenda)).
 
 4. Solicitar um horário livre (amanhã, 16:00–17:00) → **201**, situação `SOLICITADA`; anote o `id` da resposta:
 

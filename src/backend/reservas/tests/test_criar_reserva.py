@@ -4,8 +4,13 @@ import pytest
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
 from reservas.application.casos_de_uso import CriarReserva
-from reservas.application.portas import EspacoReservavel
-from reservas.domain.excecoes import ConflitoDeHorario, DataRetroativa, HorarioInvalido
+from reservas.domain.excecoes import (
+    ConflitoDeHorario,
+    DataRetroativa,
+    ForaDoHorarioDeFuncionamento,
+    HorarioInvalido,
+    IdentificadorDeEspacoInvalido,
+)
 from reservas.domain.situacao import SituacaoReserva
 from reservas.tests.fakes import (
     AGORA,
@@ -15,14 +20,16 @@ from reservas.tests.fakes import (
     ID_INEXISTENTE,
     ConsultaDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
+    espaco_reservavel,
+    funcionamento,
     reserva_reconstituida,
     todas_as_reservas,
 )
 
 S = SituacaoReserva
-QUADRA = EspacoReservavel(id=1, nome="Quadra Coberta")
-CAMPO = EspacoReservavel(id=2, nome="Campo Norte")
-GINASIO_INATIVO = EspacoReservavel(id=3, nome="Ginásio Antigo")
+QUADRA = espaco_reservavel(1, "Quadra Coberta")
+CAMPO = espaco_reservavel(2, "Campo Norte")
+GINASIO_INATIVO = espaco_reservavel(3, "Ginásio Antigo")
 
 
 @pytest.fixture
@@ -170,3 +177,69 @@ def test_fim_igual_ou_antes_do_inicio_lanca_horario_invalido(
     # Assert
     assert consulta.ids_consultados == []
     assert _todas(repositorio) == []
+
+
+def test_pedido_usa_o_horario_do_espaco_obtido_pela_consulta(repositorio):
+    # Arrange
+    de_dia = espaco_reservavel(7, "Quadra de Dia", funcionamento("08:00", "18:00"))
+    criar = CriarReserva(
+        repositorio, ConsultaDeEspacosEmMemoria([de_dia]), lambda: AGORA
+    )
+
+    # Act
+    aceita = criar.executar(
+        **_dados_validos(espaco_id=7, hora_inicio=time(17, 0), hora_fim=time(18, 0))
+    )
+    with pytest.raises(ForaDoHorarioDeFuncionamento) as erro:
+        criar.executar(
+            **_dados_validos(
+                espaco_id=7, hora_inicio=time(17, 30), hora_fim=time(18, 30)
+            )
+        )
+
+    # Assert
+    assert aceita.situacao is S.SOLICITADA
+    assert erro.value.campo == "hora_fim"
+    assert "08:00 às 18:00" in erro.value.mensagem
+
+
+def test_pedido_ate_a_meia_noite_e_aceito_no_horario_padrao(criar, repositorio):
+    # Act
+    reserva = criar.executar(
+        **_dados_validos(hora_inicio=time(23, 0), hora_fim=time(0, 0))
+    )
+
+    # Assert
+    assert reserva.id is not None
+    assert reserva.intervalo.termina_a_meia_noite()
+
+
+def test_espaco_inexistente_e_404_antes_de_qualquer_regra_de_agenda(criar):
+    # Act / Assert
+    with pytest.raises(RecursoNaoEncontrado):
+        criar.executar(
+            **_dados_validos(
+                espaco_id=ID_INEXISTENTE, hora_inicio=time(5, 0), hora_fim=time(5, 10)
+            )
+        )
+
+
+def test_horario_malformado_continua_400_mesmo_para_espaco_inexistente(criar, consulta):
+    # Act / Assert
+    with pytest.raises(HorarioInvalido):
+        criar.executar(
+            **_dados_validos(
+                espaco_id=ID_INEXISTENTE, hora_inicio=time(11, 0), hora_fim=time(10, 0)
+            )
+        )
+    assert consulta.ids_consultados == []
+
+
+@pytest.mark.parametrize("espaco_id", [0, -3], ids=["zero", "negativo"])
+def test_espaco_com_identificador_nao_positivo_e_recusado_sem_consultar_o_espaco(
+    criar, consulta, espaco_id
+):
+    # Act / Assert
+    with pytest.raises(IdentificadorDeEspacoInvalido):
+        criar.executar(**_dados_validos(espaco_id=espaco_id))
+    assert consulta.ids_consultados == []

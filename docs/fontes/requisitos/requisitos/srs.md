@@ -30,6 +30,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | AUT-11: RF-42, RF-43, RF-43.1 e RF-43.2 nas tabelas (resumo, 4.1, 4.2, 6.1 a 6.4, QFD e auditoria; 70 fichas, 43 RF principais), a tela `/usuarios` e as rotas `GET /api/usuarios/` e `PATCH /api/usuarios/{id}/`; DEC-27 na seção 6.3; a lacuna L-10 (b) fechada, com a gestão de usuários pelo Gestor ([DEC-27](../decisoes/DEC-27.md), [CR-07](../mudancas/CR-07-gestao-de-usuarios.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | L-01 e L-18 fechadas e auditoria do RF-16, RF-18, RF-19, RF-20 e RF-24.1 com o código da RES-11 (CR-01 implementado); evidência do RF-24.1. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | L-02 fechada e auditoria do RF-22 com o código da RES-12 (CR-02 implementado); resumo da auditoria: 9 ✘, 7 em Completo. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-03 implementado (ESP-07): auditoria dos RF-05, RF-06, RF-28 e RF-30 com o código que agora tem a regra; a do RF-28 registra a divergência do horário por espaço (consulta de espaços, com login); evidência do RF-11.5 com o teste vigente. Enunciados sem mudança. Sem aprovação. |
 
 ## Sumário
 
@@ -105,7 +106,7 @@ Reservas consulta o cadastro de espaços para saber se um espaço é [reserváve
 ### Premissas e dependências
 
 - As premissas P-01 a P-07 da [Visão](../visao.md#premissas) valem para toda a SRS. As que mais afetam os requisitos: P-01 (sem cliente real: os valores de regra são do grupo, com o professor como referência), P-03 (horário de Brasília), P-04 (regras de agenda iguais para todos os espaços, até o [CR-03](../mudancas/CR-03-horario-por-espaco.md) trazer o horário por espaço), P-05 (um pedido é de um espaço, num dia, num intervalo contínuo) e P-06 (Gestor criado só pela Equipe de TI).
-- Dependências de decisão: as DEC-05 a DEC-13 foram decididas na Aula 7 (06/11/2026). As que mudam o comportamento seguem pelo fluxo de [CR](../README.md#como-propor-uma-mudança) e só mudam os requisitos quando a tarefa que implementa o CR for feita: DEC-13 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), RES-11), DEC-05 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), RES-12), DEC-07 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07) e DEC-09 ([CR-04](../mudancas/CR-04-matricula-so-digitos.md), AUT-12). Até lá, esta SRS descreve o comportamento atual. Índice: [`decisoes/`](../decisoes/README.md).
+- Dependências de decisão: as DEC-05 a DEC-13 foram decididas na Aula 7 (06/11/2026). As que mudam o comportamento seguem pelo fluxo de [CR](../README.md#como-propor-uma-mudança) e só mudam os requisitos quando a tarefa que implementa o CR for feita: DEC-13 ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), RES-11), DEC-05 ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), RES-12), DEC-07 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07, implementada em 17/11/2026) e DEC-09 ([CR-04](../mudancas/CR-04-matricula-so-digitos.md), AUT-12). Até lá, esta SRS descreve o comportamento atual. Índice: [`decisoes/`](../decisoes/README.md).
 - Nenhuma dependência de sistema externo (seção 4).
 
 ## 3. Requisitos funcionais
@@ -395,7 +396,7 @@ UC, US, CA e TA de cada RF estão na [matriz gerada](../rastreabilidade/matriz.m
 | RF-11.2 | `reservas/tests/test_reserva.py::test_solicitar_com_inicio_igual_a_agora_e_recusado` |
 | RF-11.3 | `reservas/tests/test_api_reservas.py::test_espaco_inexistente_responde_404` |
 | RF-11.4 | `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` |
-| RF-11.5 | `reservas/tests/test_regras_de_agenda.py::test_horario_fora_do_funcionamento_e_recusado_no_campo_certo` |
+| RF-11.5 | `reservas/tests/test_regras_de_agenda.py::test_mensagem_de_fora_do_horario_cita_o_horario_do_espaco` |
 | RF-12 | `reservas/tests/test_api_consulta_reservas.py::test_criterios_combinados_se_somam` |
 | RF-12.1 | `reservas/tests/test_api_consulta_reservas.py::test_filtro_invalido_responde_400_com_o_campo` |
 | RF-12.2 | `reservas/tests/test_api_paginacao_de_reservas.py::test_as_paginas_juntas_dao_a_lista_completa_sem_repeticao` |
@@ -504,10 +505,10 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-02.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda não guarda o horário de funcionamento do espaço. A ficha já o inclui no cadastro ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
+| RF-05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código guarda o horário de funcionamento do espaço desde 17/11/2026 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07), com o padrão 07:00–00:00. |
 | RF-05.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-05.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Conforme a [DEC-10](../decisoes/DEC-10.md) (decidida). |
-| RF-06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda não altera o horário de funcionamento do espaço. A ficha já o inclui na edição ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
+| RF-06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código altera o horário de funcionamento do espaço desde 17/11/2026 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07) e recusa reduzi-lo quando alguma reserva Solicitada ou Confirmada ficaria fora da nova janela. |
 | RF-06.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-06.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-07 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Efeito sobre as reservas existentes conforme a [DEC-06](../decisoes/DEC-06.md) (decidida). |
@@ -521,7 +522,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-11.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | "Data retroativa" compara data e hora (divergência registrada no glossário). |
 | RF-11.3 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-11.4 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código usa 07:00–22:00 para todos os espaços. A ficha já diz o horário do espaço pedido, padrão 07:00–00:00 ([DEC-07](../decisoes/DEC-07.md) decidida; [CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
+| RF-11.5 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código usa o horário do espaço pedido, padrão 07:00–00:00, desde 17/11/2026 ([DEC-07](../decisoes/DEC-07.md); [CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07); como o espaço agora é consultado antes das regras de agenda, um espaço inexistente ou inativo é informado antes de um horário fora do funcionamento (UC-04). |
 | RF-12 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Em páginas desde a RES-10 ([RF-12.2](rf-reservas.md#rf-12-2), [L-05](#l-05) resolvida). |
 | RF-12.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-12.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
@@ -541,11 +542,11 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-25 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-26 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O limite do motivo também vale ao confirmar e concluir, fora deste RF ([L-13](#l-13)). |
 | RF-27 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda mostra um horário único e não tem a duração sugerida. A ficha já diz o horário de cada espaço e a duração sugerida de 1 hora ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
+| RF-28 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: a duração sugerida de 1 hora vem das regras de agenda, públicas e globais, desde 17/11/2026 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07). Divergência aceita na ESP-07: o horário de abertura e de fechamento de cada espaço vem na consulta de espaços, que exige login, e não nas regras de agenda; o visitante sem login não vê o horário de cada espaço, como o enunciado pede. |
 | RF-29 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Privacidade conforme a [DEC-11](../decisoes/DEC-11.md) (decidida). |
 | RF-29.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-29.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
-| RF-30 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda calcula os livres com o funcionamento único. A ficha já diz o funcionamento do espaço ([CR-03](../mudancas/CR-03-horario-por-espaco.md)); fecha com a ESP-07. |
+| RF-30 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código calcula os livres com o funcionamento de cada espaço desde 17/11/2026 ([CR-03](../mudancas/CR-03-horario-por-espaco.md), ESP-07). |
 | RF-31 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-32.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Co: o código ainda aceita matrícula com letras. A ficha já diz só dígitos ([DEC-09](../decisoes/DEC-09.md) decidida; [CR-04](../mudancas/CR-04-matricula-so-digitos.md), lacuna [L-06](#l-06)); fecha com a AUT-12. |

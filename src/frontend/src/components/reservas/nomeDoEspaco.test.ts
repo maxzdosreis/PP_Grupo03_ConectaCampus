@@ -9,6 +9,8 @@ const GINASIO: Espaco = {
   tipo_rotulo: 'Ginásio',
   capacidade: 50,
   ativo: false,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 describe('nomeDoEspaco', () => {

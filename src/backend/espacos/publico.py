@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 from espacos.application.casos_de_uso import VerificarEspacoDisponivel
+from espacos.application.portas import ReservasDoEspaco
+from espacos.infrastructure import consulta_de_reservas
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 
 
@@ -8,8 +10,24 @@ from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 class EspacoDisponivel:
     id: int
     nome: str
+    abertura: str
+    fechamento: str
+    abertura_em_minutos: int
+    fechamento_em_minutos: int
 
 
 def verificar_espaco_disponivel(espaco_id: int) -> EspacoDisponivel:
     espaco = VerificarEspacoDisponivel(RepositorioEspacosDjango()).executar(espaco_id)
-    return EspacoDisponivel(id=espaco.id, nome=espaco.nome)
+    horario = espaco.horario
+    return EspacoDisponivel(
+        id=espaco.id,
+        nome=espaco.nome,
+        abertura=f"{horario.abertura():%H:%M}",
+        fechamento=f"{horario.fechamento():%H:%M}",
+        abertura_em_minutos=horario.abertura_em_minutos,
+        fechamento_em_minutos=horario.fechamento_em_minutos,
+    )
+
+
+def registrar_reservas_do_espaco(reservas: ReservasDoEspaco) -> None:
+    consulta_de_reservas.registrar(reservas)

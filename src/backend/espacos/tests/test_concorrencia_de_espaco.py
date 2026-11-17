@@ -6,9 +6,10 @@ from django.db import connection
 from espacos.application.casos_de_uso import DesativarEspaco, EditarEspaco
 from espacos.domain.espaco_esportivo import EspacoEsportivo, EstadoDoEspaco
 from espacos.domain.excecoes import EspacoDesatualizado
+from espacos.domain.horario_de_funcionamento import HorarioDeFuncionamento
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
-from espacos.tests.fakes import novo_espaco
+from espacos.tests.fakes import ReservasDoEspacoFake, novo_espaco
 
 ESPERA_MAXIMA_S = 10
 
@@ -67,7 +68,9 @@ def test_edicao_e_desativacao_simultaneas_gravam_so_uma():
         [
             (
                 "edicao",
-                lambda repo: EditarEspaco(repo).executar(espaco_id, capacidade=99),
+                lambda repo: EditarEspaco(repo, ReservasDoEspacoFake()).executar(
+                    espaco_id, capacidade=99
+                ),
             ),
             ("desativacao", lambda repo: DesativarEspaco(repo).executar(espaco_id)),
         ]
@@ -77,8 +80,12 @@ def test_edicao_e_desativacao_simultaneas_gravam_so_uma():
     vencedor = _vencedor(resultados)
     estado_final = RepositorioEspacosDjango().obter_por_id(espaco_id).estado
     esperado = {
-        "edicao": EstadoDoEspaco("Ginásio A", TipoEspaco.GINASIO, 99, True),
-        "desativacao": EstadoDoEspaco("Ginásio A", TipoEspaco.GINASIO, 20, False),
+        "edicao": EstadoDoEspaco(
+            "Ginásio A", TipoEspaco.GINASIO, 99, True, HorarioDeFuncionamento.padrao()
+        ),
+        "desativacao": EstadoDoEspaco(
+            "Ginásio A", TipoEspaco.GINASIO, 20, False, HorarioDeFuncionamento.padrao()
+        ),
     }[vencedor]
     assert estado_final == esperado
 

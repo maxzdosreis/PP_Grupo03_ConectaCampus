@@ -6,7 +6,7 @@ Do pedido (Solicitada) à decisão do gestor (Confirmada), com uma rejeição em
 
 **Figura 5 — Solicitar uma reserva.** `POST /api/reservas/` até o 201, com o conflito de horário como rejeição.
 
-O `Solicitante` sai do token, nunca do corpo (2). `Reserva.solicitar` aplica as regras do pedido e devolve a reserva com o registro de criação pendente (3–4); só então o espaço é conferido (5) e as reservas que ocupam o horário são lidas (6–7). `garantir_horario_livre` acha a sobreposição com a Solicitada das 10:00–11:00 (8): a exceção sobe antes de `salvar`, nada é gravado (9), e o formulário mostra a mensagem do 409 com os valores preservados (10). Com o horário livre, reserva e registro são gravados numa transação só (11–13).
+O `Solicitante` sai do token, nunca do corpo (2). `CriarReserva` confere que o início ainda não passou (3) e, só então, consulta o espaço (4), que devolve o horário de funcionamento dele (5); `Reserva.solicitar` aplica as regras de agenda com esse horário e devolve a reserva com o registro de criação pendente (6–7), e as reservas que ocupam o horário são lidas (8–9). `garantir_horario_livre` acha a sobreposição com a Solicitada das 10:00–11:00 (10): a exceção sobe antes de `salvar`, nada é gravado (11), e o formulário mostra a mensagem do 409 com os valores preservados (12). Com o horário livre, reserva e registro são gravados numa transação só (13–15). O formulário só sugere o término (início mais a duração sugerida, no máximo o fechamento do espaço): quem decide é sempre a API.
 
 ![Figura 6 — Confirmar a reserva](confirmar-reserva.png)
 

@@ -140,3 +140,52 @@ def test_mesmo_horario_em_datas_diferentes_nao_se_sobrepoe():
     # Assert
     assert base.sobrepoe(dia_seguinte) is False
     assert dia_seguinte.sobrepoe(base) is False
+
+
+def test_termino_as_00_00_e_a_meia_noite_do_fim_do_dia_da_reserva():
+    # Act
+    intervalo = _criar_intervalo(hora_inicio=time(23, 0), hora_fim=time(0, 0))
+
+    # Assert
+    assert intervalo.termina_a_meia_noite() is True
+    assert intervalo.data == date(2026, 10, 25)
+    assert intervalo.fim() == datetime(2026, 10, 26, 0, 0, tzinfo=FUSO_HORARIO)
+    assert intervalo.fim() - intervalo.inicio() == timedelta(hours=1)
+    assert str(intervalo) == "25/10/2026 23:00–00:00"
+
+
+def test_termino_comum_nao_termina_a_meia_noite():
+    # Act
+    intervalo = _criar_intervalo()
+
+    # Assert
+    assert intervalo.termina_a_meia_noite() is False
+    assert intervalo.fim().date() == intervalo.data
+
+
+def test_reserva_ate_a_meia_noite_nao_se_sobrepoe_ao_inicio_do_dia_seguinte():
+    # Arrange
+    ate_meia_noite = _criar_intervalo(hora_inicio=time(23, 0), hora_fim=time(0, 0))
+    no_dia_seguinte = _criar_intervalo(
+        data=date(2026, 10, 26), hora_inicio=time(0, 0), hora_fim=time(1, 0)
+    )
+    no_mesmo_dia = _criar_intervalo(hora_inicio=time(23, 30), hora_fim=time(0, 0))
+
+    # Assert
+    assert not ate_meia_noite.sobrepoe(no_dia_seguinte)
+    assert not no_dia_seguinte.sobrepoe(ate_meia_noite)
+    assert ate_meia_noite.sobrepoe(no_mesmo_dia)
+
+
+def test_termino_depois_da_meia_noite_nao_vira_o_dia_e_e_horario_invalido():
+    # Act / Assert
+    with pytest.raises(HorarioInvalido):
+        _criar_intervalo(hora_inicio=time(23, 30), hora_fim=time(0, 30))
+
+
+def test_00_00_a_00_00_e_o_dia_inteiro():
+    # Act
+    dia_inteiro = _criar_intervalo(hora_inicio=time(0, 0), hora_fim=time(0, 0))
+
+    # Assert
+    assert dia_inteiro.fim() - dia_inteiro.inicio() == timedelta(hours=24)

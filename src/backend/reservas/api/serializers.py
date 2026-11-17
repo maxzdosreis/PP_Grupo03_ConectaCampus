@@ -12,8 +12,7 @@ from reservas.domain.regras_de_agenda import (
     ANTECEDENCIA_MAXIMA_EM_DIAS,
     DURACAO_MAXIMA,
     DURACAO_MINIMA,
-    HORARIO_DE_ABERTURA,
-    HORARIO_DE_FECHAMENTO,
+    DURACAO_SUGERIDA,
     data_limite_para_reservar,
 )
 from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserva
@@ -99,8 +98,7 @@ class SituacaoDeReservaSaidaSerializer(serializers.Serializer):
 
 
 class RegrasDeAgendaSaidaSerializer(serializers.Serializer):
-    horario_de_abertura = serializers.TimeField(format=_FORMATO_DA_HORA)
-    horario_de_fechamento = serializers.TimeField(format=_FORMATO_DA_HORA)
+    duracao_sugerida_em_minutos = serializers.IntegerField()
     duracao_minima_em_minutos = serializers.IntegerField()
     duracao_maxima_em_minutos = serializers.IntegerField()
     antecedencia_maxima_em_dias = serializers.IntegerField()
@@ -110,8 +108,7 @@ class RegrasDeAgendaSaidaSerializer(serializers.Serializer):
     def vigentes(cls, agora: datetime) -> "RegrasDeAgendaSaidaSerializer":
         return cls(
             {
-                "horario_de_abertura": HORARIO_DE_ABERTURA,
-                "horario_de_fechamento": HORARIO_DE_FECHAMENTO,
+                "duracao_sugerida_em_minutos": _em_minutos(DURACAO_SUGERIDA),
                 "duracao_minima_em_minutos": _em_minutos(DURACAO_MINIMA),
                 "duracao_maxima_em_minutos": _em_minutos(DURACAO_MAXIMA),
                 "antecedencia_maxima_em_dias": ANTECEDENCIA_MAXIMA_EM_DIAS,

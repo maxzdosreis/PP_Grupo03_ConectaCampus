@@ -37,6 +37,8 @@ const GINASIO: Espaco = {
   tipo_rotulo: 'Ginásio',
   capacidade: 50,
   ativo: true,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 const SOLICITADA: Reserva = {

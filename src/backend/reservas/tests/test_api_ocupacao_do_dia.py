@@ -85,11 +85,11 @@ def test_dia_livre_responde_com_o_funcionamento_inteiro(cliente_solicitante, esp
         "dados": {
             "data": _amanha().isoformat(),
             "horario_de_abertura": "07:00",
-            "horario_de_fechamento": "22:00",
+            "horario_de_fechamento": "00:00",
             "reservavel": True,
             "motivo_indisponivel": None,
             "ocupados": [],
-            "livres": [{"hora_inicio": "07:00", "hora_fim": "22:00"}],
+            "livres": [{"hora_inicio": "07:00", "hora_fim": "00:00"}],
         },
     }
 
@@ -164,7 +164,7 @@ def test_livres_sao_coerentes_com_os_ocupados(cliente_solicitante, espaco_id):
     # Assert
     assert resposta.data["dados"]["livres"] == [
         {"hora_inicio": "07:00", "hora_fim": "10:00"},
-        {"hora_inicio": "12:00", "hora_fim": "22:00"},
+        {"hora_inicio": "12:00", "hora_fim": "00:00"},
     ]
 
 

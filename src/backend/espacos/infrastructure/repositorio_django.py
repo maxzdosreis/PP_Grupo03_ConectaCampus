@@ -7,6 +7,7 @@ from espacos.domain.excecoes import (
     EspacoNaoEncontrado,
     NomeDeEspacoJaCadastrado,
 )
+from espacos.domain.horario_de_funcionamento import HorarioDeFuncionamento
 from espacos.domain.tipo_espaco import TipoEspaco
 from espacos.infrastructure.models import CONSTRAINT_NOME_UNICO, EspacoEsportivoModel
 
@@ -70,6 +71,9 @@ def _para_entidade(model: EspacoEsportivoModel) -> EspacoEsportivo:
         tipo=model.tipo,
         capacidade=model.capacidade,
         ativo=model.ativo,
+        horario=HorarioDeFuncionamento(
+            model.abertura_em_minutos, model.fechamento_em_minutos
+        ),
     )
 
 
@@ -78,3 +82,5 @@ def _aplicar_no_model(entidade: EspacoEsportivo, model: EspacoEsportivoModel) ->
     model.tipo = entidade.tipo.value
     model.capacidade = entidade.capacidade
     model.ativo = entidade.ativo
+    model.abertura_em_minutos = entidade.horario.abertura_em_minutos
+    model.fechamento_em_minutos = entidade.horario.fechamento_em_minutos

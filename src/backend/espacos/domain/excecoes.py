@@ -29,6 +29,45 @@ class CapacidadeInvalida(DadosInvalidos):
     mensagem_padrao = "A capacidade deve ser um número inteiro maior que zero."
 
 
+class HorarioDeFuncionamentoInvalido(DadosInvalidos):
+    codigo = "HORARIO_DE_FUNCIONAMENTO_INVALIDO"
+
+    def __init__(self, campo: str) -> None:
+        self.campo = campo
+        if campo == "fechamento":
+            mensagem = "O fechamento deve ser depois da abertura."
+        else:
+            mensagem = "Informe um horário de abertura entre 00:00 e 23:59."
+        super().__init__(mensagem)
+
+
+class JanelaDeFuncionamentoCurta(DadosInvalidos):
+    codigo = "JANELA_DE_FUNCIONAMENTO_CURTA"
+    campo = "fechamento"
+
+    def __init__(self, minimo_em_minutos: int) -> None:
+        self.minimo_em_minutos = minimo_em_minutos
+        super().__init__(
+            f"O espaço deve funcionar por pelo menos {minimo_em_minutos} minutos."
+        )
+
+
+class HorarioIncompativelComReservas(ConflitoDeEstado):
+    codigo = "HORARIO_INCOMPATIVEL_COM_RESERVAS"
+
+    def __init__(self, quantidade: int) -> None:
+        self.quantidade = quantidade
+        reservas = (
+            "1 reserva ativa ficaria fora"
+            if quantidade == 1
+            else f"{quantidade} reservas ativas ficariam fora"
+        )
+        super().__init__(
+            f"Não é possível alterar o horário: {reservas} do novo horário. "
+            "Cancele ou conclua essas reservas antes de reduzir o horário."
+        )
+
+
 class NomeDeEspacoJaCadastrado(ConflitoDeEstado):
     codigo = "NOME_DE_ESPACO_JA_CADASTRADO"
     campo = "nome"

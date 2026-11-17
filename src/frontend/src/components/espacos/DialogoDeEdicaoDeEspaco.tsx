@@ -22,7 +22,13 @@ type PropriedadesDoDialogoDeEdicao = {
 }
 
 function dadosDo(espaco: Espaco): DadosDoEspaco {
-  return { nome: espaco.nome, tipo: espaco.tipo, capacidade: String(espaco.capacidade) }
+  return {
+    nome: espaco.nome,
+    tipo: espaco.tipo,
+    capacidade: String(espaco.capacidade),
+    abertura: espaco.abertura,
+    fechamento: espaco.fechamento,
+  }
 }
 
 function camposAlterados(original: DadosDoEspaco, dados: DadosDoEspaco) {

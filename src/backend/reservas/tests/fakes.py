@@ -18,6 +18,7 @@ from reservas.application.repositorio import (
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.conflito_de_horario import garantir_horario_livre
 from reservas.domain.excecoes import ReservaDesatualizada, ReservaNaoEncontrada
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
@@ -25,6 +26,9 @@ from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserv
 from reservas.domain.solicitante import Solicitante
 
 UTC = ZoneInfo("UTC")
+FUNCIONAMENTO_PADRAO = FuncionamentoDoEspaco(
+    abertura_em_minutos=7 * 60, fechamento_em_minutos=24 * 60
+)
 AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=FUSO_HORARIO)
 DIA = date(2026, 10, 25)
 DEPOIS_DO_TERMINO = datetime(2026, 10, 25, 12, 0, tzinfo=FUSO_HORARIO)
@@ -87,6 +91,7 @@ def reserva_solicitada(**sobrescritas) -> Reserva:
         "hora_fim": time(11, 0),
         "finalidade": "Treino do time de vôlei",
         "agora": AGORA,
+        "funcionamento": FUNCIONAMENTO_PADRAO,
     }
     dados.update(sobrescritas)
     return Reserva.solicitar(**dados)
@@ -105,6 +110,27 @@ def reserva_reconstituida(**sobrescritas) -> Reserva:
     dados.update(sobrescritas)
     dados.setdefault("motivo_da_situacao", motivo_para(dados["situacao"]))
     return Reserva(**dados)
+
+
+def funcionamento(abertura: str = "07:00", fechamento: str = "00:00"):
+    """Funcionamento a partir de "HH:MM"; "00:00" no fechamento é o fim do dia."""
+    return FuncionamentoDoEspaco(
+        abertura_em_minutos=_minutos(abertura),
+        fechamento_em_minutos=_minutos(fechamento) or 24 * 60,
+    )
+
+
+def _minutos(horario: str) -> int:
+    hora = time.fromisoformat(horario)
+    return hora.hour * 60 + hora.minute
+
+
+def espaco_reservavel(
+    id: int, nome: str, funcionamento_do_espaco: FuncionamentoDoEspaco | None = None
+) -> EspacoReservavel:
+    return EspacoReservavel(
+        id=id, nome=nome, funcionamento=funcionamento_do_espaco or FUNCIONAMENTO_PADRAO
+    )
 
 
 class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
@@ -190,6 +216,17 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
             if reserva.espaco_id == espaco_id
             and reserva.intervalo.data == data
             and reserva.situacao.ocupa_horario
+        )
+
+    def listar_ativas_a_partir_de(
+        self, espaco_id: int, momento: datetime
+    ) -> list[Reserva]:
+        return self._ordenadas(
+            reserva
+            for reserva in self._reservas.values()
+            if reserva.espaco_id == espaco_id
+            and reserva.situacao.ocupa_horario
+            and reserva.intervalo.fim() > momento
         )
 
     def _ordenadas(self, reservas: Iterable[Reserva]) -> list[Reserva]:

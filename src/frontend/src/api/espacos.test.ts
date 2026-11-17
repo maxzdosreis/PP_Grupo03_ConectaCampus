@@ -46,11 +46,23 @@ describe('api de espaços', () => {
   })
 
   it('cadastrarEspaco envia um POST com a capacidade como foi digitada', async () => {
-    await cadastrarEspaco({ nome: 'Ginásio A', tipo: 'GINASIO', capacidade: '50' })
+    await cadastrarEspaco({
+      nome: 'Ginásio A',
+      tipo: 'GINASIO',
+      capacidade: '50',
+      abertura: '07:00',
+      fechamento: '00:00',
+    })
 
     expect(requisitar).toHaveBeenCalledWith('/espacos/', {
       method: 'POST',
-      body: JSON.stringify({ nome: 'Ginásio A', tipo: 'GINASIO', capacidade: '50' }),
+      body: JSON.stringify({
+        nome: 'Ginásio A',
+        tipo: 'GINASIO',
+        capacidade: '50',
+        abertura: '07:00',
+        fechamento: '00:00',
+      }),
     })
   })
 

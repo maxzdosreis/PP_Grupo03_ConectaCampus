@@ -27,7 +27,7 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `PUT /api/auth/senha/` | `contas:senha` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
 | `PATCH /api/auth/senha/` | `contas:senha` | **sem RF** | — | método não implementado, provado pela matriz: [RNF-F04](../requisitos/rnf.md#rnf-f04) (toda rota e método com regra) |
 | `DELETE /api/auth/senha/` | `contas:senha` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
-| `GET /api/espacos/` | `espacos:lista` | [RF-01](matriz.md#rf-01), [RF-02](matriz.md#rf-02) | [NS-01](../visao.md#ns-01) | — |
+| `GET /api/espacos/` | `espacos:lista` | [RF-01](matriz.md#rf-01), [RF-02](matriz.md#rf-02), [RF-28](matriz.md#rf-28) | [NS-01](../visao.md#ns-01), [NS-06](../visao.md#ns-06) | — |
 | `POST /api/espacos/` | `espacos:lista` (corpo: novo espaço) | [RF-05](matriz.md#rf-05) | [NS-02](../visao.md#ns-02) | — |
 | `GET /api/espacos/tipos/` | `espacos:tipos` | [RF-04](matriz.md#rf-04) | [NS-01](../visao.md#ns-01) | — |
 | `GET /api/espacos/{id}/` | `espacos:detalhe` | [RF-03](matriz.md#rf-03) | [NS-01](../visao.md#ns-01) | — |

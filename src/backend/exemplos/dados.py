@@ -21,6 +21,8 @@ class EspacoDeExemplo:
     tipo: TipoEspaco
     capacidade: int
     ativo: bool = True
+    abertura: time | None = None
+    fechamento: time | None = None
 
 
 @dataclass(frozen=True)
@@ -95,7 +97,13 @@ ESPACOS = (
     EspacoDeExemplo(QUADRA_CENTRAL, TipoEspaco.QUADRA_POLIESPORTIVA, 30),
     EspacoDeExemplo(CAMPO_PRINCIPAL, TipoEspaco.CAMPO_DE_FUTEBOL, 22),
     EspacoDeExemplo(GINASIO_COBERTO, TipoEspaco.GINASIO, 200),
-    EspacoDeExemplo(QUADRA_DE_AREIA, TipoEspaco.QUADRA_DE_AREIA, 12),
+    EspacoDeExemplo(
+        QUADRA_DE_AREIA,
+        TipoEspaco.QUADRA_DE_AREIA,
+        12,
+        abertura=time(8, 0),
+        fechamento=time(22, 0),
+    ),
     EspacoDeExemplo(QUADRA_DE_TENIS, TipoEspaco.QUADRA_DE_TENIS, 4),
     EspacoDeExemplo("Quadra de Tênis 2", TipoEspaco.QUADRA_DE_TENIS, 4, ativo=False),
 )
@@ -118,9 +126,9 @@ RESERVAS = (
         espaco=CAMPO_PRINCIPAL,
         solicitante_email=DANIELA.email,
         dias_a_partir_de_hoje=1,
-        hora_inicio=time(14, 0),
-        hora_fim=time(16, 0),
-        finalidade="Partida do campeonato intercursos",
+        hora_inicio=time(21, 0),
+        hora_fim=time(0, 0),
+        finalidade="Partida noturna do campeonato intercursos",
         solicitada_ha_dias=1,
         mudancas=(
             MudancaDeExemplo(SituacaoReserva.CONFIRMADA),

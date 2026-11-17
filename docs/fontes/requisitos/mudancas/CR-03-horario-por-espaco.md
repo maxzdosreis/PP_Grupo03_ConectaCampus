@@ -4,7 +4,7 @@
 |---|---|
 | **CR-03 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha (aprovador da fonte oficial) |
 
-Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa ESP-07)\". O **código não mudou**: quem o muda é a tarefa **ESP-07**, que também cria os testes de aceite e marca o CR como implementado.
+Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8) e **implementado em 17/11/2026 pela tarefa ESP-07** (seção 9): o código, os testes de aceite, as figuras e os READMEs dizem o mesmo que a especificação.
 
 ## Histórico de revisões
 
@@ -14,6 +14,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decis
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-12 a TA-156 passam a TA-13 a TA-157, para o TA-12 novo da US-02 (tentativas em excesso) seguir a ordem das histórias (AUT-08). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13): RF, RN, UC, histórias, CAs e TAs com a regra nova, listados na [seção 8](#8-aplicação-na-especificação-req-13). Estado: aplicado na especificação; código pendente (tarefa ESP-07). A especificação está adiante do código de propósito, e cada CA novo leva a marca "implementação pendente (tarefa ESP-07)". Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementado na tarefa ESP-07 (seção 9): código, migration, testes, figuras, dados de exemplo e READMEs; os seis CAs com a marca "implementação pendente" passam a automatizados; os pontos que a seção 8 deixou abertos foram decididos. Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -22,7 +23,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-07](../decis
 | **Motivo** | Resposta do professor à [DEC-07](../decisoes/DEC-07.md) na Aula 7 (06/11/2026): "O horário de funcionamento é das 07:00 às 00:00, as reservas padrões são de 1 hora, e precisa de horário por espaço, porque teremos vários espaços." Decisão do grupo, nos pontos que a resposta não cobriu: 07:00–00:00 é o padrão de cada espaço, configurável por espaço; "reservas padrões de 1 hora" é a duração sugerida ao pedir; mínimo de 30 minutos, máximo de 3 horas e antecedência de 30 dias continuam; o término à meia-noite é o fim do dia da reserva. |
 | **Solicitante** | O professor, como representante do cliente. |
 | **Responsável** | O grupo. |
-| **Estado** | **Aplicado na especificação; código pendente (tarefa ESP-07)** (10/11/2026, REQ-13). |
+| **Estado** | **Implementado** (17/11/2026, tarefa ESP-07); aplicado na especificação em 10/11/2026 (REQ-13). |
 | **Origem** | [DEC-07](../decisoes/DEC-07.md). |
 | **Baseline vigente** | Nenhuma aprovada: a [candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata (aprovação na REQ-07). |
 | **Tarefa que implementa** | ESP-07 |
@@ -157,7 +158,7 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 
 ## 8. Aplicação na especificação (REQ-13)
 
-Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a especificação está adiante do código de propósito, e cada critério abaixo leva a marca "implementação pendente (tarefa ESP-07)" até a tarefa ESP-07 implementar a regra e criar o teste de aceite dele. Os testes que existem hoje verificam a regra anterior, e nenhum TA novo cita um deles.
+Aplicado na especificação em 10/11/2026. Na data da aplicação, o código ainda não mudava: a especificação estava adiante do código de propósito, e cada critério abaixo levava a marca de implementação pendente até a tarefa ESP-07. Ela implementou a regra em 17/11/2026 e criou o teste de aceite de cada um (seção 9).
 
 **O que mudou:**
 
@@ -167,23 +168,50 @@ Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a esp
 - US/CA/TA: [US-05](../historias/US-05-cadastrar-espaco.md) e [US-08](../historias/US-08-solicitar-reserva.md) (CAs novos); [US-09](../historias/US-09-ver-a-agenda-do-dia.md) (CAs de agenda reescritos sem o valor fixo de 22:00, mesma obrigação, mesmos TAs).
 - Documentos: [glossário](../glossario.md) (horário de funcionamento, termo novo duração sugerida), [Visão](../visao.md) (NS-06, P-04, R-10), [SRS](../requisitos/srs.md) (auditoria).
 
-**CAs novos (6, todos com a marca "implementação pendente (tarefa ESP-07)")**
+**CAs novos (6; a marca de implementação pendente saiu em 17/11/2026, quando a tarefa ESP-07 os implementou)**
 
 | CA | Título | Tipo | TA | Pedido do CR | Implementação |
 |---|---|---|---|---|---|
-| [US-08 · CA-03](../historias/US-08-solicitar-reserva.md#us-08-ca-03) | Pedido até a meia-noite no horário padrão | sucesso | [TA-69](../historias/US-08-solicitar-reserva.md#ta-69) | CR-03 · CA-01 | implementação pendente (tarefa ESP-07) |
-| [US-08 · CA-04](../historias/US-08-solicitar-reserva.md#us-08-ca-04) | Pedido depois das 22:00 aceito | sucesso | [TA-70](../historias/US-08-solicitar-reserva.md#ta-70) | CR-03 · CA-02 | implementação pendente (tarefa ESP-07) |
-| [US-08 · CA-08](../historias/US-08-solicitar-reserva.md#us-08-ca-08) | Duração sugerida | alternativa | [TA-74](../historias/US-08-solicitar-reserva.md#ta-74) | CR-03 · CA-05 | implementação pendente (tarefa ESP-07) |
-| [US-08 · CA-14](../historias/US-08-solicitar-reserva.md#us-08-ca-14) | Fora do horário de um espaço com horário próprio | exceção | [TA-80](../historias/US-08-solicitar-reserva.md#ta-80) | CR-03 · CA-03 | implementação pendente (tarefa ESP-07) |
-| [US-08 · CA-16](../historias/US-08-solicitar-reserva.md#us-08-ca-16) | Limites de duração sem mudança | exceção | [TA-82](../historias/US-08-solicitar-reserva.md#ta-82) | CR-03 · CA-06 | implementação pendente (tarefa ESP-07) |
-| [US-05 · CA-03](../historias/US-05-cadastrar-espaco.md#us-05-ca-03) | Espaço cadastrado sem horário | sucesso | [TA-38](../historias/US-05-cadastrar-espaco.md#ta-38) | CR-03 · CA-04 | implementação pendente (tarefa ESP-07) |
+| [US-08 · CA-03](../historias/US-08-solicitar-reserva.md#us-08-ca-03) | Pedido até a meia-noite no horário padrão | sucesso | [TA-69](../historias/US-08-solicitar-reserva.md#ta-69) | CR-03 · CA-01 | implementado (tarefa ESP-07, 17/11/2026) |
+| [US-08 · CA-04](../historias/US-08-solicitar-reserva.md#us-08-ca-04) | Pedido depois das 22:00 aceito | sucesso | [TA-70](../historias/US-08-solicitar-reserva.md#ta-70) | CR-03 · CA-02 | implementado (tarefa ESP-07, 17/11/2026) |
+| [US-08 · CA-08](../historias/US-08-solicitar-reserva.md#us-08-ca-08) | Duração sugerida | alternativa | [TA-74](../historias/US-08-solicitar-reserva.md#ta-74) | CR-03 · CA-05 | implementado (tarefa ESP-07, 17/11/2026) |
+| [US-08 · CA-14](../historias/US-08-solicitar-reserva.md#us-08-ca-14) | Fora do horário de um espaço com horário próprio | exceção | [TA-80](../historias/US-08-solicitar-reserva.md#ta-80) | CR-03 · CA-03 | implementado (tarefa ESP-07, 17/11/2026) |
+| [US-08 · CA-16](../historias/US-08-solicitar-reserva.md#us-08-ca-16) | Limites de duração sem mudança | exceção | [TA-82](../historias/US-08-solicitar-reserva.md#ta-82) | CR-03 · CA-06 | implementado (tarefa ESP-07, 17/11/2026) |
+| [US-05 · CA-03](../historias/US-05-cadastrar-espaco.md#us-05-ca-03) | Espaço cadastrado sem horário | sucesso | [TA-38](../historias/US-05-cadastrar-espaco.md#ta-38) | CR-03 · CA-04 | implementado (tarefa ESP-07, 17/11/2026) |
 
 **CAs antigos marcados:** [US-08 · CA-02](../historias/US-08-solicitar-reserva.md#us-08-ca-02) (substituído em parte), [US-08 · CA-13](../historias/US-08-solicitar-reserva.md#us-08-ca-13) (substituído). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpre até a tarefa ESP-07.
 
-**Pontos que ficam abertos para a tarefa ESP-07 (nada foi decidido aqui):**
+**Pontos que ficaram abertos para a tarefa ESP-07 (nada foi decidido aqui; as decisões estão na seção 9):**
 
 - Os artefatos marcados "a confirmar" na seção 3: [RF-01](../requisitos/rf-espacos.md#rf-01), [RF-02](../requisitos/rf-espacos.md#rf-02), [RF-29](../requisitos/rf-agenda.md#rf-29), [UC-03](../casos-de-uso/fichas-resumidas.md#uc-03), [UC-14](../casos-de-uso/UC-14-cadastrar-espaco.md) (fluxo), [UC-15](../casos-de-uso/fichas-resumidas.md#uc-15), [US-04](../historias/US-04-consultar-os-espacos.md), [US-06](../historias/US-06-editar-espaco.md), [NS-01](../visao.md#ns-01) e [NS-02](../visao.md#ns-02). Não há CA da edição do horário nem da consulta dele.
 - Onde a duração sugerida aparece (dica do pedido, término preenchido pela agenda do dia ou os dois): por isso [US-09 · CA do preenchimento do horário livre](../historias/US-09-ver-a-agenda-do-dia.md) segue como está.
 - Se a consulta das regras de agenda passa a receber o espaço ou se o horário vai junto com o espaço na consulta de espaços.
 - O texto da mensagem de fora do horário e a validação do horário do espaço (por exemplo, abertura antes do fechamento).
 - A Figura 3 da modelagem (atributos de `EspacoEsportivo`) não foi alterada nesta tarefa.
+
+## 9. Implementação (ESP-07)
+
+Implementado em 17/11/2026. As decisões que a seção 8 deixou para a tarefa, e as que a implementação trouxe:
+
+| Ponto | Decisão |
+|---|---|
+| Representação do fechamento à meia-noite | **Minutos desde a meia-noite local, de 0 a 1440**, num objeto de valor (`HorarioDeFuncionamento`, em `espacos`; `FuncionamentoDoEspaco`, em `reservas`). O fechamento `1440` é a meia-noite do **fim** do dia e se escreve `00:00` na tela e na API; a abertura `0` é a do começo. A conversão de e para `time` fica num lugar só por contexto, e nenhum outro código compara horas soltas: as comparações usam `abre_em(data)` e `fecha_em(data)`, em datetimes com fuso. |
+| Término à meia-noite na reserva | `IntervaloDeHorario` com `hora_fim` 00:00 termina à meia-noite do fim do dia da reserva (`fim()` é 00:00 do dia seguinte); 00:00–00:00 é o dia inteiro. O dia da reserva é o dia local do início: uma reserva das 23:00 às 00:00 aparece só na agenda desse dia. Um término depois da meia-noite não existe (23:30–00:30 é um término anterior ao início). |
+| Validação do horário do espaço | Abertura e fechamento obrigatórios; fechamento depois da abertura (00:00 vale 24:00); janela de pelo menos 30 minutos (o valor repete a duração mínima da reserva, e um teste em `config/tests` garante que os dois continuam iguais); qualquer minuto é aceito, porque as reservas também aceitam qualquer minuto. Códigos `HORARIO_DE_FUNCIONAMENTO_INVALIDO` e `JANELA_DE_FUNCIONAMENTO_CURTA`, junto ao fechamento. |
+| Edição com reservas ativas fora da nova janela | **Recusada** (409 `HORARIO_INCOMPATIVEL_COM_RESERVAS`, com a quantidade de reservas Solicitadas ou Confirmadas, ainda não terminadas, que ficariam fora). O CR e a DEC-07 eram omissos; a decisão (a alternativa conservadora) foi do grupo. Cancelar ou concluir essas reservas libera a edição. `espacos` não importa `reservas`: `reservas` se registra em `espacos.publico` ao iniciar (`ReservasConfig.ready`), e o cadastro recebe só a porta `ReservasDoEspaco`. |
+| Onde o horário chega ao cliente | No espaço: `abertura` e `fechamento` ("HH:MM") entram no cadastro, na edição, na listagem e no detalhe; a agenda do dia traz o horário do espaço consultado. `GET /api/reservas/regras-de-agenda/` segue público e global e passou a trazer `duracao_sugerida_em_minutos`; deixou de trazer `horario_de_abertura` e `horario_de_fechamento`, que eram globais (o único campo removido, do endpoint de regras). O visitante sem login vê as regras globais, mas não o horário de cada espaço (divergência do RF-28, registrada na auditoria da SRS). Não há rota nova nem linha nova na matriz de acesso. |
+| Ordem das verificações do pedido | Com o horário no espaço, o espaço passa a ser consultado antes das regras de agenda. A ordem real é: formato e término → data retroativa → identificador do espaço → espaço (404, 409) → funcionamento → duração → antecedência → finalidade → conflito. A data retroativa e o identificador continuam antes de consultar o espaço (o CA-12 da US-08 diz que o espaço nem é consultado numa data retroativa); a ficha UC-04 e o fluxo de decisão trazem a nova ordem. |
+| Duração sugerida | Constante `DURACAO_SUGERIDA` (1 hora) no domínio, exposta pelas regras de agenda; no pedido, ao informar o início o término vem preenchido com o início mais a duração sugerida, ou com o fechamento do espaço (e um aviso) se faltar menos que ela. É só sugestão: um pedido de 45 minutos continua válido. "Usar este horário" da agenda do dia segue preenchendo o término com a duração máxima, como a US-09 pede. |
+| O formulário do pedido | Mostra o horário do espaço escolhido e a agenda do dia com a janela dele, mas **não** põe `min`, `max` nem `step` nos campos de hora, porque o frontend não valida regra de negócio (decisão da FE-02, mantida): quem recusa é a API, com a mensagem do horário do espaço. |
+| Migração | `0002_horario_de_funcionamento` em `espacos`, gerada por `makemigrations`: duas colunas em minutos e uma `CheckConstraint`. Os espaços já cadastrados recebem o padrão 07:00–00:00 (o antigo funcionamento ia das 07:00 às 22:00, então nenhuma reserva antiga fica fora do horário novo). É reversível. |
+| Dados de exemplo | A Quadra de Areia Norte funciona das 08:00 às 22:00, e a partida do Campo de Futebol Principal vai das 21:00 às 00:00, para mostrar o horário próprio e o término à meia-noite. |
+
+**O que mudou**
+
+- Código (espaços): `espacos/domain/horario_de_funcionamento.py` (novo), `espaco_esportivo.py`, `excecoes.py`; `application/casos_de_uso.py` e `application/portas.py` (porta `ReservasDoEspaco`); `infrastructure/models.py`, `repositorio_django.py` e a migration `0002`; `api/serializers.py` e `api/dependencias.py`; `publico.py`.
+- Código (reservas): `domain/funcionamento.py` (novo), `domain/regras_de_agenda.py` (sem as constantes globais de abertura e fechamento; `DURACAO_SUGERIDA`; `garantir_inicio_no_futuro`), `domain/intervalo_de_horario.py`, `domain/reserva.py`, `domain/excecoes.py` (mensagem do horário do espaço); `application/portas.py`, `casos_de_uso.py` (`CriarReserva`, `ConsultarOcupacaoDoDia`, `ContarReservasAtivasForaDaJanela`), `repositorio.py` (`listar_ativas_a_partir_de`); `infrastructure/consulta_de_espacos.py` e `repositorio_django.py`; `api/serializers.py` e `api/dependencias.py`; `apps.py`.
+- Frontend: `api/espacos.ts`, `CamposDoEspaco.tsx`, `FormularioDeEspaco.tsx`, `DialogoDeEdicaoDeEspaco.tsx`, `TabelaDeEspacos.tsx`, `FormularioDeReserva.tsx`, `terminoSugerido.ts` (novo), `minutosDoDia.ts` (novo), `agendaDoDia.ts`, `AgendaDoDia.tsx`, `dicaDaAgenda.ts`, `formatacao.ts`; o fuso dos testes em `fusoDosTestes.ts`.
+- Testes: `test_horario_de_funcionamento.py`, `test_api_horario_do_espaco.py` e `test_migracao_do_horario.py` (espaços), `test_funcionamento_do_espaco.py`, `test_contar_reservas_fora_da_janela.py` e `test_api_horario_do_espaco.py` (reservas), `config/tests/test_horario_alinhado_entre_contextos.py` (novos); `test_regras_de_agenda.py` (tabela espaço × intervalo × resultado, viradas de mês e de ano, UTC), `test_horarios_livres.py`, `test_propriedades_da_agenda.py`, `test_consultar_ocupacao_do_dia.py`, `test_criar_reserva.py`, `test_intervalo_de_horario.py` e os demais que citavam o horário único (ajustados); no frontend, `terminoSugerido.test.ts` e `minutosDoDia.test.ts` (novos) e os de `PaginaNovaReserva`, `PaginaEspacos`, `agendaDoDia` e `dicaDaAgenda` (ajustados).
+- Documentos: RF-05, RF-06, RF-11.5, RF-28 e RF-30 (evidência e código), RN-03 e RN-04 (vigentes), UC-04 (E6.1, ordem e evidência), UC-14, US-05 e US-08 (CAs, Situação e TAs), SRS, glossário, Visão (P-04, R-10), DEC-07, `docs/fontes/testes_de_reservas.md` e `testes_de_espacos.md`, a rastreabilidade (regenerada) e o manifesto da baseline.
+- Figuras da modelagem: Figura 3 (`modelo-do-dominio.mmd`, com `HorarioDeFuncionamento` e o horário no espaço), Figura 5 (`solicitar-reserva.mmd`, com a consulta do espaço antes das regras de agenda) e o fluxo de decisão de UC-04 (`fluxo-solicitar-reserva.puml`).
+- Dados de exemplo: um espaço com horário próprio e uma reserva que termina à meia-noite.

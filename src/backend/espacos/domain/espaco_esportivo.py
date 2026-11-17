@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import time
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from espacos.domain.excecoes import (
@@ -10,6 +11,7 @@ from espacos.domain.excecoes import (
     NomeDeEspacoMuitoLongo,
     TipoDeEspacoInvalido,
 )
+from espacos.domain.horario_de_funcionamento import HorarioDeFuncionamento
 from espacos.domain.tipo_espaco import TipoEspaco
 
 NOME_MAXIMO_CARACTERES = 100
@@ -22,6 +24,7 @@ class EstadoDoEspaco:
     tipo: TipoEspaco
     capacidade: int
     ativo: bool
+    horario: HorarioDeFuncionamento
 
 
 class EspacoEsportivo:
@@ -32,6 +35,7 @@ class EspacoEsportivo:
         tipo: TipoEspaco | str,
         capacidade: int,
         ativo: bool = True,
+        horario: HorarioDeFuncionamento | None = None,
         id: int | None = None,
     ) -> None:
         self.id = id
@@ -39,6 +43,7 @@ class EspacoEsportivo:
         self._tipo = _converter_tipo(tipo)
         self._capacidade = _validar_capacidade(capacidade)
         self._ativo = ativo
+        self._horario = horario or HorarioDeFuncionamento.padrao()
         self._estado_de_origem = self.estado
 
     @property
@@ -58,8 +63,14 @@ class EspacoEsportivo:
         return self._ativo
 
     @property
+    def horario(self) -> HorarioDeFuncionamento:
+        return self._horario
+
+    @property
     def estado(self) -> EstadoDoEspaco:
-        return EstadoDoEspaco(self._nome, self._tipo, self._capacidade, self._ativo)
+        return EstadoDoEspaco(
+            self._nome, self._tipo, self._capacidade, self._ativo, self._horario
+        )
 
     @property
     def estado_de_origem(self) -> EstadoDoEspaco:
@@ -74,15 +85,21 @@ class EspacoEsportivo:
         nome: str | None = None,
         tipo: TipoEspaco | str | None = None,
         capacidade: int | None = None,
+        abertura: time | None = None,
+        fechamento: time | None = None,
     ) -> None:
-        if nome is None and tipo is None and capacidade is None:
+        if all(
+            valor is None for valor in (nome, tipo, capacidade, abertura, fechamento)
+        ):
             raise NenhumaAlteracaoInformada()
         novo_nome = self._nome if nome is None else _normalizar_nome(nome)
         novo_tipo = self._tipo if tipo is None else _converter_tipo(tipo)
         nova_capacidade = (
             self._capacidade if capacidade is None else _validar_capacidade(capacidade)
         )
+        novo_horario = self._horario.com(abertura=abertura, fechamento=fechamento)
         self._nome, self._tipo, self._capacidade = novo_nome, novo_tipo, nova_capacidade
+        self._horario = novo_horario
 
     def desativar(self) -> None:
         if not self._ativo:
@@ -114,7 +131,7 @@ class EspacoEsportivo:
         return (
             f"EspacoEsportivo(id={self.id!r}, nome={self.nome!r}, "
             f"tipo={self.tipo!r}, capacidade={self.capacidade!r}, "
-            f"ativo={self.ativo!r})"
+            f"ativo={self.ativo!r}, horario={str(self.horario)!r})"
         )
 
     def __str__(self) -> str:

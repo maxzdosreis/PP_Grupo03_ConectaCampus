@@ -8,6 +8,8 @@ export type Espaco = {
   tipo_rotulo: string
   capacidade: number
   ativo: boolean
+  abertura: string
+  fechamento: string
 }
 
 export type TipoDeEspaco = {
@@ -24,6 +26,8 @@ export type DadosDoEspaco = {
   nome: string
   tipo: string
   capacidade: string
+  abertura: string
+  fechamento: string
 }
 
 export function listarEspacos({ tipo, apenasAtivos }: FiltrosDeEspacos = {}) {

@@ -57,6 +57,8 @@ def test_cadastrar_espaco_valido_responde_201_com_o_espaco(cliente):
         "tipo_rotulo": "Ginásio",
         "capacidade": 50,
         "ativo": True,
+        "abertura": "07:00",
+        "fechamento": "00:00",
     }
 
 

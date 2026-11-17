@@ -28,15 +28,15 @@ vi.mock('../api/reservas.ts', () => ({
 }))
 
 const REGRAS: RegrasDeAgenda = {
-  horario_de_abertura: '08:00',
-  horario_de_fechamento: '20:00',
-  duracao_minima_em_minutos: 60,
+  duracao_sugerida_em_minutos: 60,
+  duracao_minima_em_minutos: 30,
   duracao_maxima_em_minutos: 90,
   antecedencia_maxima_em_dias: 15,
   data_limite: '2026-12-01',
 }
 
-const DICA_DA_AGENDA = 'Funcionamento das 08:00 às 20:00 · duração de 1 h a 1 h 30 min · até 01/12/2026.'
+const DICA_DA_AGENDA =
+  'duração sugerida de 1 h · de 30 min a 1 h 30 min · até 01/12/2026.'
 
 const GINASIO: Espaco = {
   id: 1,
@@ -45,6 +45,8 @@ const GINASIO: Espaco = {
   tipo_rotulo: 'Ginásio',
   capacidade: 50,
   ativo: true,
+  abertura: '07:00',
+  fechamento: '00:00',
 }
 
 const QUADRA: Espaco = {
@@ -54,6 +56,8 @@ const QUADRA: Espaco = {
   tipo_rotulo: 'Quadra poliesportiva',
   capacidade: 20,
   ativo: true,
+  abertura: '08:00',
+  fechamento: '22:00',
 }
 
 const DADOS_PREENCHIDOS = {
@@ -122,7 +126,10 @@ async function preencherFormulario(dados: Partial<typeof DADOS_PREENCHIDOS> = DA
   if (dados.espaco_id) await userEvent.selectOptions(controle('Espaço'), dados.espaco_id)
   if (dados.data) await userEvent.type(controle('Data'), dados.data)
   if (dados.hora_inicio) await userEvent.type(controle('Início'), dados.hora_inicio)
-  if (dados.hora_fim) await userEvent.type(controle('Término'), dados.hora_fim)
+  if (dados.hora_fim) {
+    await userEvent.clear(controle('Término'))
+    await userEvent.type(controle('Término'), dados.hora_fim)
+  }
   if (dados.finalidade) await userEvent.type(controle('Finalidade'), dados.finalidade)
 }
 
@@ -251,7 +258,7 @@ describe('PaginaNovaReserva', () => {
     await enviarFormulario()
 
     expect(await screen.findByRole('region', { name: 'Reserva solicitada' })).toBeTruthy()
-    expect(screen.queryByText(/^Funcionamento das/)).toBeNull()
+    expect(screen.queryByText(/^duração sugerida/)).toBeNull()
     expect(screen.queryByText('Não foi possível conectar ao servidor.')).toBeNull()
   })
 
@@ -442,4 +449,113 @@ describe('PaginaNovaReserva', () => {
 
     expect(await screen.findByLabelText('Espaço')).toBeTruthy()
   })
+
+  it('mostra o horário de funcionamento do espaço escolhido, com a meia-noite escrita por extenso', async () => {
+    renderizar()
+    await screen.findByLabelText('Espaço')
+    expect(screen.queryByText(/^Este espaço funciona das/)).toBeNull()
+
+    await userEvent.selectOptions(controle('Espaço'), '1')
+    expect(screen.getByText('Este espaço funciona das 07:00 às meia-noite.')).toBeTruthy()
+
+    await userEvent.selectOptions(controle('Espaço'), '3')
+    expect(screen.getByText('Este espaço funciona das 08:00 às 22:00.')).toBeTruthy()
+  })
+
+  it('ao informar o início, sugere o término uma hora depois, vinda da API', async () => {
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', hora_inicio: '10:00' })
+
+    expect(controle('Término').value).toBe('11:00')
+    expect(screen.queryByText(/O término foi ajustado ao fechamento/)).toBeNull()
+  })
+
+  it('a sugestão acompanha a duração que a API manda, sem número no cliente', async () => {
+    vi.mocked(obterRegrasDeAgenda).mockResolvedValue({
+      mensagem: 'Regras de agenda.',
+      dados: { ...REGRAS, duracao_sugerida_em_minutos: 90 },
+    })
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', hora_inicio: '10:00' })
+
+    expect(controle('Término').value).toBe('11:30')
+  })
+
+  it('se falta menos de uma hora para fechar, sugere o fechamento do espaço e avisa', async () => {
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', hora_inicio: '23:30' })
+
+    expect(controle('Término').value).toBe('00:00')
+    expect(
+      screen.getByText('O término foi ajustado ao fechamento do espaço. Você pode trocá-lo.'),
+    ).toBeTruthy()
+  })
+
+  it('num espaço com horário próprio, a sugestão nunca passa do fechamento dele', async () => {
+    renderizar()
+    await preencherFormulario({ espaco_id: '3', hora_inicio: '21:30' })
+
+    expect(controle('Término').value).toBe('22:00')
+    expect(screen.getByText(/O término foi ajustado ao fechamento do espaço/)).toBeTruthy()
+  })
+
+  it('é só sugestão: um término de 45 minutos digitado vai como foi escrito', async () => {
+    vi.mocked(solicitarReserva).mockResolvedValue({ mensagem: MENSAGEM_DE_SUCESSO, dados: RESERVA })
+    renderizar()
+    await preencherFormulario({
+      ...DADOS_PREENCHIDOS,
+      hora_inicio: '10:00',
+      hora_fim: undefined,
+    })
+
+    await userEvent.clear(controle('Término'))
+    await userEvent.type(controle('Término'), '10:45')
+    await enviarFormulario()
+
+    expect(solicitarReserva).toHaveBeenCalledWith({ ...DADOS_PREENCHIDOS, hora_fim: '10:45' })
+  })
+
+  it('depois de trocar o término à mão, mudar o início não o sobrescreve', async () => {
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', hora_inicio: '10:00' })
+    await userEvent.clear(controle('Término'))
+    await userEvent.type(controle('Término'), '12:00')
+
+    await userEvent.clear(controle('Início'))
+    await userEvent.type(controle('Início'), '09:00')
+
+    expect(controle('Término').value).toBe('12:00')
+  })
+
+  it('sem as regras de agenda, não sugere término nenhum', async () => {
+    vi.mocked(obterRegrasDeAgenda).mockRejectedValue(
+      new ErroDaApi(0, 'SEM_CONEXAO', 'Não foi possível conectar ao servidor.'),
+    )
+    renderizar()
+    await preencherFormulario({ espaco_id: '1', hora_inicio: '10:00' })
+
+    expect(controle('Término').value).toBe('')
+  })
+
+  it('a agenda do dia usa o horário que a API manda para o espaço, com a meia-noite por extenso', async () => {
+    vi.mocked(obterOcupacaoDoDia).mockResolvedValue({
+      mensagem: 'Nenhum horário ocupado neste dia.',
+      dados: {
+        ...OCUPACAO,
+        horario_de_abertura: '07:00',
+        horario_de_fechamento: '00:00',
+        ocupados: [],
+        livres: [{ hora_inicio: '07:00', hora_fim: '00:00' }],
+      },
+    })
+    renderizar()
+
+    await preencherFormulario({ espaco_id: '1', data: '2026-10-25' })
+
+    expect((await screen.findByRole('list', { name: 'Livres' })).textContent).toContain(
+      '07:00–00:00',
+    )
+    expect(screen.getByText('meia-noite')).toBeTruthy()
+  })
+
 })

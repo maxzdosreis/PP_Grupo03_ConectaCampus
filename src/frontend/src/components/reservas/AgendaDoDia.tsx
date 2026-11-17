@@ -176,7 +176,7 @@ function Faixa({ ocupacao }: { ocupacao: OcupacaoDoDia }) {
       </div>
       <div className={estilos.extremos}>
         <span>{abertura}</span>
-        <span>{fechamento}</span>
+        <span>{fechamento === '00:00' ? 'meia-noite' : fechamento}</span>
       </div>
     </div>
   )

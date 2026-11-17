@@ -10,7 +10,7 @@ from reservas.domain.excecoes import ReservaDesatualizada
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
-from reservas.tests.fakes import ANA, ATOR_ANA, GESTOR
+from reservas.tests.fakes import ANA, ATOR_ANA, FUNCIONAMENTO_PADRAO, GESTOR
 from reservas.tests.historico import verificar_historico_coerente
 
 S = SituacaoReserva
@@ -68,6 +68,7 @@ def test_alteracoes_simultaneas_gravam_so_uma_e_o_historico_fica_coerente():
             hora_fim=time(11, 0),
             finalidade="Treino",
             agora=datetime.now(tz=timezone.get_current_timezone()),
+            funcionamento=FUNCIONAMENTO_PADRAO,
         )
     ).id
 

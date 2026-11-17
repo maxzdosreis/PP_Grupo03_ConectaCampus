@@ -7,6 +7,7 @@ from django.utils import timezone
 from reservas.domain.reserva import Reserva
 from reservas.domain.solicitante import Solicitante
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
+from reservas.tests.fakes import FUNCIONAMENTO_PADRAO
 
 pytestmark = pytest.mark.django_db
 
@@ -40,6 +41,7 @@ def massa(usuario_solicitante, outro_solicitante, espaco_id):
             hora_fim=time(9 + hora),
             finalidade=f"Treino {indice:02d}",
             agora=agora,
+            funcionamento=FUNCIONAMENTO_PADRAO,
         )
         ids.append(repositorio.salvar(reserva).id)
     return ids

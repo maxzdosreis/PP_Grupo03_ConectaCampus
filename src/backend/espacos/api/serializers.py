@@ -3,12 +3,15 @@ from rest_framework import serializers
 from espacos.domain.tipo_espaco import TipoEspaco
 
 _MAIOR_INTEIRO_DO_BANCO = 2_147_483_647
+_FORMATOS_DE_HORA = ["%H:%M", "%H:%M:%S"]
 
 
 class EspacoEntradaSerializer(serializers.Serializer):
     nome = serializers.CharField(allow_blank=True)
     tipo = serializers.CharField(allow_blank=True)
     capacidade = serializers.IntegerField(max_value=_MAIOR_INTEIRO_DO_BANCO)
+    abertura = serializers.TimeField(required=False, input_formats=_FORMATOS_DE_HORA)
+    fechamento = serializers.TimeField(required=False, input_formats=_FORMATOS_DE_HORA)
 
 
 class EspacoEdicaoSerializer(EspacoEntradaSerializer):
@@ -35,6 +38,8 @@ class EspacoSaidaSerializer(serializers.Serializer):
     tipo_rotulo = serializers.CharField(source="tipo.rotulo")
     capacidade = serializers.IntegerField()
     ativo = serializers.BooleanField()
+    abertura = serializers.TimeField(source="horario.abertura", format="%H:%M")
+    fechamento = serializers.TimeField(source="horario.fechamento", format="%H:%M")
 
 
 class TipoDeEspacoSaidaSerializer(serializers.Serializer):

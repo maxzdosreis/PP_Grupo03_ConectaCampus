@@ -2,12 +2,15 @@ from datetime import date, datetime, time, timedelta
 
 from hypothesis import strategies as st
 
+from reservas.domain.funcionamento import FuncionamentoDoEspaco
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.solicitante import Solicitante
 from reservas.tests.fakes import DIA, UTC
 
 MINUTOS_POR_HORA = 60
 ULTIMO_MINUTO_DO_DIA = 24 * MINUTOS_POR_HORA - 1
+MINUTOS_NO_DIA = 24 * MINUTOS_POR_HORA
+JANELA_MINIMA = 30
 SO_O_DIA_PADRAO = st.just(DIA)
 
 
@@ -17,6 +20,29 @@ def hora(minutos: int) -> time:
 
 def minutos(horario: time) -> int:
     return horario.hour * MINUTOS_POR_HORA + horario.minute
+
+
+def hora_do_termino(minutos_do_dia: int) -> time:
+    """1440 (fim do dia) é escrito 00:00; os demais valores são horas comuns."""
+    return hora(minutos_do_dia % MINUTOS_NO_DIA)
+
+
+def minutos_do_termino(horario: time) -> int:
+    """Oráculo independente dos datetimes: 00:00 como término vale 1440."""
+    return minutos(horario) or MINUTOS_NO_DIA
+
+
+@st.composite
+def funcionamentos(draw) -> FuncionamentoDoEspaco:
+    """Qualquer janela válida de um espaço, inclusive as que fecham à meia-noite."""
+    abertura = draw(st.integers(0, MINUTOS_NO_DIA - JANELA_MINIMA))
+    fechamento = draw(
+        st.one_of(
+            st.just(MINUTOS_NO_DIA),
+            st.integers(abertura + JANELA_MINIMA, MINUTOS_NO_DIA),
+        )
+    )
+    return FuncionamentoDoEspaco(abertura, fechamento)
 
 
 @st.composite

@@ -10,7 +10,13 @@ import Aviso from '../mensagens/Aviso.tsx'
 import CamposDoEspaco from './CamposDoEspaco.tsx'
 import estilos from './FormularioDeEspaco.module.css'
 
-const FORMULARIO_VAZIO: DadosDoEspaco = { nome: '', tipo: '', capacidade: '' }
+const FORMULARIO_VAZIO: DadosDoEspaco = {
+  nome: '',
+  tipo: '',
+  capacidade: '',
+  abertura: '07:00',
+  fechamento: '00:00',
+}
 
 type PropriedadesDoFormulario = {
   tipos: EstadoDaConsulta<TipoDeEspaco[]>

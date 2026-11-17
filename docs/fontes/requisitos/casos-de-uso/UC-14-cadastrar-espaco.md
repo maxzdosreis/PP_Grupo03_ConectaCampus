@@ -14,6 +14,7 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Linha "Histórias derivadas" (REQ-05), sem mudar o fluxo. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Ator primário, interessado e passos: Gestor do serviço; E1.1 e as regras seguem com o perfil Gestor, que cobre o papel ([DEC-25](../decisoes/DEC-25.md), REQ-12). Meta e exceções iguais. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Questões em aberto: o horário de funcionamento do espaço (DEC-07, CR-03) fica registrado como pendência de redação dos passos 3 e 7, para a tarefa ESP-07 (REQ-13). Fluxo e exceções sem mudança. Mudança editorial. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | ESP-07 (CR-03): passos 3, 5 e 7 com o horário de funcionamento do espaço e o padrão 07:00–00:00; a recusa do horário inválido fica como pendência (sem exceção própria). Sem aprovação. |
 
 ## Sumário
 
@@ -53,11 +54,11 @@ Ficha do caso de uso UC-14 do [índice](README.md#uc-14). Editar, desativar e re
 
 1. <a id="p1"></a>O Gestor do serviço pede para cadastrar um espaço.
 2. <a id="p2"></a>O sistema apresenta os [tipos de espaço](../glossario.md#tipo-de-espaco) existentes, na ordem do negócio (Quadra poliesportiva, Campo de futebol, Ginásio, Quadra de areia, Quadra de tênis).
-3. <a id="p3"></a>O Gestor do serviço informa o nome, escolhe o tipo e informa a [capacidade](../glossario.md#capacidade).
+3. <a id="p3"></a>O Gestor do serviço informa o nome, escolhe o tipo e informa a [capacidade](../glossario.md#capacidade) e, se quiser, o [horário de funcionamento](../glossario.md#horario-de-funcionamento) do espaço (abertura e fechamento); sem informá-lo, o espaço fica com o padrão das 07:00 às 00:00, e 00:00 como fechamento é a meia-noite do fim do dia.
 4. <a id="p4"></a>O Gestor do serviço envia o cadastro.
-5. <a id="p5"></a>O sistema confere os dados, nesta ordem: todos presentes e no formato esperado; nome; tipo; capacidade.
+5. <a id="p5"></a>O sistema confere os dados, nesta ordem: todos presentes e no formato esperado; nome; tipo; capacidade; horário de funcionamento (o fechamento depois da abertura e a janela de pelo menos 30 minutos, com a mensagem junto ao fechamento).
 6. <a id="p6"></a>O sistema confere que nenhum espaço já tem esse nome, sem diferenciar maiúsculas de minúsculas e comparando o nome já sem espaços nas pontas nem repetidos.
-7. <a id="p7"></a>O sistema grava o espaço [ativo](../glossario.md#espaco-ativo), com o nome normalizado.
+7. <a id="p7"></a>O sistema grava o espaço [ativo](../glossario.md#espaco-ativo), com o nome normalizado e o horário de funcionamento.
 8. <a id="p8"></a>O sistema informa "Espaço cadastrado com sucesso." e mostra o espaço na lista, ativo e aceitando pedidos de reserva.
 
 ## Alternativas
@@ -181,7 +182,7 @@ Todos os RF que a [rastreabilidade RF → UC](README.md#rastreabilidade-rf--uc) 
 | [DEC-10](../decisoes/DEC-10.md) · Nome de espaço único | Se o cliente aceitar nomes repetidos (por exemplo, em prédios diferentes), [E6.1](#e6-1) e [E7.1](#e7-1) deixam de existir. |
 | [DEC-06](../decisoes/DEC-06.md) · Reservas de um espaço desativado | Define o que acontece com o espaço depois, em [UC-16](fichas-resumidas.md#uc-16). |
 | [DEC-04](../decisoes/DEC-04.md) · Autenticação e perfis (decidida) | Só o Gestor cadastra ([E1.1](#e1-1)). |
-| [DEC-07](../decisoes/DEC-07.md) · Horário de funcionamento por espaço (decidida na Aula 7) | O [CR-03](../mudancas/CR-03-horario-por-espaco.md) acrescenta o horário de funcionamento ao cadastro ([RF-05](../requisitos/rf-espacos.md#rf-05)), com o padrão das 07:00 às 00:00 quando não informado. Os passos 3 e 7 desta ficha ainda não o descrevem: a redação fica para a tarefa ESP-07, que decide também a validação do horário. |
+| [DEC-07](../decisoes/DEC-07.md) · Horário de funcionamento por espaço (decidida na Aula 7) | O [CR-03](../mudancas/CR-03-horario-por-espaco.md) acrescenta o horário de funcionamento ao cadastro ([RF-05](../requisitos/rf-espacos.md#rf-05)), com o padrão das 07:00 às 00:00 quando não informado. Implementado na tarefa ESP-07 (17/11/2026): os passos 3, 5 e 7 desta ficha o descrevem. A recusa de um horário inválido (fechamento que não vem depois da abertura, ou janela de menos de 30 minutos) é conferida no passo 5 e aparece junto ao fechamento; ela ainda não tem exceção própria nesta ficha nem critério de aceite na US-05 (só os testes de `espacos/tests/test_horario_de_funcionamento.py` e `test_api_horario_do_espaco.py`): fica como pendência para a revisão da ficha. |
 
 ## Anexo — Evidência (complementar)
 

@@ -104,7 +104,11 @@ _CRIAR_POR_PERFIL = {
 
 def _criar_espaco(exemplo: EspacoDeExemplo) -> None:
     espaco = cadastrar_espaco().executar(
-        nome=exemplo.nome, tipo=exemplo.tipo, capacidade=exemplo.capacidade
+        nome=exemplo.nome,
+        tipo=exemplo.tipo,
+        capacidade=exemplo.capacidade,
+        abertura=exemplo.abertura,
+        fechamento=exemplo.fechamento,
     )
     if not exemplo.ativo:
         desativar_espaco().executar(espaco.id)
