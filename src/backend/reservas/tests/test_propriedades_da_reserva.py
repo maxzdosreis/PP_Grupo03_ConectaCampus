@@ -13,7 +13,9 @@ from compartilhado.domain.erros import (
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
+    ConclusaoAntesDoTermino,
     MotivoObrigatorio,
+    MudancaAposOInicio,
     ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
@@ -56,6 +58,8 @@ _RECUSAS_ESPERADAS = (
     SituacaoInvalida,
     AlteracaoDeSituacaoNaoPermitida,
     TransicaoDeSituacaoInvalida,
+    ConclusaoAntesDoTermino,
+    MudancaAposOInicio,
     MotivoObrigatorio,
     TextoMuitoLongo,
 )
@@ -85,7 +89,7 @@ class MaquinaDaReserva(RuleBasedStateMachine):
         ator=st.sampled_from(sorted(ATORES)),
         destino=st.sampled_from(_DESTINOS),
         motivo=st.sampled_from(_MOTIVOS),
-        minutos_depois=st.integers(min_value=1, max_value=24 * 60),
+        minutos_depois=st.integers(min_value=1, max_value=3 * 24 * 60),
     )
     def tentar_alterar(self, ator, destino, motivo, minutos_depois):
         self.agora += timedelta(minutes=minutos_depois)
@@ -100,11 +104,21 @@ class MaquinaDaReserva(RuleBasedStateMachine):
             return
 
         ultimo = self.reserva.registros_pendentes[-1]
+        self._respeita_a_janela_do_gestor(ator, destino)
         assert self.reserva.situacao == destino
         assert (ultimo.autor_usuario_id, ultimo.registrado_em) == (
             ATORES[ator].usuario_id,
             self.agora,
         )
+
+    def _respeita_a_janela_do_gestor(self, ator, destino):
+        if ator != "gestor":
+            return
+        intervalo = self.reserva.intervalo
+        if destino == S.CONCLUIDA:
+            assert self.agora >= intervalo.fim()
+        if destino in (S.RECUSADA, S.CANCELADA):
+            assert self.agora < intervalo.inicio()
 
     @invariant()
     def historico_e_um_caminho_da_tabela_ate_a_situacao_atual(self):
@@ -146,7 +160,7 @@ class MaquinaDaReserva(RuleBasedStateMachine):
     def acoes_permitidas_sao_exatamente_as_alteracoes_aceitas(self):
         depois = self.agora + timedelta(minutes=1)
         for ator in ATORES.values():
-            acoes = self.reserva.acoes_permitidas_para(ator)
+            acoes = self.reserva.acoes_permitidas_para(ator, depois)
             for destino in SituacaoReserva:
                 aceita = _aceita(self.reserva, destino, ator, depois)
                 assert (destino in acoes) is aceita, (ator.papel, destino)

@@ -59,7 +59,7 @@ classDiagram
       solicitar(…)$ Reserva
       alterar_situacao(nova, motivo, ator, agora) None
       visivel_para(ator) bool
-      acoes_permitidas_para(ator) list[SituacaoReserva]
+      acoes_permitidas_para(ator, agora) list[SituacaoReserva]
     }
     class SituacaoReserva {
       <<enumeration>>

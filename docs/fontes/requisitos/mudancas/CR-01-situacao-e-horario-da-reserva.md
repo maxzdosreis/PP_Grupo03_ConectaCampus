@@ -4,7 +4,7 @@
 |---|---|
 | **CR-01 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha (aprovador da fonte oficial) |
 
-Pedido de mudança aberto a partir da resposta do professor à [DEC-13](../decisoes/DEC-13.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa RES-11)\". O **código não mudou**: quem o muda é a tarefa **RES-11**, que também cria os testes de aceite e marca o CR como implementado.
+Pedido de mudança aberto a partir da resposta do professor à [DEC-13](../decisoes/DEC-13.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8) e **implementado em 16/11/2026 pela tarefa RES-11** (seção 9): o código, os testes de aceite, as figuras e os dados de exemplo cumprem a regra, e o CR está marcado como implementado.
 
 ## Histórico de revisões
 
@@ -15,6 +15,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-13](../decis
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-19 e TA-20 passam a TA-20 e TA-21, e TA-21 a TA-158 passam a TA-24 a TA-161, para os TA-19, TA-22 e TA-23 novos da US-03 (revogação e troca da credencial de renovação) seguirem a ordem das histórias (AUT-09). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 09/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-96 a TA-107 passam a TA-97, TA-98, TA-99, TA-102, TA-103, TA-105, TA-106, TA-107, TA-109, TA-110, TA-113 e TA-114, e TA-108 a TA-161 passam a TA-115 a TA-168, para os TAs novos das US-10 e US-11 (consulta em páginas) seguirem a ordem das histórias (RES-10). Mudança editorial, sem nova obrigação. Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13): RF, RN, UC, histórias, CAs e TAs com a regra nova, listados na [seção 8](#8-aplicação-na-especificação-req-13). Estado: aplicado na especificação; código pendente (tarefa RES-11). A especificação está adiante do código de propósito, e cada CA novo leva a marca "implementação pendente (tarefa RES-11)". Sem aprovação. |
+| 0.1 | 16/11/2026 | Max Zimmermann dos Reis | Implementado (tarefa RES-11): regra de horário no domínio, exceções `CONCLUSAO_ANTES_DO_TERMINO` e `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO`, um instante por requisição na API, testes, TAs, figuras e README; as marcas "implementação pendente (tarefa RES-11)" saem de todos os CAs, TAs e fichas (seção 9). Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -23,7 +24,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-13](../decis
 | **Motivo** | Resposta do professor à [DEC-13](../decisoes/DEC-13.md) na Aula 7 (06/11/2026): "Temos que alterar, deve poder concluir somente depois do término, e recusar e cancelar somente antes do início (isso para Gestor)." Decisão do grupo, nos pontos que a resposta não cobriu: confirmar continua sem restrição de horário; o cancelamento pelo Solicitante continua sem restrição de horário; a Solicitada não decidida continua ocupando o horário depois da data. Bordas: concluir vale a partir do instante do término; recusar e cancelar (Gestor) valem só enquanto o início ainda não chegou. |
 | **Solicitante** | O professor, como representante do cliente. |
 | **Responsável** | O grupo. |
-| **Estado** | **Aplicado na especificação; código pendente (tarefa RES-11)** (10/11/2026, REQ-13). |
+| **Estado** | **Implementado** (16/11/2026, tarefa RES-11); aplicado na especificação em 10/11/2026 (REQ-13). |
 | **Origem** | [DEC-13](../decisoes/DEC-13.md) e lacuna [L-01](../requisitos/srs.md#l-01). |
 | **Baseline vigente** | Nenhuma aprovada: a [candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata (aprovação na REQ-07). |
 | **Tarefa que implementa** | RES-11 |
@@ -164,7 +165,7 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 
 ## 8. Aplicação na especificação (REQ-13)
 
-Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a especificação está adiante do código de propósito, e cada critério abaixo leva a marca "implementação pendente (tarefa RES-11)" até a tarefa RES-11 implementar a regra e criar o teste de aceite dele. Os testes que existem hoje verificam a regra anterior, e nenhum TA novo cita um deles.
+Aplicado na especificação em 10/11/2026. Naquela data o código ainda não mudara, e cada critério abaixo levava a marca "implementação pendente (tarefa RES-11)", que a tarefa RES-11 retirou em 16/11/2026 (seção 9). O texto desta seção fica como o registro da aplicação.
 
 **O que mudou:**
 
@@ -174,27 +175,49 @@ Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a esp
 - US/CA/TA: [US-13](../historias/US-13-cancelar-uma-reserva.md), [US-14](../historias/US-14-confirmar-uma-reserva.md), [US-15](../historias/US-15-recusar-uma-reserva.md) e [US-16](../historias/US-16-concluir-uma-reserva.md) (Conversa, INVEST, CAs e TAs), [US-11](../historias/US-11-acompanhar-todas-as-reservas.md) (nota no CA das ações), cobertura UC → US/CA e RF → US/CA do [README das histórias](../historias/README.md).
 - Documentos: [glossário](../glossario.md) (ação disponível, Concluída), [Visão](../visao.md) (NS-09), [SRS](../requisitos/srs.md) (tabelas, auditoria e lacuna L-01).
 
-**CAs novos (10, todos com a marca "implementação pendente (tarefa RES-11)")**
+**CAs novos (10, que traziam a marca "implementação pendente (tarefa RES-11)"; hoje implementados)**
 
 | CA | Título | Tipo | TA | Pedido do CR | Implementação |
 |---|---|---|---|---|---|
-| [US-16 · CA-02](../historias/US-16-concluir-uma-reserva.md#us-16-ca-02) | Uso concluído a partir do término | sucesso | [TA-171](../historias/US-16-concluir-uma-reserva.md#ta-171) | CR-01 · CA-02 | implementação pendente (tarefa RES-11) |
-| [US-16 · CA-04](../historias/US-16-concluir-uma-reserva.md#us-16-ca-04) | Ações oferecidas conforme o horário | alternativa | [TA-173](../historias/US-16-concluir-uma-reserva.md#ta-173) | CR-01 · CA-05 | implementação pendente (tarefa RES-11) |
-| [US-16 · CA-07](../historias/US-16-concluir-uma-reserva.md#us-16-ca-07) | Concluir antes do término | exceção | [TA-176](../historias/US-16-concluir-uma-reserva.md#ta-176) | CR-01 · CA-01 | implementação pendente (tarefa RES-11) |
-| [US-15 · CA-03](../historias/US-15-recusar-uma-reserva.md#us-15-ca-03) | Pedido recusado antes do início | sucesso | [TA-163](../historias/US-15-recusar-uma-reserva.md#ta-163) | derivado da seção 4 do CR | implementação pendente (tarefa RES-11) |
-| [US-15 · CA-07](../historias/US-15-recusar-uma-reserva.md#us-15-ca-07) | Recusar depois do início | exceção | [TA-167](../historias/US-15-recusar-uma-reserva.md#ta-167) | CR-01 · CA-03 | implementação pendente (tarefa RES-11) |
-| [US-20 · CA-02](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-02) | O Gestor cancela antes do início a reserva de qualquer pessoa | sucesso | [TA-191](../historias/US-20-cancelar-qualquer-reserva.md#ta-191) | derivado da seção 4 do CR | implementação pendente (tarefa RES-11) |
-| [US-13 · CA-02](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-02) | O Solicitante cancela depois do início | sucesso | [TA-138](../historias/US-13-cancelar-uma-reserva.md#ta-138) | CR-01 · CA-06 | implementação pendente (tarefa RES-11) |
-| [US-20 · CA-03](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-03) | Cancelar pelo Gestor depois do início | exceção | [TA-192](../historias/US-20-cancelar-qualquer-reserva.md#ta-192) | CR-01 · CA-04 | implementação pendente (tarefa RES-11) |
-| [US-14 · CA-03](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-03) | Pedido confirmado, com as ações conforme o horário | sucesso | [TA-149](../historias/US-14-confirmar-uma-reserva.md#ta-149) | derivado da seção 4 do CR | implementação pendente (tarefa RES-11) |
-| [US-14 · CA-04](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-04) | Confirmar depois do início | sucesso | [TA-150](../historias/US-14-confirmar-uma-reserva.md#ta-150) | CR-01 · CA-07 | implementação pendente (tarefa RES-11) |
+| [US-16 · CA-02](../historias/US-16-concluir-uma-reserva.md#us-16-ca-02) | Uso concluído a partir do término | sucesso | [TA-171](../historias/US-16-concluir-uma-reserva.md#ta-171) | CR-01 · CA-02 | implementado (tarefa RES-11) |
+| [US-16 · CA-04](../historias/US-16-concluir-uma-reserva.md#us-16-ca-04) | Ações oferecidas conforme o horário | alternativa | [TA-173](../historias/US-16-concluir-uma-reserva.md#ta-173) | CR-01 · CA-05 | implementado (tarefa RES-11) |
+| [US-16 · CA-07](../historias/US-16-concluir-uma-reserva.md#us-16-ca-07) | Concluir antes do término | exceção | [TA-176](../historias/US-16-concluir-uma-reserva.md#ta-176) | CR-01 · CA-01 | implementado (tarefa RES-11) |
+| [US-15 · CA-03](../historias/US-15-recusar-uma-reserva.md#us-15-ca-03) | Pedido recusado antes do início | sucesso | [TA-163](../historias/US-15-recusar-uma-reserva.md#ta-163) | derivado da seção 4 do CR | implementado (tarefa RES-11) |
+| [US-15 · CA-07](../historias/US-15-recusar-uma-reserva.md#us-15-ca-07) | Recusar depois do início | exceção | [TA-167](../historias/US-15-recusar-uma-reserva.md#ta-167) | CR-01 · CA-03 | implementado (tarefa RES-11) |
+| [US-20 · CA-02](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-02) | O Gestor cancela antes do início a reserva de qualquer pessoa | sucesso | [TA-191](../historias/US-20-cancelar-qualquer-reserva.md#ta-191) | derivado da seção 4 do CR | implementado (tarefa RES-11) |
+| [US-13 · CA-02](../historias/US-13-cancelar-uma-reserva.md#us-13-ca-02) | O Solicitante cancela depois do início | sucesso | [TA-138](../historias/US-13-cancelar-uma-reserva.md#ta-138) | CR-01 · CA-06 | implementado (tarefa RES-11) |
+| [US-20 · CA-03](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-03) | Cancelar pelo Gestor depois do início | exceção | [TA-192](../historias/US-20-cancelar-qualquer-reserva.md#ta-192) | CR-01 · CA-04 | implementado (tarefa RES-11) |
+| [US-14 · CA-03](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-03) | Pedido confirmado, com as ações conforme o horário | sucesso | [TA-149](../historias/US-14-confirmar-uma-reserva.md#ta-149) | derivado da seção 4 do CR | implementado (tarefa RES-11) |
+| [US-14 · CA-04](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-04) | Confirmar depois do início | sucesso | [TA-150](../historias/US-14-confirmar-uma-reserva.md#ta-150) | CR-01 · CA-07 | implementado (tarefa RES-11) |
 
-**CAs antigos marcados:** [US-11 · CA-03](../historias/US-11-acompanhar-todas-as-reservas.md#us-11-ca-03) (substituído em parte), [US-20 · CA-01](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-01) (substituído), [US-14 · CA-01](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-01) (substituído), [US-15 · CA-01](../historias/US-15-recusar-uma-reserva.md#us-15-ca-01) (substituído), [US-16 · CA-01](../historias/US-16-concluir-uma-reserva.md#us-16-ca-01) (substituído). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpre até a tarefa RES-11.
+**CAs antigos marcados:** [US-11 · CA-03](../historias/US-11-acompanhar-todas-as-reservas.md#us-11-ca-03) (substituído em parte), [US-20 · CA-01](../historias/US-20-cancelar-qualquer-reserva.md#us-20-ca-01) (substituído), [US-14 · CA-01](../historias/US-14-confirmar-uma-reserva.md#us-14-ca-01) (substituído), [US-15 · CA-01](../historias/US-15-recusar-uma-reserva.md#us-15-ca-01) (substituído), [US-16 · CA-01](../historias/US-16-concluir-uma-reserva.md#us-16-ca-01) (substituído). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpriu até a tarefa RES-11. Os testes que o TA deles cita foram atualizados para o momento certo e continuam passando.
 
 **Regressão (não mudam):** o cancelamento pelo Solicitante, confirmar e a Solicitada não decidida que continua ocupando o horário seguem sem restrição de horário; os CA-06 e CA-07 da seção 5 viraram CAs com TA pendente só para fixar essa regra depois do início.
 
-**Pontos que ficam abertos para a tarefa RES-11 (nada foi decidido aqui):**
+**Pontos que ficavam abertos para a tarefa RES-11 (decididos na seção 9):**
 
 - A posição exata de E6.8 na ordem real das verificações e o ID final da recusa nova; aqui, proposta: a próxima exceção livre do UC-10 (E6.8), depois de E6.5, e o próximo RF filho livre (RF-24.1).
 - O texto da mensagem da recusa nova e o código do erro (o CR só diz que informa a data e a hora do término, ou que recusar e cancelar só valem antes do início).
-- A Figura 4 da modelagem (`estados-da-reserva.mmd`) não foi alterada nesta tarefa.
+- A Figura 4 da modelagem (`estados-da-reserva.mmd`) não foi alterada na REQ-13; a RES-11 a atualizou.
+
+## 9. Implementação (RES-11)
+
+Implementado em 16/11/2026. As decisões que a seção 8 deixou para a tarefa:
+
+| Ponto | Decisão |
+|---|---|
+| ID da recusa nova | [RF-24.1](../requisitos/rf-reservas.md#rf-24-1) e [UC-10 E6.8](../casos-de-uso/UC-10-alterar-situacao-da-reserva.md#e6-8), como propunha a seção 8. |
+| Ordem das verificações | Visibilidade → situação conhecida → perfil (403) → transição (409) → **momento (409, E6.8)** → motivo (400). O perfil vem antes do momento (um Solicitante que tenta concluir recebe sempre 403) e o momento antes do motivo (recusar depois do início não pede o motivo antes de dizer que é tarde). |
+| Bordas | Concluir: `agora >= término` (o instante exato do término vale). Recusar e cancelar pelo Gestor: `agora < início` (o instante exato do início já é recusado). A comparação é entre instantes com fuso, nunca entre datas ou horas soltas. |
+| Erros | Duas exceções de domínio na categoria `ConflitoDeEstado` (HTTP 409, como a transição inválida; o 403 fica só para falta de permissão e o 401 nunca): `ConclusaoAntesDoTermino` (`CONCLUSAO_ANTES_DO_TERMINO`, "Só é possível concluir a reserva a partir do término dela («data» às «hora»).") e `MudancaAposOInicio` (`RECUSA_OU_CANCELAMENTO_APOS_O_INICIO`, "Só é possível recusar (ou cancelar) a reserva antes do início dela («data» às «hora»)."). |
+| Relógio | O do `AlterarSituacaoReserva`, já injetado. Na API, a view lê o instante **uma vez por requisição** (`reservas.api.dependencias.agora`) e o usa na decisão e nas `acoes_disponiveis` de todas as reservas da resposta. |
+| Confirmar, cancelar pelo Solicitante e Solicitada vencida | Sem mudança, com testes de não regressão em todos os momentos. |
+| DEC-05 (CR-02) | Não implementada aqui: a recusa nova passa pelo mesmo `alterar_situacao`, então a RES-12 poderá registrar a tentativa sem refatorar este ponto. |
+
+**O que mudou**
+
+- Código: `reservas/domain/situacao.py` (`momento_permite`, `SITUACOES_SO_A_PARTIR_DO_TERMINO`, `SITUACOES_SO_ANTES_DO_INICIO`), `reservas/domain/reserva.py` (`acoes_permitidas_para(ator, agora)`, `alterar_situacao`), `reservas/domain/excecoes.py`, `reservas/api/serializers.py`, `reservas/api/views.py` e `reservas/api/dependencias.py` (`agora`). Nenhuma mudança de código no frontend: os botões já vinham só de `acoes_disponiveis`.
+- Testes: `test_momento_da_mudanca.py`, `test_api_momento_da_mudanca.py` e `test_propriedades_do_momento.py` (novos); `TestMaquinaDaReserva`, a matriz de permissões, os testes de API e de caso de uso que concluem uma reserva e, no frontend, `TabelaDeReservas.test.tsx` e `PaginaReserva.test.tsx`.
+- Documentos: RF-16, RF-18, RF-19, RF-20 e RF-24.1 (evidência e código), UC-10 (E6.8, ordem e evidência), US-11, US-13 a US-16 e US-20 (CAs e TAs), SRS (auditoria; lacunas L-01 e L-18 fechadas), RN-10 (vigente), glossário e rastreabilidade (regenerada).
+- Figuras da modelagem: Figura 4 (`estados-da-reserva.mmd`) com a janela de horário do Gestor.
+- Dados de exemplo: sem mudança (a Concluída é concluída depois do término; a Recusada e a Cancelada são de reservas futuras).

@@ -111,3 +111,11 @@ def espaco_id(cliente_gestor):
         format="json",
     )
     return resposta.data["dados"]["id"]
+
+
+@pytest.fixture
+def relogio_da_api(monkeypatch):
+    def definir(momento):
+        monkeypatch.setattr("reservas.api.dependencias.agora", lambda: momento)
+
+    return definir

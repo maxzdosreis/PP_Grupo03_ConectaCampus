@@ -55,7 +55,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17)
 - **TA:** [TA-147](#ta-147)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; confirmar continua sem restrição de horário, mas as ações oferecidas depois dependem dele: ver a Situação abaixo)
-- **Situação:** substituído por [CA-03](#us-14-ca-03), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-11; não valem como prova da regra nova.
+- **Situação:** substituído por [CA-03](#us-14-ca-03), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-11 (implementada em 16/11/2026); o texto fica como registro da regra anterior e o TA dele passou a fixar o comportamento no momento certo. Vale a regra do CA que o substitui.
 
 #### <a id="us-14-ca-02"></a>US-14 · CA-02 · O horário continua ocupado (sucesso)
 
@@ -75,7 +75,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16), [RF-17](../requisitos/rf-reservas.md#rf-17)
 - **TA:** [TA-149](#ta-149)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-14-ca-04"></a>US-14 · CA-04 · Confirmar depois do início (sucesso)
 
@@ -86,7 +85,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-17](../requisitos/rf-reservas.md#rf-17)
 - **TA:** [TA-150](#ta-150)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-14-ca-05"></a>US-14 · CA-05 · Motivo opcional ao confirmar (alternativa)
 
@@ -190,10 +188,10 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
-| <a id="ta-147"></a>TA-147 | [CA-01](#us-14-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada`; `reservas/tests/test_api_permissoes.py::test_gestor_confirma`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_traz_cancelar_e_concluir`; `pages/PaginaReservas.test.tsx`: `"Confirmar" abre o diálogo com o resumo e sem campo de motivo`; `pages/PaginaReservas.test.tsx`: `confirmar envia só a situação, sem motivo` |
+| <a id="ta-147"></a>TA-147 | [CA-01](#us-14-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_confirmar_responde_200_com_a_reserva_atualizada`; `reservas/tests/test_api_permissoes.py::test_gestor_confirma`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_antes_do_inicio_traz_so_cancelar`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_depois_do_termino_traz_so_concluir`; `pages/PaginaReservas.test.tsx`: `"Confirmar" abre o diálogo com o resumo e sem campo de motivo`; `pages/PaginaReservas.test.tsx`: `confirmar envia só a situação, sem motivo` |
 | <a id="ta-148"></a>TA-148 | [CA-02](#us-14-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_ocupa_horario_e_conflito [x]`; `reservas/tests/test_api_reservas.py::test_horario_ocupado_responde_409_e_preserva_as_reservas` |
-| <a id="ta-149"></a>TA-149 | [CA-03](#us-14-ca-03) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md#4-diferença) (seção 4, o "depois")). |
-| <a id="ta-150"></a>TA-150 | [CA-04](#us-14-ca-04) | pendente | implementação pendente (tarefa RES-11) — regra já cumprida pelo código; o teste que a fixa depois do início nasce na tarefa ([CR-01 · CA-07](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-149"></a>TA-149 | [CA-03](#us-14-ca-03) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_antes_do_inicio_traz_so_cancelar`; `reservas/tests/test_api_momento_da_mudanca.py::test_acoes_do_gestor_acompanham_a_janela_da_reserva`; `reservas/tests/test_api_momento_da_mudanca.py::test_solicitante_mantem_cancelar_em_qualquer_momento` |
+| <a id="ta-150"></a>TA-150 | [CA-04](#us-14-ca-04) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_gestor_confirma_depois_do_inicio_como_antes`; `reservas/tests/test_momento_da_mudanca.py::test_solicitada_vencida_continua_aceitando_confirmar_e_o_cancelamento_do_dono [x]` |
 | <a id="ta-151"></a>TA-151 | [CA-05](#us-14-ca-05) | automatizado | `reservas/tests/test_reserva.py::test_motivo_opcional_ao_confirmar_e_guardado_normalizado`; `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior` |
 | <a id="ta-152"></a>TA-152 | [CA-06](#us-14-ca-06) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]` |
 | <a id="ta-153"></a>TA-153 | [CA-07](#us-14-ca-07) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_situacao_ausente_ou_invalida_responde_400 [x]`; `reservas/tests/test_alterar_situacao.py::test_situacao_desconhecida_lanca_erro_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_situacao_desconhecida_e_recusada_e_nada_muda` |

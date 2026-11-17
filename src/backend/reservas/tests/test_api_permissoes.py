@@ -1,9 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 import pytest
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
+
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO
 
 pytestmark = pytest.mark.django_db
 
@@ -228,10 +230,12 @@ def test_acoes_do_gestor_na_solicitada_sao_confirmar_recusar_e_cancelar(
 
 
 def test_solicitante_numa_concluida_nao_tem_acoes(
-    cliente_solicitante, cliente_gestor, reservas
+    cliente_solicitante, cliente_gestor, reservas, relogio_da_api
 ):
     # Arrange
     _alterar(cliente_gestor, reservas["propria"], {"situacao": "CONFIRMADA"})
+    amanha = timezone.localdate() + timedelta(days=1)
+    relogio_da_api(datetime.combine(amanha, time(12, 0), FUSO_HORARIO))
     _alterar(cliente_gestor, reservas["propria"], {"situacao": "CONCLUIDA"})
 
     # Act

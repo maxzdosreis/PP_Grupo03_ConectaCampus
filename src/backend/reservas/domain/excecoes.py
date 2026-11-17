@@ -1,4 +1,4 @@
-from datetime import date, time, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import TYPE_CHECKING
 
 from compartilhado.domain.erros import (
@@ -88,6 +88,29 @@ class TransicaoDeSituacaoInvalida(ConflitoDeEstado):
         self.nova = nova
         super().__init__(
             f"Não é possível alterar uma reserva {atual.rotulo} para {nova.rotulo}."
+        )
+
+
+class ConclusaoAntesDoTermino(ConflitoDeEstado):
+    codigo = "CONCLUSAO_ANTES_DO_TERMINO"
+
+    def __init__(self, termino: datetime) -> None:
+        self.termino = termino
+        super().__init__(
+            "Só é possível concluir a reserva a partir do término dela "
+            f"({termino:%d/%m/%Y} às {termino:%H:%M})."
+        )
+
+
+class MudancaAposOInicio(ConflitoDeEstado):
+    codigo = "RECUSA_OU_CANCELAMENTO_APOS_O_INICIO"
+
+    def __init__(self, nova: SituacaoReserva, inicio: datetime) -> None:
+        self.nova = nova
+        self.inicio = inicio
+        super().__init__(
+            f"Só é possível {nova.rotulo_da_acao.lower()} a reserva antes do "
+            f"início dela ({inicio:%d/%m/%Y} às {inicio:%H:%M})."
         )
 
 

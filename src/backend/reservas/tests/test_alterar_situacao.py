@@ -3,7 +3,9 @@ import pytest
 from reservas.application.casos_de_uso import AlterarSituacaoReserva
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
+    ConclusaoAntesDoTermino,
     MotivoObrigatorio,
+    MudancaAposOInicio,
     ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
@@ -16,12 +18,15 @@ from reservas.domain.situacao import (
 from reservas.tests.fakes import (
     AGORA,
     ATOR_ANA,
+    DEPOIS_DO_TERMINO,
     GESTOR,
     ID_INEXISTENTE,
     MOTIVO,
     OUTRA_PESSOA,
     RepositorioReservasEmMemoria,
+    momento_para,
     motivo_para,
+    relogio_em,
     reserva_reconstituida,
 )
 
@@ -73,7 +78,9 @@ def test_transicao_permitida_e_persistida(repositorio, atual, nova):
     reserva = _salvar_em(repositorio, atual)
 
     # Act
-    alterada = AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
+    alterada = AlterarSituacaoReserva(
+        repositorio, relogio_em(momento_para(nova))
+    ).executar(
         ator=GESTOR,
         reserva_id=reserva.id,
         nova_situacao=nova,
@@ -198,13 +205,12 @@ def test_reserva_inexistente_lanca_reserva_nao_encontrada(repositorio):
 def test_ciclo_solicitada_confirmada_concluida(repositorio):
     # Arrange
     reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
-    alterar = AlterarSituacaoReserva(repositorio, relogio_fixo)
 
     # Act
-    alterar.executar(
+    AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
         ator=GESTOR, reserva_id=reserva.id, nova_situacao=SituacaoReserva.CONFIRMADA
     )
-    alterar.executar(
+    AlterarSituacaoReserva(repositorio, relogio_em(DEPOIS_DO_TERMINO)).executar(
         ator=GESTOR, reserva_id=reserva.id, nova_situacao=SituacaoReserva.CONCLUIDA
     )
 
@@ -301,3 +307,57 @@ def test_alteracao_recusada_nao_registra_no_historico(repositorio):
 
     # Assert
     assert repositorio.listar_historico(reserva.id) == []
+
+
+def test_concluir_antes_do_termino_lanca_erro_do_dominio_e_preserva_a_reserva(
+    repositorio,
+):
+    # Arrange
+    reserva = _salvar_em(repositorio, SituacaoReserva.CONFIRMADA)
+    antes = _retrato(repositorio, reserva.id)
+
+    # Act / Assert
+    with pytest.raises(ConclusaoAntesDoTermino) as erro:
+        AlterarSituacaoReserva(repositorio, relogio_fixo).executar(
+            ator=GESTOR,
+            reserva_id=reserva.id,
+            nova_situacao=SituacaoReserva.CONCLUIDA,
+        )
+    assert erro.value.codigo == "CONCLUSAO_ANTES_DO_TERMINO"
+    assert _retrato(repositorio, reserva.id) == antes
+    assert repositorio.listar_historico(reserva.id) == []
+
+
+@pytest.mark.parametrize("nova", [SituacaoReserva.RECUSADA, SituacaoReserva.CANCELADA])
+def test_recusar_ou_cancelar_depois_do_inicio_lanca_erro_do_dominio(repositorio, nova):
+    # Arrange
+    reserva = _salvar_em(repositorio, SituacaoReserva.SOLICITADA)
+
+    # Act / Assert
+    with pytest.raises(MudancaAposOInicio) as erro:
+        AlterarSituacaoReserva(repositorio, relogio_em(DEPOIS_DO_TERMINO)).executar(
+            ator=GESTOR,
+            reserva_id=reserva.id,
+            nova_situacao=nova,
+            motivo=MOTIVO,
+        )
+    assert erro.value.codigo == "RECUSA_OU_CANCELAMENTO_APOS_O_INICIO"
+    assert _retrato(repositorio, reserva.id) == (SituacaoReserva.SOLICITADA, None)
+
+
+def test_solicitante_cancela_a_propria_depois_do_uso_como_antes(repositorio):
+    # Arrange
+    reserva = _salvar_em(repositorio, SituacaoReserva.CONFIRMADA)
+
+    # Act
+    cancelada = AlterarSituacaoReserva(
+        repositorio, relogio_em(DEPOIS_DO_TERMINO)
+    ).executar(
+        ator=ATOR_ANA,
+        reserva_id=reserva.id,
+        nova_situacao=SituacaoReserva.CANCELADA,
+        motivo=MOTIVO,
+    )
+
+    # Assert
+    assert cancelada.situacao is SituacaoReserva.CANCELADA

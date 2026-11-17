@@ -285,13 +285,13 @@ Troque `AAAA-MM-DD` pela data de amanhã e use os ids que aparecem em `GET /api/
 
 6. Entrar como a gestora Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`), guardar o novo `access` em `ACCESS` e repetir o mesmo comando → **200** `"Reserva confirmada com sucesso."`. A gestora vê as reservas de todos.
 
-7. Concluir a mesma reserva → **200** `"Reserva concluída com sucesso."`, com `acoes_disponiveis` vazia:
+7. Tentar concluir a mesma reserva (ela é de amanhã) → **409** `CONCLUSAO_ANTES_DO_TERMINO`, com a data e a hora do término na mensagem, e a reserva continua Confirmada ([a janela de horário do Gestor](reservas/README.md#janela-de-horário-do-gestor)):
 
    ```bash
    curl -X PATCH http://localhost:8000/api/reservas/ID/situacao/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"situacao": "CONCLUIDA"}'
    ```
 
-   Tentar voltá-la para `SOLICITADA` responde **409** `TRANSICAO_DE_SITUACAO_INVALIDA`.
+   Cancelar com motivo antes do início → **200** `"Reserva cancelada com sucesso."`, com `acoes_disponiveis` vazia (`-d '{"situacao": "CANCELADA", "motivo": "Chuva forte"}'`). Tentar voltá-la para `SOLICITADA` responde **409** `TRANSICAO_DE_SITUACAO_INVALIDA`.
 
 8. Ainda como Carla, desativar o Campo de Futebol Principal (espaço `2` num banco recém-criado) → **200**; repetir o comando responde **409** `ESPACO_JA_INATIVO` ([desativar e reativar](espacos/README.md#desativar-e-reativar)):
 

@@ -184,7 +184,9 @@ class ReservaSaidaSerializer(serializers.Serializer):
     acoes_disponiveis = serializers.SerializerMethodField()
 
     def get_acoes_disponiveis(self, reserva):
-        destinos = reserva.acoes_permitidas_para(self.context["ator"])
+        destinos = reserva.acoes_permitidas_para(
+            self.context["ator"], self.context["agora"]
+        )
         return AcaoDisponivelSaidaSerializer(destinos, many=True).data
 
 

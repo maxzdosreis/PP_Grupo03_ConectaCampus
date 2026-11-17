@@ -66,7 +66,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-21](../requisitos/rf-reservas.md#rf-21)
 - **TA:** [TA-138](#ta-138)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-13-ca-03"></a>US-13 · CA-03 · Desistir de cancelar (alternativa)
 
@@ -153,7 +152,7 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
 | <a id="ta-137"></a>TA-137 | [CA-01](#us-13-ca-01) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_cancela_a_propria`; `reservas/tests/test_alterar_situacao.py::test_solicitante_cancela_a_propria_reserva`; `reservas/tests/test_alterar_situacao.py::test_cancelar_guarda_o_motivo_normalizado`; `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [x]` |
-| <a id="ta-138"></a>TA-138 | [CA-02](#us-13-ca-02) | pendente | implementação pendente (tarefa RES-11) — regra já cumprida pelo código; o teste que a fixa depois do início nasce na tarefa ([CR-01 · CA-06](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-138"></a>TA-138 | [CA-02](#us-13-ca-02) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_solicitante_cancela_a_propria_depois_do_inicio_como_antes`; `reservas/tests/test_api_momento_da_mudanca.py::test_solicitante_mantem_cancelar_em_qualquer_momento`; `reservas/tests/test_alterar_situacao.py::test_solicitante_cancela_a_propria_depois_do_uso_como_antes` |
 | <a id="ta-139"></a>TA-139 | [CA-03](#us-13-ca-03) | automatizado | `pages/PaginaReservas.test.tsx`: `"Voltar" fecha sem chamar a API e devolve o foco ao botão da linha`; `pages/PaginaReservas.test.tsx`: `Esc fecha sem chamar a API e devolve o foco ao botão da linha` |
 | <a id="ta-140"></a>TA-140 | [CA-04](#us-13-ca-04) | automatizado | `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes`; `components/reservas/TabelaDeReservas.test.tsx`: `sem ações mostra "—" e "Nenhuma ação disponível" para leitor de tela` |
 | <a id="ta-141"></a>TA-141 | [CA-05](#us-13-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos` |

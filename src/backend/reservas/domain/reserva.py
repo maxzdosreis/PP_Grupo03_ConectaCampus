@@ -4,9 +4,11 @@ from compartilhado.domain.erros import CampoObrigatorioAusente
 from reservas.domain.ator import Ator, PapelDoAtor
 from reservas.domain.excecoes import (
     AlteracaoDeSituacaoNaoPermitida,
+    ConclusaoAntesDoTermino,
     DataRetroativa,
     IdentificadorDeEspacoInvalido,
     MotivoObrigatorio,
+    MudancaAposOInicio,
     ReservaNaoEncontrada,
     SituacaoInvalida,
     TransicaoDeSituacaoInvalida,
@@ -18,7 +20,9 @@ from reservas.domain.regras_de_agenda import garantir_regras_de_agenda
 from reservas.domain.situacao import (
     DESTINOS_DE_TRANSICAO,
     SITUACOES_QUE_EXIGEM_MOTIVO,
+    SITUACOES_SO_A_PARTIR_DO_TERMINO,
     SituacaoReserva,
+    momento_permite,
     papel_pode_levar_a,
     transicao_permitida,
     transicoes_a_partir_de,
@@ -112,14 +116,38 @@ class Reserva:
             return True
         return self.solicitante.usuario_id == ator.usuario_id
 
-    def acoes_permitidas_para(self, ator: Ator) -> list[SituacaoReserva]:
+    def acoes_permitidas_para(
+        self, ator: Ator, agora: datetime
+    ) -> list[SituacaoReserva]:
+        exigir_fuso(agora, "agora")
         if not self.visivel_para(ator):
             return []
         return [
             nova
             for nova in transicoes_a_partir_de(self.situacao)
             if papel_pode_levar_a(ator.papel, nova)
+            and self._momento_permite(ator.papel, nova, agora)
         ]
+
+    def _momento_permite(
+        self, papel: PapelDoAtor, nova: SituacaoReserva, agora: datetime
+    ) -> bool:
+        return momento_permite(
+            papel,
+            nova,
+            inicio=self.intervalo.inicio(),
+            fim=self.intervalo.fim(),
+            agora=agora,
+        )
+
+    def _exigir_momento(
+        self, papel: PapelDoAtor, nova: SituacaoReserva, agora: datetime
+    ) -> None:
+        if self._momento_permite(papel, nova, agora):
+            return
+        if nova in SITUACOES_SO_A_PARTIR_DO_TERMINO:
+            raise ConclusaoAntesDoTermino(self.intervalo.fim())
+        raise MudancaAposOInicio(nova, self.intervalo.inicio())
 
     def alterar_situacao(
         self,
@@ -136,6 +164,7 @@ class Reserva:
         _exigir_permissao(ator.papel, nova)
         if not transicao_permitida(self.situacao, nova):
             raise TransicaoDeSituacaoInvalida(self.situacao, nova)
+        self._exigir_momento(ator.papel, nova, agora)
         motivo_normalizado = _normalizar_motivo(motivo)
         _exigir_motivo_se_necessario(nova, motivo_normalizado)
         registro = RegistroDeSituacao(

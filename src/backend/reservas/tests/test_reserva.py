@@ -27,10 +27,12 @@ from reservas.tests.fakes import (
     AGORA,
     ANA,
     ATOR_ANA,
+    DEPOIS_DO_TERMINO,
     GESTOR,
     OUTRA_PESSOA,
     UTC,
     exatamente,
+    momento_para,
     motivo_para,
     reserva_reconstituida,
     reserva_solicitada,
@@ -313,7 +315,9 @@ def test_transicao_permitida_altera_a_situacao(atual, nova):
     reserva = reserva_reconstituida(situacao=atual)
 
     # Act
-    reserva.alterar_situacao(nova, motivo=motivo_para(nova), ator=GESTOR, agora=AGORA)
+    reserva.alterar_situacao(
+        nova, motivo=motivo_para(nova), ator=GESTOR, agora=momento_para(nova)
+    )
 
     # Assert
     assert reserva.situacao is nova
@@ -410,7 +414,7 @@ def test_nova_situacao_limpa_o_motivo_da_anterior():
     )
 
     # Act
-    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=AGORA)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS_DO_TERMINO)
 
     # Assert
     assert reserva.motivo_da_situacao is None
@@ -588,7 +592,10 @@ def test_transicao_permitida_gera_o_registro_da_mudanca(atual, nova):
 
     # Act
     reserva.alterar_situacao(
-        nova, motivo=f"  {motivo_para(nova) or ''} ", ator=GESTOR, agora=DEPOIS
+        nova,
+        motivo=f"  {motivo_para(nova) or ''} ",
+        ator=GESTOR,
+        agora=DEPOIS_DO_TERMINO if nova is S.CONCLUIDA else DEPOIS,
     )
 
     # Assert
@@ -599,7 +606,7 @@ def test_transicao_permitida_gera_o_registro_da_mudanca(atual, nova):
             motivo=motivo_para(nova),
             autor_usuario_id=GESTOR.usuario_id,
             autor_nome=GESTOR.nome,
-            registrado_em=DEPOIS,
+            registrado_em=DEPOIS_DO_TERMINO if nova is S.CONCLUIDA else DEPOIS,
         ),
     )
 
@@ -610,7 +617,7 @@ def test_cada_mudanca_acrescenta_um_registro_na_ordem():
 
     # Act
     reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
-    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS_DO_TERMINO)
 
     # Assert
     verificar_historico_coerente(reserva.registros_pendentes, reserva.situacao)
@@ -708,7 +715,7 @@ def test_situacao_de_origem_depois_de_duas_mudancas_e_a_anterior_a_primeira():
     reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS)
 
     # Act
-    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS)
+    reserva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS_DO_TERMINO)
 
     # Assert
     assert reserva.situacao_de_origem is S.SOLICITADA

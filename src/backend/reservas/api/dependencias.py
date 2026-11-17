@@ -15,6 +15,10 @@ from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFach
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
 
+def agora() -> datetime:
+    return timezone.now()
+
+
 def criar_reserva(relogio: Callable[[], datetime] = timezone.now) -> CriarReserva:
     return CriarReserva(
         RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), relogio

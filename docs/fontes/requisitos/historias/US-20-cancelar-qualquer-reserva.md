@@ -50,7 +50,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-20](../requisitos/rf-reservas.md#rf-20)
 - **TA:** [TA-190](#ta-190)
 - **Depende de:** [DEC-06](../decisoes/DEC-06.md) (decidida; é assim que as reservas de um espaço desativado são desfeitas)
-- **Situação:** substituído por [CA-02](#us-20-ca-02), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-11; não valem como prova da regra nova.
+- **Situação:** substituído por [CA-02](#us-20-ca-02), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-11 (implementada em 16/11/2026); o texto fica como registro da regra anterior e o TA dele passou a fixar o comportamento no momento certo. Vale a regra do CA que o substitui.
 
 #### <a id="us-20-ca-02"></a>US-20 · CA-02 · O Gestor cancela antes do início a reserva de qualquer pessoa (sucesso)
 
@@ -61,7 +61,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-20](../requisitos/rf-reservas.md#rf-20)
 - **TA:** [TA-191](#ta-191)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13); [DEC-06](../decisoes/DEC-06.md) (decidida; é assim que as reservas de um espaço desativado são desfeitas)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-20-ca-03"></a>US-20 · CA-03 · Cancelar pelo Gestor depois do início (exceção)
 
@@ -72,7 +71,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-24.1](../requisitos/rf-reservas.md#rf-24-1)
 - **TA:** [TA-192](#ta-192)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-20-ca-04"></a>US-20 · CA-04 · Cancelamento recusado fica no histórico (registro)
 
@@ -92,6 +90,6 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
 | <a id="ta-190"></a>TA-190 | [CA-01](#us-20-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva`; `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida [x]` |
-| <a id="ta-191"></a>TA-191 | [CA-02](#us-20-ca-02) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md#4-diferença) (seção 4, o "depois")). |
-| <a id="ta-192"></a>TA-192 | [CA-03](#us-20-ca-03) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-04](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-191"></a>TA-191 | [CA-02](#us-20-ca-02) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_antes_do_inicio_funciona [x]`; `reservas/tests/test_momento_da_mudanca.py::test_alteracao_segue_a_regra_do_momento_da_dec_13 [x]`; `reservas/tests/test_api_situacao_reserva.py::test_cancelar_libera_o_horario_para_nova_reserva` |
+| <a id="ta-192"></a>TA-192 | [CA-03](#us-20-ca-03) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_cancelar_confirmada_depois_do_inicio_o_gestor_nao_pode`; `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_no_instante_do_inicio_responde_409 [x]`; `reservas/tests/test_momento_da_mudanca.py::test_mensagem_de_recusar_ou_cancelar_apos_o_inicio_diz_o_verbo_e_o_inicio [x]` |
 | <a id="ta-193"></a>TA-193 | [CA-04](#us-20-ca-04) | pendente | implementação pendente (tarefa RES-12) — TA a criar junto com o código ([CR-02 · CA-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md#5-critérios-de-aceite)). |

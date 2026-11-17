@@ -11,10 +11,14 @@ stateDiagram-v2
 %% papel: GESTOR = Gestor
 %% papel: SOLICITANTE = Solicitante (só o dono)
 %% motivo: motivo obrigatório
+%% Janela de horário do Gestor (DEC-13, RES-11), conferida com SITUACOES_SO_A_PARTIR_DO_TERMINO e
+%% SITUACOES_SO_ANTES_DO_INICIO; confirmar e o cancelamento pelo Solicitante não dependem do horário:
+%% janela: a partir do término = CONCLUIDA
+%% janela: antes do início = RECUSADA, CANCELADA
   direction LR
   classDef nota fill:#fef9c3,stroke:#a16207,color:#111827,text-align:left
 
-  state "Legenda: ● início · ◉ fim (situação final)<br/>moldura: reserva que ocupa o horário<br/>rótulo: ação · quem pode · motivo obrigatório<br/>As transições não dependem do horário<br/>da reserva (DEC-13). Qualquer outra<br/>é recusada sem mudar nada." as NOTA_LEGENDA
+  state "Legenda: ● início · ◉ fim (situação final)<br/>moldura: reserva que ocupa o horário<br/>rótulo: ação · quem pode · motivo obrigatório<br/>Gestor (DEC-13): Concluir só a partir do término;<br/>Recusar e Cancelar só antes do início.<br/>Confirmar e o Cancelar do Solicitante<br/>não dependem do horário. Qualquer outra<br/>mudança é recusada sem mudar nada." as NOTA_LEGENDA
   class NOTA_LEGENDA nota
 
   state "Ocupa o horário" as OCUPA {

@@ -25,6 +25,7 @@ from reservas.tests.fakes import (
     AGORA,
     ANA,
     BRUNO,
+    DEPOIS_DO_TERMINO,
     DIA,
     GESTOR,
     ID_INEXISTENTE,
@@ -493,8 +494,8 @@ def test_alterar_e_salvar_grava_o_registro_da_mudanca(repositorio):
 def test_listar_historico_desempata_pela_ordem_de_insercao(repositorio):
     # Arrange
     salva = repositorio.salvar(_solicitar())
-    salva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=AGORA)
-    salva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=AGORA)
+    salva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=DEPOIS_DO_TERMINO)
+    salva.alterar_situacao(S.CONCLUIDA, ator=GESTOR, agora=DEPOIS_DO_TERMINO)
     repositorio.salvar(salva)
 
     # Act
