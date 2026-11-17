@@ -55,7 +55,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-18](../requisitos/rf-reservas.md#rf-18)
 - **TA:** [TA-161](#ta-161)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; recusar só vale antes do início: ver a Situação abaixo)
-- **Situação:** substituído por [CA-03](#us-15-ca-03), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-11; não valem como prova da regra nova.
+- **Situação:** substituído por [CA-03](#us-15-ca-03), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-11 (implementada em 16/11/2026); o texto fica como registro da regra anterior e o TA dele passou a fixar o comportamento no momento certo. Vale a regra do CA que o substitui.
 
 #### <a id="us-15-ca-02"></a>US-15 · CA-02 · O horário é liberado (sucesso)
 
@@ -75,7 +75,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-18](../requisitos/rf-reservas.md#rf-18)
 - **TA:** [TA-163](#ta-163)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-15-ca-04"></a>US-15 · CA-04 · Recusar o que não está Solicitada (exceção)
 
@@ -114,7 +113,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-24.1](../requisitos/rf-reservas.md#rf-24-1)
 - **TA:** [TA-167](#ta-167)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-15-ca-08"></a>US-15 · CA-08 · Recusa registrada no histórico (registro)
 
@@ -144,10 +142,10 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 |---|---|---|---|
 | <a id="ta-161"></a>TA-161 | [CA-01](#us-15-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [recusada]`; `reservas/tests/test_alterar_situacao.py::test_transicao_permitida_e_persistida [x]`; `pages/PaginaReservas.test.tsx`: `"Recusar" abre o diálogo com o campo de motivo em foco`; `pages/PaginaReservas.test.tsx`: `enviar recusa com o motivo, mostra a mensagem da API, fecha e recarrega` |
 | <a id="ta-162"></a>TA-162 | [CA-02](#us-15-ca-02) | automatizado | `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
-| <a id="ta-163"></a>TA-163 | [CA-03](#us-15-ca-03) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md#4-diferença) (seção 4, o "depois")). |
+| <a id="ta-163"></a>TA-163 | [CA-03](#us-15-ca-03) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_antes_do_inicio_funciona [x]`; `reservas/tests/test_api_situacao_reserva.py::test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao [recusada]`; `reservas/tests/test_momento_da_mudanca.py::test_alteracao_segue_a_regra_do_momento_da_dec_13 [x]` |
 | <a id="ta-164"></a>TA-164 | [CA-04](#us-15-ca-04) | automatizado | `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]`; `reservas/tests/test_situacao.py::test_transicao_permitida_segue_a_tabela [x]`; `reservas/tests/test_reserva.py::test_transicao_proibida_tem_mensagem_com_os_rotulos` |
 | <a id="ta-165"></a>TA-165 | [CA-05](#us-15-ca-05) | automatizado | `reservas/tests/test_reserva.py::test_motivo_acima_do_limite_e_recusado_e_nada_muda`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
 | <a id="ta-166"></a>TA-166 | [CA-06](#us-15-ca-06) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_recusar_sem_motivo_responde_400_no_campo_motivo`; `reservas/tests/test_reserva.py::test_recusar_ou_cancelar_sem_motivo_e_recusado_e_nada_muda [x]`; `pages/PaginaReservas.test.tsx`: `erro no motivo aparece embaixo do campo, que recebe o foco` |
-| <a id="ta-167"></a>TA-167 | [CA-07](#us-15-ca-07) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-03](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-167"></a>TA-167 | [CA-07](#us-15-ca-07) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_recusar_ou_cancelar_no_instante_do_inicio_responde_409 [x]`; `reservas/tests/test_momento_da_mudanca.py::test_mensagem_de_recusar_ou_cancelar_apos_o_inicio_diz_o_verbo_e_o_inicio [x]`; `reservas/tests/test_alterar_situacao.py::test_recusar_ou_cancelar_depois_do_inicio_lanca_erro_do_dominio [x]`; `reservas/tests/test_propriedades_do_momento.py::test_gestor_so_recusa_ou_cancela_se_agora_e_antes_do_inicio` |
 | <a id="ta-168"></a>TA-168 | [CA-08](#us-15-ca-08) | automatizado | `reservas/tests/test_reserva.py::test_transicao_permitida_gera_o_registro_da_mudanca [x]`; `reservas/tests/test_api_historico.py::test_tentativa_recusada_nao_aparece_no_historico`; `reservas/tests/test_alterar_situacao.py::test_alteracao_recusada_nao_registra_no_historico` |
 | <a id="ta-169"></a>TA-169 | [CA-09](#us-15-ca-09) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros [x]`; `reservas/tests/test_api_permissoes.py::test_acoes_do_solicitante_na_propria_solicitada_sao_so_cancelar` |

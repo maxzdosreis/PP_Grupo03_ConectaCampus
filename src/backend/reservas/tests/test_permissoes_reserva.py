@@ -1,3 +1,4 @@
+from datetime import timedelta
 from itertools import product
 
 import pytest
@@ -56,6 +57,14 @@ MATRIZ = [
 ]
 
 
+ANTES_DO_INICIO = AGORA
+DEPOIS_DO_TERMINO = reserva_reconstituida().intervalo.fim() + timedelta(minutes=1)
+
+
+def _agora_para(nova):
+    return DEPOIS_DO_TERMINO if nova is S.CONCLUIDA else ANTES_DO_INICIO
+
+
 def _id_do_caso(caso):
     papel, atual, nova, dono, esperado = caso
     quem = "dono" if dono else "outro"
@@ -96,7 +105,9 @@ def test_acoes_permitidas_contem_o_destino_so_quando_a_alteracao_e_aceita(
     papel, atual, nova, dono, esperado
 ):
     # Act
-    acoes = _reserva_em(atual).acoes_permitidas_para(_ator(papel, dono))
+    acoes = _reserva_em(atual).acoes_permitidas_para(
+        _ator(papel, dono), _agora_para(nova)
+    )
 
     # Assert
     assert (nova in acoes) is (esperado == SUCESSO)
@@ -115,29 +126,30 @@ def test_alterar_situacao_segue_a_matriz_e_preserva_a_reserva_nos_erros(
     # Act / Assert
     if esperado == SUCESSO:
         reserva.alterar_situacao(
-            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=AGORA
+            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=_agora_para(nova)
         )
         assert reserva.situacao is nova
         assert len(reserva.registros_pendentes) == 1
         return
     with pytest.raises(_EXCECAO_ESPERADA[esperado]):
         reserva.alterar_situacao(
-            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=AGORA
+            nova, motivo=MOTIVO, ator=_ator(papel, dono), agora=_agora_para(nova)
         )
     assert _retrato(reserva) == antes
 
 
 @pytest.mark.parametrize(
-    ("atual", "esperadas"),
+    ("atual", "agora", "esperadas"),
     [
-        (S.SOLICITADA, [S.CONFIRMADA, S.RECUSADA, S.CANCELADA]),
-        (S.CONFIRMADA, [S.CANCELADA, S.CONCLUIDA]),
-        (S.CONCLUIDA, []),
+        (S.SOLICITADA, ANTES_DO_INICIO, [S.CONFIRMADA, S.RECUSADA, S.CANCELADA]),
+        (S.CONFIRMADA, ANTES_DO_INICIO, [S.CANCELADA]),
+        (S.CONFIRMADA, DEPOIS_DO_TERMINO, [S.CONCLUIDA]),
+        (S.CONCLUIDA, DEPOIS_DO_TERMINO, []),
     ],
 )
-def test_acoes_do_gestor_seguem_a_ordem_do_enum(atual, esperadas):
+def test_acoes_do_gestor_seguem_a_ordem_do_enum_e_o_momento(atual, agora, esperadas):
     # Act
-    acoes = _reserva_em(atual).acoes_permitidas_para(_ator(P.GESTOR, dono=False))
+    acoes = _reserva_em(atual).acoes_permitidas_para(_ator(P.GESTOR, dono=False), agora)
 
     # Assert
     assert acoes == esperadas
@@ -153,7 +165,9 @@ def test_acoes_do_gestor_seguem_a_ordem_do_enum(atual, esperadas):
 )
 def test_acoes_do_solicitante_na_propria_sao_so_cancelar(atual, esperadas):
     # Act
-    acoes = _reserva_em(atual).acoes_permitidas_para(_ator(P.SOLICITANTE, dono=True))
+    acoes = _reserva_em(atual).acoes_permitidas_para(
+        _ator(P.SOLICITANTE, dono=True), DEPOIS_DO_TERMINO
+    )
 
     # Assert
     assert acoes == esperadas

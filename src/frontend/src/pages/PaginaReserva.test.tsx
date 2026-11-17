@@ -339,6 +339,24 @@ describe('PaginaReserva', () => {
     expect(listarHistoricoDaReserva).toHaveBeenCalledTimes(2)
   })
 
+  it('o erro de horário da regra nova aparece no diálogo, com a mensagem da API, e a sessão fica', async () => {
+    const mensagem =
+      'Só é possível recusar a reserva antes do início dela (10/11/2026 às 10:00).'
+    vi.mocked(alterarSituacaoReserva).mockRejectedValue(
+      new ErroDaApi(409, 'RECUSA_OU_CANCELAMENTO_APOS_O_INICIO', mensagem),
+    )
+    renderizar()
+
+    await userEvent.click(await screen.findByRole('button', { name: /^Recusar a reserva/ }))
+    const dialogo = screen.getByRole('dialog', { name: 'Recusar reserva' })
+    await userEvent.type(within(dialogo).getByLabelText('Motivo'), 'Quadra em manutenção.')
+    await userEvent.click(within(dialogo).getByRole('button', { name: 'Recusar reserva' }))
+
+    expect((await within(dialogo).findByRole('alert')).textContent).toContain(mensagem)
+    expect(screen.getByRole('dialog', { name: 'Recusar reserva' })).toBeTruthy()
+    expect(screen.queryByText('Entrar')).toBeNull()
+  })
+
   it('"Voltar para as reservas" volta para a lista com os filtros de antes', async () => {
     renderizar({ pathname: '/reservas/5', state: { voltarPara: '/reservas?situacao=SOLICITADA' } })
 

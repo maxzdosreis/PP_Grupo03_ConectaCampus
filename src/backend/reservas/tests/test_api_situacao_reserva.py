@@ -1,9 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 import pytest
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
+
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO
 
 pytestmark = pytest.mark.django_db
 
@@ -28,6 +30,11 @@ def _corpo_da_reserva(espaco_id):
         "hora_fim": "11:00",
         "finalidade": "Treino",
     }
+
+
+def _depois_do_termino():
+    amanha = timezone.localdate() + timedelta(days=1)
+    return datetime.combine(amanha, time(12, 0), FUSO_HORARIO)
 
 
 @pytest.fixture
@@ -83,10 +90,12 @@ def test_confirmar_responde_200_com_a_reserva_atualizada(cliente, reserva_id):
     ids=["confirmada", "recusada", "cancelada", "concluida"],
 )
 def test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao(
-    cliente, reserva_id, caminho, mensagem
+    cliente, reserva_id, caminho, mensagem, relogio_da_api
 ):
     # Act
     for situacao in caminho:
+        if situacao == "CONCLUIDA":
+            relogio_da_api(_depois_do_termino())
         resposta = _alterar(
             cliente, reserva_id, {"situacao": situacao, "motivo": MOTIVO}
         )
@@ -96,9 +105,10 @@ def test_mensagem_de_sucesso_usa_o_rotulo_da_nova_situacao(
     assert resposta.data["mensagem"] == mensagem
 
 
-def test_fluxo_da_demonstracao_ate_concluida(cliente, reserva_id):
+def test_fluxo_da_demonstracao_ate_concluida(cliente, reserva_id, relogio_da_api):
     # Act
     confirmada = _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+    relogio_da_api(_depois_do_termino())
     concluida = _alterar(cliente, reserva_id, {"situacao": "CONCLUIDA"})
 
     # Assert
@@ -125,20 +135,34 @@ def test_reserva_solicitada_traz_confirmar_recusar_e_cancelar(cliente, reserva_i
     ]
 
 
-def test_reserva_confirmada_traz_cancelar_e_concluir(cliente, reserva_id):
+def test_reserva_confirmada_antes_do_inicio_traz_so_cancelar(cliente, reserva_id):
     # Act
     resposta = _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
 
     # Assert
     assert resposta.data["dados"]["acoes_disponiveis"] == [
         _acao("CANCELADA", "Cancelar", exige_motivo=True),
-        _acao("CONCLUIDA", "Concluir"),
     ]
 
 
-def test_reserva_concluida_nao_traz_acoes(cliente, reserva_id):
+def test_reserva_confirmada_depois_do_termino_traz_so_concluir(
+    cliente, reserva_id, relogio_da_api
+):
     # Arrange
     _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+    relogio_da_api(_depois_do_termino())
+
+    # Act
+    acoes = _detalhe(cliente, reserva_id)["acoes_disponiveis"]
+
+    # Assert
+    assert acoes == [_acao("CONCLUIDA", "Concluir")]
+
+
+def test_reserva_concluida_nao_traz_acoes(cliente, reserva_id, relogio_da_api):
+    # Arrange
+    _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+    relogio_da_api(_depois_do_termino())
 
     # Act
     resposta = _alterar(cliente, reserva_id, {"situacao": "CONCLUIDA"})
@@ -166,9 +190,10 @@ def test_transicao_proibida_responde_409_e_preserva_a_reserva(cliente, reserva_i
     assert _detalhe(cliente, reserva_id) == antes
 
 
-def test_reserva_concluida_nao_pode_ser_cancelada(cliente, reserva_id):
+def test_reserva_concluida_nao_pode_ser_cancelada(cliente, reserva_id, relogio_da_api):
     # Arrange
     _alterar(cliente, reserva_id, {"situacao": "CONFIRMADA"})
+    relogio_da_api(_depois_do_termino())
     _alterar(cliente, reserva_id, {"situacao": "CONCLUIDA"})
 
     # Act

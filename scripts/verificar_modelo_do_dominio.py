@@ -38,7 +38,7 @@ CAMPOS_DJANGO = {
 CAMPOS_DE_RELACAO = ("ForeignKey", "OneToOneField", "ManyToManyField")
 OCUPA = "ocupa o horário"
 
-ANOTACAO = re.compile(r"^%%\s*(classe|referencia-por-id|nota|papel|motivo):\s*(.*)$")
+ANOTACAO = re.compile(r"^%%\s*(classe|referencia-por-id|nota|papel|motivo|janela):\s*(.*)$")
 CLASSE = re.compile(r"^class\s+(\w+)\s*(\{)?$")
 NAMESPACE = re.compile(r"^namespace\s+(\w+)\s*\{$")
 METODO = re.compile(r"^[+\-#~]?(\w+)\((.*?)\)([$*])?\s*(.*)$")
@@ -114,6 +114,8 @@ class DiagramaDeEstados:
     estados: set[str] = field(default_factory=set)
     papeis: dict[str, str] = field(default_factory=dict)
     motivo: str | None = None
+    janelas: dict[str, set[str]] = field(default_factory=dict)
+    legenda: str = ""
 
 
 def tipo_do_diagrama(caminho: Path) -> str | None:
@@ -231,11 +233,16 @@ def ler_diagrama_de_estados(caminho: Path, resultado: visao.Resultado) -> Diagra
                 figura.papeis[nome.strip()] = texto.strip()
             elif chave == "motivo":
                 figura.motivo = valor
+            elif chave == "janela":
+                texto, _, estados = valor.partition("=")
+                figura.janelas[texto.strip()] = {e.strip() for e in estados.split(",") if e.strip()}
             else:
                 resultado.erro(f"{onde}: anotação '{chave}' não vale num stateDiagram")
             continue
         if linha.startswith("%%"):
             continue
+        if linha.startswith("state \"Legenda"):
+            figura.legenda = linha
         if linha.startswith("note ") and not linha.startswith("note \""):
             em_nota = ":" not in linha
             continue
@@ -713,6 +720,7 @@ def verificar_estados(figura: DiagramaDeEstados, resultado: visao.Resultado,
 
     verificar_inicio_e_fim(figura, Situacao, resultado, evidencia, arquivo, linhas)
     verificar_ocupa_o_horario(figura, situacao, resultado, evidencia, arquivo, linhas)
+    verificar_janelas_de_horario(figura, situacao, resultado, evidencia, arquivo, linhas)
 
 
 def verificar_rotulo(figura: DiagramaDeEstados, t: Transicao, destino, situacao, Papel, resultado: visao.Resultado) -> None:
@@ -751,6 +759,26 @@ def verificar_inicio_e_fim(figura: DiagramaDeEstados, Situacao, resultado: visao
     else:
         evidencia.append((figura.nome, f"{', '.join(sorted(finais))} → [*]",
                           f"{arquivo}:{linhas['TRANSICOES_PERMITIDAS']} (eh_final: sem destinos)"))
+
+
+def verificar_janelas_de_horario(figura: DiagramaDeEstados, situacao, resultado: visao.Resultado,
+                                 evidencia: list[tuple[str, str, str]], arquivo: str, linhas: dict[str, int]) -> None:
+    esperadas = {
+        "a partir do término": ("SITUACOES_SO_A_PARTIR_DO_TERMINO", situacao.SITUACOES_SO_A_PARTIR_DO_TERMINO),
+        "antes do início": ("SITUACOES_SO_ANTES_DO_INICIO", situacao.SITUACOES_SO_ANTES_DO_INICIO),
+    }
+    if set(figura.janelas) != set(esperadas):
+        resultado.erro(f"{figura.nome}: '%% janela:' cobre {sorted(figura.janelas)}; esperado {sorted(esperadas)}")
+        return
+    for texto, (nome, conjunto) in esperadas.items():
+        estados = {e.name for e in conjunto}
+        if figura.janelas[texto] != estados:
+            resultado.erro(f"{figura.nome}: '%% janela: {texto}' lista {sorted(figura.janelas[texto])}; "
+                           f"{nome} tem {sorted(estados)} ({arquivo}:{linhas[nome]})")
+        if texto not in figura.legenda:
+            resultado.erro(f"{figura.nome}: a legenda não diz '{texto}' (janela de horário do Gestor, DEC-13)")
+        evidencia.append((figura.nome, f"janela do Gestor: {texto} = {', '.join(sorted(estados))}",
+                          f"{arquivo}:{linhas[nome]}"))
 
 
 def verificar_ocupa_o_horario(figura: DiagramaDeEstados, situacao, resultado: visao.Resultado,

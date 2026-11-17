@@ -1,6 +1,6 @@
 import os
 import re
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from datetime import date, datetime, time
 from time import tzset
@@ -27,6 +27,7 @@ from reservas.domain.solicitante import Solicitante
 UTC = ZoneInfo("UTC")
 AGORA = datetime(2026, 10, 21, 12, 0, tzinfo=FUSO_HORARIO)
 DIA = date(2026, 10, 25)
+DEPOIS_DO_TERMINO = datetime(2026, 10, 25, 12, 0, tzinfo=FUSO_HORARIO)
 ID_INEXISTENTE = 9999
 MOTIVO = "Chuva forte"
 ANA = Solicitante(usuario_id=7, nome="Ana Souza", matricula="2026001")
@@ -53,6 +54,14 @@ def fuso_do_processo(nome: str) -> Iterator[None]:
         else:
             os.environ["TZ"] = anterior
         tzset()
+
+
+def relogio_em(momento: datetime) -> Callable[[], datetime]:
+    return lambda: momento
+
+
+def momento_para(nova: SituacaoReserva) -> datetime:
+    return DEPOIS_DO_TERMINO if nova is SituacaoReserva.CONCLUIDA else AGORA
 
 
 def motivo_para(situacao: SituacaoReserva) -> str | None:

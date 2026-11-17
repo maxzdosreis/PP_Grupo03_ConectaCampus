@@ -7,7 +7,7 @@ Recebe as solicitações de reserva, impede conflito de horário e pedidos fora 
 - **Reserva** (`domain/reserva.py`): espaço (`espaco_id`), solicitante (`Solicitante`: id, nome e matrícula copiados do usuário logado no momento), horário (`IntervaloDeHorario`: data, início e fim), finalidade (até `FINALIDADE_MAXIMO_CARACTERES`, 200), situação, motivo da situação (até `MOTIVO_MAXIMO_CARACTERES`, 300) e `criada_em`.
 - **Nova solicitação** (`Reserva.solicitar`) nasce `SOLICITADA` e é recusada, nesta ordem: campos ausentes ou término igual ou antes do início (`HorarioInvalido`); horário que já passou (`DataRetroativa`); fora do horário de funcionamento; duração fora dos limites; antecedência maior que a máxima ([regras de agenda](#regras-de-agenda)). Depois, o caso de uso `CriarReserva` confere o espaço (inexistente → 404, inativo → 409) e o conflito de horário.
 - **Conflito de horário** (`garantir_horario_livre`, `domain/conflito_de_horario.py`): outra reserva do mesmo espaço, `SOLICITADA` ou `CONFIRMADA` (`SITUACOES_QUE_OCUPAM_HORARIO`), com horário sobreposto. Os intervalos são semiabertos: 10:00–11:00 e 11:00–12:00 não conflitam. A mensagem mostra o horário e a situação da reserva que ocupa, nunca quem reservou. Uma constraint do banco garante o mesmo contra pedidos simultâneos.
-- **Situações e transições** (`domain/situacao.py`, tabela única `TRANSICOES_PERMITIDAS`): veja [Alterar a situação](#alterar-a-situação-de-uma-reserva). Recusar e cancelar exigem motivo (`SITUACOES_QUE_EXIGEM_MOTIVO`). Recusar, cancelar ou concluir libera o horário.
+- **Situações e transições** (`domain/situacao.py`, tabela única `TRANSICOES_PERMITIDAS`): veja [Alterar a situação](#alterar-a-situação-de-uma-reserva). Recusar e cancelar exigem motivo (`SITUACOES_QUE_EXIGEM_MOTIVO`). Recusar, cancelar ou concluir libera o horário. O Gestor só conclui a partir do término e só recusa ou cancela antes do início ([janela de horário do Gestor](#janela-de-horário-do-gestor)).
 - **Quem pode** (`DESTINOS_POR_PAPEL`): o Gestor confirma, recusa, conclui e cancela; o Solicitante só cancela, e só as próprias. A permissão é checada antes da transição, então um Solicitante que tenta confirmar recebe sempre 403. `acoes_disponiveis` (cada reserva da API) sai da mesma regra (`acoes_permitidas_para`), por isso os botões da tela e o que a API aceita nunca divergem.
 - **Visibilidade:** o Gestor vê todas; o Solicitante vê só as próprias. Reserva de outra pessoa responde 404, e não 403, para não revelar que existe. A única exceção é a [agenda do dia](#agenda-do-dia), que mostra que um horário está ocupado, sem dizer de quem.
 - **Histórico** (`RegistroDeSituacao`): a criação e cada mudança aceita viram um registro, gravado na mesma transação da reserva. Tentativas recusadas não entram (DEC-05).
@@ -25,7 +25,7 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`. "Logado" = qualquer perf
 | `GET /api/reservas/?espaco=&situacao=&data=&solicitante=&minhas=&pagina=&tamanho=` | logado (Solicitante: só as próprias) | 200 | 400 `DADOS_INVALIDOS` (filtro, página ou tamanho em formato inválido) |
 | `GET /api/reservas/ocupacao/?espaco=&data=` | logado | 200 | 400 `DADOS_INVALIDOS`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO` |
 | `GET /api/reservas/{id}/` | Gestor; Solicitante só a própria | 200 | 404 `RESERVA_NAO_ENCONTRADA` |
-| `PATCH /api/reservas/{id}/situacao/` | Gestor; Solicitante só cancela a própria | 200 | 400 `MOTIVO_OBRIGATORIO`, `SITUACAO_INVALIDA`, `DADOS_INVALIDOS`; 403 `ACAO_NAO_PERMITIDA`; 404; 409 `TRANSICAO_DE_SITUACAO_INVALIDA`, `RESERVA_DESATUALIZADA` |
+| `PATCH /api/reservas/{id}/situacao/` | Gestor; Solicitante só cancela a própria | 200 | 400 `MOTIVO_OBRIGATORIO`, `SITUACAO_INVALIDA`, `DADOS_INVALIDOS`; 403 `ACAO_NAO_PERMITIDA`; 404; 409 `TRANSICAO_DE_SITUACAO_INVALIDA`, `CONCLUSAO_ANTES_DO_TERMINO`, `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO`, `RESERVA_DESATUALIZADA` |
 | `GET /api/reservas/{id}/historico/` | Gestor; Solicitante só a própria | 200 | 404 `RESERVA_NAO_ENCONTRADA` |
 
 Sem token, todas as rotas (menos `situacoes/` e `regras-de-agenda/`) respondem **401** `NAO_AUTENTICADO`. Não há exclusão: `DELETE` na reserva e no histórico responde **405** `METODO_NAO_PERMITIDO`.
@@ -218,6 +218,22 @@ Um Solicitante que tenta confirmar, recusar ou concluir recebe **403**, mesmo qu
 ```
 
 Mudar a situação da reserva de outra pessoa responde **404** `RESERVA_NAO_ENCONTRADA`, como no detalhe.
+
+### Janela de horário do Gestor
+
+O Gestor só **conclui** uma reserva a partir do término dela (`agora >= término`) e só **recusa ou cancela** antes do início (`agora < início`; no instante exato do início já é tarde). Confirmar, o cancelamento pelo Solicitante e uma Solicitada que ninguém decidiu não dependem do horário. A regra é uma só (`momento_permite`, em `domain/situacao.py`) e decide as duas coisas: o que `acoes_disponiveis` oferece e o que `PATCH .../situacao/` aceita. A API lê o relógio **uma vez por requisição**, então todas as reservas de uma lista são calculadas no mesmo instante. A comparação é entre instantes com fuso, no horário de Brasília.
+
+A ordem das verificações do `PATCH` é: reserva visível → situação conhecida → perfil (403) → transição da tabela (409) → **momento (409)** → motivo (400). Fora da janela, a resposta é **409**, o mesmo status das outras mudanças que contradizem o estado da reserva (o 403 fica para falta de permissão), e a reserva não muda:
+
+| Pedido do Gestor | Código | Mensagem |
+|---|---|---|
+| Concluir antes do término | `CONCLUSAO_ANTES_DO_TERMINO` | "Só é possível concluir a reserva a partir do término dela (10/11/2026 às 11:00)." |
+| Recusar a partir do início | `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO` | "Só é possível recusar a reserva antes do início dela (10/11/2026 às 10:00)." |
+| Cancelar a partir do início | `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO` | "Só é possível cancelar a reserva antes do início dela (10/11/2026 às 10:00)." |
+
+```json
+{"erro": {"codigo": "CONCLUSAO_ANTES_DO_TERMINO", "mensagem": "Só é possível concluir a reserva a partir do término dela (10/11/2026 às 11:00)."}}
+```
 
 Confirmar a reserva (com o token de um Gestor):
 

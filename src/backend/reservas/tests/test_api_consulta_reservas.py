@@ -126,7 +126,7 @@ def _ids_esperados(massa, nomes):
 def _retrato_das_reservas():
     reservas = todas_as_reservas(RepositorioReservasDjango())
     return ReservaSaidaSerializer(
-        reservas, many=True, context={"ator": ATOR_GESTOR}
+        reservas, many=True, context={"ator": ATOR_GESTOR, "agora": timezone.now()}
     ).data
 
 

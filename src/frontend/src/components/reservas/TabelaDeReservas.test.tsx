@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
@@ -76,6 +76,24 @@ describe('TabelaDeReservas', () => {
 
     expect(screen.getByRole('columnheader', { name: 'Ações' })).toBeTruthy()
     expect(botoesDaLinha('10:00–11:00')).toEqual(['Confirmar', 'Recusar'])
+  })
+
+  it('os botões não dependem da data do navegador: só da lista da API (RES-11)', () => {
+    vi.useFakeTimers()
+    try {
+      vi.setSystemTime(new Date('2020-01-01T00:00:00-03:00'))
+      renderizar([SOLICITADA])
+      const noPassado = botoesDaLinha('Treino de vôlei')
+      cleanup()
+
+      vi.setSystemTime(new Date('2030-12-31T23:59:59-03:00'))
+      renderizar([SOLICITADA])
+
+      expect(botoesDaLinha('Treino de vôlei')).toEqual(noPassado)
+      expect(noPassado).toEqual(['Confirmar', 'Recusar'])
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('não tem tabela própria: renderiza até uma ação que o frontend não conhece', () => {

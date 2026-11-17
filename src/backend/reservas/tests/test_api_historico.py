@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
 import pytest
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from reservas.domain.intervalo_de_horario import FUSO_HORARIO
 from reservas.tests.historico import verificar_historico_coerente
 
 pytestmark = pytest.mark.django_db
@@ -12,6 +13,11 @@ pytestmark = pytest.mark.django_db
 URL_RESERVAS = reverse("reservas:lista")
 ID_INEXISTENTE = 9999
 MOTIVO = "Chuva forte"
+
+
+def _depois_do_termino():
+    amanha = timezone.localdate() + timedelta(days=1)
+    return datetime.combine(amanha, time(12, 0), FUSO_HORARIO)
 
 
 def _url_historico(reserva_id):
@@ -47,10 +53,11 @@ def _historico(cliente, reserva_id):
 
 
 def test_fluxo_completo_aparece_no_historico_em_ordem(
-    cliente_solicitante, cliente_gestor, reserva_id
+    cliente_solicitante, cliente_gestor, reserva_id, relogio_da_api
 ):
     # Arrange
     _alterar(cliente_gestor, reserva_id, {"situacao": "CONFIRMADA"})
+    relogio_da_api(_depois_do_termino())
     _alterar(cliente_gestor, reserva_id, {"situacao": "CONCLUIDA"})
 
     # Act

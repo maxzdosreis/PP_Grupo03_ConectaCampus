@@ -55,7 +55,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-19](../requisitos/rf-reservas.md#rf-19)
 - **TA:** [TA-170](#ta-170)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; concluir só vale a partir do término: ver a Situação abaixo)
-- **Situação:** substituído por [CA-02](#us-16-ca-02), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa RES-11; não valem como prova da regra nova.
+- **Situação:** substituído por [CA-02](#us-16-ca-02), pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código cumpria até a tarefa RES-11 (implementada em 16/11/2026); o texto fica como registro da regra anterior e o TA dele passou a fixar o comportamento no momento certo. Vale a regra do CA que o substitui.
 
 #### <a id="us-16-ca-02"></a>US-16 · CA-02 · Uso concluído a partir do término (sucesso)
 
@@ -66,7 +66,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-19](../requisitos/rf-reservas.md#rf-19)
 - **TA:** [TA-171](#ta-171)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-16-ca-03"></a>US-16 · CA-03 · Motivo opcional ao concluir (alternativa)
 
@@ -86,7 +85,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-16](../requisitos/rf-reservas.md#rf-16), [RF-19](../requisitos/rf-reservas.md#rf-19)
 - **TA:** [TA-173](#ta-173)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-16-ca-05"></a>US-16 · CA-05 · Nada mais a fazer numa reserva concluída (exceção)
 
@@ -116,7 +114,6 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 - **RF:** [RF-24.1](../requisitos/rf-reservas.md#rf-24-1)
 - **TA:** [TA-176](#ta-176)
 - **Depende de:** [DEC-13](../decisoes/DEC-13.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa RES-11)
 
 #### <a id="us-16-ca-08"></a>US-16 · CA-08 · Ciclo completo no histórico (registro)
 
@@ -145,11 +142,11 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
 | <a id="ta-170"></a>TA-170 | [CA-01](#us-16-ca-01) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_alterar_situacao.py::test_ciclo_solicitada_confirmada_concluida`; `reservas/tests/test_conflito_de_horario.py::test_sobreposicao_com_reserva_que_nao_ocupa_horario_e_aceita [x]` |
-| <a id="ta-171"></a>TA-171 | [CA-02](#us-16-ca-02) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-02](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-171"></a>TA-171 | [CA-02](#us-16-ca-02) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_concluir_no_instante_do_termino_funciona`; `reservas/tests/test_momento_da_mudanca.py::test_alteracao_segue_a_regra_do_momento_da_dec_13 [x]`; `reservas/tests/test_api_situacao_reserva.py::test_fluxo_da_demonstracao_ate_concluida` |
 | <a id="ta-172"></a>TA-172 | [CA-03](#us-16-ca-03) | automatizado | `reservas/tests/test_reserva.py::test_nova_situacao_limpa_o_motivo_da_anterior`; `reservas/tests/test_propriedades_da_reserva.py::TestMaquinaDaReserva` |
-| <a id="ta-173"></a>TA-173 | [CA-04](#us-16-ca-04) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-05](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-173"></a>TA-173 | [CA-04](#us-16-ca-04) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_acoes_do_gestor_acompanham_a_janela_da_reserva`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_confirmada_depois_do_termino_traz_so_concluir`; `reservas/tests/test_momento_da_mudanca.py::test_tabela_situacao_acao_momento_do_gestor`; `reservas/tests/test_momento_da_mudanca.py::test_acoes_oferecidas_coincidem_com_o_que_a_alteracao_aceita [x]`; `reservas/tests/test_propriedades_do_momento.py::test_gestor_so_conclui_se_agora_e_no_minimo_o_termino` |
 | <a id="ta-174"></a>TA-174 | [CA-05](#us-16-ca-05) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_traz_acoes`; `reservas/tests/test_api_situacao_reserva.py::test_reserva_concluida_nao_pode_ser_cancelada`; `reservas/tests/test_api_permissoes.py::test_solicitante_numa_concluida_nao_tem_acoes` |
 | <a id="ta-175"></a>TA-175 | [CA-06](#us-16-ca-06) | automatizado | `reservas/tests/test_api_situacao_reserva.py::test_transicao_proibida_responde_409_e_preserva_a_reserva`; `reservas/tests/test_reserva.py::test_transicao_proibida_e_recusada_e_preserva_a_situacao [x]` |
-| <a id="ta-176"></a>TA-176 | [CA-07](#us-16-ca-07) | pendente | implementação pendente (tarefa RES-11) — TA a criar junto com o código ([CR-01 · CA-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md#5-critérios-de-aceite)). |
+| <a id="ta-176"></a>TA-176 | [CA-07](#us-16-ca-07) | automatizado | `reservas/tests/test_api_momento_da_mudanca.py::test_concluir_antes_do_termino_responde_409_com_codigo_proprio`; `reservas/tests/test_momento_da_mudanca.py::test_mensagem_de_concluir_antes_do_termino_informa_data_e_hora_do_termino`; `reservas/tests/test_alterar_situacao.py::test_concluir_antes_do_termino_lanca_erro_do_dominio_e_preserva_a_reserva`; `reservas/tests/test_propriedades_do_momento.py::test_gestor_so_conclui_se_agora_e_no_minimo_o_termino` |
 | <a id="ta-177"></a>TA-177 | [CA-08](#us-16-ca-08) | automatizado | `reservas/tests/test_api_historico.py::test_fluxo_completo_aparece_no_historico_em_ordem`; `exemplos/tests/test_carregar_dados_exemplo.py::test_concluida_passou_por_solicitada_e_confirmada_em_dias_diferentes`; `reservas/tests/test_reserva.py::test_alteracao_recusada_nao_muda_nada_nem_registra [x]` |
 | <a id="ta-178"></a>TA-178 | [CA-09](#us-16-ca-09) | automatizado | `reservas/tests/test_permissoes_reserva.py::test_solicitante_concluindo_uma_solicitada_recebe_403_e_nao_409` |

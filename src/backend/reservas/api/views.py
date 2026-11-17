@@ -36,7 +36,7 @@ class ReservasView(APIView):
                 um="1 reserva encontrada.",
                 varios="{total} reservas encontradas.",
             ),
-            _saida(pagina.itens, ator, many=True),
+            _saida(pagina.itens, ator, dependencias.agora(), many=True),
             paginacao=PaginacaoSaidaSerializer(pagina).data,
         )
 
@@ -48,7 +48,7 @@ class ReservasView(APIView):
         )
         return resposta_sucesso(
             "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.",
-            _saida(reserva, ator_autenticado(request)),
+            _saida(reserva, ator_autenticado(request), dependencias.agora()),
             status=status.HTTP_201_CREATED,
         )
 
@@ -57,7 +57,9 @@ class ReservaDetalheView(APIView):
     def get(self, request, reserva_id):
         ator = ator_autenticado(request)
         reserva = dependencias.obter_reserva().executar(reserva_id, ator=ator)
-        return resposta_sucesso("Reserva encontrada.", _saida(reserva, ator))
+        return resposta_sucesso(
+            "Reserva encontrada.", _saida(reserva, ator, dependencias.agora())
+        )
 
 
 class ReservaSituacaoView(APIView):
@@ -65,7 +67,8 @@ class ReservaSituacaoView(APIView):
         ator = ator_autenticado(request)
         entrada = AlteracaoDeSituacaoSerializer(data=request.data)
         entrada.is_valid(raise_exception=True)
-        reserva = dependencias.alterar_situacao_reserva().executar(
+        agora = dependencias.agora()
+        reserva = dependencias.alterar_situacao_reserva(lambda: agora).executar(
             reserva_id=reserva_id,
             nova_situacao=entrada.validated_data["situacao"],
             motivo=entrada.validated_data.get("motivo"),
@@ -73,7 +76,7 @@ class ReservaSituacaoView(APIView):
         )
         return resposta_sucesso(
             f"Reserva {reserva.situacao.rotulo.lower()} com sucesso.",
-            _saida(reserva, ator),
+            _saida(reserva, ator, agora),
         )
 
 
@@ -127,5 +130,6 @@ class RegrasDeAgendaView(APIView):
         )
 
 
-def _saida(reservas, ator, *, many=False):
-    return ReservaSaidaSerializer(reservas, many=many, context={"ator": ator}).data
+def _saida(reservas, ator, agora, *, many=False):
+    contexto = {"ator": ator, "agora": agora}
+    return ReservaSaidaSerializer(reservas, many=many, context=contexto).data
