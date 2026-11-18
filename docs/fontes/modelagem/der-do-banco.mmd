@@ -1,0 +1,45 @@
+%% Gerado por scripts/gerar_der.py a partir dos models do Django (DOC-10). NÃO edite à mão:
+%% mudou um model ou uma migração -> gere de novo e rode scripts/verificar_der.py.
+%% FK real = linha contínua; referência por id, sem FK, entre contextos = linha pontilhada.
+erDiagram
+    direction LR
+    espacos_espaco_esportivo ||..o{ reservas_reserva : "espaco_id: ref. por id, sem FK"
+    contas_usuario ||..o{ reservas_reserva : "solicitante_usuario_id: ref. por id, sem FK"
+    reservas_reserva ||--o{ reservas_registro_de_situacao : "reserva_id"
+    contas_usuario ||..o{ reservas_registro_de_situacao : "autor_usuario_id: ref. por id, sem FK"
+    contas_usuario {
+        bigint id PK
+        boolean is_active
+        varchar nome
+        varchar matricula UK
+        varchar email UK
+        varchar perfil
+    }
+    espacos_espaco_esportivo {
+        bigint id PK
+        varchar nome UK
+        varchar tipo "ck"
+        integer capacidade "ck"
+        boolean ativo
+        smallint abertura_em_minutos "ck"
+        smallint fechamento_em_minutos "ck"
+    }
+    reservas_reserva {
+        bigint id PK
+        bigint espaco_id "ref. por id, ex"
+        bigint solicitante_usuario_id "ref. por id"
+        timestamptz inicio "ck, ex"
+        timestamptz fim "ck, ex"
+        varchar situacao "ck, ex"
+        varchar motivo_da_situacao "ck"
+    }
+    reservas_registro_de_situacao {
+        bigint id PK
+        bigint reserva_id FK
+        varchar situacao_anterior "ck"
+        varchar situacao_nova "ck"
+        bigint autor_usuario_id "ref. por id"
+        varchar resultado "ck"
+        varchar codigo_do_erro "ck"
+        varchar situacao_pedida "ck"
+    }
