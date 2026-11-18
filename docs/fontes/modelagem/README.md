@@ -20,6 +20,7 @@
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | Serviço `redis` (AUT-08): Figura 1, seção 1, componentes, relações e relações sem import; evidência seta → import gerada de novo. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Relação `contas.api` → `redis`: a contagem de tentativas é um script atômico no Redis (AUT-08, achado da revisão do PR). |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RES-12 (CR-02): Figura 3 com `ResultadoDoRegistro` e os campos novos do `RegistroDeSituacao` e o método `Reserva.registrar_tentativa_recusada`; Figura 6 com o caminho "tenta mudar → recusa → registra → relança" (o caminho feliz passa a vir primeiro, por causa da ordem das chamadas no código); imagens geradas de novo. Sem aprovação. |
+| 0.1 | 18/11/2026 | Max Zimmermann dos Reis | DOC-10: Figura 7 (DER do banco, `erDiagram`) gerada dos models por `scripts/gerar_der.py`, tabela de restrições gerada e verificação `scripts/verificar_der.py`; decisões do DER e decisão sobre o PDF. Sem aprovação. |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -36,6 +37,8 @@ Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, 
 | [`03-fluxo-principal.md`](03-fluxo-principal.md) | Texto da seção 3 do PDF (DOC-03) |
 | [`solicitar-reserva.mmd`](solicitar-reserva.mmd) | Fonte da Figura 5 (solicitar uma reserva, `sequenceDiagram`) |
 | [`confirmar-reserva.mmd`](confirmar-reserva.mmd) | Fonte da Figura 6 (confirmar a reserva, `sequenceDiagram`) |
+| [`05-der-do-banco.md`](05-der-do-banco.md) | Texto do DER (DOC-10) e a tabela de restrições, **gerada** entre os marcadores `<!-- der:restricoes:... -->` |
+| [`der-do-banco.mmd`](der-do-banco.mmd) | Fonte da Figura 7 (DER, `erDiagram`), **gerado** dos models; não edite à mão |
 | `*.svg`, `*.png` | **Gerados** a partir dos `.mmd`; nunca editados à mão |
 | [`configuracao-mermaid.json`](configuracao-mermaid.json) | Tema, fonte e espaçamento comuns a todas as figuras do PDF |
 
@@ -47,6 +50,7 @@ Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, 
 | 2. Modelo do domínio (classes; estados da reserva) | DOC-02 | `02-modelo-do-dominio.md` | ≤ 1,5 página (medida: ~1,49; ver Pendências) |
 | 3. Fluxo principal (da solicitação à mudança de situação, com uma rejeição) | DOC-03 | `03-fluxo-principal.md` | ≤ 1,5 página, alvo 1,4 (medida: ~1,37; ver Pendências) |
 | 4. Decisões técnicas (Django/DRF, React, PostgreSQL, Docker, JWT, pastas) | DOC-04 | `04-decisoes-tecnicas.md` | ≤ 1 página |
+| DER do banco (Figura 7) | DOC-10 | `05-der-do-banco.md` | ~0,85 página (figura de 6,4 cm, texto e tabela de 13 restrições). **Incluído no PDF por decisão do grupo (18/11/2026): passar de 6 páginas por causa da imagem é aceitável.** Total estimado: 4,59 + 1 + ~0,85 ≈ 6,4 páginas, sem a capa |
 | Folga (quebras de página) | — | — | 0,5 página no plano; pela medida atual das seções 1 a 3 (4,59 páginas), sobram 1,41 página: 1 para a seção 4 e **0,41** para as quebras. A capa não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md)) |
 
 A montagem do `docs/modelagem.pdf` a partir desses arquivos é da DOC-04. As figuras entram no PDF pelo `.png`, na largura da área útil (16 cm numa A4 com margens de 2,5 cm).
@@ -168,6 +172,22 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd)/docs/fontes/modelagem:/data" minla
 MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd)/docs/fontes/modelagem:/data" minlag/mermaid-cli:12.0.0 -c configuracao-mermaid.json -i confirmar-reserva.mmd -o confirmar-reserva.png -s 3 -b white
 ```
 
+Seção 5 (Figura 7, o DER; o `.mmd` é gerado dos models pelo container do backend, a partir de `src/`):
+
+```bash
+docker compose exec -T backend python - --mmd < ../scripts/gerar_der.py > ../docs/fontes/modelagem/der-do-banco.mmd
+```
+
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd)/docs/fontes/modelagem:/data" minlag/mermaid-cli:12.0.0 -c configuracao-mermaid.json -i der-do-banco.mmd -o der-do-banco.svg -b white
+```
+
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd)/docs/fontes/modelagem:/data" minlag/mermaid-cli:12.0.0 -c configuracao-mermaid.json -i der-do-banco.mmd -o der-do-banco.png -s 3 -b white
+```
+
+A tabela de restrições vem do mesmo comando com `--restricoes` no lugar de `--mmd` e é colada entre os marcadores de `05-der-do-banco.md`. No PowerShell, use `Get-Content ..\scripts\gerar_der.py -Raw | docker compose exec -T backend python - --mmd` e `${PWD}` nos `docker run`.
+
 PowerShell (os mesmos doze comandos, com `${PWD}` e sem `MSYS_NO_PATHCONV`):
 
 ```powershell
@@ -201,6 +221,10 @@ python scripts/verificar_modelo_do_dominio.py
 
 ```bash
 python scripts/verificar_fluxo_principal.py
+```
+
+```bash
+python scripts/verificar_der.py
 ```
 
 O script falha quando: uma seta "depende de" não tem import real nem `sem-import` com trecho achado; uma seta "implementa" não tem classe que herde uma porta do destino; uma seta de rede não tem `sem-import`; um import entre módulos mapeados não tem seta (fora de `EXCECOES`); um módulo com imports não está em nenhum nó nem em `IGNORADOS`; um nó aponta para módulo, caminho ou serviço inexistente; a imagem do serviço difere do `docker-compose.yml`; um serviço do compose não aparece; um contrato citado (nas figuras ou como contrato \`Nome\` no texto) não existe no `pyproject.toml`, ou um contrato do `pyproject.toml` não aparece; um teste citado não existe; um import de `somente` está em outro arquivo. Avisa (sem falhar) quando um `.svg` ou `.png` é mais antigo que o `.mmd`. No fim, imprime a tabela "seta → import que a sustenta".
@@ -260,6 +284,31 @@ Em cópias dos `.mmd` e do README fora do repositório (`--pasta`), sem tocar no
 | (iii) Figura 6: "o papel pode → 403" depois de "transição permitida → 409" na nota | `a nota põe ACAO_NAO_PERMITIDA depois de TRANSICAO_DE_SITUACAO_INVALIDA, mas o código lança ACAO_NAO_PERMITIDA antes (reservas/domain/reserva.py:226); ordem real: DADOS_INVALIDOS → RESERVA_NAO_ENCONTRADA → CAMPO_OBRIGATORIO_AUSENTE → SITUACAO_INVALIDA → ACAO_NAO_PERMITIDA → TRANSICAO_DE_SITUACAO_INVALIDA → TEXTO_MUITO_LONGO → MOTIVO_OBRIGATORIO → RESERVA_DESATUALIZADA → …` |
 
 Nos quatro casos o script sai com código 1.
+
+## Decisões do DER (Figura 7, DOC-10)
+
+- <a id="decisao-der-a"></a>**a) Gerado, nunca desenhado.** [`scripts/gerar_der.py`](../../../scripts/gerar_der.py) roda dentro do container do backend, faz `django.setup()` e lê `apps.get_models()` por introspecção (tabela, colunas, tipos, PK, FK, `unique`, `CheckConstraint`, `UniqueConstraint`, `ExclusionConstraint`); nenhum arquivo de model é lido como texto. O `.mmd` é versionado e renderizado como as outras figuras (Mermaid 12.0.0 via Docker).
+- <a id="decisao-der-b"></a>**b) Escopo:** as quatro tabelas dos contextos (`contas_usuario`, `espacos_espaco_esportivo`, `reservas_reserva`, `reservas_registro_de_situacao`). `exemplos` e `compartilhado` não têm models. As tabelas de framework (`django_*`, `auth_*`, sessões, administração, `token_blacklist_*`) ficam de fora, com uma nota no texto. O `Usuario` é o modelo próprio (`AUTH_USER_MODEL`), então entra; as tabelas M2M que ele herda do Django (`groups`, `user_permissions`) são de `auth_*` e ficam de fora.
+- <a id="decisao-der-c"></a>**c) Colunas essenciais:** a configuração é `COLUNAS_DE_NEGOCIO` no gerador, e ele soma sozinho a PK, as FKs, as referências por id e toda coluna de qualquer restrição. O resto (auditoria e texto livre, como `finalidade`, `solicitante_nome`, `criada_em` e `registrado_em`) fica fora, e o texto diz. O gerador falha se uma coluna da configuração não existir no model.
+- <a id="decisao-der-d"></a>**d) Relações:** FK real = linha contínua com o nome da coluna (`reserva_id`); referência por id sem FK = pontilhada, "`coluna`: ref. por id, sem FK". O gerador decide pelo tipo do campo (`ForeignKey` × `BigIntegerField` chamado `*_id`) e exige que toda coluna `BigIntegerField` `*_id` esteja em `REFERENCIAS_POR_ID`, com o destino declarado (o banco não o guarda), e vice-versa. A única `ForeignKey` do projeto é `RegistroDeSituacaoModel.reserva`, como diz a decisão d da seção 2.
+- <a id="decisao-der-e"></a>**e) Restrições:** o `erDiagram` não tem sintaxe para elas. O desenho leva PK, FK, UK e o comentário `ck` (check) ou `ex` (exclusão), e a tabela completa (definição lida do model e nome da constraint) é gerada pelo mesmo script e colada no `05-der-do-banco.md`. Como o `erDiagram` não tem nota, a legenda fica no texto, e não dentro da figura (exceção à decisão e da seção 1).
+- <a id="decisao-der-f"></a>**f) Legibilidade:** no máximo 6 entidades e 8 colunas por entidade; o gerador falha se passar disso. Com `direction LR` a figura mede 2352 × 939 px (16 × 6,4 cm a 16 cm de largura); na vertical media 2352 × 3756 px (25,6 cm, uma página inteira).
+- <a id="decisao-der-g"></a>**g) Verificação** por [`scripts/verificar_der.py`](../../../scripts/verificar_der.py) (host, sem rede; chama o gerador no container, que precisa estar no ar): (a) deriva byte a byte do `.mmd` e da tabela; (b) tabelas e colunas do desenho existem nos models, com tipo compatível; (c) toda FK é relação sólida, nenhuma sólida existe sem FK, e as pontilhadas são `BigIntegerField` sem FK; (d) toda restrição dos models está na tabela e vice-versa; (e) colunas obrigatórias presentes; (f) as imagens existem (aviso, sem falhar, se forem mais antigas que o `.mmd`). `--pasta` e `--gerado ARQUIVO.json` servem para provar, em cópias, que ele pega erro.
+- <a id="decisao-der-h"></a>**h) PDF:** **DER incluído no `modelagem.pdf`** (decisão do grupo, 18/11/2026). Ele ocupa ~0,85 página, acima da folga de 0,41, então o PDF passa de 6 páginas (estimativa ~6,4, sem a capa); o grupo aceitou o excesso por causa da imagem. As Figuras 1 a 6 e os textos das seções 1 a 3 não foram cortados. A posição na ordem do PDF é da DOC-04. A estimativa segue o método das Pendências (A4, margens de 2,5 cm, texto 11 pt, tabelas 9 pt, figura a 16 cm); a medida real fica para a DOC-04.
+
+### Prova de que a verificação pega erro (DER)
+
+Em cópias da pasta fora do repositório (`--pasta`), sem tocar nos originais:
+
+| Alteração | Saída do script |
+|---|---|
+| `varchar nome UK` → `integer nome UK` no `.mmd` | `der-do-banco.mmd difere do que o gerador produz…`; `espacos_espaco_esportivo.nome: o desenho diz integer, o model dá varchar(100)` |
+| Linha de `reservas_reserva_fim_apos_inicio` tirada da tabela | `a tabela de restrições … difere da gerada`; `restrição do model sem linha na tabela: reservas_reserva: fim > inicio` |
+| A FK `reserva_id` desenhada como pontilhada | `a ForeignKey reservas_registro_de_situacao.reserva_id → reservas_reserva não é relação sólida no desenho` |
+| `situacao_pedida` tirada do desenho | `reservas_registro_de_situacao.situacao_pedida é obrigatória no desenho (PK, FK, referência por id ou restrição)` |
+| Estrutura dos models com um check novo (`--gerado`) | `restrição do model sem linha na tabela: reservas_reserva: finalidade ≠ ""` |
+
+Nos cinco casos o script sai com código 1.
 
 ## Passo → código → teste (seção 3, fora do PDF)
 
