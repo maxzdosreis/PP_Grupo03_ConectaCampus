@@ -105,7 +105,7 @@ def test_listar_desempata_nomes_iguais_pelo_id(repositorio):
                 f"copia{numero}@exemplo.com",
                 SENHA,
                 nome=ANA,
-                matricula=f"Z{numero}",
+                matricula=f"6{numero:06d}",
             )
 
     # Act

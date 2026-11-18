@@ -4,7 +4,7 @@
 |---|---|
 | **CR-04 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha (aprovador da fonte oficial) |
 
-Pedido de mudança aberto a partir da resposta do professor à [DEC-09](../decisoes/DEC-09.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa AUT-12)\". O **código não mudou**: quem o muda é a tarefa **AUT-12**, que também cria os testes de aceite e marca o CR como implementado.
+Pedido de mudança aberto a partir da resposta do professor à [DEC-09](../decisoes/DEC-09.md) na Aula 7 (06/11/2026), no [modelo de CR](modelo-cr.md). Este CR foi **aplicado na especificação em 10/11/2026 (REQ-13)** (seção 8): os RF, UC, CA e TA já trazem a regra nova, com a marca \"implementação pendente (tarefa AUT-12)\". O código e os testes de aceite foram feitos pela tarefa **AUT-12** em 17/11/2026 (seção 9): o CR está **implementado**.
 
 ## Histórico de revisões
 
@@ -12,6 +12,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-09](../decis
 |---|---|---|---|
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Abertura a partir da DEC-09 decidida na Aula 7 (GES-02). Aprovado pelo professor, aguardando implementação na AUT-12. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Aplicado na especificação (REQ-13): RF, RN, UC, histórias, CAs e TAs com a regra nova, listados na [seção 8](#8-aplicação-na-especificação-req-13). Estado: aplicado na especificação; código pendente (tarefa AUT-12). A especificação está adiante do código de propósito, e cada CA novo leva a marca "implementação pendente (tarefa AUT-12)". Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementado na tarefa AUT-12 (seção 9): `_validar_matricula` e `MatriculaInvalida` com a regra e as mensagens novas, testes, TAs, dados de exemplo (sem mudança) e README. Estado: Implementado. Sem aprovação. |
 
 ## 1. Solicitação
 
@@ -20,7 +21,7 @@ Pedido de mudança aberto a partir da resposta do professor à [DEC-09](../decis
 | **Motivo** | Resposta do professor à [DEC-09](../decisoes/DEC-09.md) na Aula 7 (06/11/2026): "São números sempre, mas não tem uma quantidade máxima e uma quantidade mínima." Decisão do grupo, nos pontos que a resposta não cobriu: só dígitos; o limite de 20 caracteres fica como limite técnico (coluna do banco), não como regra da instituição. |
 | **Solicitante** | O professor, como representante do cliente. |
 | **Responsável** | O grupo. |
-| **Estado** | **Aplicado na especificação; código pendente (tarefa AUT-12)** (10/11/2026, REQ-13). |
+| **Estado** | **Implementado** (17/11/2026, tarefa AUT-12); aplicado na especificação em 10/11/2026 (REQ-13). |
 | **Origem** | [DEC-09](../decisoes/DEC-09.md) e lacuna [L-06](../requisitos/srs.md#l-06). |
 | **Baseline vigente** | Nenhuma aprovada: a [candidata à 1.0](../baselines/conecta-campus-1.0-candidata.md) continua candidata (aprovação na REQ-07). |
 | **Tarefa que implementa** | AUT-12 |
@@ -74,10 +75,10 @@ Trechos atuais e propostos. O texto proposto é a referência para a AUT-12; a r
 | [RF-32.1](../requisitos/rf-contas.md#rf-32-1), enunciado | O sistema deve impedir que o visitante se cadastre sem nome, matrícula, e-mail ou senha, com nome de mais de 150 caracteres, com matrícula de mais de 20 caracteres ou com espaço no meio, ou com e-mail em formato inválido, sem criar a conta, e informar a regra violada no campo correspondente. | O sistema deve impedir que o visitante se cadastre sem nome, matrícula, e-mail ou senha, com nome de mais de 150 caracteres, com matrícula **que não seja formada só por dígitos ou de mais de 20 caracteres (limite técnico)**, ou com e-mail em formato inválido, sem criar a conta, e informar a regra violada no campo correspondente. |
 | [UC-01 E3.1](../casos-de-uso/fichas-resumidas.md#uc01-e3-1), condição | Falta um dado; o nome só tem espaços ou passa de 150 caracteres; a matrícula passa de 20 caracteres ou tem espaço; o e-mail está mal formado. | Falta um dado; o nome só tem espaços ou passa de 150 caracteres; a matrícula **tem um caractere que não é dígito** ou passa de 20 caracteres (limite técnico); o e-mail está mal formado. |
 
-**A definir na AUT-12, sem mudar a decisão:**
+**Definido na AUT-12, sem mudar a decisão (seção 9):**
 
-- Se os espaços das pontas continuam sendo removidos antes da conferência (hoje são).
-- O texto da mensagem de `MatriculaInvalida`.
+- Os espaços das pontas continuam sendo removidos antes da conferência.
+- O texto da mensagem de `MatriculaInvalida`: duas mensagens, com o mesmo código.
 
 ## 5. Critérios de aceite
 
@@ -128,7 +129,7 @@ Novos ou alterados, em Dado/Quando/Então ([DEC-15](../decisoes/DEC-15.md)). Ent
 
 ## 8. Aplicação na especificação (REQ-13)
 
-Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a especificação está adiante do código de propósito, e cada critério abaixo leva a marca "implementação pendente (tarefa AUT-12)" até a tarefa AUT-12 implementar a regra e criar o teste de aceite dele. Os testes que existem hoje verificam a regra anterior, e nenhum TA novo cita um deles.
+Aplicado na especificação em 10/11/2026 (REQ-13), com a regra adiante do código. A tarefa AUT-12 implementou a regra em 17/11/2026 (seção 9): a marca de pendência dos critérios abaixo saiu, e cada TA cita testes que existem.
 
 **O que mudou:**
 
@@ -138,18 +139,41 @@ Aplicado na especificação em 10/11/2026. **O código ainda não mudou**: a esp
 - US/CA/TA: [US-01](../historias/US-01-criar-minha-conta.md) (Conversa, INVEST, CAs e TAs).
 - Documentos: [glossário](../glossario.md) (matrícula), [Visão](../visao.md) (P-02, R-12), [SRS](../requisitos/srs.md) (auditoria e lacuna L-06).
 
-**CAs novos (4, todos com a marca "implementação pendente (tarefa AUT-12)")**
+**CAs novos (4, todos implementados na AUT-12)**
 
 | CA | Título | Tipo | TA | Pedido do CR | Implementação |
 |---|---|---|---|---|---|
-| [US-01 · CA-02](../historias/US-01-criar-minha-conta.md#us-01-ca-02) | Matrícula só de dígitos aceita | sucesso | [TA-02](../historias/US-01-criar-minha-conta.md#ta-02) | CR-04 · CA-02 | implementação pendente (tarefa AUT-12) |
-| [US-01 · CA-03](../historias/US-01-criar-minha-conta.md#us-01-ca-03) | Matrícula sem quantidade mínima | sucesso | [TA-03](../historias/US-01-criar-minha-conta.md#ta-03) | CR-04 · CA-03 | implementação pendente (tarefa AUT-12) |
-| [US-01 · CA-06](../historias/US-01-criar-minha-conta.md#us-01-ca-06) | Matrícula com letra recusada | exceção | [TA-06](../historias/US-01-criar-minha-conta.md#ta-06) | CR-04 · CA-01 | implementação pendente (tarefa AUT-12) |
-| [US-01 · CA-07](../historias/US-01-criar-minha-conta.md#us-01-ca-07) | Limite técnico da matrícula mantido | exceção | [TA-07](../historias/US-01-criar-minha-conta.md#ta-07) | CR-04 · CA-04 | implementação pendente (tarefa AUT-12) |
+| [US-01 · CA-02](../historias/US-01-criar-minha-conta.md#us-01-ca-02) | Matrícula só de dígitos aceita | sucesso | [TA-02](../historias/US-01-criar-minha-conta.md#ta-02) | CR-04 · CA-02 | implementado (AUT-12) |
+| [US-01 · CA-03](../historias/US-01-criar-minha-conta.md#us-01-ca-03) | Matrícula sem quantidade mínima | sucesso | [TA-03](../historias/US-01-criar-minha-conta.md#ta-03) | CR-04 · CA-03 | implementado (AUT-12) |
+| [US-01 · CA-06](../historias/US-01-criar-minha-conta.md#us-01-ca-06) | Matrícula com letra recusada | exceção | [TA-06](../historias/US-01-criar-minha-conta.md#ta-06) | CR-04 · CA-01 | implementado (AUT-12) |
+| [US-01 · CA-07](../historias/US-01-criar-minha-conta.md#us-01-ca-07) | Limite técnico da matrícula mantido | exceção | [TA-07](../historias/US-01-criar-minha-conta.md#ta-07) | CR-04 · CA-04 | implementado (AUT-12) |
 
-**CAs antigos marcados:** [US-01 · CA-05](../historias/US-01-criar-minha-conta.md#us-01-ca-05) (substituído em parte). O texto e o TA deles ficam como estavam, com a linha Situação apontando para o CA novo: descrevem a regra anterior, que o código cumpre até a tarefa AUT-12.
+**CAs antigos marcados:** [US-01 · CA-05](../historias/US-01-criar-minha-conta.md#us-01-ca-05) (substituído em parte). Na AUT-12, o texto do CA-05 e o TA-05 passaram a descrever a regra nova, e a Situação saiu.
 
-**Pontos que ficam abertos para a tarefa AUT-12 (nada foi decidido aqui):**
+**Pontos que ficaram para a tarefa AUT-12 (decididos na seção 9):**
 
 - Se os espaços das pontas continuam sendo removidos antes da conferência (hoje são).
 - O texto da mensagem de matrícula inválida (o CR só diz que informa, junto à matrícula, que ela deve ter só dígitos) e se há código de erro próprio.
+
+## 9. Implementação (AUT-12)
+
+Implementado em 17/11/2026. As decisões que a seção 8 deixou para a tarefa, e as que a implementação trouxe:
+
+| Ponto | Decisão |
+|---|---|
+| Regra | `_validar_matricula` (`contas/domain/cadastro.py`) aceita só os dígitos `0` a `9` (`re.fullmatch(r"[0-9]+")`), sem quantidade mínima: um dígito basta. Não usa `isdigit()` nem `\d`, que aceitam dígitos de outros alfabetos ("٣٤٥", "１２３", "²", "①"). A matrícula nunca vira número: zeros à esquerda são significativos ("00123" não é "123"), e o valor é guardado e devolvido como texto. |
+| Espaços das pontas | **Continuam sendo removidos** antes da conferência (já era assim, no domínio e no tratamento de texto da API; nenhuma normalização nova). Por isso " 123 " e "123\n" viram "123" e são aceitas; "12 34" e "12\n34" (espaço ou quebra de linha no meio) são recusadas. |
+| Ordem das verificações | Obrigatória (vazia ou só de espaços → `CAMPO_OBRIGATORIO_AUSENTE`) → só dígitos → limite técnico. Uma matrícula com letras e mais de 20 caracteres recebe a mensagem do formato. |
+| Mensagens e código | Um só código, `MATRICULA_INVALIDA` (400, campo `matricula`), com duas mensagens: "A matrícula deve ter só dígitos (0 a 9), sem letras, espaços nem símbolos." e, acima do limite, "A matrícula pode ter no máximo 20 dígitos." O limite é descrito como técnico, não como tamanho da matrícula na instituição. O código não mudou. |
+| Limite técnico | `MATRICULA_MAXIMO_CARACTERES` (20) continua, como tamanho das colunas `contas.Usuario.matricula` e `reservas.solicitante_matricula`. **Sem migration e sem mudança de dados.** |
+| Contas antigas | Nada é alterado nem revalidado: `DadosDeCadastro` só roda no cadastro público e na carga dos dados de exemplo. Login, troca de senha, gestão de usuários (AUT-11) e `createsuperuser` não conferem a matrícula (as fixtures de teste e os usuários criados por esses caminhos podem ter matrícula fora do formato). Uma conta antiga com matrícula fora do formato continua existindo e funcionando. |
+| API | O serializer não repete a regra (só o tipo texto); quem decide é o domínio, e as mensagens são as dele. |
+| Tela de cadastro | Campo de texto com `inputMode="numeric"` (não `type="number"`, que perde zeros à esquerda) e `maxLength` 20 (o limite técnico). Sem `pattern` nem validação no navegador, pela convenção das telas (decisão da FE-02): o erro da API aparece embaixo do campo. |
+
+**O que mudou**
+
+- Código: `contas/domain/cadastro.py` (`_validar_matricula`), `contas/domain/excecoes.py` (`MatriculaInvalida.so_digitos` e `acima_do_limite_tecnico`); frontend: `FormularioDeCadastro.tsx`.
+- Testes: `test_cadastro_dominio.py` (tabela de válidas e inválidas, Unicode, propriedades com Hypothesis), `test_cadastrar_solicitante.py`, `test_api_cadastro.py` e `PaginaCadastro.test.tsx`; fixtures de teste com matrícula só de dígitos (`conftest.py` e testes de `contas`).
+- Dados de exemplo: sem mudança (já eram só dígitos).
+- Documentos: RF-32.1 (evidência), RN-13 (vigente), US-01 (CAs, TAs e histórico), SRS (L-06 fechada e auditoria), glossário, Visão (P-02, R-12), DEC-09, README de `contas` e da raiz, a rastreabilidade (regenerada) e o manifesto da baseline.
+- Figuras da modelagem: nenhuma mostra o formato ou o tamanho da matrícula; não mudaram.

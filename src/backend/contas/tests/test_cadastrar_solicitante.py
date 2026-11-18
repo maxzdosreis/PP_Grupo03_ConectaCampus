@@ -2,7 +2,12 @@ import pytest
 
 from compartilhado.domain.erros import CampoObrigatorioAusente
 from contas.application.casos_de_uso import CadastrarSolicitante
-from contas.domain.excecoes import EmailJaCadastrado, MatriculaJaCadastrada, SenhaFraca
+from contas.domain.excecoes import (
+    EmailJaCadastrado,
+    MatriculaInvalida,
+    MatriculaJaCadastrada,
+    SenhaFraca,
+)
 from contas.domain.perfil import PerfilUsuario
 from contas.tests.fakes import PoliticaDeSenhaFake, RepositorioUsuariosEmMemoria
 
@@ -47,6 +52,25 @@ def test_cadastro_valido_cria_solicitante_com_dados_normalizados(
     assert usuario.perfil == PerfilUsuario.SOLICITANTE
     assert repositorio.criados == {1: usuario}
     assert repositorio.senhas[1] == SENHA_FORTE
+
+
+def test_matricula_com_zeros_a_esquerda_e_gravada_intacta(cadastrar, repositorio):
+    # Act
+    usuario = cadastrar(matricula="00123")
+
+    # Assert
+    assert usuario.matricula == "00123"
+    assert repositorio.criados[1].matricula == "00123"
+
+
+@pytest.mark.parametrize("matricula", ["2026A01", "１２３", "1" * 21])
+def test_matricula_invalida_lanca_matricula_invalida_sem_criar_usuario(
+    cadastrar, repositorio, matricula
+):
+    # Act / Assert
+    with pytest.raises(MatriculaInvalida):
+        cadastrar(matricula=matricula)
+    assert repositorio.criados == {}
 
 
 def test_email_repetido_com_caixa_diferente_lanca_email_ja_cadastrado(

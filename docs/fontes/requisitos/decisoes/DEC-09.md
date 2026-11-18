@@ -12,7 +12,7 @@
 | **Resposta do professor** | "São números sempre, mas não tem uma quantidade máxima e uma quantidade mínima." |
 | **Decisão do grupo** | Só dígitos. O limite de 20 caracteres fica como limite técnico (coluna do banco), não como regra da instituição. |
 | **Decisão** | A matrícula é obrigatória, única e formada só por dígitos, sem quantidade mínima ou máxima definida pela instituição; o limite de 20 caracteres continua apenas como limite técnico do armazenamento. |
-| **Implementação** | [CR-04](../mudancas/CR-04-matricula-so-digitos.md), tarefa AUT-12. Até ela, o código continua com a regra acima. |
+| **Implementação** | [CR-04](../mudancas/CR-04-matricula-so-digitos.md), tarefa AUT-12, implementada em 17/11/2026: o código aceita só os dígitos 0 a 9 e mantém 20 como limite técnico. |
 | **Motivo** | O formato real não foi informado. A regra provisória aceita qualquer formato plausível e fica isolada numa função, para mudar sem afetar o resto. |
 | **Alternativas** | Só dígitos, com uma quantidade fixa; um padrão com prefixo (definido por expressão regular); conferência com o cadastro acadêmico (fora do escopo: integração institucional). A decisão é só dígitos, sem quantidade fixa e sem conferência. |
 | **Responsável** | Max Zimmermann dos Reis (grupo), com o professor. |
@@ -29,3 +29,4 @@
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Artefatos afetados: as histórias e o número de critérios e testes de aceite, a partir do [mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-09) (REQ-06). Estado e opção sem mudança. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Decidida na Aula 7: resposta do professor e decisão do grupo registradas; a regra atual passa a "implementada até o CR-04"; CR-04 aberto, implementação na AUT-12 (GES-02). |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Artefatos afetados com 9 critérios e 9 testes de aceite, depois de aplicar o CR-04 na especificação, com os CAs novos da US-01 (REQ-13). Estado e opção sem mudança. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementada na tarefa AUT-12 ([CR-04](../mudancas/CR-04-matricula-so-digitos.md), seção 9). Estado e decisão sem mudança. Sem aprovação. |

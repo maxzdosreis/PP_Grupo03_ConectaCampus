@@ -48,10 +48,10 @@ def _hash_de_senha_rapido(settings):
 def _duas_gestoras():
     modelo = get_user_model()
     primeira = modelo.objects.create_superuser(
-        "gestora.um@exemplo.com", SENHA, nome="Gestora Um", matricula="G1"
+        "gestora.um@exemplo.com", SENHA, nome="Gestora Um", matricula="9100001"
     )
     segunda = modelo.objects.create_superuser(
-        "gestora.dois@exemplo.com", SENHA, nome="Gestora Dois", matricula="G2"
+        "gestora.dois@exemplo.com", SENHA, nome="Gestora Dois", matricula="9100002"
     )
     return primeira, segunda
 

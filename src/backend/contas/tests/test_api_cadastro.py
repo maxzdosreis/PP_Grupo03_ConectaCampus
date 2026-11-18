@@ -161,12 +161,51 @@ def test_nome_so_com_espacos_responde_400_campo_obrigatorio():
     _assert_erro(resposta, 400, "CAMPO_OBRIGATORIO_AUSENTE", "nome")
 
 
-def test_matricula_com_espaco_responde_400():
+MENSAGEM_SO_DIGITOS = (
+    "A matrícula deve ter só dígitos (0 a 9), sem letras, espaços nem símbolos."
+)
+
+
+@pytest.mark.parametrize("matricula", ["2026001", "123", "7", "00123", "1" * 20])
+def test_matricula_so_de_digitos_responde_201_com_a_matricula_intacta(matricula):
     # Act
-    resposta = _cadastrar(_corpo(matricula="2026 001"))
+    resposta = _cadastrar(_corpo(matricula=matricula))
+
+    # Assert
+    assert resposta.status_code == 201
+    assert resposta.data["dados"]["matricula"] == matricula
+    assert Usuario.objects.get().matricula == matricula
+
+
+@pytest.mark.parametrize("matricula", ["2026A01", "12a45", "2026 001", "１２３", "٣٤٥"])
+def test_matricula_que_nao_e_so_de_digitos_responde_400(matricula):
+    # Act
+    resposta = _cadastrar(_corpo(matricula=matricula))
 
     # Assert
     _assert_erro(resposta, 400, "MATRICULA_INVALIDA", "matricula")
+    assert resposta.data["erro"]["campos"]["matricula"] == [MENSAGEM_SO_DIGITOS]
+    assert not Usuario.objects.exists()
+
+
+def test_matricula_com_21_digitos_responde_400_como_limite_tecnico():
+    # Act
+    resposta = _cadastrar(_corpo(matricula="1" * 21))
+
+    # Assert
+    _assert_erro(resposta, 400, "MATRICULA_INVALIDA", "matricula")
+    assert resposta.data["erro"]["campos"]["matricula"] == [
+        "A matrícula pode ter no máximo 20 dígitos."
+    ]
+    assert not Usuario.objects.exists()
+
+
+def test_matricula_vazia_responde_400_campo_obrigatorio():
+    # Act
+    resposta = _cadastrar(_corpo(matricula=""))
+
+    # Assert
+    _assert_erro(resposta, 400, "CAMPO_OBRIGATORIO_AUSENTE", "matricula")
 
 
 def test_header_authorization_invalido_nao_impede_o_cadastro():

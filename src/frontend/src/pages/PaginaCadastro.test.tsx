@@ -129,6 +129,43 @@ describe('PaginaCadastro', () => {
     expect(controle('Senha').getAttribute('aria-invalid')).toBe('true')
   })
 
+  it('a matrícula é um campo de texto com teclado numérico e limite técnico de 20', () => {
+    renderizarComSessaoReal(ROTAS, '/cadastro')
+
+    expect(controle('Matrícula').type).toBe('text')
+    expect(controle('Matrícula').inputMode).toBe('numeric')
+    expect(controle('Matrícula').maxLength).toBe(20)
+  })
+
+  it('a matrícula com zeros à esquerda vai para a API como texto, intacta', async () => {
+    vi.mocked(cadastrar).mockRejectedValue(new ErroDaApi(500, 'ERRO_INTERNO', 'Erro.'))
+    renderizarComSessaoReal(ROTAS, '/cadastro')
+
+    await userEvent.type(controle('Nome'), DADOS.nome)
+    await userEvent.type(controle('Matrícula'), '00123')
+    await userEvent.type(controle('E-mail'), DADOS.email)
+    await userEvent.type(controle('Senha'), DADOS.senha)
+    await userEvent.click(screen.getByRole('button', { name: 'Criar conta' }))
+
+    await waitFor(() => expect(cadastrar).toHaveBeenCalled())
+    expect(vi.mocked(cadastrar).mock.calls[0][0].matricula).toBe('00123')
+  })
+
+  it('matrícula com letra mostra, embaixo da matrícula, a mensagem do servidor', async () => {
+    const mensagem = 'A matrícula deve ter só dígitos (0 a 9), sem letras, espaços nem símbolos.'
+    vi.mocked(cadastrar).mockRejectedValue(
+      new ErroDaApi(400, 'MATRICULA_INVALIDA', mensagem, { matricula: [mensagem] }),
+    )
+    renderizarComSessaoReal(ROTAS, '/cadastro')
+
+    await preencherEEnviar()
+
+    expect(await screen.findByText(mensagem)).toBeTruthy()
+    expect(controle('Matrícula').getAttribute('aria-invalid')).toBe('true')
+    expect(controle('Matrícula').value).toBe(DADOS.matricula)
+    await waitFor(() => expect(document.activeElement).toBe(controle('Matrícula')))
+  })
+
   it('o link de entrar preserva o ?proximo', () => {
     renderizarComSessaoReal(ROTAS, '/cadastro?proximo=%2Freservas')
 
