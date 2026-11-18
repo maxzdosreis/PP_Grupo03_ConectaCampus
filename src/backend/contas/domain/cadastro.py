@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 from compartilhado.domain.erros import CampoObrigatorioAusente, TextoMuitoLongo
@@ -5,6 +6,7 @@ from contas.domain.excecoes import MatriculaInvalida
 
 NOME_MAXIMO_CARACTERES = 150
 MATRICULA_MAXIMO_CARACTERES = 20
+_SO_DIGITOS_ASCII = re.compile(r"[0-9]+")
 
 
 def normalizar_email(email: str | None) -> str:
@@ -30,8 +32,10 @@ def _validar_nome(nome: str | None) -> str:
 
 def _validar_matricula(matricula: str | None) -> str:
     matricula = _exigir((matricula or "").strip(), "matricula", "Matrícula")
-    if len(matricula) > MATRICULA_MAXIMO_CARACTERES or len(matricula.split()) > 1:
-        raise MatriculaInvalida(MATRICULA_MAXIMO_CARACTERES)
+    if not _SO_DIGITOS_ASCII.fullmatch(matricula):
+        raise MatriculaInvalida.so_digitos()
+    if len(matricula) > MATRICULA_MAXIMO_CARACTERES:
+        raise MatriculaInvalida.acima_do_limite_tecnico(MATRICULA_MAXIMO_CARACTERES)
     return matricula
 
 

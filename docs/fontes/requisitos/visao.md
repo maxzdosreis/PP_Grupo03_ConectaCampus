@@ -22,6 +22,7 @@ Modelo: Documento de Visão do RUP em quatro quadrantes (A3·s7), com o cabeçal
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | NS-11 cita também RF-42 e RF-43 (gestão de usuários pelo Gestor); fora do escopo e P-06 mudam: o perfil e a situação da conta passam a ser alterados pelo Gestor pela tela ([DEC-27](decisoes/DEC-27.md), [CR-07](mudancas/CR-07-gestao-de-usuarios.md), AUT-11). Nenhuma necessidade nova. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | R-08: o código da RES-12 registra as tentativas recusadas (CR-02 implementado). Nenhuma necessidade, premissa ou risco novo. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | P-04 e R-10 com a data do código do CR-03 (ESP-07, 17/11/2026). Nenhuma necessidade, premissa ou risco novo. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | P-02 e R-12: o CR-04 está implementado (AUT-12). Mudança editorial. Sem aprovação. |
 
 ## Sumário
 
@@ -168,7 +169,7 @@ Premissa é o que o grupo assume como verdadeiro sem ter confirmado. Se uma prem
 | ID | Premissa | Se não valer |
 |---|---|---|
 | P-01 | Não há cliente real nomeado. O grupo representa a instituição, e o professor é a referência para as dúvidas de regra. | Necessidades e valores de regra precisam ser validados com o cliente real. |
-| P-02 | Solicitantes e gestores têm e-mail e matrícula e se identificam por e-mail e senha. | [DEC-09](decisoes/DEC-09.md) e o cadastro mudam. A DEC-09, decidida em 06/11/2026, fixa a matrícula só com dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), AUT-12); a premissa continua valendo. |
+| P-02 | Solicitantes e gestores têm e-mail e matrícula e se identificam por e-mail e senha. | [DEC-09](decisoes/DEC-09.md) e o cadastro mudam. A DEC-09, decidida em 06/11/2026, fixa a matrícula só com dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), implementado na AUT-12 em 17/11/2026); a premissa continua valendo. |
 | P-03 | Todos os horários são de Brasília ([fuso horário](glossario.md#fuso-horario)). | Regras de agenda e conflito precisam de fuso por espaço. |
 | P-04 | As regras de agenda são as mesmas para todos os espaços e todos os dias. | [DEC-07](decisoes/DEC-07.md). Deixa de valer na especificação desde o [CR-03](mudancas/CR-03-horario-por-espaco.md) (REQ-13; código na ESP-07, 17/11/2026): a DEC-07, decidida em 06/11/2026, traz o horário de funcionamento por espaço; duração e antecedência continuam iguais para todos. |
 | P-05 | Um pedido é de um espaço, num único dia, num [intervalo](glossario.md#intervalo-de-horario) contínuo. | Recorrência e vários espaços por pedido exigem novos requisitos. |
@@ -206,7 +207,7 @@ Probabilidade e impacto em Baixa, Média ou Alta. Resposta: **mitigar** (reduzir
 | R-09 | [DEC-06](decisoes/DEC-06.md): o cliente querer que desativar um espaço cancele ou bloqueie as reservas futuras dele. | Média | Médio | Mitigar: confirmar; a mudança cruza dois contextos do código. Não ocorreu: a DEC-06 foi confirmada em 06/11/2026. |
 | R-10 | [DEC-07](decisoes/DEC-07.md): o funcionamento real ter outros horários, ou horários por espaço ou por dia. | Média | Médio | Mitigar: valores são constantes únicas; horários por espaço ficam fora do escopo até um CR. Ocorreu: a DEC-07, decidida em 06/11/2026, traz 07:00 às 00:00 e o horário por espaço ([CR-03](mudancas/CR-03-horario-por-espaco.md), ESP-07; especificação em 10/11/2026 e código em 17/11/2026). |
 | R-11 | [DEC-08](decisoes/DEC-08.md): manter a cobertura-alvo consumir tempo das tarefas restantes. | Baixa | Baixo | Aceitar: meta interna do grupo, não exigida. A DEC-08 foi confirmada em 06/11/2026. |
-| R-12 | [DEC-09](decisoes/DEC-09.md): o formato real da matrícula ser mais restrito e invalidar dados de exemplo. | Média | Baixo | Mitigar: regra isolada numa função; ajustar exemplos junto. Ocorreu em parte: a DEC-09, decidida em 06/11/2026, exige só dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), AUT-12; especificação em 10/11/2026); os dados de exemplo já são só dígitos. |
+| R-12 | [DEC-09](decisoes/DEC-09.md): o formato real da matrícula ser mais restrito e invalidar dados de exemplo. | Média | Baixo | Mitigar: regra isolada numa função; ajustar exemplos junto. Ocorreu em parte: a DEC-09, decidida em 06/11/2026, exige só dígitos ([CR-04](mudancas/CR-04-matricula-so-digitos.md), AUT-12; especificação em 10/11/2026, código em 17/11/2026); os dados de exemplo já eram só dígitos. |
 | R-13 | [DEC-10](decisoes/DEC-10.md): existirem espaços reais com o mesmo nome (ex.: em unidades diferentes). | Baixa | Baixo | Aceitar: nomes distintos por convenção até a confirmação. A DEC-10 foi confirmada em 06/11/2026. |
 | R-14 | [DEC-11](decisoes/DEC-11.md): o cliente considerar que mostrar períodos ocupados por outras pessoas expõe o uso. | Baixa | Médio | Mitigar: confirmar; a agenda pode ser restrita sem afetar o pedido. Não ocorreu: a DEC-11 foi confirmada em 06/11/2026. |
 

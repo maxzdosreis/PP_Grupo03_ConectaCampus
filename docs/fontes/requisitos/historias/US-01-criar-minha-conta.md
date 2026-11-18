@@ -12,6 +12,7 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 |---|---|---|---|
 | 0.1 | 04/11/2026 | Max Zimmermann dos Reis | Criação: Index Card, INVEST, critérios e testes de aceite (REQ-05). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Critérios novos: CA-02, CA-03, CA-06, CA-07 novos, com a implementação pendente na tarefa AUT-12 ([CR-04](../mudancas/CR-04-matricula-so-digitos.md)). CAs antigos que a regra nova substitui ficam marcados com Situação, sem apagar o texto nem o TA. Renumeração dos TAs: TA-01 a TA-06 passam a TA-01 a TA-10 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Implementação do [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (AUT-12): CA-02, CA-03, CA-06 e CA-07 sem a marca de pendência, com os TA-02, TA-03, TA-06 e TA-07 automatizados; CA-05 passa a descrever a regra nova (matrícula com caractere que não é dígito ou acima do limite técnico) e perde a Situação; TA-05 aponta para os testes novos. Nenhum enunciado muda: a especificação já trazia a regra. Sem aprovação. |
 
 ## Index Card
 
@@ -25,7 +26,7 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 | **Prioridade** | Esperado — a classe QFD mais alta entre [RF-32](../requisitos/rf-contas.md#rf-32), [RF-32.1](../requisitos/rf-contas.md#rf-32-1), [RF-32.2](../requisitos/rf-contas.md#rf-32-2) e [RF-32.3](../requisitos/rf-contas.md#rf-32-3), todos esperados ([SRS, seção 7](../requisitos/srs.md#7-análise-qfd)). |
 | **Estimativa (Custo em Semanas)** | 0,3 (retrospectiva: o cadastro da AUT-04 e a tela de cadastro da AUT-06). |
 | **Conversa** | "Qual é o formato real da matrícula?" → [DEC-09](../decisoes/DEC-09.md), decidida na Aula 7: só dígitos, sem quantidade mínima nem máxima da instituição; os 20 caracteres são só um limite técnico ([CR-04](../mudancas/CR-04-matricula-so-digitos.md), tarefa AUT-12). "Alguém pode se cadastrar já como Gestor?" → não; o Gestor só é criado pela Equipe de TI ([DEC-04](../decisoes/DEC-04.md), [US-17](US-17-criar-o-primeiro-gestor.md)). "A matrícula é conferida com a instituição?" → não, fora do escopo ([L-06](../requisitos/srs.md#l-06)). |
-| **Pronta quando** | Todos os CAs abaixo têm o TA passando (os automatizados na verificação do PR; o manual executado e registrado no ensaio), esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). Os CAs marcados com implementação pendente só contam quando a tarefa citada os implementar e criar o TA deles. |
+| **Pronta quando** | Todos os CAs abaixo têm o TA passando (os automatizados na verificação do PR; o manual executado e registrado no ensaio), esta ficha e os vínculos (RF, UC e SRS 6.4) estão atualizados e a revisão por pares está registrada no histórico (versão 0.2). |
 
 ## INVEST
 
@@ -60,7 +61,6 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 - **RF:** [RF-32](../requisitos/rf-contas.md#rf-32)
 - **TA:** [TA-02](#ta-02)
 - **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa AUT-12)
 
 #### <a id="us-01-ca-03"></a>US-01 · CA-03 · Matrícula sem quantidade mínima (sucesso)
 
@@ -71,7 +71,6 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 - **RF:** [RF-32](../requisitos/rf-contas.md#rf-32)
 - **TA:** [TA-03](#ta-03)
 - **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa AUT-12)
 
 #### <a id="us-01-ca-04"></a>US-01 · CA-04 · Volta ao ponto em que estava (alternativa)
 
@@ -85,13 +84,12 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 #### <a id="us-01-ca-05"></a>US-01 · CA-05 · Dados ausentes ou inválidos (exceção)
 
 - **Dado** um visitante preenchendo o cadastro
-- **Quando** falta um dos dados, o nome só tem espaços ou passa do limite, a matrícula tem espaço ou passa do limite, ou o e-mail está mal formado
+- **Quando** falta um dos dados, o nome só tem espaços ou passa do limite, a matrícula tem um caractere que não é dígito ou passa do limite técnico, ou o e-mail está mal formado
 - **Então** o sistema aponta, junto a cada dado com problema, a regra violada (por exemplo, 'O campo "Nome" é obrigatório.'), não o identifica e nenhuma conta é criada
 - **Origem:** [UC-01 E3.1](../casos-de-uso/fichas-resumidas.md#uc01-e3-1)
 - **RF:** [RF-32.1](../requisitos/rf-contas.md#rf-32-1)
 - **TA:** [TA-05](#ta-05)
-- **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7: a regra da matrícula passa a ser só dígitos; ver a Situação abaixo)
-- **Situação:** em parte substituído (a regra da matrícula, agora só de dígitos) por [CA-06](#us-01-ca-06), [CA-07](#us-01-ca-07), pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (REQ-13). Este CA e o TA dele descrevem a regra anterior, que o código ainda cumpre até a tarefa AUT-12; não valem como prova da regra nova.
+- **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7: a matrícula só com dígitos; [CA-06](#us-01-ca-06) e [CA-07](#us-01-ca-07) detalham os dois casos da matrícula)
 
 #### <a id="us-01-ca-06"></a>US-01 · CA-06 · Matrícula com letra recusada (exceção)
 
@@ -102,7 +100,6 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 - **RF:** [RF-32.1](../requisitos/rf-contas.md#rf-32-1)
 - **TA:** [TA-06](#ta-06)
 - **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa AUT-12)
 
 #### <a id="us-01-ca-07"></a>US-01 · CA-07 · Limite técnico da matrícula mantido (exceção)
 
@@ -113,7 +110,6 @@ História do [índice](README.md#índice-das-histórias). Como ler o Index Card,
 - **RF:** [RF-32.1](../requisitos/rf-contas.md#rf-32-1)
 - **TA:** [TA-07](#ta-07)
 - **Depende de:** [DEC-09](../decisoes/DEC-09.md) (decidida na Aula 7; regra aplicada na especificação pelo [CR-04](../mudancas/CR-04-matricula-so-digitos.md), REQ-13)
-- **Implementação:** implementação pendente (tarefa AUT-12)
 
 #### <a id="us-01-ca-08"></a>US-01 · CA-08 · Senha fraca (exceção)
 
@@ -150,12 +146,12 @@ Testes a partir de `src/backend/` (pytest, `arquivo::teste`) ou de `src/frontend
 | TA | CA | Tipo | Testes ou roteiro |
 |---|---|---|---|
 | <a id="ta-01"></a>TA-01 | [CA-01](#us-01-ca-01) | automatizado | `contas/tests/test_api_cadastro.py::test_cadastro_valido_responde_201_com_solicitante_sem_senha`; `contas/tests/test_api_cadastro.py::test_usuario_recem_cadastrado_consegue_fazer_login`; `contas/tests/test_cadastrar_solicitante.py::test_cadastro_valido_cria_solicitante_com_dados_normalizados`; `pages/PaginaCadastro.test.tsx`: `com sucesso, cadastra, entra com as mesmas credenciais e vai para /reservas/nova` |
-| <a id="ta-02"></a>TA-02 | [CA-02](#us-01-ca-02) | pendente | implementação pendente (tarefa AUT-12) — TA a criar junto com o código ([CR-04 · CA-02](../mudancas/CR-04-matricula-so-digitos.md#5-critérios-de-aceite)). |
-| <a id="ta-03"></a>TA-03 | [CA-03](#us-01-ca-03) | pendente | implementação pendente (tarefa AUT-12) — TA a criar junto com o código ([CR-04 · CA-03](../mudancas/CR-04-matricula-so-digitos.md#5-critérios-de-aceite)). |
+| <a id="ta-02"></a>TA-02 | [CA-02](#us-01-ca-02) | automatizado | `contas/tests/test_api_cadastro.py::test_matricula_so_de_digitos_responde_201_com_a_matricula_intacta [x]`; `contas/tests/test_cadastro_dominio.py::test_matricula_so_com_digitos_e_aceita_sem_minimo_e_com_zeros_a_esquerda [x]` |
+| <a id="ta-03"></a>TA-03 | [CA-03](#us-01-ca-03) | automatizado | `contas/tests/test_api_cadastro.py::test_matricula_so_de_digitos_responde_201_com_a_matricula_intacta [x]`; `contas/tests/test_cadastro_dominio.py::test_matricula_so_com_digitos_e_aceita_sem_minimo_e_com_zeros_a_esquerda [x]`; `contas/tests/test_cadastrar_solicitante.py::test_matricula_com_zeros_a_esquerda_e_gravada_intacta` |
 | <a id="ta-04"></a>TA-04 | [CA-04](#us-01-ca-04) | manual | **Precondição:** nenhuma sessão aberta. **Passos:** pedir para ver as reservas; no caminho para entrar, escolher criar a conta; cadastrar com dados novos e válidos. **Resultado esperado:** a pessoa termina identificada na lista das próprias reservas, e não no pedido de reserva. Apoio parcial automatizado (o destino é preservado até o cadastro, mas o retorno depois dele não é testado): `pages/PaginaEntrar.test.tsx`: `o link de cadastro preserva o ?proximo`; `navegacao.test.ts`: `proximoSeguro aceita o caminho interno %s`. Lacuna [L-15](../requisitos/srs.md#l-15). |
-| <a id="ta-05"></a>TA-05 | [CA-05](#us-01-ca-05) | automatizado | `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo`; `contas/tests/test_api_cadastro.py::test_nome_so_com_espacos_responde_400_campo_obrigatorio`; `contas/tests/test_api_cadastro.py::test_matricula_com_espaco_responde_400`; `contas/tests/test_api_cadastro.py::test_email_malformado_responde_400`; `contas/tests/test_cadastro_dominio.py::test_nome_acima_do_limite_lanca_texto_muito_longo`; `contas/tests/test_cadastro_dominio.py::test_matricula_longa_ou_com_espaco_no_meio_lanca_matricula_invalida [x]` |
-| <a id="ta-06"></a>TA-06 | [CA-06](#us-01-ca-06) | pendente | implementação pendente (tarefa AUT-12) — TA a criar junto com o código ([CR-04 · CA-01](../mudancas/CR-04-matricula-so-digitos.md#5-critérios-de-aceite)). |
-| <a id="ta-07"></a>TA-07 | [CA-07](#us-01-ca-07) | pendente | implementação pendente (tarefa AUT-12) — TA a criar junto com o código ([CR-04 · CA-04](../mudancas/CR-04-matricula-so-digitos.md#5-critérios-de-aceite)). |
+| <a id="ta-05"></a>TA-05 | [CA-05](#us-01-ca-05) | automatizado | `contas/tests/test_api_cadastro.py::test_campos_ausentes_respondem_400_com_cada_campo`; `contas/tests/test_api_cadastro.py::test_nome_so_com_espacos_responde_400_campo_obrigatorio`; `contas/tests/test_api_cadastro.py::test_matricula_que_nao_e_so_de_digitos_responde_400 [x]`; `contas/tests/test_api_cadastro.py::test_email_malformado_responde_400`; `contas/tests/test_cadastro_dominio.py::test_nome_acima_do_limite_lanca_texto_muito_longo`; `contas/tests/test_cadastro_dominio.py::test_matricula_com_caractere_que_nao_e_digito_lanca_matricula_invalida [x]`; `contas/tests/test_cadastro_dominio.py::test_matricula_acima_do_limite_tecnico_lanca_matricula_invalida [x]` |
+| <a id="ta-06"></a>TA-06 | [CA-06](#us-01-ca-06) | automatizado | `contas/tests/test_api_cadastro.py::test_matricula_que_nao_e_so_de_digitos_responde_400 [x]`; `contas/tests/test_cadastro_dominio.py::test_matricula_com_caractere_que_nao_e_digito_lanca_matricula_invalida [x]`; `contas/tests/test_cadastro_dominio.py::test_unicode_que_o_python_chama_de_digito_nao_e_digito_de_matricula`; `pages/PaginaCadastro.test.tsx`: `matrícula com letra mostra, embaixo da matrícula, a mensagem do servidor` |
+| <a id="ta-07"></a>TA-07 | [CA-07](#us-01-ca-07) | automatizado | `contas/tests/test_api_cadastro.py::test_matricula_com_21_digitos_responde_400_como_limite_tecnico`; `contas/tests/test_cadastro_dominio.py::test_matricula_acima_do_limite_tecnico_lanca_matricula_invalida [x]`; `contas/tests/test_cadastrar_solicitante.py::test_matricula_invalida_lanca_matricula_invalida_sem_criar_usuario [x]`; `pages/PaginaCadastro.test.tsx`: `a matrícula é um campo de texto com teclado numérico e limite técnico de 20` |
 | <a id="ta-08"></a>TA-08 | [CA-08](#us-01-ca-08) | automatizado | `contas/tests/test_api_cadastro.py::test_senha_fraca_responde_400_com_motivos_em_senha`; `contas/tests/test_cadastrar_solicitante.py::test_senha_fraca_lanca_senha_fraca_sem_criar_usuario`; `pages/PaginaCadastro.test.tsx`: `senha fraca aparece embaixo da senha` |
 | <a id="ta-09"></a>TA-09 | [CA-09](#us-01-ca-09) | automatizado | `contas/tests/test_api_cadastro.py::test_email_repetido_com_caixa_diferente_responde_409`; `contas/tests/test_api_cadastro.py::test_matricula_repetida_responde_409`; `pages/PaginaCadastro.test.tsx`: `e-mail já cadastrado aparece embaixo do e-mail, que recebe o foco, e não entra` |
 | <a id="ta-10"></a>TA-10 | [CA-10](#us-01-ca-10) | automatizado | `contas/tests/test_api_cadastro.py::test_campos_de_privilegio_no_corpo_sao_ignorados` |

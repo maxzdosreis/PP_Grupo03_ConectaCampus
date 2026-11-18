@@ -49,7 +49,10 @@ def _cliente_de(usuario):
 @pytest.fixture
 def usuario_gestor(db):
     return get_user_model().objects.create_superuser(
-        "gestora@teste.com", SENHA_DE_TESTE, nome="Gestora de Teste", matricula="G0001"
+        "gestora@teste.com",
+        SENHA_DE_TESTE,
+        nome="Gestora de Teste",
+        matricula="9000001",
     )
 
 

@@ -23,7 +23,7 @@ def outra_gestora(db):
         "outra.gestora@exemplo.com",
         SENHA_DE_TESTE,
         nome="Dora Gestora",
-        matricula="G0002",
+        matricula="9000002",
     )
 
 
@@ -53,7 +53,7 @@ def _criar_varios(quantidade):
             f"lote{numero:02d}@exemplo.com",
             SENHA_DE_TESTE,
             nome=f"Lote {numero:02d}",
-            matricula=f"L{numero:04d}",
+            matricula=f"8{numero:06d}",
         )
 
 
@@ -195,7 +195,7 @@ def test_ordem_e_estavel_por_nome_e_depois_por_id(cliente_gestor):
             f"igual{numero}@exemplo.com",
             SENHA_DE_TESTE,
             nome="Nome Igual",
-            matricula=f"I{numero}",
+            matricula=f"7{numero:06d}",
         )
 
     # Act

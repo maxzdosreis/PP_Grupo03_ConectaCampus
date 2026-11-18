@@ -12,12 +12,19 @@ class MatriculaInvalida(DadosInvalidos):
     codigo = "MATRICULA_INVALIDA"
     campo = "matricula"
 
-    def __init__(self, limite: int) -> None:
+    def __init__(self, mensagem: str, limite: int | None = None) -> None:
         self.limite = limite
-        super().__init__(
-            f"A matrícula deve ter no máximo {limite} caracteres e não pode "
-            "conter espaços."
+        super().__init__(mensagem)
+
+    @classmethod
+    def so_digitos(cls) -> "MatriculaInvalida":
+        return cls(
+            "A matrícula deve ter só dígitos (0 a 9), sem letras, espaços nem símbolos."
         )
+
+    @classmethod
+    def acima_do_limite_tecnico(cls, limite: int) -> "MatriculaInvalida":
+        return cls(f"A matrícula pode ter no máximo {limite} dígitos.", limite)
 
 
 class SenhaFraca(DadosInvalidos):

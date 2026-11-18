@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type InputHTMLAttributes } from 'react'
 import type { DadosDeCadastro } from '../../api/autenticacao.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
@@ -15,11 +15,20 @@ type DescricaoDoCampo = {
   tipo: 'text' | 'email' | 'password'
   autoComplete: string
   dica?: string
+  atributos?: InputHTMLAttributes<HTMLInputElement>
 }
+
+const LIMITE_TECNICO_DA_MATRICULA = 20
 
 const CAMPOS: DescricaoDoCampo[] = [
   { campo: 'nome', rotulo: 'Nome', tipo: 'text', autoComplete: 'name' },
-  { campo: 'matricula', rotulo: 'Matrícula', tipo: 'text', autoComplete: 'off' },
+  {
+    campo: 'matricula',
+    rotulo: 'Matrícula',
+    tipo: 'text',
+    autoComplete: 'off',
+    atributos: { inputMode: 'numeric', maxLength: LIMITE_TECNICO_DA_MATRICULA },
+  },
   { campo: 'email', rotulo: 'E-mail', tipo: 'email', autoComplete: 'email' },
   {
     campo: 'senha',
@@ -55,11 +64,12 @@ function FormularioDeCadastro() {
           <Aviso variante="erro">{erroGeral}</Aviso>
         </div>
       )}
-      {CAMPOS.map(({ campo, rotulo, tipo, autoComplete, dica }) => (
+      {CAMPOS.map(({ campo, rotulo, tipo, autoComplete, dica, atributos }) => (
         <Campo key={campo} rotulo={rotulo} dica={dica} erro={errosDosCampos[campo]}>
           {(controle) => (
             <input
               {...controle}
+              {...atributos}
               type={tipo}
               name={campo}
               autoComplete={autoComplete}

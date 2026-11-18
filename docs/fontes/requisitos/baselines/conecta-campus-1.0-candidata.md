@@ -6,7 +6,7 @@
 
 Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + aprovação registrada + local de consulta**. Este arquivo tem o manifesto e as versões exatas; a aprovação e a referência Git ainda **não existem**. Ele é uma candidata: nada aqui está aprovado, nenhum documento mudou de estado, e salvo, commit ou push não são aprovação (A4·s14, s22–24).
 
-**A especificação desta candidata está adiante do código, de propósito:** os CR-01 a CR-04 (respostas da Aula 7) foram aplicados nos requisitos em 10/11/2026 (REQ-13), e 4 critérios de aceite levam a marca "implementação pendente (tarefa AUT-12)"; os 10 da RES-11 foram implementados em 16/11/2026 e os 5 da RES-12 e os 6 da ESP-07, em 17/11/2026. Esses 4 critérios têm TA do tipo pendente, sem teste; o código e os testes deles vêm na AUT-12. A [matriz](../rastreabilidade/matriz.md) e a [cobertura](../rastreabilidade/cobertura.md) mostram os TA pendentes à parte dos automatizados e dos manuais.
+**A especificação desta candidata e o código estão alinhados:** os CR-01 a CR-04 (respostas da Aula 7) foram aplicados nos requisitos em 10/11/2026 (REQ-13) e implementados nas tarefas RES-11 (16/11/2026), RES-12, ESP-07 e AUT-12 (17/11/2026); nenhum TA fica pendente. A [matriz](../rastreabilidade/matriz.md) e a [cobertura](../rastreabilidade/cobertura.md) mostram os TA automatizados e os manuais.
 
 ## Histórico de revisões
 
@@ -36,11 +36,11 @@ Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + apro
 Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcadores abaixo; não edite à mão. O `--verificar` acusa qualquer artefato que mude depois do manifesto, e a versão acordada é a que tem este hash, não "o arquivo mais novo". Na aprovação, todos os documentos devem estar na versão e no estado aprovados (1.0 • Aprovado), e o manifesto é gerado de novo.
 
 <!-- manifesto:inicio -->
-113 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `c3a831c2`.
+113 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `9cdeec76`.
 
 | Artefato | ID | Versão | Estado | Caminho (a partir de `docs/fontes/requisitos/`) | SHA-256 |
 |---|---|---|---|---|---|
-| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `3a84e334` |
+| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `333fac71` |
 | Casos de uso | UCD-01 | 0.1 | Rascunho | `casos-de-uso/README.md` | `a8a54fa0` |
 | UC-02 · Autenticar | UC-02 | 0.1 | Rascunho | `casos-de-uso/UC-02-autenticar.md` | `2cab2819` |
 | UC-04 · Solicitar reserva | UC-04 | 0.1 | Rascunho | `casos-de-uso/UC-04-solicitar-reserva.md` | `72929dcc` |
@@ -58,7 +58,7 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | DEC-06 — Reservas de um espaço desativado | DEC-06 | 0.1 | Rascunho | `decisoes/DEC-06.md` | `eb191d97` |
 | DEC-07 — Valores das regras de agenda | DEC-07 | 0.1 | Rascunho | `decisoes/DEC-07.md` | `b07b4d8f` |
 | DEC-08 — Cobertura-alvo dos testes | DEC-08 | 0.1 | Rascunho | `decisoes/DEC-08.md` | `6097c9fa` |
-| DEC-09 — Formato da matrícula | DEC-09 | 0.1 | Rascunho | `decisoes/DEC-09.md` | `eb2f41e0` |
+| DEC-09 — Formato da matrícula | DEC-09 | 0.1 | Rascunho | `decisoes/DEC-09.md` | `92037460` |
 | DEC-10 — Nome de espaço único | DEC-10 | 0.1 | Rascunho | `decisoes/DEC-10.md` | `177a8842` |
 | DEC-11 — Períodos ocupados por outras pessoas na agenda do dia | DEC-11 | 0.1 | Rascunho | `decisoes/DEC-11.md` | `afc4ac01` |
 | DEC-12 — Metas de desempenho | DEC-12 | 0.1 | Rascunho | `decisoes/DEC-12.md` | `8da85bb9` |
@@ -77,16 +77,16 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | DEC-25 — Atendente responsável como papel da especificação; um perfil cobre Atendente e Gestor no sistema mínimo | DEC-25 | 0.1 | Rascunho | `decisoes/DEC-25.md` | `3f4763da` |
 | DEC-26 — O usuário autenticado pode trocar a própria senha | DEC-26 | 0.1 | Rascunho | `decisoes/DEC-26.md` | `9c2e4f7a` |
 | DEC-27 — O Gestor gerencia usuários pela tela: perfil e situação da conta | DEC-27 | 0.1 | Rascunho | `decisoes/DEC-27.md` | `aea004e2` |
-| Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `d1cb3fa7` |
+| Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `d24c846c` |
 | Pauta para o professor — Aula 7 (06/11/2026) | PAU-01 | 0.1 | Rascunho | `decisoes/pauta-aula-7.md` | `97957e49` |
 | Conecta Campus: Especificação de Requisitos | RS-GRUPO03 | 0.1 | Rascunho | `entrega/RS_Grupo03_Especificacao.md` | `e0271d77` |
 | Evidências do Levantamento de Requisitos | sem cabeçalho | — | — | `entrega/RS_Grupo03_Evidencias.md` | `e5a8c73c` |
 | Ensaio cronometrado da apresentação de Requisitos | APR-03 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Ensaio.md` | `eb3b7194` |
 | Perguntas prováveis da apresentação de Requisitos | APR-02 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Perguntas.md` | `cc3cbc45` |
 | Roteiro da apresentação de Requisitos (Aula 8) | APR-01 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Roteiro.md` | `6fb12053` |
-| Glossário do Conecta Campus | GLO-01 | 0.1 | Rascunho | `glossario.md` | `e89d8ca9` |
-| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `34011611` |
-| US-01 · Criar minha conta | US-01 | 0.1 | Rascunho | `historias/US-01-criar-minha-conta.md` | `be746539` |
+| Glossário do Conecta Campus | GLO-01 | 0.1 | Rascunho | `glossario.md` | `67e647c6` |
+| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `7e615e9d` |
+| US-01 · Criar minha conta | US-01 | 0.1 | Rascunho | `historias/US-01-criar-minha-conta.md` | `11b23e1d` |
 | US-02 · Entrar no sistema | US-02 | 0.1 | Rascunho | `historias/US-02-entrar-no-sistema.md` | `9e615e2c` |
 | US-03 · Manter e encerrar a sessão | US-03 | 0.1 | Rascunho | `historias/US-03-manter-e-encerrar-a-sessao.md` | `25cdfe75` |
 | US-04 · Consultar os espaços | US-04 | 0.1 | Rascunho | `historias/US-04-consultar-os-espacos.md` | `cef3da4b` |
@@ -129,30 +129,30 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | CR-01 — Mudança de situação em relação ao horário da reserva | CR-01 | 0.1 | Rascunho | `mudancas/CR-01-situacao-e-horario-da-reserva.md` | `375ab186` |
 | CR-02 — Tentativas recusadas no histórico da reserva | CR-02 | 0.1 | Rascunho | `mudancas/CR-02-tentativas-recusadas-no-historico.md` | `6fa9fdf9` |
 | CR-03 — Horário de funcionamento por espaço e duração sugerida | CR-03 | 0.1 | Rascunho | `mudancas/CR-03-horario-por-espaco.md` | `add131dc` |
-| CR-04 — Matrícula só com dígitos | CR-04 | 0.1 | Rascunho | `mudancas/CR-04-matricula-so-digitos.md` | `3e11ba0f` |
+| CR-04 — Matrícula só com dígitos | CR-04 | 0.1 | Rascunho | `mudancas/CR-04-matricula-so-digitos.md` | `34cfc0ee` |
 | CR-05 — Atendente responsável e Gestor do serviço nos artefatos de ator misto | CR-05 | 0.1 | Rascunho | `mudancas/CR-05-atendente-e-gestor-nos-artefatos-mistos.md` | `e136ead4` |
 | CR-06 — Trocar a própria senha | CR-06 | 0.1 | Rascunho | `mudancas/CR-06-trocar-a-propria-senha.md` | `04837bb4` |
 | CR-07 — Gestão de usuários pelo Gestor | CR-07 | 0.1 | Rascunho | `mudancas/CR-07-gestao-de-usuarios.md` | `851c9b66` |
-| Pedidos de mudança | IND-03 | 0.1 | Rascunho | `mudancas/README.md` | `a0522cbf` |
+| Pedidos de mudança | IND-03 | 0.1 | Rascunho | `mudancas/README.md` | `12e7df43` |
 | Modelo de pedido de mudança (CR) | MCR-01 | 0.1 | Rascunho | `mudancas/modelo-cr.md` | `a4aa7557` |
 | Rastreabilidade | RAS-01 | 0.1 | Rascunho | `rastreabilidade/README.md` | `56922638` |
-| Cobertura da rastreabilidade | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/cobertura.md` | `6a66adf6` |
-| Mapa de impacto por decisão (DEC) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/impacto-por-dec.md` | `7e6dd670` |
-| Matriz de rastreabilidade (planilha, gerada) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.csv` | `0bfa4eba` |
-| Matriz de rastreabilidade (NS → RF → UC → US → CA/TA → endpoint ou tela → código) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.md` | `701e7856` |
-| Rastreabilidade das regras de negócio (RN → RF → UC → US → CA) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/regras-de-negocio.md` | `de7ccafd` |
+| Cobertura da rastreabilidade | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/cobertura.md` | `015d9dea` |
+| Mapa de impacto por decisão (DEC) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/impacto-por-dec.md` | `e99e4ca0` |
+| Matriz de rastreabilidade (planilha, gerada) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.csv` | `bcd24879` |
+| Matriz de rastreabilidade (NS → RF → UC → US → CA/TA → endpoint ou tela → código) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.md` | `16f81a7a` |
+| Rastreabilidade das regras de negócio (RN → RF → UC → US → CA) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/regras-de-negocio.md` | `bea28abe` |
 | Rastreabilidade dos RNF (RNF → NS, RF ou DEC → forma de verificação → evidência) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/rnf.md` | `aefe163f` |
 | Rastreabilidade no sentido inverso (rota ou tela → RF → NS) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/sentido-inverso.md` | `46c1e366` |
 | Requisitos funcionais e não funcionais | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/README.md` | `9675686f` |
-| Regras de negócio — Conecta Campus | RNG-01 | 0.1 | Rascunho | `requisitos/regras-de-negocio.md` | `67fe5f26` |
+| Regras de negócio — Conecta Campus | RNG-01 | 0.1 | Rascunho | `requisitos/regras-de-negocio.md` | `bfcc62aa` |
 | Requisitos funcionais — Regras de agenda e agenda do dia | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-agenda.md` | `561b4477` |
-| Requisitos funcionais — Contas e acesso | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-contas.md` | `4194c5c1` |
+| Requisitos funcionais — Contas e acesso | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-contas.md` | `fd2b5ef9` |
 | Requisitos funcionais — Espaços | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-espacos.md` | `ed4f08af` |
 | Requisitos funcionais — Mensagens e operação | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-gerais.md` | `3383bb43` |
 | Requisitos funcionais — Reservas | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rf-reservas.md` | `1dd60dbc` |
 | Requisitos não funcionais (FURPS) e restrições | Parte da SRS-01 | 0.1 | Rascunho | `requisitos/rnf.md` | `0e1c1879` |
-| Especificação de Requisitos de Software (SRS) — Conecta Campus | SRS-01 | 0.1 | Rascunho | `requisitos/srs.md` | `2a901651` |
-| Documento de Visão — Conecta Campus | VIS-01 | 0.1 | Rascunho | `visao.md` | `e4ea8654` |
+| Especificação de Requisitos de Software (SRS) — Conecta Campus | SRS-01 | 0.1 | Rascunho | `requisitos/srs.md` | `0ceaa058` |
+| Documento de Visão — Conecta Campus | VIS-01 | 0.1 | Rascunho | `visao.md` | `5aa4195f` |
 <!-- manifesto:fim -->
 
 ## 3. Decisões que ainda faltam

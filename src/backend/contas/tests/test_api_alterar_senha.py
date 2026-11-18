@@ -259,7 +259,7 @@ def test_senha_atual_de_outra_pessoa_nao_serve_para_trocar_a_propria(
 def test_gestor_tambem_troca_a_propria_senha():
     # Arrange
     gestor = Usuario.objects.create_superuser(
-        "gestora@x.com", SENHA, nome="Carla Dias", matricula="G0001"
+        "gestora@x.com", SENHA, nome="Carla Dias", matricula="9000001"
     )
     cliente, _ = _sessao(gestor)
 
