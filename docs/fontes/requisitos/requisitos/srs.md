@@ -33,6 +33,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-03 implementado (ESP-07): auditoria dos RF-05, RF-06, RF-28 e RF-30 com o código que agora tem a regra; a do RF-28 registra a divergência do horário por espaço (consulta de espaços, com login); evidência do RF-11.5 com o teste vigente. Enunciados sem mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-04 implementado na tarefa AUT-12: L-06 fechada e a auditoria do RF-32.1 (Co) passa a dizer que o código segue a regra. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | L-03 passa a citar os limites por conta (troca de senha e alteração de usuários), em linha com o RNF-F12 (DOC-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 19/11/2026 | Max Zimmermann dos Reis | RNF-U02 a RNF-U05 verificados (FE-08, [VER-01](../verificacoes/FE-08-usabilidade.md)): estados da tabela de RNF e da auditoria atualizados (a meta do RNF-U02 passa a 9 de 9 telas, como na ficha desde a DOC-11; o menor contraste de borda calculado é 3,41:1); a L-09 deixa de cobrir RNF-U02, U04 e U05 e fica com a parte que falta do RNF-U03. Sem aprovação. |
 
 ## Sumário
 
@@ -274,10 +275,10 @@ Fichas completas em [`rnf.md`](rnf.md). "Cliente" = ✔ quando é um RNF que o c
 | [RNF-F12](rnf.md#rnf-f12) | F | Limite de tentativas de entrada e de cadastro | entrada 5/min por e-mail e 20/min por origem; cadastro 10/h por origem | ✔ | Rascunho |
 | [RNF-F13](rnf.md#rnf-f13) | F | Revogação e troca da credencial de renovação | 100% das renovações com credencial revogada ou trocada recusadas; acesso vale até 30 min | ✔ | Rascunho |
 | [RNF-U01](rnf.md#rnf-u01) | U | Mensagens em português que orientam a correção | 100% das recusas com código, mensagem e campo | — | Rascunho |
-| [RNF-U02](rnf.md#rnf-u02) | U | Telas utilizáveis em telas estreitas | 7 de 7 telas sem rolagem horizontal a 360 px | ✔ | A verificar |
-| [RNF-U03](rnf.md#rnf-u03) | U | Operação completa pelo teclado | 100% das operações sem mouse | ✔ | A verificar |
-| [RNF-U04](rnf.md#rnf-u04) | U | Contraste de cores (WCAG AA) | texto ≥ 4,5:1; bordas ≥ 3:1 (menor medido: 4,79:1 e 3,66:1) | ✔ | Rascunho (telas a verificar) |
-| [RNF-U05](rnf.md#rnf-u05) | U | Situação nunca indicada só por cor | 100% das etiquetas e avisos com texto | ✔ | A verificar |
+| [RNF-U02](rnf.md#rnf-u02) | U | Telas utilizáveis em telas estreitas | 9 de 9 telas sem rolagem horizontal a 360 px | ✔ | Rascunho (roteiro de 19/11/2026, VER-01) |
+| [RNF-U03](rnf.md#rnf-u03) | U | Operação completa pelo teclado | 100% das operações sem mouse | ✔ | Rascunho — verificado em parte (L-09) |
+| [RNF-U04](rnf.md#rnf-u04) | U | Contraste de cores (WCAG AA) | texto ≥ 4,5:1; bordas ≥ 3:1 (menor calculado: 4,79:1 e 3,41:1) | ✔ | Rascunho |
+| [RNF-U05](rnf.md#rnf-u05) | U | Situação nunca indicada só por cor | 100% das etiquetas e avisos com texto | ✔ | Rascunho |
 | [RNF-U06](rnf.md#rnf-u06) | U | Datas e horas no formato brasileiro | dd/mm/aaaa e HH:MM; 0 datas deslocadas | ✔ | Rascunho |
 | [RNF-R01](rnf.md#rnf-r01) | R | Nenhum espaço comprometido duas vezes | 0 pares sobrepostos, inclusive simultâneos | — | Rascunho |
 | [RNF-R02](rnf.md#rnf-r02) | R | Histórico completo e na mesma gravação | 100% das mudanças aceitas com registro; 0 a mais | ✔ | Rascunho |
@@ -483,7 +484,7 @@ Comportamento que uma necessidade pede e o sistema não tem, comportamento sem t
 | <a id="l-06"></a>L-06 | NS × comportamento | A matrícula não é conferida com a instituição: qualquer texto de até 20 caracteres sem espaço é aceito. | RF-32, RF-32.1; NS-11 | **Fechada** — [CR-04](../mudancas/CR-04-matricula-so-digitos.md) (a [DEC-09](../decisoes/DEC-09.md), decidida em 06/11/2026: só dígitos, sem quantidade mínima ou máxima da instituição). Aplicado na especificação em 10/11/2026 (REQ-13) e implementado na AUT-12 em 17/11/2026. A conferência com a instituição continua fora do escopo. |
 | <a id="l-07"></a>L-07 | RF/RNF sem teste | Não há teste com dois pedidos simultâneos de verdade (duas threads) para o mesmo período; a garantia é a restrição do banco, provada por um teste que simula a corrida. Para a mudança de situação o teste de duas threads existe. | RNF-R01; RF-11.4 | **Aceitar** nesta tarefa (não muda testes); sugerir o teste numa tarefa de testes antes da baseline. |
 | <a id="l-08"></a>L-08 | RF sem teste | A resposta "Não foi possível conectar ao banco de dados." (503) da verificação do sistema não tem teste. | RF-40; [US-19 · CA-02](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md#us-19-ca-02) (TA-188, roteiro manual, REQ-05) | **Aceitar** nesta tarefa; sugerir o teste numa tarefa de testes. |
-| <a id="l-09"></a>L-09 | RNF sem verificação automática | 360 px, teclado, contraste nas telas, situação sem depender da cor, execução num ambiente novo e ausência de segredos no ZIP dependem de verificação manual. | RNF-U02 a RNF-U05, RNF-S01, RNF-S06 | **Aceitar**, com a verificação feita no ensaio antes da entrega e o resultado registrado na versão 0.2. |
+| <a id="l-09"></a>L-09 | RNF sem verificação automática | Execução num ambiente novo e ausência de segredos no ZIP dependem de verificação manual. Do teclado ([RNF-U03](rnf.md#rnf-u03)) faltam só levar até a gravação aceita as operações que gravam e a conferência com um leitor de tela real; 360 px, contraste e situação sem depender da cor foram verificados na FE-08 ([VER-01](../verificacoes/FE-08-usabilidade.md)). | RNF-U03 (em parte), RNF-S01, RNF-S06 | **Aceitar**, com a verificação feita no ensaio antes da entrega e o resultado registrado na versão 0.2. |
 | <a id="l-10"></a>L-10 | Comportamento sem NS | (a) Só a origem das telas é autorizada a chamar a API pelo navegador (RNF-F11): proteção técnica sem NS própria, ligada à NS-14. (b) **Fechada na AUT-11:** o Gestor muda o perfil e desativa usuários pela tela ([RF-42](rf-contas.md#rf-42), [RF-43](rf-contas.md#rf-43), [DEC-27](../decisoes/DEC-27.md)); a administração (`/admin/`) continua com a Equipe de TI. (c) O Gestor também pede reservas em nome próprio ([RF-11](rf-reservas.md#rf-11)) e filtra "somente as minhas" ([RF-12](rf-reservas.md#rf-12)), mas a NS-03 e a NS-07 têm só o Solicitante como origem. | RNF-F11; RF-37, RF-42, RF-43; RF-11, RF-12; Visão | (a) **aceitar**. (b) **fechada** pelo [CR-07](../mudancas/CR-07-gestao-de-usuarios.md) (AUT-11). (c) Ajuste editorial na Visão na 0.2 (acrescentar o Gestor à origem da NS-03 e da NS-07), sem mudança de comportamento. |
 | <a id="l-11"></a>L-11 | NS sem RF implementado | Nenhuma. As 16 NS do 1.0 têm pelo menos um RF implementado e com teste; a NS-17 está fora do 1.0 pela [DEC-24](../decisoes/DEC-24.md), sem RF de propósito, e os verificadores a reconhecem. | — | — |
 | <a id="l-12"></a>L-12 | RF × comportamento | Ao solicitar, o espaço informado por um número que não é positivo e, depois dele, a finalidade (em branco ou acima de 200 caracteres) são conferidos **depois** da data retroativa e das regras de agenda, e não junto com os outros dados do RF-11.1, como diz a ordem do campo Regras de negócio do [RF-11](rf-reservas.md#rf-11). Um pedido com finalidade vazia e data passada recebe primeiro "data retroativa"; com finalidade vazia e espaço zero, recebe primeiro "espaço não identificado" (a ficha dizia o contrário até a DOC-03). O que é aceito não muda, só qual mensagem aparece primeiro; nenhum teste fixa essa posição. Achada ao escrever a ficha de [UC-04](../casos-de-uso/UC-04-solicitar-reserva.md#p7) (REQ-04). | RF-11, RF-11.1; UC-04 | **Aceitar** o comportamento; ajuste editorial do campo Regras de negócio do RF-11 na 0.2 (a ficha de UC-04 já mostra a ordem real) e um teste da ordem numa tarefa de testes. |
@@ -591,10 +592,10 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-F12 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Contador no Redis, sem persistência: zera ao reiniciar o Redis (limitação conhecida do README da raiz). |
 | RNF-F13 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A credencial de acesso não é revogada ([L-04](#l-04), aceita). |
 | RNF-U01 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Os testes cobrem as recusas existentes; uma recusa nova precisa do seu teste de mensagem. |
-| RNF-U02 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar ([L-09](#l-09)). |
-| RNF-U03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar ([L-09](#l-09)). |
-| RNF-U04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Cores-base medidas; telas a verificar ([L-09](#l-09)). |
-| RNF-U05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar ([L-09](#l-09)). |
+| RNF-U02 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Verificado no roteiro de 19/11/2026 ([VER-01](../verificacoes/FE-08-usabilidade.md)). |
+| RNF-U03 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Verificado em parte ([VER-01](../verificacoes/FE-08-usabilidade.md)); o resto na [L-09](#l-09). |
+| RNF-U04 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Verificado por `contraste.test.ts`. |
+| RNF-U05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Verificado por `acessibilidade.test.tsx` e pelo roteiro em tons de cinza. |
 | RNF-U06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-R01 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | Sem teste de duas threads na criação ([L-07](#l-07)). |
 | RNF-R02 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |

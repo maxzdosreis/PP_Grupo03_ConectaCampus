@@ -6,7 +6,7 @@ Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodand
 
 | Pasta ou arquivo | Papel |
 |---|---|
-| `main.tsx`, `App.tsx` | Entrada e rotas (`MensagensProvider` > `BrowserRouter` > `SessaoProvider` > rotas). |
+| `main.tsx`, `App.tsx`, `RotasDaAplicacao.tsx` | Entrada (`MensagensProvider` > `BrowserRouter` > `SessaoProvider`) e, em `RotasDaAplicacao.tsx`, a tabela de rotas (separada para os testes de acessibilidade renderizarem as rotas de verdade). |
 | `navegacao.ts` | Itens do menu (com `exigeLogin`) e os caminhos das telas, montados num lugar só (`caminhoParaReservar`, `caminhoDaReserva`, `proximoSeguro` etc.). |
 | `formatacao.ts` | Datas e horários para exibição, por texto, sem `new Date("AAAA-MM-DD")` (que leria a data em UTC e poderia mostrar o dia anterior no Brasil). |
 | `api/` | Cliente HTTP (`cliente.ts`), sessão (`sessao.ts`) e uma função por endpoint (`autenticacao.ts`, `espacos.ts`, `reservas.ts`, `saude.ts`), com os tipos das respostas; `erros.ts` extrai a mensagem e os erros de cada campo. |
@@ -76,6 +76,16 @@ Testes (Vitest e Testing Library, em jsdom; o fuso do processo é fixado em Amer
 docker compose exec frontend npm test -- --run
 ```
 
+Acessibilidade e contraste (RNF-U03 a U05): `src/acessibilidade.test.tsx` roda o axe (`axe-core`, em `src/testes/acessibilidade.ts`) em cada tela, estado e diálogo, pelas rotas de `RotasDaAplicacao.tsx`, com a regra de contraste desligada porque o jsdom não calcula estilos; `src/contraste.test.ts` calcula o contraste de cada par de cores do tema a partir de `index.css`. Uma cor nova usada como texto ou fundo num módulo CSS precisa de um par nesse teste. Para rodar só os dois:
+
+```bash
+docker compose exec frontend npx vitest --run src/acessibilidade.test.tsx src/contraste.test.ts
+```
+
+Contagem em 19/11/2026: 486 testes em 42 arquivos, dos quais 35 em `acessibilidade.test.tsx` e 39 em `contraste.test.ts`. Num computador sobrecarregado, testes que digitam (`userEvent`) podem passar dos 5 s e falhar por tempo; nesse caso, `npx vitest --run --maxWorkers=2` roda com menos processos em paralelo.
+
+A parte que só o navegador mostra (larguras de 320 a 1280 px, ordem do foco, diálogos com Esc, tons de cinza) é um roteiro manual nas ferramentas do navegador, com os comandos de console na seção "Como repetir" da verificação VER-01, em `docs/fontes/requisitos/verificacoes/` (fora do ZIP).
+
 ```bash
 docker compose exec frontend npm run build
 ```
@@ -92,7 +102,7 @@ Instale pacotes dentro do container (`docker compose run --rm --no-deps frontend
 
 | Para mudar… | Arquivo |
 |---|---|
-| Uma rota ou item do menu | `App.tsx` e `navegacao.ts` (cada tela nova acrescenta o seu item; `apenasGestor` esconde o item de quem não é Gestor) |
+| Uma rota ou item do menu | `RotasDaAplicacao.tsx` e `navegacao.ts` (cada tela nova acrescenta o seu item; `apenasGestor` esconde o item de quem não é Gestor) |
 | Uma chamada à API | `api/<assunto>.ts` |
 | Login, renovação e sessão | `api/cliente.ts`, `api/sessao.ts`, `components/sessao/SessaoProvider.tsx` |
 | Uma tela | `pages/Pagina<Nome>.tsx` e os componentes de `components/<assunto>/` |

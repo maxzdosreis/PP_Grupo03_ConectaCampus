@@ -1,10 +1,21 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route, Routes } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { Link, Route, Routes } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { renderizarComProvedores, valorDaSessao } from '../../testes/renderizar.tsx'
 import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../../testes/usuarios.ts'
 import Layout from './Layout.tsx'
+
+function FocaNoTitulo() {
+  const titulo = useRef<HTMLHeadingElement>(null)
+  useEffect(() => titulo.current?.focus(), [])
+  return (
+    <h1 ref={titulo} tabIndex={-1}>
+      Outra
+    </h1>
+  )
+}
 
 function renderizar(sessao = valorDaSessao()) {
   return renderizarComProvedores(
@@ -60,6 +71,51 @@ describe('Layout', () => {
     ).toBe('/cadastro')
     expect(within(cabecalho).queryByRole('button', { name: 'Sair' })).toBeNull()
     expect(itensDoMenu()).toEqual(['Início'])
+  })
+
+  describe('foco ao trocar de tela', () => {
+    function renderizarComDuasTelas() {
+      renderizarComProvedores(
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Link to="/outra">Ir para a outra tela</Link>} />
+            <Route path="outra" element={<FocaNoTitulo />} />
+          </Route>
+        </Routes>,
+        { sessao: valorDaSessao({ usuario: USUARIO_GESTOR }) },
+      )
+    }
+
+    it('na primeira carga, o foco não sai do lugar', () => {
+      renderizarComDuasTelas()
+
+      expect(document.activeElement).toBe(document.body)
+    })
+
+    it('se o elemento com o foco sumiu, o foco vai para o conteúdo', async () => {
+      renderizarComProvedores(
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Link to="/mantem">Ir para a outra tela</Link>} />
+            <Route path="mantem" element={<p>Outra tela</p>} />
+          </Route>
+        </Routes>,
+        { sessao: valorDaSessao({ usuario: USUARIO_GESTOR }) },
+      )
+
+      await userEvent.click(screen.getByRole('link', { name: 'Ir para a outra tela' }))
+
+      await screen.findByText('Outra tela')
+      expect(document.activeElement).toBe(screen.getByRole('main'))
+    })
+
+    it('não tira o foco que a própria tela pôs', async () => {
+      renderizarComDuasTelas()
+
+      await userEvent.click(screen.getByRole('link', { name: 'Ir para a outra tela' }))
+
+      expect(document.activeElement).toBe(await screen.findByRole('heading', { name: 'Outra' }))
+    })
   })
 
   it('enquanto verifica a sessão, não mostra nem Entrar nem Sair', () => {

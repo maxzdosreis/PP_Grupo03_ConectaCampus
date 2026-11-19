@@ -1,12 +1,32 @@
-import { Link, Outlet } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { Link, Outlet, useLocation } from 'react-router'
 import { useSessao } from '../../hooks/useSessao.ts'
 import { itensVisiveis } from '../../navegacao.ts'
 import AreaDoUsuario from './AreaDoUsuario.tsx'
 import estilos from './Layout.module.css'
 import Navegacao from './Navegacao.tsx'
 
+function useFocoNoConteudoAoTrocarDeTela() {
+  const { pathname } = useLocation()
+  const conteudo = useRef<HTMLElement>(null)
+  const telaAnterior = useRef(pathname)
+
+  useEffect(() => {
+    if (telaAnterior.current === pathname) {
+      return
+    }
+    telaAnterior.current = pathname
+    if (document.activeElement === null || document.activeElement === document.body) {
+      conteudo.current?.focus({ preventScroll: true })
+    }
+  }, [pathname])
+
+  return conteudo
+}
+
 function Layout() {
   const { autenticado, ehGestor } = useSessao()
+  const conteudo = useFocoNoConteudoAoTrocarDeTela()
 
   return (
     <div className={estilos.pagina}>
@@ -22,7 +42,7 @@ function Layout() {
           <AreaDoUsuario />
         </div>
       </header>
-      <main id="conteudo" tabIndex={-1} className={estilos.conteudo}>
+      <main id="conteudo" ref={conteudo} tabIndex={-1} className={estilos.conteudo}>
         <Outlet />
       </main>
       <footer className={estilos.rodape}>
