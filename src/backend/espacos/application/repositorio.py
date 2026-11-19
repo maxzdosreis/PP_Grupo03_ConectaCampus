@@ -1,3 +1,4 @@
+from contextlib import AbstractContextManager
 from typing import Protocol
 
 from espacos.domain.espaco_esportivo import EspacoEsportivo
@@ -14,6 +15,22 @@ class RepositorioEspacos(Protocol):
         se outra operação alterou o espaço depois da leitura, lança
         EspacoDesatualizado sem gravar. Depois de gravar, marca a entidade como
         gravada.
+        """
+
+    def em_transacao(self) -> AbstractContextManager[None]:
+        """Abre uma transação que vale até o fim do bloco `with`.
+
+        As travas de `travar` só existem dentro dela e são soltas no commit ou
+        no rollback. Dentro de outra transação já aberta, participa dela.
+        """
+
+    def travar(self, espaco_id: int) -> None:
+        """Trava a linha do espaço até o fim da transação aberta (ESP-08).
+
+        Quem tentar travar o mesmo espaço espera; espaços diferentes não se
+        bloqueiam. Só vale dentro de `em_transacao`; fora dela, é erro de
+        programação. Id inexistente não trava nada e não é erro: quem chama
+        decide o que a ausência significa.
         """
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:

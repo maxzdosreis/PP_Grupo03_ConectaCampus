@@ -64,6 +64,15 @@ class VerificarEspacoDisponivel:
         return espaco
 
 
+class VerificarEspacoParaReservar:
+    def __init__(self, repositorio: RepositorioEspacos) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, espaco_id: int) -> EspacoEsportivo:
+        self._repositorio.travar(espaco_id)
+        return VerificarEspacoDisponivel(self._repositorio).executar(espaco_id)
+
+
 class EditarEspaco:
     def __init__(
         self, repositorio: RepositorioEspacos, reservas: ReservasDoEspaco
@@ -81,23 +90,25 @@ class EditarEspaco:
         abertura: time | None = None,
         fechamento: time | None = None,
     ) -> EspacoEsportivo:
-        espaco = _obter_ou_falhar(self._repositorio, espaco_id)
-        nome_anterior = espaco.nome
-        horario_anterior = espaco.horario
-        espaco.alterar_dados(
-            nome=nome,
-            tipo=tipo,
-            capacidade=capacidade,
-            abertura=abertura,
-            fechamento=fechamento,
-        )
-        if espaco.horario != horario_anterior:
-            self._garantir_reservas_dentro_do_horario(espaco_id, espaco.horario)
-        if espaco.nome != nome_anterior and self._repositorio.existe_com_nome(
-            espaco.nome, ignorar_id=espaco_id
-        ):
-            raise NomeDeEspacoJaCadastrado()
-        return self._repositorio.salvar(espaco)
+        with self._repositorio.em_transacao():
+            espaco = _obter_ou_falhar(self._repositorio, espaco_id)
+            nome_anterior = espaco.nome
+            horario_anterior = espaco.horario
+            espaco.alterar_dados(
+                nome=nome,
+                tipo=tipo,
+                capacidade=capacidade,
+                abertura=abertura,
+                fechamento=fechamento,
+            )
+            if espaco.horario != horario_anterior:
+                self._repositorio.travar(espaco_id)
+                self._garantir_reservas_dentro_do_horario(espaco_id, espaco.horario)
+            if espaco.nome != nome_anterior and self._repositorio.existe_com_nome(
+                espaco.nome, ignorar_id=espaco_id
+            ):
+                raise NomeDeEspacoJaCadastrado()
+            return self._repositorio.salvar(espaco)
 
     def _garantir_reservas_dentro_do_horario(
         self, espaco_id: int, horario: HorarioDeFuncionamento

@@ -12,6 +12,7 @@ Recebe as solicitações de reserva, impede conflito de horário e pedidos fora 
 - **Visibilidade:** o Gestor vê todas; o Solicitante vê só as próprias. Reserva de outra pessoa responde 404, e não 403, para não revelar que existe. A única exceção é a [agenda do dia](#agenda-do-dia), que mostra que um horário está ocupado, sem dizer de quem.
 - **Histórico** (`RegistroDeSituacao`): a criação e cada mudança aceita viram um registro, gravado na mesma transação da reserva. A tentativa recusada de mudar a situação também vira um registro (`resultado` `RECUSADA`, com a situação pedida e o código do erro), gravado numa transação própria, confirmada antes de a recusa chegar a quem pediu (DEC-05, RES-12). Ver [Histórico de uma reserva](#histórico-de-uma-reserva).
 - **Alterações simultâneas:** se duas pessoas mudarem a mesma reserva ao mesmo tempo, só a primeira grava; a segunda recebe 409 `RESERVA_DESATUALIZADA`.
+- **Criar reserva × editar o horário do espaço** (ESP-08): a criação roda numa transação que trava a linha do espaço (pela fachada `espacos.publico`, porta `ConsultaDeEspacos.obter_espaco_reservavel_travado`) antes de ler o horário e a mantém até gravar a reserva. Assim a edição do horário do mesmo espaço espera o pedido terminar e o conta, ou o pedido espera a edição e é validado pelo horário novo. Criações no mesmo espaço passam uma de cada vez; a exclusion constraint continua sendo a defesa final contra sobreposição. A agenda do dia e as demais consultas não travam nada.
 
 ## Endpoints
 

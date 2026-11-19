@@ -139,10 +139,12 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
         espacos: Iterable[EspacoReservavel] = (),
         *,
         ids_inativos: Iterable[int] = (),
+        eventos: list[str] | None = None,
     ) -> None:
         self._espacos = {espaco.id: espaco for espaco in espacos}
         self._ids_inativos = frozenset(ids_inativos)
         self.ids_consultados: list[int] = []
+        self.eventos = eventos if eventos is not None else []
 
     def obter_espaco_reservavel(self, espaco_id: int) -> EspacoReservavel:
         self.ids_consultados.append(espaco_id)
@@ -153,17 +155,34 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
             raise ConflitoDeEstado("Este espaço está inativo e não aceita reservas.")
         return espaco
 
+    def obter_espaco_reservavel_travado(self, espaco_id: int) -> EspacoReservavel:
+        self.eventos.append("travar")
+        return self.obter_espaco_reservavel(espaco_id)
+
 
 class RepositorioReservasEmMemoria(RepositorioReservas):
-    def __init__(self) -> None:
+    def __init__(self, eventos: list[str] | None = None) -> None:
+        self.eventos = eventos if eventos is not None else []
+        self.transacoes_abertas = 0
         self._reservas: dict[int, Reserva] = {}
         self._historico: dict[int, list[RegistroDeSituacao]] = {}
         self._proximo_id = 1
         self.chamadas_de_salvar = 0
         self.tentativas_registradas = 0
 
+    @contextmanager
+    def em_transacao(self) -> Iterator[None]:
+        self.eventos.append("abrir")
+        self.transacoes_abertas += 1
+        try:
+            yield
+        finally:
+            self.transacoes_abertas -= 1
+            self.eventos.append("fechar")
+
     def salvar(self, reserva: Reserva) -> Reserva:
         self.chamadas_de_salvar += 1
+        self.eventos.append("salvar")
         if reserva.id is not None and reserva.id not in self._reservas:
             raise ReservaNaoEncontrada(reserva.id)
         if reserva.id is not None:
@@ -210,6 +229,7 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         )
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
+        self.eventos.append("listar")
         return self._ordenadas(
             reserva
             for reserva in self._reservas.values()

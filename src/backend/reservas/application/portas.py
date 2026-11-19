@@ -18,3 +18,11 @@ class ConsultaDeEspacos(Protocol):
         Espaço inexistente lança um RecursoNaoEncontrado; inativo, um
         ConflitoDeEstado. Os erros sobem sem tradução.
         """
+
+    def obter_espaco_reservavel_travado(self, espaco_id: int) -> EspacoReservavel:
+        """Como `obter_espaco_reservavel`, mas trava o espaço até o fim da transação.
+
+        Só pode ser chamada dentro de `RepositorioReservas.em_transacao`. A trava
+        impede que o horário do espaço mude entre a leitura e a gravação da
+        reserva (ESP-08); criações no mesmo espaço passam uma de cada vez.
+        """

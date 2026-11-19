@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
-from espacos.application.casos_de_uso import VerificarEspacoDisponivel
+from espacos.application.casos_de_uso import (
+    VerificarEspacoDisponivel,
+    VerificarEspacoParaReservar,
+)
 from espacos.application.portas import ReservasDoEspaco
 from espacos.infrastructure import consulta_de_reservas
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
@@ -18,6 +21,15 @@ class EspacoDisponivel:
 
 def verificar_espaco_disponivel(espaco_id: int) -> EspacoDisponivel:
     espaco = VerificarEspacoDisponivel(RepositorioEspacosDjango()).executar(espaco_id)
+    return _como_disponivel(espaco)
+
+
+def verificar_espaco_disponivel_para_reserva(espaco_id: int) -> EspacoDisponivel:
+    espaco = VerificarEspacoParaReservar(RepositorioEspacosDjango()).executar(espaco_id)
+    return _como_disponivel(espaco)
+
+
+def _como_disponivel(espaco) -> EspacoDisponivel:
     horario = espaco.horario
     return EspacoDisponivel(
         id=espaco.id,

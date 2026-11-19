@@ -1,3 +1,4 @@
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Protocol
@@ -54,6 +55,13 @@ def _exigir_inteiro(nome: str, valor: object) -> None:
 
 
 class RepositorioReservas(Protocol):
+    def em_transacao(self) -> AbstractContextManager[None]:
+        """Abre uma transação que vale até o fim do bloco `with` (ESP-08).
+
+        Tudo o que o caso de uso lê e grava dentro dela, inclusive as travas
+        tomadas por outras portas na mesma conexão, confirma ou desfaz junto.
+        """
+
     def salvar(self, reserva: Reserva) -> Reserva:
         """Insere quando o id é None e atualiza quando já existe.
 
