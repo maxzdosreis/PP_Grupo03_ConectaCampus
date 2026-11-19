@@ -1,0 +1,79 @@
+codigo,titulo,frente,fase,pontos,status,responsavel
+GES-01,Levar os pontos a confirmar à Aula 6,Gestão,0,1,feito,Max
+AUT-01,Registrar a decisão de incluir autenticação,Autenticação,0,1,feito,Max
+INF-01,"Docker Compose com PostgreSQL 16, backend e frontend",Infra,0,2,feito,Max
+INF-02,Projeto Django 5.2 + DRF com configuração por ambiente,Infra,0,2,feito,Max
+AUT-02,Modelo de usuário customizado (antes da 1ª migration),Autenticação,0,2,feito,Max
+INF-03,Ferramentas de qualidade do backend,Infra,0,1,feito,Max
+INF-04,Exception handler único e formato de resposta,Infra,0,2,feito,Max
+INF-05,Frontend Vite + React + TypeScript,Frontend,0,2,feito,Max
+ESP-01,Domínio de EspacoEsportivo,Espaços,1,2,feito,Max
+ESP-02,Persistência de espaços,Espaços,1,2,feito,Max
+ESP-03,Cadastrar e listar espaços (API),Espaços,1,2,feito,Max
+ESP-05,Contrato entre contextos: espaço existe e está ativo,Espaços,1,1,feito,Max
+RES-01,Domínio de Reserva e tabela de transições,Reservas,1,3,feito,Max
+RES-02,Regra de conflito de horário,Reservas,1,2,feito,Max
+RES-03,Persistência de reservas,Reservas,1,2,feito,Max
+RES-04,Cadastrar reserva (SOLICITADA),Reservas,1,2,feito,Max
+RES-05,Consultar reservas com filtros combinados,Reservas,1,2,feito,Max
+RES-06,Alterar situação da reserva,Reservas,1,2,feito,Max
+AUT-03,"Login, refresh e usuário atual (JWT)",Autenticação,1,2,feito,Max
+AUT-04,Cadastro de usuário solicitante,Autenticação,1,2,feito,Max
+FE-01,Layout base e componente de mensagens,Frontend,1,2,feito,Max
+FE-02,Tela de espaços,Frontend,1,2,feito,Max
+FE-03,Tela de nova reserva,Frontend,1,2,feito,Max
+FE-04,Tela de consulta de reservas,Frontend,1,2,feito,Max
+FE-05,Ações de mudança de situação,Frontend,1,2,feito,Max
+INF-06,Comando carregar_dados_exemplo,Infra,1,2,feito,Max
+AUT-05,Permissões por perfil na API,Autenticação,2,2,feito,Max
+AUT-06,"Login, cadastro e rotas protegidas no front",Autenticação,2,3,feito,Max
+AUT-07,Testes de autenticação e permissões,Autenticação,2,2,feito,Max
+RES-07,Histórico de mudanças de situação,Reservas,2,2,feito,Max
+FE-06,Minhas reservas e detalhe com histórico,Frontend,2,2,feito,Max
+ESP-04,Editar e desativar espaço,Espaços,2,1,feito,Max
+RES-09,Regras de agenda (opcional),Reservas,2,1,feito,Max
+FE-07,Agenda do espaço no dia (opcional),Frontend,2,2,feito,Max
+ESP-06,Testes de espaços,Espaços,2,1,feito,Max
+RES-08,Testes de reservas,Reservas,2,2,feito,Max
+REQ-01,"Documento de Visão, stakeholders e glossário",Requisitos,1,2,feito,Max
+REQ-02,"SRS: RF, RNF (FURPS) e priorização QFD",Requisitos,1,3,feito,Max
+REQ-03,Diagrama UML de casos de uso,Requisitos,1,2,feito,Max
+REQ-04,Casos de uso detalhados (Cockburn),Requisitos,2,3,feito,Max
+REQ-05,User Stories e critérios de aceite,Requisitos,2,3,feito,Max
+REQ-06,Matriz de rastreabilidade e decisões pendentes,Requisitos,2,2,feito,Max
+GES-02,Registrar as respostas da Aula 7 e decidir as tarefas condicionais,Gestão,2,1,feito,Max
+INF-07,Portas configuráveis sem ajustar duas variáveis,Infra,2,1,feito,Max
+AUT-08,Limite de tentativas de login,Autenticação,2,1,feito,Max
+AUT-09,Sair revogando o token de renovação,Autenticação,2,2,feito,Max
+RES-10,Paginação da consulta de reservas,Reservas,2,2,feito,Max
+AUT-10,Trocar a própria senha,Autenticação,2,2,feito,Max
+AUT-11,Gestor altera perfil e desativa usuários pela tela (opcional),Autenticação,2,3,feito,Max
+INF-08,Modo de produção opcional,Infra,2,2,feito,Max
+RES-11,"Situação da reserva em relação ao horário (DEC-13, CR)",Reservas,2,2,feito,Max
+RES-12,"Registrar tentativas recusadas no histórico (DEC-05, CR)",Reservas,2,2,feito,Max
+RES-13,Cancelada: reservas futuras ao desativar um espaço (DEC-06 confirmada),Reservas,2,0,feito,
+ESP-07,"Horário de funcionamento por espaço e novos valores da agenda (DEC-07, CR)",Espaços,2,3,feito,Max
+AUT-12,"Matrícula só com dígitos (DEC-09, CR)",Autenticação,2,1,feito,Max
+REQ-09,Levantamento: entrevistas com representantes de stakeholders,Requisitos,2,2,feito,Max
+REQ-10,Levantamento: questionário com estudantes,Requisitos,2,2,feito,Max
+REQ-11,Síntese do levantamento e decisões resultantes,Requisitos,2,2,feito,Max
+REQ-12,Atendente responsável e regras de negócio (RN),Requisitos,2,3,feito,Max
+REQ-13,Aplicar CR-01 a CR-04 na especificação,Requisitos,2,2,feito,Max
+REQ-08,Gerar RS_Grupo03_Especificacao.pdf,Requisitos,2,3,feito,Max
+REQ-14,Gerar RS_Grupo03_Evidencias.pdf,Requisitos,2,1,feito,Max
+REQ-15,Apresentação de Requisitos (13/11),Requisitos,2,1,feito,Max
+DOC-01,Visão do sistema (diagrama de componentes),Modelagem,3,2,feito,Max
+DOC-02,Modelo de domínio e diagrama de estados,Modelagem,3,2,feito,Max
+DOC-03,Fluxo principal com rejeição,Modelagem,3,1,feito,Max
+DOC-10,Diagrama entidade-relacionamento (DER),Modelagem,3,2,feito,Max
+DOC-11,Corrigir textos desatualizados e completar as limitações,Entrega,3,2,feito,Max
+FE-08,Verificar os RNF de responsividade e acessibilidade (U02 a U05),Frontend,3,2,feito,Max
+DOC-04,Decisões técnicas e modelagem.pdf,Modelagem,3,2,feito,Max
+INF-09,Deploy em VPS (opcional),Infra,3,3,a_fazer,
+ESP-08,Verificar a corrida entre editar o horário do espaço e criar reserva (opcional),Espaços,3,1,feito,Max
+DOC-09,Dividir o README em README principal e READMEs por módulo,Entrega,3,2,feito,Max
+DOC-05,README reprodutível,Entrega,3,2,feito,Max
+DOC-06,Contribuições (contribuicoes.pdf),Entrega,3,1,fazendo,Max
+REQ-07,Revisão por pares e aprovação da baseline 1.0,Requisitos,3,2,a_fazer,
+DOC-07,Teste em clone limpo e geração do ZIP,Entrega,3,1,a_fazer,
+DOC-08,Roteiro e ensaio da demonstração,Entrega,3,1,a_fazer,

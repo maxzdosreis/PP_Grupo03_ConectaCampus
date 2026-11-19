@@ -270,4 +270,4 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 | Exemplos | [`src/backend/exemplos/README.md`](src/backend/exemplos/README.md) | Como o comando de dados de exemplo funciona. |
 | Frontend | [`src/frontend/README.md`](src/frontend/README.md) | Pastas, rotas e telas, cliente da API e sessão, convenções e comandos. |
 | Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) | Decisões técnicas e modelagem: as escolhas de tecnologia e por quê, a organização em contextos e camadas, o modelo do domínio, os estados da reserva e o fluxo principal. |
-| Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) | Quem fez cada parte do trabalho. |
+| Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) | Quem fez cada parte do trabalho, com a evidência de cada linha. |
