@@ -1,43 +1,14 @@
-import { BrowserRouter, Route, Routes } from 'react-router'
-import Layout from './components/layout/Layout.tsx'
+import { BrowserRouter } from 'react-router'
 import MensagensProvider from './components/mensagens/MensagensProvider.tsx'
-import RotaDeGestor from './components/sessao/RotaDeGestor.tsx'
-import RotaProtegida from './components/sessao/RotaProtegida.tsx'
 import SessaoProvider from './components/sessao/SessaoProvider.tsx'
-import PaginaCadastro from './pages/PaginaCadastro.tsx'
-import PaginaEntrar from './pages/PaginaEntrar.tsx'
-import PaginaEspacos from './pages/PaginaEspacos.tsx'
-import PaginaInicial from './pages/PaginaInicial.tsx'
-import PaginaMinhaConta from './pages/PaginaMinhaConta.tsx'
-import PaginaNaoEncontrada from './pages/PaginaNaoEncontrada.tsx'
-import PaginaNovaReserva from './pages/PaginaNovaReserva.tsx'
-import PaginaReserva from './pages/PaginaReserva.tsx'
-import PaginaReservas from './pages/PaginaReservas.tsx'
-import PaginaUsuarios from './pages/PaginaUsuarios.tsx'
+import RotasDaAplicacao from './RotasDaAplicacao.tsx'
 
 function App() {
   return (
     <MensagensProvider>
       <BrowserRouter>
         <SessaoProvider>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index element={<PaginaInicial />} />
-              <Route path="entrar" element={<PaginaEntrar />} />
-              <Route path="cadastro" element={<PaginaCadastro />} />
-              <Route element={<RotaProtegida />}>
-                <Route path="conta" element={<PaginaMinhaConta />} />
-                <Route path="espacos" element={<PaginaEspacos />} />
-                <Route path="reservas" element={<PaginaReservas />} />
-                <Route path="reservas/nova" element={<PaginaNovaReserva />} />
-                <Route path="reservas/:reservaId" element={<PaginaReserva />} />
-                <Route element={<RotaDeGestor />}>
-                  <Route path="usuarios" element={<PaginaUsuarios />} />
-                </Route>
-              </Route>
-              <Route path="*" element={<PaginaNaoEncontrada />} />
-            </Route>
-          </Routes>
+          <RotasDaAplicacao />
         </SessaoProvider>
       </BrowserRouter>
     </MensagensProvider>

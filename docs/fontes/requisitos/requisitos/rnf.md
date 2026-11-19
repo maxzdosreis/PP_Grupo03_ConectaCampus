@@ -21,13 +21,14 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RNF-F12 cobre também o limite de tentativas de troca de senha, por conta; RNF-F13, a revogação das outras sessões ao trocar a senha (AUT-10, [DEC-26](../decisoes/DEC-26.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RNF-R02: a origem e a verificação passam a citar a RES-12 (CR-02 implementado), com os testes das tentativas recusadas gravadas em outra conexão. Enunciado sem mudança. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | RNF-F12 cobre também a alteração de usuários pelo Gestor (30 por minuto por conta, `LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO`, AUT-11) e o título passa a dizer quais tentativas limita; RNF-S01 lista os serviços de cada modo de execução; RNF-U02 inclui `/conta` e `/usuarios` nas telas cobertas, sem mudar o estado "a verificar" (DOC-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 19/11/2026 | Max Zimmermann dos Reis | RNF-U02 a RNF-U05 verificados (FE-08, [VER-01](../verificacoes/FE-08-usabilidade.md)): U02, U04 e U05 passam a Rascunho, com o roteiro registrado (U02) e os testes `acessibilidade.test.tsx` e `contraste.test.ts`; U03 passa a "Rascunho — verificado em parte (L-09)", estado novo no "Como ler", porque falta concluir pelo teclado as operações que gravam e conferir com um leitor de tela real. Enunciados e métricas sem mudança. Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Como ler
 
 - **ID:** `RNF-<letra FURPS><número>`, estável e nunca reutilizado.
 - **O cliente não pediria (A3):** ✔ marca o RNF que a instituição dificilmente diria sozinha, mas que a frustraria se faltasse (A3·s27 pede para identificá-los).
 - **Como verificar:** o teste ou comando que já existe (caminhos a partir de `src/backend/`, salvo os do frontend, em `src/frontend/src/`), ou "a verificar" com o método proposto.
-- **Estado:** Rascunho (verificado pelos testes citados), Rascunho — a verificar (sem verificação automática ainda) ou Não atendido (medido e fora do alvo; vira lacuna).
+- **Estado:** Rascunho (verificado pelos testes citados ou pelo roteiro com resultado registrado), Rascunho — verificado em parte (L-09) (verificado o que a ficha cita; o que falta está na lacuna [L-09](srs.md#l-09)), Rascunho — a verificar (sem verificação ainda) ou Não atendido (medido e fora do alvo; vira lacuna).
 - Os termos têm definição única no [glossário](../glossario.md).
 
 ## 1. Funcionalidade (F)
@@ -196,10 +197,10 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 |---|---|
 | **Enunciado** | Todas as telas podem ser usadas, sem rolagem horizontal da página inteira, numa largura de 360 px; tabelas largas rolam dentro da própria área. |
 | **Métrica e valor-alvo** | 9 de 9 telas (`/`, `/entrar`, `/cadastro`, `/conta`, `/espacos`, `/reservas`, `/reservas/nova`, `/reservas/:reservaId`, `/usuarios`) sem rolagem horizontal da página a 360 × 640 px. |
-| **Como verificar** | A verificar: abrir cada tela com a largura de 360 px (ferramentas do navegador, modo de dispositivo) e conferir `document.documentElement.scrollWidth <= 360`. Hoje há só o apoio do CSS (quebras abaixo de 30rem e tabelas em região com rolagem própria), sem teste. |
+| **Como verificar** | Roteiro no navegador, feito em 19/11/2026 com o resultado registrado na [VER-01](../verificacoes/FE-08-usabilidade.md#3-navegador-real-larguras-rnf-u02): cada tela aberta a 360 × 640 (e também a 320, 768 e 1280 px), como Gestor e como Solicitante, com `document.documentElement.scrollWidth` igual à largura útil e as três tabelas rolando na própria região. Resultado: 9 de 9 telas sem rolagem horizontal da página, depois da correção da FE-08 (`/reservas` media 1003 px a 320 px). Sem teste automático, porque o jsdom não calcula layout. |
 | **Origem** | NS-03, NS-07; premissa P-07 da [Visão](../visao.md#premissas) |
 | **O cliente não pediria** | ✔ |
-| **Revisão / estado** | 0.1 • Rascunho — a verificar |
+| **Revisão / estado** | 0.1 • Rascunho |
 
 ### <a id="rnf-u03"></a>RNF-U03 · Operação completa pelo teclado
 
@@ -207,10 +208,10 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 |---|---|
 | **Enunciado** | Todas as operações das telas podem ser feitas só com o teclado, com o foco sempre visível, e um diálogo devolve o foco a quem o abriu. |
 | **Métrica e valor-alvo** | 100% das operações dos RF com tela feitas sem mouse no roteiro da demonstração; 0 elementos de ação inalcançáveis por Tab. |
-| **Como verificar** | Parcial (testes): `components/dialogo/Dialogo.test.tsx` ("Esc chama aoFechar", "ao fechar, o foco volta para quem abriu"); `pages/PaginaEntrar.test.tsx` ("erros de campo aparecem embaixo do campo, que recebe o foco"); `components/formulario/Campo.test.tsx`. A verificar: roteiro manual só com Tab, Shift+Tab, Enter, espaço e Esc pelo fluxo da demonstração. |
+| **Como verificar** | Testes: `acessibilidade.test.tsx` (axe sem violações em todas as telas, estados e diálogos, inclusive nomes acessíveis de campos e botões); `components/layout/Layout.test.tsx` ("se o elemento com o foco sumiu, o foco vai para o conteúdo", "não tira o foco que a própria tela pôs"); `components/dialogo/Dialogo.test.tsx` ("Esc chama aoFechar", "ao fechar, o foco volta para quem abriu"); `pages/PaginaEntrar.test.tsx` ("erros de campo aparecem embaixo do campo, que recebe o foco"); `components/formulario/Campo.test.tsx`. Roteiro no navegador em 19/11/2026, só com Tab, Shift+Tab, Enter, Espaço, setas e Esc ([VER-01](../verificacoes/FE-08-usabilidade.md#6-navegador-real-teclado-e-foco-rnf-u03)): em todas as telas, um ciclo completo de Tab alcança todos os controles, com o contorno de foco desenhado em cada parada e sem armadilha; os diálogos são modais e devolvem o foco a quem os abriu (5 de 5); as operações foram levadas pelo teclado até a resposta da API. Falta ([L-09](srs.md#l-09)): levar pelo teclado até a gravação aceita as operações que gravam (feito só até a recusa da API, para não alterar os dados de exemplo) e conferir com um leitor de tela real. |
 | **Origem** | NS-13; premissa P-07 |
 | **O cliente não pediria** | ✔ |
-| **Revisão / estado** | 0.1 • Rascunho — a verificar |
+| **Revisão / estado** | 0.1 • Rascunho — verificado em parte (L-09) |
 
 ### <a id="rnf-u04"></a>RNF-U04 · Contraste de cores (WCAG AA)
 
@@ -218,10 +219,10 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 |---|---|
 | **Enunciado** | O texto tem contraste de pelo menos 4,5:1 com o fundo, e as bordas de controles, de pelo menos 3:1 (nível AA das WCAG 2.1). |
 | **Métrica e valor-alvo** | Texto ≥ 4,5:1; bordas de controle ≥ 3:1. |
-| **Como verificar** | **Medido** nas cores definidas em `index.css` (cálculo da razão de luminância relativa das WCAG): menor par de texto, sucesso sobre o fundo de sucesso, 4,79:1; texto suave sobre o fundo, 6,02:1; texto do botão sobre a cor primária, 6,70:1; erro sobre o fundo de erro, 5,91:1; aviso sobre o fundo de aviso, 6,84:1; borda forte sobre a superfície, 3,66:1. A verificar: as combinações montadas pelos módulos CSS de cada componente, com uma ferramenta de auditoria de acessibilidade do navegador em cada tela. |
+| **Como verificar** | `contraste.test.ts`: calcula, pela fórmula das WCAG, a razão de cada par de texto e fundo e de cada borda, contorno de foco e indicador de controle que as telas montam, a partir dos tokens de `index.css` (as cores translúcidas compostas sobre o fundo real), e falha se um módulo CSS usar como texto ou fundo um token sem par conferido. Menor par de texto: sucesso sobre o fundo de sucesso, 4,79:1; menor borda: borda dos campos sobre o fundo da página, 3,41:1. Tabela completa e isenções (separadores decorativos, botões desabilitados) na [VER-01](../verificacoes/FE-08-usabilidade.md#4-contraste-calculado-rnf-u04), com a cor do contorno de foco conferida nas capturas do navegador. |
 | **Origem** | NS-13; premissa P-07 |
 | **O cliente não pediria** | ✔ |
-| **Revisão / estado** | 0.1 • Rascunho (cores-base medidas; telas a verificar) |
+| **Revisão / estado** | 0.1 • Rascunho |
 
 ### <a id="rnf-u05"></a>RNF-U05 · Situação nunca indicada só por cor
 
@@ -229,10 +230,10 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 |---|---|
 | **Enunciado** | A situação de uma reserva, o estado de um espaço e o tipo de cada aviso aparecem sempre como texto, além da cor. |
 | **Métrica e valor-alvo** | 100% das etiquetas e avisos com texto legível sem cor. |
-| **Como verificar** | Sem teste específico: as etiquetas recebem o rótulo da situação como texto (`components/reservas/EtiquetaDeSituacao.tsx`, `components/etiqueta/`), e `components/mensagens/Aviso.test.tsx` confere o papel de cada aviso. A verificar: no roteiro do [RNF-U03](#rnf-u03), ver cada tela em tons de cinza (filtro de cor do navegador) e conferir que toda situação e todo aviso continuam identificáveis. |
+| **Como verificar** | `acessibilidade.test.tsx` ("a situação de cada reserva aparece como texto na lista, com o motivo", "o estado de cada espaço aparece como texto", "o tipo de cada aviso aparece como texto, além da cor e do marcador", "na linha do tempo, a tentativa recusada se distingue da mudança aceita pelo texto"); `components/mensagens/Aviso.test.tsx`; `components/reservas/LinhaDoTempo.test.tsx` ("mostra a tentativa recusada com texto, ícone e o motivo legível do código"). Roteiro em tons de cinza no navegador em 19/11/2026 ([VER-01](../verificacoes/FE-08-usabilidade.md#6-navegador-real-teclado-e-foco-rnf-u03)): toda situação continua legível como texto. |
 | **Origem** | NS-07, NS-13 |
 | **O cliente não pediria** | ✔ |
-| **Revisão / estado** | 0.1 • Rascunho — a verificar |
+| **Revisão / estado** | 0.1 • Rascunho |
 
 ### <a id="rnf-u06"></a>RNF-U06 · Datas e horas no formato brasileiro
 

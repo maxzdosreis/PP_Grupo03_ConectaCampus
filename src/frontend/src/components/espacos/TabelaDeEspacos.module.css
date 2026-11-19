@@ -1,4 +1,5 @@
 .rolagem {
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-medio);

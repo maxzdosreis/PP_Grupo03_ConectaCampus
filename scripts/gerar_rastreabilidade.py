@@ -17,7 +17,7 @@ from verificar_requisitos import PASTA, RAIZ, fichas_de_rf, fichas_de_rnf, ler, 
 PASTA_RAS = PASTA / "rastreabilidade"
 SRS = PASTA / "requisitos" / "srs.md"
 MATRIZ_DE_ACESSO = RAIZ / "docs" / "fontes" / "matriz_de_acesso.md"
-APP_TSX = FRONTEND / "App.tsx"
+APP_TSX = FRONTEND / "RotasDaAplicacao.tsx"
 URLS_DO_CONFIG = BACKEND / "config" / "urls.py"
 PASTA_DEC = PASTA / "decisoes"
 PAUTA = PASTA_DEC / "pauta-aula-7.md"

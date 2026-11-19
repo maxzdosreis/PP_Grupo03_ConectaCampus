@@ -68,11 +68,10 @@ TA pendentes: nenhum (a especificação está adiante do código de propósito; 
 
 | Forma | RNF |
 |---|---|
-| automatizado | 23 |
+| automatizado | 26 |
 | automatizado (comando) | 2 |
-| automatizado + manual (a verificar) | 2 |
-| manual (a verificar) | 3 |
+| manual | 1 |
+| manual (a verificar) | 2 |
 | medição | 2 |
-| medição + manual (a verificar) | 1 |
 
 Detalhe em [`rnf.md`](rnf.md). Total: 33 RNF.
