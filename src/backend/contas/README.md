@@ -122,7 +122,7 @@ curl -X POST http://localhost:8000/api/auth/senha/ -H "Authorization: Bearer $AC
 
 - **Ordem das conferências:** limite de tentativas → campos informados → senha atual (`SENHA_ATUAL_INCORRETA`) → nova diferente da atual (`NOVA_SENHA_IGUAL_A_ATUAL`) → mesma política de senha do cadastro (`SENHA_FRACA`, com `PoliticaDeSenhaDjango`). A senha atual vem antes da política: quem não prova a atual não aprende nada sobre a política.
 - **Senha atual errada é 400, nunca 401:** um 401 faria o navegador tentar renovar o token ou encerrar a sessão, e a pessoa seria deslogada por errar a senha.
-- **Limite de tentativas:** 5 por minuto **por conta** (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`), contado no Redis como o login; por conta e não por IP, porque no Docker todos chegam do mesmo IP. Estourado: 429 `LIMITE_DE_TENTATIVAS`.
+- **Limite de tentativas:** 5 por minuto **por conta** (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`), contado no Redis como o login; por conta e não por IP, porque pela porta publicada do Docker todos podem chegar com o mesmo IP (ver [Limite de tentativas](#limite-de-tentativas)). Estourado: 429 `LIMITE_DE_TENTATIVAS`.
 - **Sessões:** a API revoga o refresh token das **outras** sessões da conta (lista negra do Simple JWT, AUT-09) e mantém o do `refresh_atual`; sem `refresh_atual`, revoga todos. Um `refresh_atual` inválido, ou de outra pessoa, é 400 `DADOS_INVALIDOS` (`campos.refresh_atual`) e nada é trocado. Os **tokens de acesso (JWT) não são revogáveis**: o já emitido em outro aparelho vale até expirar (30 minutos).
 - **Nada de senha em resposta, exceção ou log.** A senha só é guardada como hash.
 - **Onde fica:** caso de uso `AlterarSenha` (`application/casos_de_uso.py`), exceções `SenhaAtualIncorreta` e `NovaSenhaIgualAAtual` (`domain/excecoes.py`), `AlterarSenhaView` (`api/views.py`) e `LimiteDeTrocaDeSenhaPorUsuario` (`api/limites.py`).
@@ -152,22 +152,24 @@ curl -X PATCH http://localhost:8000/api/usuarios/2/ -H "Authorization: Bearer $A
 
 ## Limite de tentativas
 
-Para ninguém adivinhar uma senha repetindo o login, o login e o cadastro têm limite de tentativas (throttles do DRF em `api/limites.py`, AUT-08):
+Para ninguém adivinhar uma senha repetindo o login, o login, o cadastro, a troca de senha e a alteração de usuários pelo Gestor têm limite de tentativas (throttles do DRF em `api/limites.py`, AUT-08, AUT-10 e AUT-11):
 
 | Onde | Chave | Padrão | Variável |
 |---|---|---|---|
 | Login | e-mail do corpo, normalizado como no login (minúsculas, sem espaços nas pontas) | 5 por minuto | `LIMITE_LOGIN_POR_EMAIL` |
 | Login | IP da conexão | 20 por minuto | `LIMITE_LOGIN_POR_IP` |
 | Cadastro | IP da conexão | 10 por hora | `LIMITE_CADASTRO_POR_IP` |
+| Troca de senha | conta logada | 5 por minuto | `LIMITE_TROCA_DE_SENHA_POR_USUARIO` |
+| Alteração de usuários (Gestor) | conta logada | 30 por minuto | `LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO` |
 
 - **Toda tentativa conta**, com acerto ou erro, numa janela deslizante, inclusive as simultâneas. A contagem é um script Lua no Redis (`_REGISTRAR_TENTATIVA`), que limpa as tentativas que saíram da janela, conta, decide e registra numa só operação, sobre um sorted set por chave. O get/set do `SimpleRateThrottle` do DRF não é usado: em operações separadas, tentativas ao mesmo tempo liam o mesmo total e passavam juntas (achado da revisão do PR; `test_tentativas_simultaneas_nao_passam_do_limite` dispara 30 de uma vez e só 5 passam). Acima do limite, a resposta é **429** `LIMITE_DE_TENTATIVAS` com o tempo de espera na mensagem e no cabeçalho `Retry-After`, sem dizer qual limite foi atingido nem se o e-mail existe (a mesma regra das credenciais inválidas). A tentativa recusada não conta.
 - **O limite vem antes de tudo:** o DRF confere os throttles antes da validação do corpo e da senha. Depois de excedido, até a senha certa é recusada até o tempo passar.
-- **Por e-mail e por IP:** o por e-mail protege uma conta; o por IP pega quem testa muitos e-mails e é mais folgado, porque no Docker todos os acessos do computador chegam com o mesmo IP. Sem um e-mail válido no corpo, vale só o por IP (um corpo que não é JSON continua 400 `JSON_INVALIDO` e conta no por IP).
-- **IP confiável:** `REST_FRAMEWORK["NUM_PROXIES"] = 0` faz o DRF usar o `REMOTE_ADDR` e ignorar o `X-Forwarded-For`, que o próprio cliente escreve. Atrás de um proxy, esse valor teria de mudar.
+- **Por e-mail e por IP:** o por e-mail protege uma conta; o por IP pega quem testa muitos e-mails e é mais folgado, porque pela porta publicada do Docker o backend pode enxergar o IP do gateway da rede (172.20.0.1, observado na auditoria de 18/11/2026) em todas as requisições, e então o limite por IP vale para todos que chegam por esse caminho; testes diretos entre containers usaram chaves separadas por IP. Sem um e-mail válido no corpo, vale só o por IP (um corpo que não é JSON continua 400 `JSON_INVALIDO` e conta no por IP).
+- **IP confiável:** `REST_FRAMEWORK["NUM_PROXIES"]` vem de `DJANGO_NUM_PROXIES` (`config/settings.py`): **0** no modo padrão, em que o DRF usa o `REMOTE_ADDR` e ignora o `X-Forwarded-For`, que o próprio cliente escreve; e **1** no [modo de produção](../../README.md#modo-de-produção-opcional-inf-08) (`docker-compose.prod.yml`), em que o DRF lê o `X-Forwarded-For` que o nginx grava. O nginx **sobrescreve** esse cabeçalho com o IP de quem o chama, então o cliente não consegue forjá-lo, mas o backend só enxerga o IP de quem chama o nginx (limitação no README de `src/`, INF-09).
 - **A renovação do token não tem limite:** o `refresh` é assinado, não há o que adivinhar.
 - **As taxas são lidas das settings a cada requisição** (`LimiteDeTentativas.get_rate`), e não da constante de classe do DRF, lida uma vez só na importação; assim `override_settings` funciona nos testes. Um valor fora do formato `N/s|min|hour|day` impede o backend de subir.
 - **Contador no Redis** (`CACHES` com o `RedisCache` do Django, serviço `redis` do Compose): vale para todos os processos do backend e não zera ao reiniciar o backend. O Redis roda sem persistência, então a contagem zera quando ele reinicia (limitação no [README da raiz](../../../README.md#limitações-conhecidas)).
-- **Redis fora do ar → 503:** `LimiteDeTentativas.allow_request` transforma o `RedisError` em `ServicoIndisponivel`, e login e cadastro respondem **503** `SERVICO_INDISPONIVEL` ("Serviço temporariamente indisponível. Tente de novo em alguns instantes.") antes de conferir qualquer dado: nenhuma tentativa passa sem contagem. Os timeouts do Redis são de 1 s, para a recusa ser rápida.
+- **Redis fora do ar → 503:** `LimiteDeTentativas.allow_request` transforma o `RedisError` em `ServicoIndisponivel`, e o login, o cadastro, a troca de senha e a alteração de usuários respondem **503** `SERVICO_INDISPONIVEL` ("Serviço temporariamente indisponível. Tente de novo em alguns instantes.") antes de conferir qualquer dado: nenhuma tentativa passa sem contagem. Os timeouts do Redis são de 1 s, para a recusa ser rápida.
 
 Seis tentativas seguidas com senha errada:
 

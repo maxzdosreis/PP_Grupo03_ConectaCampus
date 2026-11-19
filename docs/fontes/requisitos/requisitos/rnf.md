@@ -20,6 +20,7 @@ RNF descrevem **como** o sistema se comporta, e não o que ele faz (A2·s9). Cad
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | RNF-R02 passa a cobrir a gravação da tentativa recusada e RNF-R03 deixa de dizer que o histórico fica como estava ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md), DEC-05), com o código na tarefa RES-12 (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | RNF-F12 cobre também o limite de tentativas de troca de senha, por conta; RNF-F13, a revogação das outras sessões ao trocar a senha (AUT-10, [DEC-26](../decisoes/DEC-26.md)). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RNF-R02: a origem e a verificação passam a citar a RES-12 (CR-02 implementado), com os testes das tentativas recusadas gravadas em outra conexão. Enunciado sem mudança. Sem aprovação. |
+| 0.1 | 18/11/2026 | Max Zimmermann dos Reis | RNF-F12 cobre também a alteração de usuários pelo Gestor (30 por minuto por conta, `LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO`, AUT-11) e o título passa a dizer quais tentativas limita; RNF-S01 lista os serviços de cada modo de execução; RNF-U02 inclui `/conta` e `/usuarios` nas telas cobertas, sem mudar o estado "a verificar" (DOC-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Como ler
 
@@ -154,12 +155,12 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho |
 
-### <a id="rnf-f12"></a>RNF-F12 · Limite de tentativas de entrada e de cadastro
+### <a id="rnf-f12"></a>RNF-F12 · Limite de tentativas de entrada, de cadastro, de troca de senha e de alteração de usuários
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | O sistema limita as tentativas de entrada por e-mail e por origem, os pedidos de cadastro por origem e as tentativas de troca de senha por conta, numa janela de tempo. A tentativa acima do limite é recusada antes de qualquer outra conferência, com o tempo de espera, e a origem é o endereço da conexão, nunca um dado que o próprio pedido informa. |
-| **Métrica e valor-alvo** | Entrada: 5 tentativas por minuto por e-mail (sem diferenciar maiúsculas de minúsculas nem espaços nas pontas) e 20 por minuto por origem; cadastro: 10 por hora por origem; troca de senha: 5 por minuto por conta (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`, contada por conta e não por origem, porque no Docker todos os acessos têm a mesma origem); janela deslizante, contando acertos e erros. 100% das tentativas acima do limite recusadas, inclusive com a senha certa e com tentativas simultâneas, com o tempo de espera em segundos; 0 tentativas escapam trocando o cabeçalho de origem do pedido; a renovação da sessão não tem limite. Valores configuráveis por variável de ambiente, conferidos na subida. Contador no Redis, sem persistência: vale para todos os processos do backend e zera quando o Redis reinicia. Com o Redis fora do ar, 100% das tentativas são recusadas (503), nunca liberadas sem contagem. |
+| **Enunciado** | O sistema limita as tentativas de entrada por e-mail e por origem, os pedidos de cadastro por origem, as tentativas de troca de senha por conta e as alterações de usuários feitas pelo Gestor, por conta, numa janela de tempo. A tentativa acima do limite é recusada antes de qualquer outra conferência, com o tempo de espera, e a origem é o endereço da conexão, nunca um dado que o próprio pedido informa. |
+| **Métrica e valor-alvo** | Entrada: 5 tentativas por minuto por e-mail (sem diferenciar maiúsculas de minúsculas nem espaços nas pontas) e 20 por minuto por origem; cadastro: 10 por hora por origem; troca de senha: 5 por minuto por conta (`LIMITE_TROCA_DE_SENHA_POR_USUARIO`, contada por conta e não por origem, porque pela porta publicada do Docker o backend pode enxergar o IP do gateway da rede em todas as requisições); alteração de usuários pelo Gestor: 30 por minuto por conta (`LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO`, também por conta); janela deslizante, contando acertos e erros. 100% das tentativas acima do limite recusadas, inclusive com a senha certa e com tentativas simultâneas, com o tempo de espera em segundos; 0 tentativas escapam trocando o cabeçalho de origem do pedido; a renovação da sessão não tem limite. Valores configuráveis por variável de ambiente, conferidos na subida. Contador no Redis, sem persistência: vale para todos os processos do backend e zera quando o Redis reinicia. Com o Redis fora do ar, 100% das tentativas são recusadas (503), nunca liberadas sem contagem. |
 | **Como verificar** | `contas/tests/test_limites_de_tentativas.py::test_sexta_tentativa_com_o_mesmo_email_responde_429_com_a_espera`, `::test_senha_certa_tambem_e_recusada_depois_do_limite`, `::test_email_com_caixa_e_espacos_diferentes_conta_como_o_mesmo`, `::test_limite_por_ip_vale_para_varios_emails`, `::test_x_forwarded_for_diferente_nao_escapa_do_limite_por_ip`, `::test_cadastro_acima_do_limite_por_ip_responde_429`, `::test_depois_da_janela_o_login_volta_a_ser_aceito`, `::test_renovar_o_token_nao_tem_limite_de_tentativas`, `::test_redis_fora_do_ar_recusa_o_login_com_503_sem_conferir_a_senha`, `::test_redis_fora_do_ar_recusa_o_cadastro_com_503`, `::test_tentativas_simultaneas_nao_passam_do_limite [x]`; `contas/tests/test_api_alterar_senha.py::test_sexta_troca_seguida_responde_429_traduzido_pelo_tratador`, `::test_limite_de_troca_e_por_usuario_e_nao_por_ip`, `::test_limite_de_troca_vem_das_settings_a_cada_requisicao`; `config/tests/test_configuracao_de_limites.py::test_taxa_invalida_impede_a_subida_com_mensagem_clara [x]` |
 | **Origem** | NS-11, NS-14 |
 | **O cliente não pediria** | ✔ |
@@ -194,7 +195,7 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | Campo | Conteúdo |
 |---|---|
 | **Enunciado** | Todas as telas podem ser usadas, sem rolagem horizontal da página inteira, numa largura de 360 px; tabelas largas rolam dentro da própria área. |
-| **Métrica e valor-alvo** | 7 de 7 telas (`/`, `/entrar`, `/cadastro`, `/espacos`, `/reservas`, `/reservas/nova`, `/reservas/:reservaId`) sem rolagem horizontal da página a 360 × 640 px. |
+| **Métrica e valor-alvo** | 9 de 9 telas (`/`, `/entrar`, `/cadastro`, `/conta`, `/espacos`, `/reservas`, `/reservas/nova`, `/reservas/:reservaId`, `/usuarios`) sem rolagem horizontal da página a 360 × 640 px. |
 | **Como verificar** | A verificar: abrir cada tela com a largura de 360 px (ferramentas do navegador, modo de dispositivo) e conferir `document.documentElement.scrollWidth <= 360`. Hoje há só o apoio do CSS (quebras abaixo de 30rem e tabelas em região com rolagem própria), sem teste. |
 | **Origem** | NS-03, NS-07; premissa P-07 da [Visão](../visao.md#premissas) |
 | **O cliente não pediria** | ✔ |
@@ -399,7 +400,7 @@ A consulta devolve uma página de 20 reservas (o tamanho padrão) e o total. "It
 | Campo | Conteúdo |
 |---|---|
 | **Enunciado** | Num computador só com Docker, o sistema sobe com um único comando seguindo o README, sem passo fora dele. |
-| **Métrica e valor-alvo** | 1 comando para subir (`docker compose up --build`, depois de copiar o `.env.example`); 0 intervenções de quem escreveu o roteiro. |
+| **Métrica e valor-alvo** | 1 comando para subir (`docker compose up --build`, depois de copiar o `.env.example`); 0 intervenções de quem escreveu o roteiro. O modo padrão sobe quatro serviços do `docker-compose.yml`: `db` (PostgreSQL 16), `backend` (servidor de desenvolvimento do Django), `frontend` (Vite) e `redis` (contador do limite de tentativas). O modo de produção opcional (`docker-compose.prod.yml`) sobe `db`, `redis`, `migrar` (migração de uso único), `backend` (gunicorn) e `frontend` (nginx, que também repassa `/api/`). |
 | **Como verificar** | A verificar: critério CS-03 da [Visão](../visao.md#critérios-de-sucesso) (um integrante que não escreveu o roteiro executa num clone novo, com data e nome registrados no checklist pré-entrega). |
 | **Origem** | NS-16; critério CS-03 |
 | **O cliente não pediria** | — (é a NS-16) |

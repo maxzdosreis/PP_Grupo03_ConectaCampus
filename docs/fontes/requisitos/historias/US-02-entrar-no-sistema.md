@@ -14,6 +14,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 | 0.1 | 07/11/2026 | Max Zimmermann dos Reis | CA-06 · Tentativas em excesso, com o TA-12, antes do CA de acesso (agora CA-07, TA-13), como pede a ordem sucesso → alternativa → exceção → acesso; os TAs seguintes, em todas as histórias, andam uma posição (TA-13 a TA-157), porque a numeração global segue a ordem das histórias ([decisão b](README.md#decisao-b)); os CAs de exceção apontam para UC-02 E3.2 e E3.3, renumeradas; a Conversa e o INVEST deixam de citar a L-03 como aceita (AUT-08). Sem aprovação. |
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | TA-12 cita o teste de tentativas simultâneas (contagem atômica, AUT-08). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Renumeração dos TAs: TA-07 a TA-13 passam a TA-11 a TA-17 (e os CAs seguintes na mesma história, quando há CA novo antes deles), para os 25 TAs pendentes novos seguirem a ordem das histórias (REQ-13). A especificação está adiante do código de propósito. Mudança comportamental da especificação nos CAs novos; a renumeração é editorial, sem nova obrigação. Sem aprovação. |
+| 0.1 | 18/11/2026 | Max Zimmermann dos Reis | CA-06: "mesmo computador" passa a "mesma origem", o termo do RNF-F12. Sem mudança de comportamento (DOC-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Index Card
 
@@ -91,7 +92,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 
 #### <a id="us-02-ca-06"></a>US-02 · CA-06 · Tentativas em excesso (exceção)
 
-- **Dado** que já houve 5 tentativas de entrada com o mesmo e-mail no último minuto, certas ou erradas (ou 20 a partir do mesmo computador, com qualquer e-mail)
+- **Dado** que já houve 5 tentativas de entrada com o mesmo e-mail no último minuto, certas ou erradas (ou 20 a partir da mesma origem, com qualquer e-mail)
 - **Quando** a pessoa tenta entrar de novo com esse e-mail, mesmo com a senha certa
 - **Então** o sistema recusa sem conferir a senha, informa "Muitas tentativas. Tente de novo em N segundos." com o tempo que falta, não diz qual limite foi atingido nem se o e-mail existe, e nenhuma sessão é iniciada; depois desse tempo, a entrada volta a ser aceita, e outro e-mail continua entrando normalmente
 - **Origem:** [UC-02 E3.1](../casos-de-uso/UC-02-autenticar.md#e3-1)

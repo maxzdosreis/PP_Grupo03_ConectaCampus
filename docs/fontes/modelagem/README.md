@@ -21,6 +21,7 @@
 | 0.1 | 08/11/2026 | Max Zimmermann dos Reis | Relação `contas.api` → `redis`: a contagem de tentativas é um script atômico no Redis (AUT-08, achado da revisão do PR). |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RES-12 (CR-02): Figura 3 com `ResultadoDoRegistro` e os campos novos do `RegistroDeSituacao` e o método `Reserva.registrar_tentativa_recusada`; Figura 6 com o caminho "tenta mudar → recusa → registra → relança" (o caminho feliz passa a vir primeiro, por causa da ordem das chamadas no código); imagens geradas de novo. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | DOC-10: Figura 7 (DER do banco, `erDiagram`) gerada dos models por `scripts/gerar_der.py`, tabela de restrições gerada e verificação `scripts/verificar_der.py`; decisões do DER e decisão sobre o PDF. Sem aprovação. |
+| 0.1 | 18/11/2026 | Max Zimmermann dos Reis | Seção 1: o `redis` conta os quatro limites de tentativas (login, cadastro, troca de senha e alteração de usuários), e não só login e cadastro (DOC-11). Mudança editorial. |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 

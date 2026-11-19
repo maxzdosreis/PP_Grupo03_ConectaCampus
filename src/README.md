@@ -42,9 +42,10 @@ O `.env` é criado a partir do `.env.example` (passo 1 do [README da raiz](../RE
 | `JWT_ACCESS_MINUTES` | `30` | Validade do token de acesso, em minutos. |
 | `JWT_REFRESH_DAYS` | `1` | Validade do token de renovação, em dias. |
 | `LIMITE_LOGIN_POR_EMAIL` | `5/min` | Tentativas de login com o mesmo e-mail, no formato `N/s`, `N/min`, `N/hour` ou `N/day`. Um valor fora do formato impede o backend de subir (`ImproperlyConfigured`, com o nome da variável). Ausente, vale o do exemplo. |
-| `LIMITE_LOGIN_POR_IP` | `20/min` | Tentativas de login do mesmo computador (endereço da conexão), com qualquer e-mail. Mesmo formato. |
-| `LIMITE_CADASTRO_POR_IP` | `10/hour` | Pedidos de cadastro do mesmo computador. Mesmo formato. A renovação do token não tem limite. |
-| `LIMITE_TROCA_DE_SENHA_POR_USUARIO` | `5/min` | Pedidos de troca de senha da mesma pessoa logada (contados por usuário, não por computador). Mesmo formato. |
+| `LIMITE_LOGIN_POR_IP` | `20/min` | Tentativas de login do mesmo endereço IP (o da conexão), com qualquer e-mail. Mesmo formato. |
+| `LIMITE_CADASTRO_POR_IP` | `10/hour` | Pedidos de cadastro do mesmo endereço IP. Mesmo formato. A renovação do token não tem limite. |
+| `LIMITE_TROCA_DE_SENHA_POR_USUARIO` | `5/min` | Pedidos de troca de senha da mesma pessoa logada (contados por usuário, não por endereço IP). Mesmo formato. |
+| `LIMITE_GESTAO_DE_USUARIOS_POR_USUARIO` | `30/min` | Alterações de perfil ou situação de contas feitas pelo mesmo Gestor (contadas por usuário). Mesmo formato. |
 
 ### Derivadas pelo Compose a partir das portas
 
@@ -77,7 +78,7 @@ O `docker-compose.prod.yml` sobe o sistema sem as facilidades do desenvolvimento
 - **d) Estáticos do admin com whitenoise**, coletados no build (`collectstatic`); `STATIC_ROOT` é `backend/staticfiles`. O `gunicorn` e o `whitenoise` entram em `requirements.txt` (também chegam à imagem de desenvolvimento, que não os usa).
 - **e) Só o nginx publica porta.** Banco, Redis e backend não têm `ports`.
 - **f) Segredos sem padrão.** `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DB_DATABASE`, `DB_USER` e `DB_PASSWORD` usam `${VAR:?...}`: faltando uma (ou vazia), o `up` falha dizendo qual. Além disso, o Django só aplica as regras de produção quando `DJANGO_MODO_PRODUCAO=1` (o compose de produção define): chave com 50 caracteres ou mais, com pelo menos 5 diferentes e que não comece com `troque-` nem `django-insecure-`; `DJANGO_DEBUG` falso; `DJANGO_ALLOWED_HOSTS` preenchida e sem `*`; `DB_HOST` definido. A variável própria existe porque `DJANGO_DEBUG=False` sozinho já é o padrão do modo de avaliação e dos testes, que usam a chave de exemplo.
-- **g) Limite de tentativas atrás do nginx.** O nginx manda o IP real em `X-Forwarded-For`, e o compose define `DJANGO_NUM_PROXIES=1` para o limite por IP (AUT-08) contar cada computador, e não o IP do nginx. Com outro proxy na frente, some 1.
+- **g) Limite de tentativas atrás do nginx.** O nginx **sobrescreve** `X-Forwarded-For` com o IP de quem o chama (`$remote_addr`), e o compose define `DJANGO_NUM_PROXIES=1` para o limite por IP (AUT-08) usar esse valor, e não o IP do nginx. Por isso o backend só enxerga o IP de quem chama o nginx: com mais um proxy (por exemplo, o de TLS) na frente, o limite por IP passaria a valer para todos juntos, porque o nginx ainda não repassa o IP real que esse proxy informa. Isso é uma limitação conhecida, a tratar na INF-09.
 - **h) Healthchecks e logs.** O do `backend` chama `/api/health/` com o primeiro host de `DJANGO_ALLOWED_HOSTS` no cabeçalho `Host` (por isso essa variável deve listar hosts simples, sem porta nem curinga); o do nginx pede `/`. Os serviços de longa duração têm `restart: unless-stopped`, e os logs rodam em `json-file` com 3 arquivos de 10 MB.
 - **i) gunicorn:** `GUNICORN_WORKERS` (padrão 3) e `GUNICORN_TIMEOUT` (padrão 30 s), lidos no start.
 
