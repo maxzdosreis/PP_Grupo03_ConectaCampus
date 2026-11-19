@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from espacos.application.portas import ReservasDoEspaco
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
@@ -12,13 +14,17 @@ ID_INEXISTENTE = 9999
 
 
 class ReservasDoEspacoFake(ReservasDoEspaco):
-    def __init__(self, fora_da_janela: int = 0) -> None:
+    def __init__(
+        self, fora_da_janela: int = 0, eventos: list[str] | None = None
+    ) -> None:
         self.fora_da_janela = fora_da_janela
         self.consultas: list[tuple[int, int, int]] = []
+        self.eventos = eventos if eventos is not None else []
 
     def contar_ativas_fora_da_janela(
         self, espaco_id: int, abertura_em_minutos: int, fechamento_em_minutos: int
     ) -> int:
+        self.eventos.append("contar")
         self.consultas.append((espaco_id, abertura_em_minutos, fechamento_em_minutos))
         return self.fora_da_janela
 
@@ -40,13 +46,32 @@ def nomes(espacos: list[EspacoEsportivo]) -> list[str]:
 
 
 class RepositorioEspacosEmMemoria(RepositorioEspacos):
-    def __init__(self) -> None:
+    def __init__(self, eventos: list[str] | None = None) -> None:
         self._espacos: dict[int, EspacoEsportivo] = {}
         self._proximo_id = 1
         self.chamadas_de_salvar = 0
+        self.eventos = eventos if eventos is not None else []
+        self.ids_travados: list[int] = []
+        self.transacoes_abertas = 0
+
+    @contextmanager
+    def em_transacao(self):
+        self.eventos.append("abrir")
+        self.transacoes_abertas += 1
+        try:
+            yield
+        finally:
+            self.transacoes_abertas -= 1
+            self.eventos.append("fechar")
+
+    def travar(self, espaco_id: int) -> None:
+        assert self.transacoes_abertas, "travar fora de uma transação"
+        self.eventos.append("travar")
+        self.ids_travados.append(espaco_id)
 
     def salvar(self, espaco: EspacoEsportivo) -> EspacoEsportivo:
         self.chamadas_de_salvar += 1
+        self.eventos.append("salvar")
         if espaco.id is not None and espaco.id not in self._espacos:
             raise EspacoNaoEncontrado(espaco.id)
         if (

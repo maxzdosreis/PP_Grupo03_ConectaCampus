@@ -57,22 +57,25 @@ class CriarReserva:
         )
         garantir_inicio_no_futuro(pedido, agora)
         validar_espaco_id(espaco_id)
-        espaco = self._consulta_de_espacos.obter_espaco_reservavel(espaco_id)
-        reserva = Reserva.solicitar(
-            espaco_id=espaco_id,
-            solicitante=solicitante,
-            data=data,
-            hora_inicio=hora_inicio,
-            hora_fim=hora_fim,
-            finalidade=finalidade,
-            agora=agora,
-            funcionamento=espaco.funcionamento,
-        )
-        existentes = self._repositorio.listar_que_ocupam_horario(
-            reserva.espaco_id, reserva.intervalo.data
-        )
-        garantir_horario_livre(reserva, existentes)
-        return self._repositorio.salvar(reserva)
+        with self._repositorio.em_transacao():
+            espaco = self._consulta_de_espacos.obter_espaco_reservavel_travado(
+                espaco_id
+            )
+            reserva = Reserva.solicitar(
+                espaco_id=espaco_id,
+                solicitante=solicitante,
+                data=data,
+                hora_inicio=hora_inicio,
+                hora_fim=hora_fim,
+                finalidade=finalidade,
+                agora=agora,
+                funcionamento=espaco.funcionamento,
+            )
+            existentes = self._repositorio.listar_que_ocupam_horario(
+                reserva.espaco_id, reserva.intervalo.data
+            )
+            garantir_horario_livre(reserva, existentes)
+            return self._repositorio.salvar(reserva)
 
 
 class ConsultarReservas:

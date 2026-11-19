@@ -1,3 +1,4 @@
+from contextlib import AbstractContextManager
 from datetime import date, datetime
 
 from django.db import IntegrityError, transaction
@@ -27,6 +28,9 @@ from reservas.infrastructure.models import (
 
 
 class RepositorioReservasDjango(RepositorioReservas):
+    def em_transacao(self) -> AbstractContextManager[None]:
+        return transaction.atomic()
+
     def salvar(self, reserva: Reserva) -> Reserva:
         try:
             with transaction.atomic():

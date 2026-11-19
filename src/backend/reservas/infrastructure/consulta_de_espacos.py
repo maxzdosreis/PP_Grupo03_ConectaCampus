@@ -5,12 +5,20 @@ from reservas.domain.funcionamento import FuncionamentoDoEspaco
 
 class ConsultaDeEspacosViaFachada(ConsultaDeEspacos):
     def obter_espaco_reservavel(self, espaco_id: int) -> EspacoReservavel:
-        espaco = publico.verificar_espaco_disponivel(espaco_id)
-        return EspacoReservavel(
-            id=espaco.id,
-            nome=espaco.nome,
-            funcionamento=FuncionamentoDoEspaco(
-                abertura_em_minutos=espaco.abertura_em_minutos,
-                fechamento_em_minutos=espaco.fechamento_em_minutos,
-            ),
+        return _como_reservavel(publico.verificar_espaco_disponivel(espaco_id))
+
+    def obter_espaco_reservavel_travado(self, espaco_id: int) -> EspacoReservavel:
+        return _como_reservavel(
+            publico.verificar_espaco_disponivel_para_reserva(espaco_id)
         )
+
+
+def _como_reservavel(espaco: publico.EspacoDisponivel) -> EspacoReservavel:
+    return EspacoReservavel(
+        id=espaco.id,
+        nome=espaco.nome,
+        funcionamento=FuncionamentoDoEspaco(
+            abertura_em_minutos=espaco.abertura_em_minutos,
+            fechamento_em_minutos=espaco.fechamento_em_minutos,
+        ),
+    )

@@ -1,3 +1,5 @@
+from contextlib import AbstractContextManager
+
 from django.db import IntegrityError, transaction
 
 from espacos.application.repositorio import RepositorioEspacos
@@ -26,6 +28,16 @@ class RepositorioEspacosDjango(RepositorioEspacos):
             raise
         espaco.marcar_como_gravado()
         return _para_entidade(model)
+
+    def em_transacao(self) -> AbstractContextManager[None]:
+        return transaction.atomic()
+
+    def travar(self, espaco_id: int) -> None:
+        list(
+            EspacoEsportivoModel.objects.select_for_update()
+            .filter(pk=espaco_id)
+            .values_list("pk", flat=True)
+        )
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
         model = EspacoEsportivoModel.objects.filter(pk=espaco_id).first()
