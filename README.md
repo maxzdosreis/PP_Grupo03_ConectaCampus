@@ -269,5 +269,5 @@ Como o nome do projeto é fixo, outra cópia do projeto no mesmo computador (out
 | Compartilhado | [`src/backend/compartilhado/README.md`](src/backend/compartilhado/README.md) | Erros de domínio, formato das respostas, tratador de erros e permissão de gestor. |
 | Exemplos | [`src/backend/exemplos/README.md`](src/backend/exemplos/README.md) | Como o comando de dados de exemplo funciona. |
 | Frontend | [`src/frontend/README.md`](src/frontend/README.md) | Pastas, rotas e telas, cliente da API e sessão, convenções e comandos. |
-| Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) | Visão do sistema, modelo do domínio, fluxo principal, diagrama entidade-relacionamento do banco e decisões técnicas. |
+| Modelagem | [`docs/modelagem.pdf`](docs/modelagem.pdf) | Decisões técnicas e modelagem: as escolhas de tecnologia e por quê, a organização em contextos e camadas, o modelo do domínio, os estados da reserva e o fluxo principal. |
 | Contribuições | [`docs/contribuicoes.pdf`](docs/contribuicoes.pdf) | Quem fez cada parte do trabalho. |

@@ -22,6 +22,7 @@
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | RES-12 (CR-02): Figura 3 com `ResultadoDoRegistro` e os campos novos do `RegistroDeSituacao` e o método `Reserva.registrar_tentativa_recusada`; Figura 6 com o caminho "tenta mudar → recusa → registra → relança" (o caminho feliz passa a vir primeiro, por causa da ordem das chamadas no código); imagens geradas de novo. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | DOC-10: Figura 7 (DER do banco, `erDiagram`) gerada dos models por `scripts/gerar_der.py`, tabela de restrições gerada e verificação `scripts/verificar_der.py`; decisões do DER e decisão sobre o PDF. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | Seção 1: o `redis` conta os quatro limites de tentativas (login, cadastro, troca de senha e alteração de usuários), e não só login e cadastro (DOC-11). Mudança editorial. |
+| 0.1 | 19/11/2026 | Max Zimmermann dos Reis | DOC-04: texto único do PDF em `modelagem.md` (decisões técnicas, organização, modelagem e as Figuras 1 a 6), verificado por `scripts/verificar_documento_modelagem.py`; o plano do PDF passa a ser esse arquivo, e o DER sai do PDF (decisão h revista). Sem aprovação. |
 
 Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, seção 6 do enunciado: no máximo 6 páginas). Ela fica em `docs/fontes/` e por isso **não entra no ZIP**: só o PDF gerado entra.
 
@@ -29,6 +30,7 @@ Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, 
 
 | Arquivo | O que é |
 |---|---|
+| [`modelagem.md`](modelagem.md) | **Texto do PDF** (DOC-04): título e nomes, decisões técnicas, organização, modelagem do domínio, modelo de dados e qualidade, com as Figuras 1 a 6. É dele que o `docs/modelagem.pdf` é montado |
 | [`01-visao-do-sistema.md`](01-visao-do-sistema.md) | Texto da seção 1 do PDF (DOC-01) |
 | [`visao-geral.mmd`](visao-geral.mmd) | Fonte da Figura 1 (visão geral) |
 | [`regras-de-dependencia.mmd`](regras-de-dependencia.mmd) | Fonte da Figura 2 (regras de dependência) |
@@ -55,6 +57,8 @@ Esta pasta é a fonte de todo o `docs/modelagem.pdf` (Projeto de Programação, 
 | Folga (quebras de página) | — | — | 0,5 página no plano; pela medida atual das seções 1 a 3 (4,59 páginas), sobram 1,41 página: 1 para a seção 4 e **0,41** para as quebras. A capa não conta nas 6 páginas e tem só o título e os nomes ([DEC-21](../requisitos/decisoes/DEC-21.md)) |
 
 A montagem do `docs/modelagem.pdf` a partir desses arquivos é da DOC-04. As figuras entram no PDF pelo `.png`, na largura da área útil (16 cm numa A4 com margens de 2,5 cm).
+
+**Plano em vigor (DOC-04, 19/11/2026):** o PDF sai de um arquivo só, [`modelagem.md`](modelagem.md), e não da sequência `01`…`05` da tabela acima: o `04-decisoes-tecnicas.md` previsto não foi criado, e os textos `01` a `03` e `05` continuam como estão, como fonte detalhada de cada seção. A ordem é: título e nomes (sem capa formal, [DEC-21](../requisitos/decisoes/DEC-21.md)) → 1. Decisões técnicas → 2. Organização do sistema (Figuras 1 e 2) → 3. Modelagem do domínio (Figuras 3 a 6) → 4. Modelo de dados (só a remissão ao DER) → 5. Qualidade e limitações assumidas. Estimativa: ~5,49 páginas de 6 (A4, margens de 2,5 cm, corpo 11 pt, espaçamento simples, figuras a 16 cm). O PDF final fica em `docs/modelagem.pdf` (estrutura do ZIP: `README.md`, `src/` e `docs/`, com `modelagem.pdf` e `contribuicoes.pdf`). **O DER (Figura 7) e a tabela de restrições ficam fora do PDF**, como material complementar nesta pasta: com eles, o PDF passaria de 6 páginas (~6,3).
 
 ## Decisões
 
@@ -228,6 +232,12 @@ python scripts/verificar_fluxo_principal.py
 python scripts/verificar_der.py
 ```
 
+```bash
+python scripts/verificar_documento_modelagem.py
+```
+
+O último (DOC-04) lê o `modelagem.md` entre `<!-- corpo:inicio -->` e `<!-- corpo:fim -->`, sem rede e sem Django, e falha quando: um nome entre crases não existe no repositório (caminho, classe, função ou constante por `ast` de `src/backend`, texto como nome de constraint ou código de erro, módulo, pacote, serviço dos compose, variável de ambiente, imagem Docker, contrato do import-linter ou, por último, texto em `src/frontend/src`); uma versão diverge do `requirements.txt`, do `package-lock.json` ou das imagens dos Dockerfiles e dos compose; uma figura falta, sai da sequência, não tem `.mmd` nem legenda; um número citado (agenda, matrícula, DEC-08, tokens, contextos, camadas, contratos) diverge da fonte; aparece um e-mail, telefone ou sequência de 6 ou mais dígitos; ou a estimativa passa de 6 páginas (avisa acima de 5,5). Lista os `[PENDENTE: …]` e `[CONFIRMAR COM O GRUPO: …]` e imprime a estimativa por seção. `--negativo` prova, numa cópia temporária que ele mesmo apaga, que um nome inventado faz falhar; `--arquivo` verifica outro arquivo. Um comentário `<!-- largura: 14cm -->` antes de uma figura muda a largura usada na estimativa.
+
 O script falha quando: uma seta "depende de" não tem import real nem `sem-import` com trecho achado; uma seta "implementa" não tem classe que herde uma porta do destino; uma seta de rede não tem `sem-import`; um import entre módulos mapeados não tem seta (fora de `EXCECOES`); um módulo com imports não está em nenhum nó nem em `IGNORADOS`; um nó aponta para módulo, caminho ou serviço inexistente; a imagem do serviço difere do `docker-compose.yml`; um serviço do compose não aparece; um contrato citado (nas figuras ou como contrato \`Nome\` no texto) não existe no `pyproject.toml`, ou um contrato do `pyproject.toml` não aparece; um teste citado não existe; um import de `somente` está em outro arquivo. Avisa (sem falhar) quando um `.svg` ou `.png` é mais antigo que o `.mmd`. No fim, imprime a tabela "seta → import que a sustenta".
 
 **O que ele ignora, e por quê:** as pastas `tests/` e `migrations/`; imports dentro de `if TYPE_CHECKING:` (hoje só `reservas/domain/excecoes.py:13`, dentro da mesma camada); `import type` do frontend (some no build); os arquivos de teste do frontend (`*.test.ts(x)`, `testes/`, `configuracaoDosTestes.ts`); e a cola do Django (`<contexto>/models.py`, que só reexporta os models da infraestrutura, e `contas/admin.py`, a administração do Django). O frontend entra na verificação no nível das duas caixas da Figura 1 (`api/` e o resto de `src/`).
@@ -295,7 +305,7 @@ Nos quatro casos o script sai com código 1.
 - <a id="decisao-der-e"></a>**e) Restrições:** o `erDiagram` não tem sintaxe para elas. O desenho leva PK, FK, UK e o comentário `ck` (check) ou `ex` (exclusão), e a tabela completa (definição lida do model e nome da constraint) é gerada pelo mesmo script e colada no `05-der-do-banco.md`. Como o `erDiagram` não tem nota, a legenda fica no texto, e não dentro da figura (exceção à decisão e da seção 1).
 - <a id="decisao-der-f"></a>**f) Legibilidade:** no máximo 6 entidades e 8 colunas por entidade; o gerador falha se passar disso. Com `direction LR` a figura mede 2352 × 939 px (16 × 6,4 cm a 16 cm de largura); na vertical media 2352 × 3756 px (25,6 cm, uma página inteira).
 - <a id="decisao-der-g"></a>**g) Verificação** por [`scripts/verificar_der.py`](../../../scripts/verificar_der.py) (host, sem rede; chama o gerador no container, que precisa estar no ar): (a) deriva byte a byte do `.mmd` e da tabela; (b) tabelas e colunas do desenho existem nos models, com tipo compatível; (c) toda FK é relação sólida, nenhuma sólida existe sem FK, e as pontilhadas são `BigIntegerField` sem FK; (d) toda restrição dos models está na tabela e vice-versa; (e) colunas obrigatórias presentes; (f) as imagens existem (aviso, sem falhar, se forem mais antigas que o `.mmd`). `--pasta` e `--gerado ARQUIVO.json` servem para provar, em cópias, que ele pega erro.
-- <a id="decisao-der-h"></a>**h) PDF:** **DER incluído no `modelagem.pdf`** (decisão do grupo, 18/11/2026). Ele ocupa ~0,85 página, acima da folga de 0,41, então o PDF passa de 6 páginas (estimativa ~6,4, sem a capa); o grupo aceitou o excesso por causa da imagem. As Figuras 1 a 6 e os textos das seções 1 a 3 não foram cortados. A posição na ordem do PDF é da DOC-04. A estimativa segue o método das Pendências (A4, margens de 2,5 cm, texto 11 pt, tabelas 9 pt, figura a 16 cm); a medida real fica para a DOC-04.
+- <a id="decisao-der-h"></a>**h) PDF:** **DER incluído no `modelagem.pdf`** (decisão do grupo, 18/11/2026). Ele ocupa ~0,85 página, acima da folga de 0,41, então o PDF passa de 6 páginas (estimativa ~6,4, sem a capa); o grupo aceitou o excesso por causa da imagem. As Figuras 1 a 6 e os textos das seções 1 a 3 não foram cortados. A posição na ordem do PDF é da DOC-04. A estimativa segue o método das Pendências (A4, margens de 2,5 cm, texto 11 pt, tabelas 9 pt, figura a 16 cm); a medida real fica para a DOC-04. **Revista na DOC-04 (19/11/2026): o DER sai do PDF.** Com o texto único (`modelagem.md`) estimado em ~5,49 páginas, a Figura 7 e a tabela somariam ~0,8 e levariam o PDF a ~6,3, acima do limite de 6 páginas; pela ordem de cortes da DOC-04, o DER é o primeiro a sair. Ele continua nesta pasta como material complementar, e a seção 4 do PDF só remete a ele. O texto acima fica como registro da decisão anterior.
 
 ### Prova de que a verificação pega erro (DER)
 
@@ -610,6 +620,8 @@ Saída de `python scripts/verificar_fluxo_principal.py` em 16/11/2026 (caminhos 
 | solicitar-reserva.mmd | 13 | 201 “Reserva solicitada com sucesso. Aguarde a confirmação do gestor.” | resposta_sucesso reservas/api/views.py:49 |
 
 ## Para a DOC-04 (decisões técnicas e montagem do PDF)
+
+> **Feito na DOC-04 (19/11/2026):** a ordem e o saldo abaixo foram substituídos pelo plano em vigor (texto único em [`modelagem.md`](modelagem.md); ver [Plano do PDF](#plano-do-pdf)). Os itens ficam como registro.
 
 - **Ordem do PDF:** capa (só o título e os nomes, fora das 6 páginas, [DEC-21](../requisitos/decisoes/DEC-21.md)) → `01-visao-do-sistema.md` (figuras 1 e 2) → `02-modelo-do-dominio.md` (figuras 3 e 4) → `03-fluxo-principal.md` (figuras 5 e 6) → `04-decisoes-tecnicas.md`. As figuras entram pelo `.png`, a 16 cm, na ordem da numeração; os textos citam a Figura 4 a partir da seção 3, então a numeração não pode mudar.
 - **Saldo de páginas:** as seções 1 a 3 medem ~4,59 páginas; sobram 1,41: até 1 página para as decisões técnicas e ~0,41 para as quebras (a capa não conta, [DEC-21](../requisitos/decisoes/DEC-21.md)). Meça com o CSS registrado nas Pendências.
