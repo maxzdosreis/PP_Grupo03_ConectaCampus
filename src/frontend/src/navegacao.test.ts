@@ -40,10 +40,10 @@ describe('navegacao', () => {
     expect(caminhoParaCadastro('/espacos')).toBe('/cadastro?proximo=%2Fespacos')
   })
 
-  it('sem sessão, o menu mostra só o Início; com sessão, todos os itens', () => {
-    expect(itensVisiveis(false, false).map(({ rotulo }) => rotulo)).toEqual(['Início'])
+  it('sem sessão, o menu fica vazio e nunca tem Início; com sessão, todos os itens', () => {
+    expect(itensVisiveis(false, false)).toEqual([])
+    expect(itensVisiveis(true, true).map(({ rotulo }) => rotulo)).not.toContain('Início')
     expect(itensVisiveis(true, true).map(({ rotulo }) => rotulo)).toEqual([
-      'Início',
       'Espaços',
       'Reservas',
       'Nova reserva',
@@ -63,7 +63,6 @@ describe('navegacao', () => {
 
   it('para quem não é gestor, o item das reservas se chama "Minhas reservas"', () => {
     expect(itensVisiveis(true, false).map(({ rotulo }) => rotulo)).toEqual([
-      'Início',
       'Espaços',
       'Minhas reservas',
       'Nova reserva',

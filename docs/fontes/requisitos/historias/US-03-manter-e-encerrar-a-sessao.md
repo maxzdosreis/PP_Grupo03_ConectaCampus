@@ -59,7 +59,7 @@ História do [índice](README.md#índice-das-histórias). Como ler: [decisões d
 
 - **Dado** uma pessoa identificada, em qualquer ponto do sistema
 - **Quando** ela pede para sair
-- **Então** o sistema encerra a identificação neste navegador e a sessão no sistema, informa "Você saiu da sua conta." e mostra a página inicial sem nenhuma identificação, mesmo que o sistema não responda no momento
+- **Então** o sistema encerra a identificação neste navegador e a sessão no sistema, informa "Você saiu da sua conta." e volta à entrada do sistema sem nenhuma identificação, mesmo que o sistema não responda no momento
 - **Origem:** [UC-02 A4.3](../casos-de-uso/UC-02-autenticar.md#a4-3)
 - **RF:** [RF-36](../requisitos/rf-contas.md#rf-36)
 - **TA:** [TA-19](#ta-19)

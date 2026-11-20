@@ -7,6 +7,9 @@ type PropriedadesDaNavegacao = {
 }
 
 function Navegacao({ itens }: PropriedadesDaNavegacao) {
+  if (itens.length === 0) {
+    return null
+  }
   return (
     <nav aria-label="Navegação principal">
       <ul className={estilos.lista}>

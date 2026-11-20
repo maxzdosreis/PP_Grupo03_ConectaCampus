@@ -211,8 +211,7 @@ Telas no navegador, em português (premissa P-07). Descrição do que cada tela 
 
 | Tela | Quem usa | O que permite | RF |
 |---|---|---|---|
-| Início (`/`) | Todos | Ver se o sistema está no ar; ir para entrar, criar conta ou, identificado, para as próprias reservas. | RF-40, RF-33, RF-32 |
-| Entrar (`/entrar`) | Visitante | Entrar com e-mail e senha e voltar à tela de onde veio. | RF-33, RF-33.1 |
+| Entrar (`/entrar`) | Visitante | Tela inicial do sistema (CR-08): `/` e qualquer endereço desconhecido levam a ela sem sessão, ou às reservas com sessão. Entrar com e-mail e senha e voltar à tela de onde veio. | RF-33, RF-33.1 |
 | Cadastro (`/cadastro`) | Visitante | Criar a conta de Solicitante e já entrar. | RF-32 e filhos |
 | Minha conta (`/conta`) | Usuário autenticado | Trocar a própria senha, informando a atual e a nova, e continuar identificado. | RF-41 e filhos |
 | Usuários (`/usuarios`) | Gestor | Listar, buscar e filtrar os usuários; promover, rebaixar, desativar e reativar contas, com confirmação, sem poder agir sobre a própria conta. | RF-42, RF-43 e filhos |
@@ -275,7 +274,7 @@ Fichas completas em [`rnf.md`](rnf.md). "Cliente" = ✔ quando é um RNF que o c
 | [RNF-F12](rnf.md#rnf-f12) | F | Limite de tentativas de entrada e de cadastro | entrada 5/min por e-mail e 20/min por origem; cadastro 10/h por origem | ✔ | Rascunho |
 | [RNF-F13](rnf.md#rnf-f13) | F | Revogação e troca da credencial de renovação | 100% das renovações com credencial revogada ou trocada recusadas; acesso vale até 30 min | ✔ | Rascunho |
 | [RNF-U01](rnf.md#rnf-u01) | U | Mensagens em português que orientam a correção | 100% das recusas com código, mensagem e campo | — | Rascunho |
-| [RNF-U02](rnf.md#rnf-u02) | U | Telas utilizáveis em telas estreitas | 9 de 9 telas sem rolagem horizontal a 360 px | ✔ | Rascunho (roteiro de 19/11/2026, VER-01) |
+| [RNF-U02](rnf.md#rnf-u02) | U | Telas utilizáveis em telas estreitas | 8 de 8 telas sem rolagem horizontal a 360 px | ✔ | Rascunho (roteiro de 19/11/2026, VER-01) |
 | [RNF-U03](rnf.md#rnf-u03) | U | Operação completa pelo teclado | 100% das operações sem mouse | ✔ | Rascunho — verificado em parte (L-09) |
 | [RNF-U04](rnf.md#rnf-u04) | U | Contraste de cores (WCAG AA) | texto ≥ 4,5:1; bordas ≥ 3:1 (menor calculado: 4,79:1 e 3,41:1) | ✔ | Rascunho |
 | [RNF-U05](rnf.md#rnf-u05) | U | Situação nunca indicada só por cor | 100% das etiquetas e avisos com texto | ✔ | Rascunho |

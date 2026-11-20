@@ -81,7 +81,7 @@ Quando o usuário volta ao sistema com uma sessão guardada, o sistema confere o
 
 #### <a id="a4-3"></a>A4.3 · Sair
 
-Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema encerra a identificação neste navegador e revoga a credencial de renovação da sessão: daí em diante, ela não renova em nenhum lugar, nem numa cópia. Informa "Você saiu da sua conta." e mostra a página inicial sem nenhuma identificação, mesmo que a revogação não possa ser confirmada no momento (por exemplo, sem conexão). Pedir para sair com uma credencial já revogada ou vencida tem a mesma resposta. A credencial de acesso já emitida não é revogada e vale até expirar, em até 30 minutos ([lacuna L-04](../requisitos/srs.md#l-04)).
+Em qualquer momento depois do passo 4, o usuário pede para sair. O sistema encerra a identificação neste navegador e revoga a credencial de renovação da sessão: daí em diante, ela não renova em nenhum lugar, nem numa cópia. Informa "Você saiu da sua conta." e volta à entrada do sistema sem nenhuma identificação, mesmo que a revogação não possa ser confirmada no momento (por exemplo, sem conexão). Pedir para sair com uma credencial já revogada ou vencida tem a mesma resposta. A credencial de acesso já emitida não é revogada e vale até expirar, em até 30 minutos ([lacuna L-04](../requisitos/srs.md#l-04)).
 
 #### <a id="a4-4"></a>A4.4 · Trocar a própria senha
 
