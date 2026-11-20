@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest'
 import Navegacao from './Navegacao.tsx'
 
 const ITENS = [
-  { rotulo: 'Início', caminho: '/', exigeLogin: false },
   { rotulo: 'Espaços', caminho: '/espacos', exigeLogin: true },
   { rotulo: 'Reservas', caminho: '/reservas', exigeLogin: true },
   { rotulo: 'Nova reserva', caminho: '/reservas/nova', exigeLogin: true },
@@ -23,14 +22,17 @@ describe('Navegacao', () => {
     renderizarEm('/espacos')
 
     expect(screen.getByRole('link', { name: 'Espaços' }).getAttribute('aria-current')).toBe('page')
-    expect(screen.getByRole('link', { name: 'Início' }).getAttribute('aria-current')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Reservas' }).getAttribute('aria-current')).toBeNull()
   })
 
-  it('marca o início como ativo na raiz', () => {
-    renderizarEm('/')
+  it('sem itens, não desenha a navegação', () => {
+    render(
+      <MemoryRouter>
+        <Navegacao itens={[]} />
+      </MemoryRouter>,
+    )
 
-    expect(screen.getByRole('link', { name: 'Início' }).getAttribute('aria-current')).toBe('page')
-    expect(screen.getByRole('link', { name: 'Espaços' }).getAttribute('aria-current')).toBeNull()
+    expect(screen.queryByRole('navigation')).toBeNull()
   })
 
   it('em "/reservas/nova" marca só "Nova reserva", e não "Reservas"', () => {

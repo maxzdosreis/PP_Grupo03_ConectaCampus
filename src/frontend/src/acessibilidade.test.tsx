@@ -23,7 +23,6 @@ import {
   type RegistroDeSituacao,
   type Reserva,
 } from './api/reservas.ts'
-import { consultarSaude } from './api/saude.ts'
 import type { Paginacao, RespostaSucesso } from './api/tipos.ts'
 import { listarUsuarios, type UsuarioGerenciado } from './api/usuarios.ts'
 import RotasDaAplicacao from './RotasDaAplicacao.tsx'
@@ -32,7 +31,6 @@ import { renderizarComProvedores, valorDaSessao } from './testes/renderizar.tsx'
 import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from './testes/usuarios.ts'
 
 vi.mock('./api/autenticacao.ts', () => ({ alterarSenha: vi.fn() }))
-vi.mock('./api/saude.ts', () => ({ consultarSaude: vi.fn() }))
 vi.mock('./api/espacos.ts', () => ({
   ativarEspaco: vi.fn(),
   cadastrarEspaco: vi.fn(),
@@ -189,7 +187,6 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  vi.mocked(consultarSaude).mockResolvedValue(sucesso({ banco: 'ok', cache: 'ok' }))
   vi.mocked(listarEspacos).mockResolvedValue(sucesso([GINASIO, QUADRA_INATIVA]))
   vi.mocked(listarTiposDeEspaco).mockResolvedValue(
     sucesso([
@@ -245,31 +242,16 @@ beforeEach(() => {
   )
 })
 
-describe('Acessibilidade (axe, sem contraste) — página inicial e 404', () => {
-  it('inicial para o visitante, com a API no ar', async () => {
+describe('Acessibilidade (axe, sem contraste) — raiz e rota desconhecida', () => {
+  it('a raiz, sem sessão, leva ao login sem violações', async () => {
     abrir('/', null)
-    await screen.findByRole('heading', { level: 1 })
-    await screen.findByText('Mensagem da API.')
+    await screen.findByRole('button', { name: 'Entrar' })
     await esperarSemViolacoes()
   })
 
-  it('inicial carregando a situação da API', async () => {
-    vi.mocked(consultarSaude).mockReturnValue(nuncaResponde())
-    abrir('/', USUARIO_SOLICITANTE)
-    await screen.findByRole('heading', { level: 1 })
-    await esperarSemViolacoes()
-  })
-
-  it('inicial com a API fora do ar', async () => {
-    vi.mocked(consultarSaude).mockRejectedValue(SEM_CONEXAO)
-    abrir('/', null)
-    await screen.findByText('Não foi possível falar com o servidor.')
-    await esperarSemViolacoes()
-  })
-
-  it('página não encontrada', async () => {
+  it('uma rota desconhecida, sem sessão, leva ao login sem violações', async () => {
     abrir('/nao-existe', null)
-    await screen.findByRole('heading', { level: 1 })
+    await screen.findByRole('button', { name: 'Entrar' })
     await esperarSemViolacoes()
   })
 })
@@ -538,8 +520,8 @@ describe('Situação nunca indicada só por cor (RNF-U05)', () => {
   })
 
   it('o tipo de cada aviso aparece como texto, além da cor e do marcador', async () => {
-    vi.mocked(consultarSaude).mockRejectedValue(SEM_CONEXAO)
-    abrir('/', null)
+    vi.mocked(listarReservas).mockRejectedValue(SEM_CONEXAO)
+    abrir('/reservas')
     const aviso = await screen.findByRole('alert')
     expect(aviso.textContent).toContain('Erro:')
   })

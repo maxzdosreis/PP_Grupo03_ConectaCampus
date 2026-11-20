@@ -210,12 +210,12 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 
 | Campo | Conteúdo |
 |---|---|
-| **Enunciado** | O sistema deve permitir ao usuário autenticado sair e ver a página inicial sem nenhuma identificação, com a mensagem "Você saiu da sua conta."; depois de sair, a sessão não pode mais ser renovada, em nenhum lugar. |
+| **Enunciado** | O sistema deve permitir ao usuário autenticado sair e voltar à entrada do sistema sem nenhuma identificação, com a mensagem "Você saiu da sua conta."; depois de sair, a sessão não pode mais ser renovada, em nenhum lugar. |
 | **Origem** | NS-11 (principal); NS-14 |
 | **Funcionalidade** | Extra (AUT-06) |
 | **Prioridade (QFD)** | Esperado — num computador compartilhado, sem sair, a próxima pessoa agiria em nome da anterior. |
 | **Vínculos** | UC: [UC-02 Autenticar](../casos-de-uso/README.md#uc-02) (alternativa) — na ficha: [UC-02 A4.3](../casos-de-uso/UC-02-autenticar.md#a4-3) · US/CA: [US-03 · CA-02](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-02) (TA-19), [US-03 · CA-09](../historias/US-03-manter-e-encerrar-a-sessao.md#us-03-ca-09) (TA-26) |
-| **Evidência (complementar)** | `POST /api/auth/logout/` com o `refresh`, chamado pelo frontend sem esperar a resposta (AUT-09); "Sair" no cabeçalho de toda tela, que leva ao início `/`. `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_sair_de_novo_com_o_mesmo_refresh_responde_200`; `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início", "sair revoga o refresh na API sem esperar a resposta"); `api/sessao.test.ts` |
+| **Evidência (complementar)** | `POST /api/auth/logout/` com o `refresh`, chamado pelo frontend sem esperar a resposta (AUT-09); "Sair" no cabeçalho de toda tela, que leva à raiz do sistema e daí à tela de entrar (CR-08). `contas/tests/test_api_sair.py::test_sair_revoga_o_refresh_e_ele_deixa_de_renovar`, `::test_sair_de_novo_com_o_mesmo_refresh_responde_200`; `components/sessao/SessaoProvider.test.tsx` ("sair numa rota protegida limpa a sessão, avisa e vai para o início", "sair revoga o refresh na API sem esperar a resposta"); `api/sessao.test.ts` |
 | **Código (complementar)** | `contas/api/views.py::SairView.post`, `components/sessao/SessaoProvider.tsx::SessaoProvider`, `api/sessao.ts::limparSessao` |
 | **Regras de negócio** | [Sessão](../glossario.md#sessao) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) (a credencial de acesso não é revogada ao sair: lacuna [L-04](srs.md#lacunas)) |

@@ -41,7 +41,7 @@ describe('Layout', () => {
 
     const cabecalho = screen.getByRole('banner')
     expect(cabecalho.textContent).toContain('Carla Mendes · Gestor')
-    expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Reservas', 'Nova reserva', 'Usuários'])
+    expect(itensDoMenu()).toEqual(['Espaços', 'Reservas', 'Nova reserva', 'Usuários'])
     expect(within(cabecalho).queryByRole('link', { name: 'Entrar' })).toBeNull()
     expect(within(cabecalho).getByRole('link', { name: 'Minha conta' }).getAttribute('href')).toBe(
       '/conta',
@@ -55,7 +55,7 @@ describe('Layout', () => {
   it('logado como solicitante, o item das reservas se chama "Minhas reservas"', () => {
     renderizar(valorDaSessao({ usuario: USUARIO_SOLICITANTE }))
 
-    expect(itensDoMenu()).toEqual(['Início', 'Espaços', 'Minhas reservas', 'Nova reserva'])
+    expect(itensDoMenu()).toEqual(['Espaços', 'Minhas reservas', 'Nova reserva'])
     expect(itensDoMenu()).not.toContain('Usuários')
   })
 
@@ -70,7 +70,8 @@ describe('Layout', () => {
       within(cabecalho).getByRole('link', { name: 'Cadastre-se' }).getAttribute('href'),
     ).toBe('/cadastro')
     expect(within(cabecalho).queryByRole('button', { name: 'Sair' })).toBeNull()
-    expect(itensDoMenu()).toEqual(['Início'])
+    expect(screen.queryByRole('navigation', { name: 'Navegação principal' })).toBeNull()
+    expect(within(cabecalho).queryByRole('link', { name: 'Início' })).toBeNull()
   })
 
   describe('foco ao trocar de tela', () => {

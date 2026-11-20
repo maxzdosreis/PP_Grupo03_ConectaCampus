@@ -9,8 +9,8 @@ Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodand
 | `main.tsx`, `App.tsx`, `RotasDaAplicacao.tsx` | Entrada (`MensagensProvider` > `BrowserRouter` > `SessaoProvider`) e, em `RotasDaAplicacao.tsx`, a tabela de rotas (separada para os testes de acessibilidade renderizarem as rotas de verdade). |
 | `navegacao.ts` | Itens do menu (com `exigeLogin`) e os caminhos das telas, montados num lugar só (`caminhoParaReservar`, `caminhoDaReserva`, `proximoSeguro` etc.). |
 | `formatacao.ts` | Datas e horários para exibição, por texto, sem `new Date("AAAA-MM-DD")` (que leria a data em UTC e poderia mostrar o dia anterior no Brasil). |
-| `api/` | Cliente HTTP (`cliente.ts`), sessão (`sessao.ts`) e uma função por endpoint (`autenticacao.ts`, `espacos.ts`, `reservas.ts`, `saude.ts`), com os tipos das respostas; `erros.ts` extrai a mensagem e os erros de cada campo. |
-| `pages/` | Uma página por rota (`PaginaInicial`, `PaginaEntrar`, `PaginaCadastro`, `PaginaMinhaConta`, `PaginaEspacos`, `PaginaReservas`, `PaginaNovaReserva`, `PaginaReserva`, `PaginaUsuarios`, `PaginaNaoEncontrada`). |
+| `api/` | Cliente HTTP (`cliente.ts`), sessão (`sessao.ts`) e uma função por endpoint (`autenticacao.ts`, `espacos.ts`, `reservas.ts`), com os tipos das respostas; `erros.ts` extrai a mensagem e os erros de cada campo. |
+| `pages/` | Uma página por rota (`PaginaEntrar`, `PaginaCadastro`, `PaginaMinhaConta`, `PaginaEspacos`, `PaginaReservas`, `PaginaNovaReserva`, `PaginaReserva`, `PaginaUsuarios`). |
 | `components/` | Componentes por assunto: `layout/` (cabeçalho, menu, área do usuário), `sessao/` (provider, rota protegida, formulários de entrar e de cadastro), `mensagens/` (toasts e `Aviso`), `estados/` (carregando, vazio, falha), `formulario/` (`Campo`), `dialogo/`, `etiqueta/`, `espacos/` e `reservas/`. Estilos em `<Componente>.module.css`; testes em `*.test.ts(x)` ao lado. |
 | `hooks/` | `useConsulta` (carregar com carregando, sucesso e erro), `useEnvio` (enviar formulário e separar erros de campo e gerais), foco depois de erro ou recarga, `useSessao`, `useMensagens`, `useTituloDaPagina`, `useValorAtrasado`. |
 | `testes/`, `configuracaoDosTestes.ts` | Só para os testes: renderizar com sessão controlada, usuários de teste, limpeza e o polyfill do `<dialog>` no jsdom. |
@@ -20,8 +20,7 @@ Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodand
 
 | Rota | Tela | Quem acessa |
 |---|---|---|
-| `/` | Página inicial | qualquer pessoa |
-| `/entrar` | Entrar | qualquer pessoa (com sessão, vai direto para o destino) |
+| `/entrar` | Entrar (a tela inicial do sistema) | qualquer pessoa (com sessão, vai direto para o destino) |
 | `/cadastro` | Criar conta | qualquer pessoa |
 | `/conta` | Minha conta: trocar a própria senha | logado |
 | `/espacos` | Espaços | logado; formulário e ações de gestão só para o Gestor |
@@ -29,11 +28,11 @@ Aplicação React 19.3 + TypeScript 6.0, com Vite 8.3 e React Router 8.4, rodand
 | `/reservas/nova` | Nova reserva | logado |
 | `/reservas/:reservaId` | Detalhe da reserva | logado (Solicitante: só as próprias) |
 | `/usuarios` | Usuários: listar, buscar e filtrar; promover, rebaixar, desativar e reativar contas | só o Gestor (outros perfis voltam para as reservas) |
-| qualquer outra | Página não encontrada | qualquer pessoa |
+| `/` e qualquer outra | Sem tela: sem sessão leva a `/entrar`; com sessão, a `/reservas` (CR-08) | qualquer pessoa |
 
 As rotas que exigem login ficam dentro de `RotaProtegida`; `/usuarios` fica ainda dentro de `RotaDeGestor`, que leva quem não é Gestor para `/reservas` (conveniência: a API responde 403). Sem sessão, a regra é a de `RotaProtegida`: sem sessão, a pessoa vai para `/entrar?proximo=<tela pedida>` e volta para ela depois do login. O `proximo` só é aceito se for um caminho do próprio site.
 
-- Aplicação (frontend): http://localhost:5173 — a página inicial mostra a situação da API ("API no ar.") e os atalhos "Entrar" e "Criar conta" (ou "Ir para minhas reservas", com login).
+- Aplicação (frontend): http://localhost:5173 — sem sessão, abre direto a tela de entrar (com o link "Cadastre-se"); com sessão, as reservas. A situação da API fica em http://localhost:8000/api/health/.
 - Entrar: http://localhost:5173/entrar (ou "Entrar" no cabeçalho) — com o e-mail e a senha de um dos [usuários de exemplo](../../README.md#dados-de-exemplo). Espaços e reservas exigem login: quem abre uma dessas telas sem login vai para a tela de entrar e volta para ela depois. O login continua valendo ao recarregar a página e em abas novas, e o token é renovado sozinho enquanto o refresh for válido (1 dia desde o login). O cabeçalho mostra quem está logado ("Nome · Perfil") e o botão "Sair", que encerra a sessão também na API: depois de sair, aquele login não renova mais.
 - Criar conta: http://localhost:5173/cadastro (ou "Cadastre-se" no cabeçalho) — cadastrar um solicitante com nome, matrícula, e-mail e senha; a conta já entra sozinha e abre a tela de nova reserva.
 - Minha conta: http://localhost:5173/conta (ou "Minha conta" no cabeçalho, com sessão) — senha atual, nova senha e confirmação; a confirmação é só do navegador, e a API confere a senha atual (400 `SENHA_ATUAL_INCORRETA`, que não encerra a sessão), a política de senha e o limite de tentativas. No sucesso, os campos são limpos e a pessoa continua logada; as outras sessões da conta deixam de renovar (o `refresh` da sessão atual vai em `refresh_atual`).

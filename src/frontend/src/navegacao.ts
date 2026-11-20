@@ -27,7 +27,6 @@ export function rotuloDasReservas(ehGestor: boolean): string {
 }
 
 export const ITENS_DE_NAVEGACAO: DefinicaoDoItem[] = [
-  { rotulo: 'Início', caminho: '/', exigeLogin: false },
   { rotulo: 'Espaços', caminho: '/espacos', exigeLogin: true },
   { rotulo: rotuloDasReservas, caminho: CAMINHO_DAS_RESERVAS, exigeLogin: true },
   { rotulo: 'Nova reserva', caminho: CAMINHO_DA_NOVA_RESERVA, exigeLogin: true },

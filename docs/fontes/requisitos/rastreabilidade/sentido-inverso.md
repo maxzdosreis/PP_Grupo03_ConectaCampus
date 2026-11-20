@@ -55,7 +55,6 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 
 | Rota | Nome | RF | NS | Observação |
 |---|---|---|---|---|
-| `/` | PaginaInicial | [RF-36](matriz.md#rf-36), [RF-40](matriz.md#rf-40) | [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14), [NS-16](../visao.md#ns-16) | — |
 | `/entrar` | PaginaEntrar | [RF-33](matriz.md#rf-33) | [NS-11](../visao.md#ns-11) | — |
 | `/cadastro` | PaginaCadastro | [RF-32](matriz.md#rf-32) | [NS-15](../visao.md#ns-15) | — |
 | `/conta` | PaginaMinhaConta | [RF-41](matriz.md#rf-41) | [NS-11](../visao.md#ns-11), [NS-15](../visao.md#ns-15) | — |
@@ -64,7 +63,6 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `/reservas/nova` | PaginaNovaReserva | [RF-11](matriz.md#rf-11), [RF-28](matriz.md#rf-28), [RF-29](matriz.md#rf-29), [RF-30](matriz.md#rf-30), [RF-31](matriz.md#rf-31), [RF-35](matriz.md#rf-35) | [NS-03](../visao.md#ns-03), [NS-05](../visao.md#ns-05), [NS-06](../visao.md#ns-06), [NS-11](../visao.md#ns-11), [NS-14](../visao.md#ns-14) | — |
 | `/reservas/:reservaId` | PaginaReserva | [RF-03](matriz.md#rf-03), [RF-14](matriz.md#rf-14), [RF-16](matriz.md#rf-16), [RF-22](matriz.md#rf-22) | [NS-01](../visao.md#ns-01), [NS-07](../visao.md#ns-07), [NS-08](../visao.md#ns-08), [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10), [NS-11](../visao.md#ns-11), [NS-12](../visao.md#ns-12) | — |
 | `/usuarios` | PaginaUsuarios | [RF-42](matriz.md#rf-42), [RF-43](matriz.md#rf-43) | [NS-11](../visao.md#ns-11) | — |
-| `*` | PaginaNaoEncontrada | **sem RF** | — | sem RF: [L-17](../requisitos/srs.md#l-17) |
 | `/admin/` | Django admin (config/urls.py) | [RF-37](matriz.md#rf-37) | [NS-11](../visao.md#ns-11) | ver [L-10](../requisitos/srs.md#l-10) |
 
 ## Comandos

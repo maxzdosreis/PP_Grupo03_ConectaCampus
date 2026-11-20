@@ -197,8 +197,8 @@ Segurança e acesso. Base: [DEC-04](../decisoes/DEC-04.md) e a [matriz de acesso
 | Campo | Conteúdo |
 |---|---|
 | **Enunciado** | Todas as telas podem ser usadas, sem rolagem horizontal da página inteira, numa largura de 360 px; tabelas largas rolam dentro da própria área. |
-| **Métrica e valor-alvo** | 9 de 9 telas (`/`, `/entrar`, `/cadastro`, `/conta`, `/espacos`, `/reservas`, `/reservas/nova`, `/reservas/:reservaId`, `/usuarios`) sem rolagem horizontal da página a 360 × 640 px. |
-| **Como verificar** | Roteiro no navegador, feito em 19/11/2026 com o resultado registrado na [VER-01](../verificacoes/FE-08-usabilidade.md#3-navegador-real-larguras-rnf-u02): cada tela aberta a 360 × 640 (e também a 320, 768 e 1280 px), como Gestor e como Solicitante, com `document.documentElement.scrollWidth` igual à largura útil e as três tabelas rolando na própria região. Resultado: 9 de 9 telas sem rolagem horizontal da página, depois da correção da FE-08 (`/reservas` media 1003 px a 320 px). Sem teste automático, porque o jsdom não calcula layout. |
+| **Métrica e valor-alvo** | 8 de 8 telas (`/entrar`, `/cadastro`, `/conta`, `/espacos`, `/reservas`, `/reservas/nova`, `/reservas/:reservaId`, `/usuarios`) sem rolagem horizontal da página a 360 × 640 px. |
+| **Como verificar** | Roteiro no navegador, feito em 19/11/2026 com o resultado registrado na [VER-01](../verificacoes/FE-08-usabilidade.md#3-navegador-real-larguras-rnf-u02): cada tela aberta a 360 × 640 (e também a 320, 768 e 1280 px), como Gestor e como Solicitante, com `document.documentElement.scrollWidth` igual à largura útil e as três tabelas rolando na própria região. Resultado: 9 de 9 telas sem rolagem horizontal da página, depois da correção da FE-08 (o CR-08 de 20/11/2026 tirou a tela `/`; as outras 8 são as medidas nesse roteiro e não mudaram) (`/reservas` media 1003 px a 320 px). Sem teste automático, porque o jsdom não calcula layout. |
 | **Origem** | NS-03, NS-07; premissa P-07 da [Visão](../visao.md#premissas) |
 | **O cliente não pediria** | ✔ |
 | **Revisão / estado** | 0.1 • Rascunho |

@@ -1,5 +1,0 @@
-.atalhos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--espaco-2) var(--espaco-5);
-}
