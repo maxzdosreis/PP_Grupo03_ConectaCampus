@@ -8,6 +8,7 @@ import { useConsulta, type EstadoDaConsulta } from '../../hooks/useConsulta.ts'
 import Carregando from '../estados/Carregando.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import { posicaoNaFaixa } from './agendaDoDia.ts'
+import { Botao, BotaoDeIcone } from '../botao/Botao.tsx'
 import estilos from './AgendaDoDia.module.css'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
 
@@ -58,9 +59,9 @@ function AgendaConsultada({ espacoId, data, aoUsarHorario }: PropriedadesDaConsu
             Não foi possível carregar a agenda. Você ainda pode solicitar normalmente.
           </Aviso>
           <div>
-            <button type="button" className={estilos.botao} onClick={recarregar}>
+            <Botao acao="atualizar" onClick={recarregar}>
               Tentar novamente
-            </button>
+            </Botao>
           </div>
         </div>
       )
@@ -136,14 +137,11 @@ function Ocupacao({ ocupacao, aoUsarHorario }: PropriedadesDaOcupacao) {
               {ocupacao.livres.map((livre) => (
                 <li key={horario(livre)} className={estilos.item}>
                   <span>{horario(livre)}</span>
-                  <button
-                    type="button"
-                    className={estilos.botao}
-                    aria-label={`Usar este horário, ${horario(livre)}`}
+                  <BotaoDeIcone
+                    acao="usarHorario"
+                    rotulo={`Usar este horário, ${horario(livre)}`}
                     onClick={() => aoUsarHorario(livre)}
-                  >
-                    Usar este horário
-                  </button>
+                  />
                 </li>
               ))}
             </ul>

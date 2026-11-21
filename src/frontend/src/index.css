@@ -17,6 +17,14 @@
   --cor-informacao-fundo: #eff6ff;
   --cor-foco: #1d4ed8;
 
+  --cor-neutro-hover: #eef1f5;
+  --cor-erro-escura: #991b1b;
+  --cor-sucesso-escura: #166534;
+  --cor-editar: #facc15;
+  --cor-editar-hover: #eab308;
+  --cor-editar-borda: #a16207;
+  --cor-desabilitado-fundo: #eef1f5;
+
   --espaco-1: 0.25rem;
   --espaco-2: 0.5rem;
   --espaco-3: 0.75rem;
@@ -36,6 +44,8 @@
 
   --sombra-leve: 0 1px 3px rgb(15 23 42 / 0.12), 0 1px 2px rgb(15 23 42 / 0.08);
   --largura-maxima: 64rem;
+  --tamanho-toque: 2.75rem;
+  --tamanho-icone: 20px;
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: var(--fonte-base);
@@ -85,21 +95,6 @@ a {
 
 button {
   font: inherit;
-  padding: var(--espaco-2) var(--espaco-4);
-  border: 1px solid var(--cor-primaria);
-  border-radius: var(--raio-pequeno);
-  color: var(--cor-sobre-primaria);
-  background-color: var(--cor-primaria);
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: var(--cor-primaria-escura);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 input,

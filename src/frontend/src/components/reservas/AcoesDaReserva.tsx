@@ -1,4 +1,6 @@
 import type { AcaoDisponivel, Reserva } from '../../api/reservas.ts'
+import { acaoDaSituacao } from '../botao/acoes.ts'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import estilos from './AcoesDaReserva.module.css'
 
 type PropriedadesDasAcoes = {
@@ -12,15 +14,12 @@ function AcoesDaReserva({ reserva, descricao, aoEscolherAcao }: PropriedadesDasA
   return (
     <div className={estilos.acoes}>
       {reserva.acoes_disponiveis.map((acao) => (
-        <button
+        <BotaoDeIcone
           key={acao.situacao}
-          type="button"
-          className={estilos.acao}
-          aria-label={`${acao.rotulo} a reserva de ${descricao}`}
+          acao={acaoDaSituacao(acao.situacao)}
+          rotulo={`${acao.rotulo} a reserva de ${descricao}`}
           onClick={() => aoEscolherAcao(reserva, acao)}
-        >
-          {acao.rotulo}
-        </button>
+        />
       ))}
     </div>
   )

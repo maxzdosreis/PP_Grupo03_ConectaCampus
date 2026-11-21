@@ -278,7 +278,11 @@ describe('PaginaReserva', () => {
     renderizar()
 
     await screen.findByText('Ginásio A')
-    expect(screen.getAllByRole('button').map((botao) => botao.textContent)).toEqual([
+    expect(
+      screen
+        .getAllByRole('button')
+        .map((botao) => botao.getAttribute('aria-label')?.split(' a reserva de ')[0]),
+    ).toEqual([
       'Confirmar',
       'Recusar',
       'Cancelar',

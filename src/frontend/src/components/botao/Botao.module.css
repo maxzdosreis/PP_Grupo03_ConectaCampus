@@ -1,0 +1,109 @@
+.botao {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: var(--tamanho-toque);
+  padding: 0 var(--espaco-4);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--raio-pequeno);
+  cursor: pointer;
+}
+
+.botao svg {
+  flex-shrink: 0;
+}
+
+.soIcone {
+  width: var(--tamanho-toque);
+  padding: 0;
+}
+
+.primario {
+  color: var(--cor-sobre-primaria);
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+}
+
+.primario:hover {
+  background-color: var(--cor-primaria-escura);
+  border-color: var(--cor-primaria-escura);
+}
+
+.neutro {
+  color: var(--cor-texto);
+  background-color: var(--cor-superficie);
+  border-color: var(--cor-borda-forte);
+}
+
+.neutro:hover {
+  background-color: var(--cor-neutro-hover);
+}
+
+.editar {
+  color: var(--cor-texto);
+  background-color: var(--cor-editar);
+  border-color: var(--cor-editar-borda);
+}
+
+.editar:hover {
+  background-color: var(--cor-editar-hover);
+}
+
+.perigo {
+  color: var(--cor-sobre-primaria);
+  background-color: var(--cor-erro);
+  border-color: var(--cor-erro);
+}
+
+.perigo:hover {
+  background-color: var(--cor-erro-escura);
+  border-color: var(--cor-erro-escura);
+}
+
+.confirmar {
+  color: var(--cor-sobre-primaria);
+  background-color: var(--cor-sucesso);
+  border-color: var(--cor-sucesso);
+}
+
+.confirmar:hover {
+  background-color: var(--cor-sucesso-escura);
+  border-color: var(--cor-sucesso-escura);
+}
+
+.botao:disabled {
+  color: var(--cor-texto-suave);
+  background-color: var(--cor-desabilitado-fundo);
+  border-color: var(--cor-borda-forte);
+  cursor: not-allowed;
+}
+
+.soIcone[data-dica]::after {
+  content: attr(data-dica);
+  position: absolute;
+  inset-block-end: calc(100% + var(--espaco-1));
+  inset-inline-end: 0;
+  z-index: 10;
+  padding: var(--espaco-1) var(--espaco-2);
+  font-size: var(--fonte-pequena);
+  font-weight: 400;
+  white-space: nowrap;
+  color: var(--cor-sobre-primaria);
+  background-color: var(--cor-texto);
+  border-radius: var(--raio-pequeno);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.soIcone[data-dica]:hover::after,
+.soIcone[data-dica]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}

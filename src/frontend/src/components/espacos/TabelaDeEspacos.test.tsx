@@ -40,7 +40,8 @@ describe('TabelaDeEspacos', () => {
     renderizar()
 
     const reservar = screen.getByRole('link', { name: 'Reservar Ginásio A' })
-    expect(reservar.textContent).toBe('Reservar')
+    expect(reservar.textContent).toBe('')
+    expect(reservar.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     expect(reservar.getAttribute('href')).toBe('/reservas/nova?espaco=1')
 
     const linhaDoInativo = screen.getByRole('row', { name: /Quadra Antiga/ })
@@ -60,13 +61,11 @@ describe('TabelaDeEspacos', () => {
 
     const linhaDoAtivo = within(screen.getByRole('row', { name: /Ginásio A/ }))
     const linhaDoInativo = within(screen.getByRole('row', { name: /Quadra Antiga/ }))
-    expect(linhaDoAtivo.getByRole('button', { name: 'Desativar o espaço Ginásio A' }).textContent).toBe(
-      'Desativar',
-    )
+    expect(linhaDoAtivo.getByRole('button', { name: 'Desativar o espaço Ginásio A' })).toBeTruthy()
     expect(linhaDoAtivo.queryByRole('button', { name: /Reativar/ })).toBeNull()
     expect(
-      linhaDoInativo.getByRole('button', { name: 'Reativar o espaço Quadra Antiga' }).textContent,
-    ).toBe('Reativar')
+      linhaDoInativo.getByRole('button', { name: 'Reativar o espaço Quadra Antiga' }),
+    ).toBeTruthy()
     expect(linhaDoInativo.queryByRole('button', { name: /Desativar/ })).toBeNull()
     expect(linhaDoAtivo.getByRole('link', { name: 'Reservar Ginásio A' })).toBeTruthy()
 

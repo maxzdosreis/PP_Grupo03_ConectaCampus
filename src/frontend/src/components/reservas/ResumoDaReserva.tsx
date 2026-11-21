@@ -4,6 +4,7 @@ import type { Reserva } from '../../api/reservas.ts'
 import { formatarIntervalo } from '../../formatacao.ts'
 import { caminhoDaReserva, caminhoParaMinhasReservas } from '../../navegacao.ts'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
+import { Botao } from '../botao/Botao.tsx'
 import estilos from './ResumoDaReserva.module.css'
 
 type PropriedadesDoResumo = {
@@ -46,9 +47,9 @@ function ResumoDaReserva({ reserva, nomeDoEspaco, aoSolicitarOutra }: Propriedad
         </div>
       </dl>
       <div className={estilos.acoes}>
-        <button type="button" onClick={aoSolicitarOutra}>
+        <Botao acao="reservar" onClick={aoSolicitarOutra}>
           Solicitar outra reserva
-        </button>
+        </Botao>
         <Link to={caminhoDaReserva(reserva.id)}>Ver reserva</Link>
         <Link to={caminhoParaMinhasReservas()}>Ver minhas reservas</Link>
       </div>

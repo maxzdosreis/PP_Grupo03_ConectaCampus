@@ -11,6 +11,7 @@ import {
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import AgendaDoDia from './AgendaDoDia.tsx'
@@ -213,9 +214,9 @@ function FormularioDeReserva({
         )}
       </Campo>
       <div>
-        <button type="submit" disabled={enviando}>
+        <Botao acao="reservar" type="submit" disabled={enviando}>
           {enviando ? 'Enviando solicitação...' : 'Solicitar reserva'}
-        </button>
+        </Botao>
       </div>
     </form>
   )

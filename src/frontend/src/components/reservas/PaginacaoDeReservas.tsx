@@ -1,4 +1,5 @@
 import type { Paginacao } from '../../api/tipos.ts'
+import { Botao } from '../botao/Botao.tsx'
 import estilos from './PaginacaoDeReservas.module.css'
 
 type PropriedadesDaPaginacao = {
@@ -17,23 +18,20 @@ function PaginacaoDeReservas({
 
   return (
     <nav aria-label="Paginação" className={estilos.paginacao}>
-      <button
-        type="button"
-        disabled={pagina <= 1}
-        onClick={() => aoMudarPagina(pagina - 1)}
-      >
+      <Botao acao="anterior" disabled={pagina <= 1} onClick={() => aoMudarPagina(pagina - 1)}>
         Anterior
-      </button>
+      </Botao>
       <p className={estilos.posicao}>
         Página {pagina} de {totalDePaginas} · {total} {nomeDosItens}
       </p>
-      <button
-        type="button"
+      <Botao
+        acao="proxima"
+        iconeAoFinal
         disabled={pagina >= totalDePaginas}
         onClick={() => aoMudarPagina(pagina + 1)}
       >
         Próxima
-      </button>
+      </Botao>
     </nav>
   )
 }

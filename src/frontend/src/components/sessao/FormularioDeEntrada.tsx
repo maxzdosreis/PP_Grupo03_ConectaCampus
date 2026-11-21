@@ -3,6 +3,7 @@ import type { DadosDeLogin } from '../../api/autenticacao.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useSessao } from '../../hooks/useSessao.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './FormularioDeAcesso.module.css'
@@ -58,9 +59,9 @@ function FormularioDeEntrada() {
         )}
       </Campo>
       <div>
-        <button type="submit" disabled={enviando}>
+        <Botao acao="entrar" type="submit" disabled={enviando}>
           {enviando ? 'Entrando...' : 'Entrar'}
-        </button>
+        </Botao>
       </div>
     </form>
   )

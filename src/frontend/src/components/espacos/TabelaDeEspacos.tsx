@@ -1,8 +1,8 @@
 import { useId, type Ref } from 'react'
-import { Link } from 'react-router'
 import type { Espaco } from '../../api/espacos.ts'
 import { formatarFuncionamento } from '../../formatacao.ts'
 import { caminhoParaReservar } from '../../navegacao.ts'
+import { BotaoDeIcone, LinkDeIcone } from '../botao/Botao.tsx'
 import Etiqueta from '../etiqueta/Etiqueta.tsx'
 import estilos from './TabelaDeEspacos.module.css'
 
@@ -59,12 +59,11 @@ function TabelaDeEspacos({ espacos, legenda, gestao, ref }: PropriedadesDaTabela
               <td>
                 <div className={estilos.acoes}>
                   {espaco.ativo && (
-                    <Link
+                    <LinkDeIcone
+                      acao="reservar"
                       to={caminhoParaReservar(espaco.id)}
-                      aria-label={`Reservar ${espaco.nome}`}
-                    >
-                      Reservar
-                    </Link>
+                      rotulo={`Reservar ${espaco.nome}`}
+                    />
                   )}
                   {gestao && <BotoesDeGestao espaco={espaco} gestao={gestao} />}
                 </div>
@@ -81,22 +80,16 @@ function BotoesDeGestao({ espaco, gestao }: { espaco: Espaco; gestao: AcoesDeGes
   const ativacao = espaco.ativo ? 'Desativar' : 'Reativar'
   return (
     <>
-      <button
-        type="button"
-        className={estilos.acao}
-        aria-label={`Editar o espaço ${espaco.nome}`}
+      <BotaoDeIcone
+        acao="editar"
+        rotulo={`Editar o espaço ${espaco.nome}`}
         onClick={() => gestao.aoEditar(espaco)}
-      >
-        Editar
-      </button>
-      <button
-        type="button"
-        className={estilos.acao}
-        aria-label={`${ativacao} o espaço ${espaco.nome}`}
+      />
+      <BotaoDeIcone
+        acao={espaco.ativo ? 'desativar' : 'reativar'}
+        rotulo={`${ativacao} o espaço ${espaco.nome}`}
         onClick={() => gestao.aoAlterarAtivacao(espaco)}
-      >
-        {ativacao}
-      </button>
+      />
     </>
   )
 }

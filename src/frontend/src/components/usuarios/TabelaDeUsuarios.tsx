@@ -1,6 +1,7 @@
 import { useId, type Ref } from 'react'
 import type { UsuarioGerenciado } from '../../api/usuarios.ts'
 import { formatarDataHora } from '../../formatacao.ts'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import Etiqueta from '../etiqueta/Etiqueta.tsx'
 import {
   acaoDePerfil,
@@ -76,17 +77,14 @@ function TabelaDeUsuarios({
                 <td>
                   <div className={estilos.acoes}>
                     {[acaoDePerfil(usuario), acaoDeSituacao(usuario)].map((acao) => (
-                      <button
+                      <BotaoDeIcone
                         key={acao}
-                        type="button"
-                        className={estilos.acao}
-                        aria-label={`${ROTULOS_DAS_ACOES[acao]}: ${usuario.nome}`}
+                        acao={acao}
+                        rotulo={`${ROTULOS_DAS_ACOES[acao]}: ${usuario.nome}`}
                         aria-describedby={ehOProprio ? idDaAjudaDaLinha : undefined}
                         disabled={ehOProprio && (acao === 'rebaixar' || acao === 'desativar')}
                         onClick={() => aoEscolherAcao(usuario, acao)}
-                      >
-                        {ROTULOS_DAS_ACOES[acao]}
-                      </button>
+                      />
                     ))}
                   </div>
                   {ehOProprio && (

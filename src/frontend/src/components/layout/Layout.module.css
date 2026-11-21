@@ -42,7 +42,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--espaco-2) var(--espaco-5);
+  gap: var(--espaco-2) var(--espaco-6);
 }
 
 .marca {

@@ -3,6 +3,7 @@ import { ativarEspaco, desativarEspaco, type Espaco } from '../../api/espacos.ts
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Dialogo from '../dialogo/Dialogo.tsx'
 import ErroDoDialogo from '../dialogo/ErroDoDialogo.tsx'
 import estilos from './DialogoDeEspaco.module.css'
@@ -77,18 +78,22 @@ function DialogoDeAtivacao({
         </p>
         <p className={estilos.texto}>{textos.explicacao}</p>
         <div className={estilos.botoes}>
-          <button type="submit" disabled={enviando}>
+          <Botao
+            acao={espaco.ativo ? 'desativar' : 'reativar'}
+            type="submit"
+            disabled={enviando}
+          >
             {enviando ? textos.enviando : textos.titulo}
-          </button>
-          <button
+          </Botao>
+          <Botao
+            acao="voltar"
             ref={botaoVoltar}
             type="button"
-            className={estilos.secundario}
             onClick={fechar}
             disabled={enviando}
           >
             Voltar
-          </button>
+          </Botao>
         </div>
       </form>
     </Dialogo>

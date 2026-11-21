@@ -7,6 +7,7 @@ import type { EstadoDaConsulta } from '../../hooks/useConsulta.ts'
 import Carregando from '../estados/Carregando.tsx'
 import FalhaAoCarregar from '../estados/FalhaAoCarregar.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
+import { Botao } from '../botao/Botao.tsx'
 import CamposDoEspaco from './CamposDoEspaco.tsx'
 import estilos from './FormularioDeEspaco.module.css'
 
@@ -84,9 +85,9 @@ function Formulario({ tipos, aoCadastrar }: PropriedadesDoCadastro) {
         aoAlterar={alterar}
       />
       <div>
-        <button type="submit" disabled={enviando}>
+        <Botao acao="salvar" type="submit" disabled={enviando}>
           {enviando ? 'Cadastrando...' : 'Cadastrar espaço'}
-        </button>
+        </Botao>
       </div>
     </form>
   )

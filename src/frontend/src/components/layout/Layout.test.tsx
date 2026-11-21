@@ -36,11 +36,12 @@ function itensDoMenu() {
 }
 
 describe('Layout', () => {
-  it('logado, mostra nome e perfil, o botão Sair e todos os itens do menu', async () => {
+  it('logado, mostra o botão Sair e todos os itens do menu, sem nome nem perfil', async () => {
     const sessao = renderizar(valorDaSessao({ usuario: USUARIO_GESTOR }))
 
     const cabecalho = screen.getByRole('banner')
-    expect(cabecalho.textContent).toContain('Carla Mendes · Gestor')
+    expect(cabecalho.textContent).not.toContain('Carla Mendes')
+    expect(cabecalho.textContent).not.toContain('Gestor')
     expect(itensDoMenu()).toEqual(['Espaços', 'Reservas', 'Nova reserva', 'Usuários'])
     expect(within(cabecalho).queryByRole('link', { name: 'Entrar' })).toBeNull()
     expect(within(cabecalho).getByRole('link', { name: 'Minha conta' }).getAttribute('href')).toBe(

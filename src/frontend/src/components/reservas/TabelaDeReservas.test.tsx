@@ -67,7 +67,7 @@ function botoesDaLinha(reservaDaLinha: string) {
   const linha = screen.getByRole('row', { name: new RegExp(reservaDaLinha) })
   return within(linha)
     .queryAllByRole('button')
-    .map((botao) => botao.textContent)
+    .map((botao) => botao.getAttribute('aria-label')?.split(' a reserva de ')[0])
 }
 
 describe('TabelaDeReservas', () => {
@@ -107,15 +107,12 @@ describe('TabelaDeReservas', () => {
     expect(botoesDaLinha('14:00–15:00')).toEqual(['Reabrir'])
   })
 
-  it('sem ações mostra "—" e "Nenhuma ação disponível" para leitor de tela', () => {
+  it('sem ações de situação, só oferece o link para os detalhes', () => {
     renderizar([CONCLUIDA])
 
     const linha = screen.getByRole('row', { name: /14:00–15:00/ })
     expect(within(linha).queryByRole('button')).toBeNull()
-    expect(linha.textContent).toContain('—')
-    expect(within(linha).getByText('Nenhuma ação disponível').className).toBe(
-      'somente-leitor-de-tela',
-    )
+    expect(within(linha).getAllByRole('link')).toHaveLength(1)
   })
 
   it('cada botão tem nome acessível com a data, o horário e o espaço', () => {
@@ -124,7 +121,8 @@ describe('TabelaDeReservas', () => {
     const confirmar = screen.getByRole('button', {
       name: 'Confirmar a reserva de 25/10/2026, 10:00–11:00 em Ginásio A',
     })
-    expect(confirmar.textContent).toBe('Confirmar')
+    expect(confirmar.textContent).toBe('')
+    expect(confirmar.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     expect(
       screen.getByRole('button', {
         name: 'Recusar a reserva de 25/10/2026, 14:00–15:00 em Espaço #9',
@@ -132,13 +130,14 @@ describe('TabelaDeReservas', () => {
     ).toBeTruthy()
   })
 
-  it('a data de cada linha é um link para o detalhe, com nome acessível com contexto', () => {
+  it('cada linha tem um link para o detalhe, com nome acessível com contexto', () => {
     renderizar([SOLICITADA, CONCLUIDA])
 
     const link = screen.getByRole('link', {
       name: '25/10/2026, 10:00–11:00 em Ginásio A — ver detalhes',
     })
-    expect(link.textContent).toBe('25/10/2026, 10:00–11:00')
+    expect(link.textContent).toBe('')
+    expect(link.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     expect(link.getAttribute('href')).toBe('/reservas/10')
     expect(
       screen

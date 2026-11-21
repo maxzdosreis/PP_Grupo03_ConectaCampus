@@ -31,11 +31,4 @@
   gap: var(--espaco-2);
 }
 
-.secundario {
-  color: var(--cor-primaria);
-  background-color: var(--cor-superficie);
-}
 
-.secundario:hover {
-  color: var(--cor-sobre-primaria);
-}

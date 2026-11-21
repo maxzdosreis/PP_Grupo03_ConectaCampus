@@ -1,6 +1,6 @@
-import { Link } from 'react-router'
 import { useSessao } from '../../hooks/useSessao.ts'
 import { CAMINHO_DA_CONTA, CAMINHO_DE_ENTRAR, CAMINHO_DO_CADASTRO } from '../../navegacao.ts'
+import { Botao, LinkBotao } from '../botao/Botao.tsx'
 import estilos from './AreaDoUsuario.module.css'
 
 function AreaDoUsuario() {
@@ -12,27 +12,23 @@ function AreaDoUsuario() {
   if (!usuario) {
     return (
       <div className={estilos.area}>
-        <Link to={CAMINHO_DE_ENTRAR} className={estilos.link}>
+        <LinkBotao acao="entrar" variante="neutro" to={CAMINHO_DE_ENTRAR}>
           Entrar
-        </Link>
-        <Link to={CAMINHO_DO_CADASTRO} className={estilos.link}>
+        </LinkBotao>
+        <LinkBotao acao="cadastrar" variante="neutro" to={CAMINHO_DO_CADASTRO}>
           Cadastre-se
-        </Link>
+        </LinkBotao>
       </div>
     )
   }
   return (
     <div className={estilos.area}>
-      <p className={estilos.usuario}>
-        <span className="somente-leitor-de-tela">Conectado como </span>
-        {usuario.nome} · {usuario.perfil_rotulo}
-      </p>
-      <Link to={CAMINHO_DA_CONTA} className={estilos.link}>
+      <LinkBotao acao="conta" to={CAMINHO_DA_CONTA}>
         Minha conta
-      </Link>
-      <button type="button" className={estilos.sair} onClick={sair}>
+      </LinkBotao>
+      <Botao acao="sair" onClick={sair}>
         Sair
-      </button>
+      </Botao>
     </div>
   )
 }

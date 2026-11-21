@@ -28,19 +28,7 @@
   overflow-wrap: anywhere;
 }
 
-.fechar {
-  flex-shrink: 0;
-  padding: 0 var(--espaco-2);
-  font-size: var(--fonte-media);
-  line-height: 1.5;
-  border-color: var(--cor-borda-forte);
-  color: var(--cor-texto);
-  background-color: var(--cor-superficie);
-}
 
-.fechar:hover {
-  background-color: var(--cor-fundo);
-}
 
 @media (width < 30rem) {
   .dialogo {

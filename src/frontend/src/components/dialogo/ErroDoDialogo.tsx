@@ -1,4 +1,5 @@
 import type { Ref } from 'react'
+import { Botao } from '../botao/Botao.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './ErroDoDialogo.module.css'
 
@@ -27,9 +28,9 @@ function ErroDoDialogo({
       <Aviso variante="erro">{mensagem}</Aviso>
       {desatualizado && (
         <div>
-          <button type="button" onClick={aoAtualizar}>
+          <Botao acao="atualizar" onClick={aoAtualizar}>
             {rotuloDaAtualizacao}
-          </button>
+          </Botao>
         </div>
       )}
     </div>

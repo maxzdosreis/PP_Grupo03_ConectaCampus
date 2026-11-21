@@ -4,6 +4,7 @@ import { lerSessao } from '../../api/sessao.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './FormularioDeAcesso.module.css'
@@ -101,9 +102,9 @@ function FormularioDeTrocaDeSenha() {
         </Campo>
       ))}
       <div>
-        <button type="submit" disabled={enviando}>
+        <Botao acao="salvar" type="submit" disabled={enviando}>
           {enviando ? 'Alterando...' : 'Alterar senha'}
-        </button>
+        </Botao>
       </div>
     </form>
   )

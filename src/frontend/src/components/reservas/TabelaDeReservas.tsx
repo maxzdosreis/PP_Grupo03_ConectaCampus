@@ -1,8 +1,9 @@
 import { useId, type Ref } from 'react'
-import { Link, useLocation } from 'react-router'
+import { useLocation } from 'react-router'
 import type { AcaoDisponivel, Reserva } from '../../api/reservas.ts'
 import { formatarIntervalo } from '../../formatacao.ts'
 import { caminhoDaReserva, type OrigemDaReserva } from '../../navegacao.ts'
+import { LinkDeIcone } from '../botao/Botao.tsx'
 import AcoesDaReserva from './AcoesDaReserva.tsx'
 import EtiquetaDeSituacao from './EtiquetaDeSituacao.tsx'
 import { nomeDoEspaco, type NomesDosEspacos } from './nomeDoEspaco.ts'
@@ -14,15 +15,6 @@ type PropriedadesDaTabela = {
   nomesDosEspacos: NomesDosEspacos
   aoEscolherAcao: (reserva: Reserva, acao: AcaoDisponivel) => void
   ref?: Ref<HTMLDivElement>
-}
-
-function SemAcoes() {
-  return (
-    <>
-      <span aria-hidden="true">—</span>
-      <span className="somente-leitor-de-tela">Nenhuma ação disponível</span>
-    </>
-  )
 }
 
 function TabelaDeReservas({
@@ -65,13 +57,7 @@ function TabelaDeReservas({
             return (
               <tr key={reserva.id}>
                 <th scope="row">
-                  <Link
-                    to={caminhoDaReserva(reserva.id)}
-                    state={origem}
-                    aria-label={`${descricao} — ver detalhes`}
-                  >
-                    {intervalo}
-                  </Link>
+                  {intervalo}
                 </th>
                 <td>{espaco}</td>
                 <td>
@@ -91,15 +77,19 @@ function TabelaDeReservas({
                   )}
                 </td>
                 <td>
-                  {reserva.acoes_disponiveis.length > 0 ? (
+                  <div className={estilos.acoes}>
+                    <LinkDeIcone
+                      acao="detalhes"
+                      to={caminhoDaReserva(reserva.id)}
+                      state={origem}
+                      rotulo={`${descricao} — ver detalhes`}
+                    />
                     <AcoesDaReserva
                       reserva={reserva}
                       descricao={descricao}
                       aoEscolherAcao={aoEscolherAcao}
                     />
-                  ) : (
-                    <SemAcoes />
-                  )}
+                  </div>
                 </td>
               </tr>
             )

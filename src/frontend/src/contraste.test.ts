@@ -59,7 +59,6 @@ function razaoDeContraste(a: Rgb, b: Rgb) {
 type Par = { frente: string; fundo: string; onde: string; corDoFundo?: Rgb }
 
 const TINTA_ESCURA: Rgb = [15, 23, 42]
-const BRANCO: Rgb = [255, 255, 255]
 
 const PARES_DE_TEXTO: Par[] = [
   { frente: 'cor-texto', fundo: 'cor-fundo', onde: 'corpo da página' },
@@ -82,12 +81,6 @@ const PARES_DE_TEXTO: Par[] = [
   { frente: 'cor-primaria', fundo: 'cor-superficie', onde: 'links e botões secundários nos cartões e diálogos' },
   { frente: 'cor-sobre-primaria', fundo: 'cor-primaria', onde: 'botões primários, marcador do Aviso informativo, "Pular para o conteúdo"' },
   { frente: 'cor-sobre-primaria', fundo: 'cor-primaria-escura', onde: 'cabeçalho e botões sob o mouse' },
-  {
-    frente: 'cor-sobre-primaria',
-    fundo: 'cor-primaria-escura',
-    onde: '"Sair" sob o mouse (branco de 15% sobre o cabeçalho)',
-    corDoFundo: sobre(BRANCO, 0.15, cor('cor-primaria-escura')),
-  },
   { frente: 'cor-sucesso', fundo: 'cor-sucesso-fundo', onde: 'etiqueta de sucesso (Confirmada, Ativo, Concluída)' },
   { frente: 'cor-aviso', fundo: 'cor-aviso-fundo', onde: 'etiqueta de aviso (Solicitada)' },
   { frente: 'cor-erro', fundo: 'cor-erro-fundo', onde: 'etiqueta de erro (Recusada, Cancelada, Inativo)' },
@@ -95,6 +88,13 @@ const PARES_DE_TEXTO: Par[] = [
   { frente: 'cor-erro', fundo: 'cor-fundo', onde: 'mensagem de erro de campo fora de cartão' },
   { frente: 'cor-sobre-primaria', fundo: 'cor-erro', onde: 'marcador "!" do erro de campo e do Aviso de erro' },
   { frente: 'cor-sobre-primaria', fundo: 'cor-sucesso', onde: 'marcador "✓" do Aviso de sucesso' },
+  { frente: 'cor-texto', fundo: 'cor-neutro-hover', onde: 'botão neutro sob o mouse' },
+  { frente: 'cor-texto', fundo: 'cor-editar', onde: 'botão de editar (ícone escuro sobre amarelo)' },
+  { frente: 'cor-texto', fundo: 'cor-editar-hover', onde: 'botão de editar sob o mouse' },
+  { frente: 'cor-sobre-primaria', fundo: 'cor-erro-escura', onde: 'botão de perigo sob o mouse' },
+  { frente: 'cor-sobre-primaria', fundo: 'cor-sucesso-escura', onde: 'botão de confirmar sob o mouse' },
+  { frente: 'cor-sobre-primaria', fundo: 'cor-texto', onde: 'dica dos botões só de ícone' },
+  { frente: 'cor-texto-suave', fundo: 'cor-desabilitado-fundo', onde: 'botão desabilitado (isento da WCAG, mantido legível)' },
 ]
 
 const PARES_DE_COMPONENTE: Par[] = [
@@ -105,7 +105,14 @@ const PARES_DE_COMPONENTE: Par[] = [
   { frente: 'cor-primaria', fundo: 'cor-fundo', onde: 'botões sobre o fundo da página' },
   { frente: 'cor-foco', fundo: 'cor-superficie', onde: 'contorno de foco nos cartões e diálogos' },
   { frente: 'cor-foco', fundo: 'cor-fundo', onde: 'contorno de foco sobre o fundo da página' },
-  { frente: 'cor-sobre-primaria', fundo: 'cor-primaria-escura', onde: 'borda de "Sair" e traço do item ativo do menu' },
+  { frente: 'cor-sobre-primaria', fundo: 'cor-primaria-escura', onde: 'traço do item ativo do menu' },
+  { frente: 'cor-borda-forte', fundo: 'cor-neutro-hover', onde: 'borda do botão neutro sob o mouse' },
+  { frente: 'cor-editar-borda', fundo: 'cor-superficie', onde: 'borda do botão de editar sobre os cartões' },
+  { frente: 'cor-editar-borda', fundo: 'cor-fundo', onde: 'borda do botão de editar sobre o fundo da página' },
+  { frente: 'cor-erro', fundo: 'cor-fundo', onde: 'botão de perigo sobre o fundo da página' },
+  { frente: 'cor-sucesso', fundo: 'cor-superficie', onde: 'botão de confirmar sobre os cartões' },
+  { frente: 'cor-sucesso', fundo: 'cor-fundo', onde: 'botão de confirmar sobre o fundo da página' },
+  { frente: 'cor-borda-forte', fundo: 'cor-desabilitado-fundo', onde: 'borda do botão desabilitado' },
   ...(FOCO_NO_CABECALHO
     ? [
         { frente: FOCO_NO_CABECALHO, fundo: 'cor-primaria-escura', onde: 'contorno de foco no cabeçalho' },
@@ -136,7 +143,7 @@ function tokensUsadosEm(propriedade: RegExp) {
 
 describe('Contraste das cores do tema (RNF-U04)', () => {
   it('lê os tokens de cor do index.css e o foco do cabeçalho', () => {
-    expect(Object.keys(TOKENS).length).toBeGreaterThanOrEqual(17)
+    expect(Object.keys(TOKENS).length).toBeGreaterThanOrEqual(24)
     expect(FOCO_NO_CABECALHO).toBeDefined()
   })
 
