@@ -44,8 +44,8 @@ Roteiro do critério de sucesso CS-03 da [Visão](requisitos/visao.md): **um int
 | 7 | Passo 2: `cd src` e `docker compose up --build` | Termina com `Starting development server at http://0.0.0.0:8000/` e `Local: http://localhost:5173/`; anote o tempo | | |
 | 8 | Passo 3: em outro terminal, em `src`, `docker compose exec backend python manage.py carregar_dados_exemplo` | "Usuários: 3 criados", "Espaços: 6 criados", "Reservas: 5 criadas" e o horário de conflito com a data de amanhã | | |
 | 9 | Verificar a API: http://localhost:8000/api/health/ | 200 `{"mensagem": "API no ar.", "dados": {"banco": "ok"}}` | | |
-| 10 | Passo 4: http://localhost:5173/entrar como Bruno (`bruno.lima@exemplo.com`, `Rede-Alta-73`) | "Minhas reservas" com 3 reservas; cabeçalho "Bruno Lima · Solicitante" | | |
-| 11 | Sair e entrar como Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`) | Cabeçalho "Carla Mendes · Gestor"; "Reservas" com 5 reservas | | |
+| 10 | Passo 4: http://localhost:5173/entrar como Bruno (`bruno.lima@exemplo.com`, `Rede-Alta-73`) | "Minhas reservas" com 3 reservas; cabeçalho com "Minha conta" e "Sair" | | |
+| 11 | Sair e entrar como Carla (`carla.mendes@exemplo.com`, `Apito-Dourado-48`) | Cabeçalho com "Minha conta", "Sair" e o item "Usuários"; "Reservas" com 5 reservas | | |
 | 12 | Roteiro, passo 3: Quadra Poliesportiva Central, amanhã, 10:30–11:30 | Aviso de conflito de horário (409 `CONFLITO_DE_HORARIO`) e os valores continuam no formulário | | |
 | 13 | Roteiro, passo 6: Bruno em "Espaços" | "Somente o gestor cadastra espaços.", sem formulário | | |
 | 14 | Roteiro com `curl` (README do backend): Bruno tenta confirmar | 403 `ACAO_NAO_PERMITIDA` | | |

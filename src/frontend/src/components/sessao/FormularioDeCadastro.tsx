@@ -3,6 +3,7 @@ import type { DadosDeCadastro } from '../../api/autenticacao.ts'
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useSessao } from '../../hooks/useSessao.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './FormularioDeAcesso.module.css'
@@ -80,9 +81,9 @@ function FormularioDeCadastro() {
         </Campo>
       ))}
       <div>
-        <button type="submit" disabled={enviando}>
+        <Botao acao="cadastrar" type="submit" disabled={enviando}>
           {enviando ? 'Criando conta...' : 'Criar conta'}
-        </button>
+        </Botao>
       </div>
     </form>
   )

@@ -8,6 +8,7 @@ import {
 import { useEnvio } from '../../hooks/useEnvio.ts'
 import { useFocoNoErro } from '../../hooks/useFocoNoErro.ts'
 import { useMensagens } from '../../hooks/useMensagens.ts'
+import { Botao } from '../botao/Botao.tsx'
 import Dialogo from '../dialogo/Dialogo.tsx'
 import ErroDoDialogo from '../dialogo/ErroDoDialogo.tsx'
 import CamposDoEspaco from './CamposDoEspaco.tsx'
@@ -96,17 +97,21 @@ function DialogoDeEdicaoDeEspaco({
           aoAlterar={alterar}
         />
         <div className={estilos.botoes}>
-          <button type="submit" disabled={enviando}>
+          <Botao
+            acao="salvar"
+            type="submit"
+            disabled={enviando}
+          >
             {enviando ? 'Salvando...' : 'Salvar alterações'}
-          </button>
-          <button
-            type="button"
-            className={estilos.secundario}
+          </Botao>
+          <Botao
+            acao="voltar"
+type="button"
             onClick={fechar}
             disabled={enviando}
           >
             Voltar
-          </button>
+          </Botao>
         </div>
       </form>
     </Dialogo>

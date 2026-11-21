@@ -1,4 +1,5 @@
 import type { FiltrosDeUsuarios as FiltrosDaApi } from '../../api/usuarios.ts'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import estilos from './FiltrosDeUsuarios.module.css'
 
@@ -62,9 +63,7 @@ function FiltrosDeUsuarios({
       </div>
       {temFiltros && (
         <div className={estilos.rodape}>
-          <button type="button" onClick={aoLimpar}>
-            Limpar filtros
-          </button>
+          <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
         </div>
       )}
     </fieldset>

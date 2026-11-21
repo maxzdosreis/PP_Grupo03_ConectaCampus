@@ -7,6 +7,7 @@ import {
   type RefObject,
   type SyntheticEvent,
 } from 'react'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import estilos from './Dialogo.module.css'
 
 const SELETOR_DE_FOCAVEIS = [
@@ -77,15 +78,7 @@ function Dialogo({ titulo, aoFechar, focoInicial, alvoAoFechar, children }: Prop
         <h2 id={idDoTitulo} className={estilos.titulo}>
           {titulo}
         </h2>
-        <button
-          ref={botaoFechar}
-          type="button"
-          className={estilos.fechar}
-          onClick={aoFechar}
-          aria-label="Fechar"
-        >
-          ×
-        </button>
+        <BotaoDeIcone ref={botaoFechar} acao="fechar" rotulo="Fechar" onClick={aoFechar} />
       </div>
       <div ref={conteudo}>{children}</div>
     </dialog>

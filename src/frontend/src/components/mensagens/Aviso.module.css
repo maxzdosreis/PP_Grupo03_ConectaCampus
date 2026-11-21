@@ -47,17 +47,4 @@
   overflow-wrap: anywhere;
 }
 
-.fechar {
-  flex-shrink: 0;
-  padding: 0 var(--espaco-2);
-  border-color: transparent;
-  font-size: var(--fonte-media);
-  line-height: 1;
-  color: var(--cor-texto-suave);
-  background-color: transparent;
-}
 
-.fechar:hover {
-  color: var(--cor-texto);
-  background-color: rgb(15 23 42 / 0.08);
-}

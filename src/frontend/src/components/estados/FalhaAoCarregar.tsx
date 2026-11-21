@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Botao } from '../botao/Botao.tsx'
 import Aviso from '../mensagens/Aviso.tsx'
 import estilos from './FalhaAoCarregar.module.css'
 
@@ -13,9 +14,9 @@ function FalhaAoCarregar({ mensagem, aoTentarNovamente, children }: Propriedades
     <div className={estilos.falha}>
       <Aviso variante="erro">{mensagem}</Aviso>
       <div className={estilos.acoes}>
-        <button type="button" onClick={aoTentarNovamente}>
+        <Botao acao="atualizar" onClick={aoTentarNovamente}>
           Tentar novamente
-        </button>
+        </Botao>
         {children}
       </div>
     </div>

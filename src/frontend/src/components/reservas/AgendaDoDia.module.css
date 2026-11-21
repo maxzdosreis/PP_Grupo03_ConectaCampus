@@ -90,16 +90,7 @@
   gap: var(--espaco-2);
 }
 
-.botao {
-  padding: var(--espaco-1) var(--espaco-3);
-  font-size: var(--fonte-pequena);
-  color: var(--cor-primaria);
-  background-color: var(--cor-superficie);
-}
 
-.botao:hover {
-  color: var(--cor-sobre-primaria);
-}
 
 @media (width < 30rem) {
   .agenda {

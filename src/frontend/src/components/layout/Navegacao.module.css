@@ -7,7 +7,10 @@
 }
 
 .link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: var(--tamanho-toque);
   padding: var(--espaco-1) 0;
   border-bottom: 3px solid transparent;
   color: var(--cor-sobre-primaria);

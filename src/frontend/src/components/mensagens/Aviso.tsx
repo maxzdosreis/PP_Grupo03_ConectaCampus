@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import estilos from './Aviso.module.css'
 
 export type VarianteDoAviso = 'sucesso' | 'erro' | 'informacao'
@@ -29,14 +30,7 @@ function Aviso({ variante, children, aoFechar, anunciar = true }: PropriedadesDo
       <span className="somente-leitor-de-tela">{rotulo}:</span>
       <div className={estilos.texto}>{children}</div>
       {aoFechar && (
-        <button
-          type="button"
-          className={estilos.fechar}
-          onClick={aoFechar}
-          aria-label="Fechar mensagem"
-        >
-          ×
-        </button>
+        <BotaoDeIcone acao="fechar" rotulo="Fechar mensagem" onClick={aoFechar} />
       )}
     </div>
   )

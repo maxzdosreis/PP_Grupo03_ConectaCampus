@@ -37,20 +37,12 @@
 
 .acoes {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--espaco-3);
+  gap: var(--espaco-2);
 }
 
-.acao {
-  padding: var(--espaco-1) var(--espaco-3);
-  font-size: var(--fonte-pequena);
-  color: var(--cor-primaria);
-  background-color: var(--cor-superficie);
-}
 
-.acao:hover {
-  color: var(--cor-sobre-primaria);
-}
 
 .tabela .numero {
   text-align: right;
@@ -64,6 +56,3 @@
   white-space: normal;
 }
 
-.acao:disabled {
-  cursor: not-allowed;
-}

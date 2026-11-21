@@ -1,5 +1,6 @@
 import type { Espaco } from '../../api/espacos.ts'
 import type { FiltrosDeReservas as FiltrosDaApi, SituacaoDeReserva } from '../../api/reservas.ts'
+import { BotaoDeIcone } from '../botao/Botao.tsx'
 import Campo from '../formulario/Campo.tsx'
 import estilos from './FiltrosDeReservas.module.css'
 import { rotuloDoEspacoDesconhecido } from './nomeDoEspaco.ts'
@@ -98,9 +99,7 @@ function FiltrosDeReservas({
           </label>
         )}
         {temFiltros && (
-          <button type="button" onClick={aoLimpar}>
-            Limpar filtros
-          </button>
+          <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
         )}
       </div>
     </fieldset>

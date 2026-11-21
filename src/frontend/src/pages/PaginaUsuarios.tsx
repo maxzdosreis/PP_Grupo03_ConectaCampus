@@ -1,3 +1,4 @@
+import { BotaoDeIcone } from '../components/botao/Botao.tsx'
 import { useEffect, useEffectEvent, useRef, useState, type Ref } from 'react'
 import { useSearchParams } from 'react-router'
 import { listarUsuarios, type ListaDeUsuarios, type UsuarioGerenciado } from '../api/usuarios.ts'
@@ -194,9 +195,7 @@ function ResultadoDaLista({
   aoMudarPagina,
 }: PropriedadesDoResultado) {
   const botaoLimparFiltros = (
-    <button type="button" onClick={aoLimparFiltros}>
-      Limpar filtros
-    </button>
+    <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimparFiltros} />
   )
 
   if (estado.tipo === 'carregando' || carregando) {
