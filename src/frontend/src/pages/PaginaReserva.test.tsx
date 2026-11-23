@@ -247,7 +247,7 @@ describe('PaginaReserva', () => {
     expect(screen.queryByRole('region', { name: 'Histórico' })).toBeNull()
     expect(screen.queryByRole('alert')).toBeNull()
     expect(
-      screen.getByRole('link', { name: 'Voltar para as reservas' }).getAttribute('href'),
+      screen.getByRole('link', { name: 'Voltar para a lista de reservas' }).getAttribute('href'),
     ).toBe('/reservas')
   })
 
@@ -367,7 +367,7 @@ describe('PaginaReserva', () => {
     renderizar({ pathname: '/reservas/5', state: { voltarPara: '/reservas?situacao=SOLICITADA' } })
 
     await screen.findByText('Ginásio A')
-    await userEvent.click(screen.getByRole('link', { name: 'Voltar para as reservas' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Voltar para a lista de reservas' }))
 
     expect(screen.getByTestId('local').textContent).toBe('/reservas?situacao=SOLICITADA')
   })
@@ -376,8 +376,64 @@ describe('PaginaReserva', () => {
     renderizar()
 
     await screen.findByText('Ginásio A')
-    await userEvent.click(screen.getByRole('link', { name: 'Voltar para as reservas' }))
+    await userEvent.click(screen.getByRole('link', { name: 'Voltar para a lista de reservas' }))
 
     expect(screen.getByTestId('local').textContent).toBe('/reservas')
+  })
+
+  it.each(['//site-externo.com', 'https://site-externo.com', String.raw`/\site`, 42, null])(
+    'origem inválida (%s) é ignorada e cai em /reservas',
+    async (origem) => {
+      renderizar({ pathname: '/reservas/5', state: { voltarPara: origem } })
+
+      await screen.findByText('Ginásio A')
+      expect(
+        screen.getByRole('link', { name: 'Voltar para a lista de reservas' }).getAttribute('href'),
+      ).toBe('/reservas')
+    },
+  )
+
+  it('o botão tem texto visível "Voltar", é focável por Tab e ativa com Enter', async () => {
+    renderizar({ pathname: '/reservas/5', state: { voltarPara: '/reservas?situacao=CONFIRMADA&pagina=2' } })
+
+    await screen.findByText('Ginásio A')
+    const botao = screen.getByRole('link', { name: 'Voltar para a lista de reservas' })
+    expect(botao.textContent).toBe('Voltar')
+    expect(botao.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    await userEvent.tab()
+    expect(document.activeElement).toBe(botao)
+    await userEvent.keyboard('{Enter}')
+
+    expect(screen.getByTestId('local').textContent).toBe(
+      '/reservas?situacao=CONFIRMADA&pagina=2',
+    )
+  })
+
+  it.each([
+    ['gestor', USUARIO_GESTOR],
+    ['solicitante', USUARIO_SOLICITANTE],
+  ])('%s volta à própria lista, com filtros e página', async (_, usuario) => {
+    renderizar(
+      { pathname: '/reservas/5', state: { voltarPara: '/reservas?minhas=true&pagina=3' } },
+      usuario,
+    )
+
+    await screen.findByText('Ginásio A')
+    await userEvent.click(screen.getByRole('link', { name: 'Voltar para a lista de reservas' }))
+
+    expect(screen.getByTestId('local').textContent).toBe('/reservas?minhas=true&pagina=3')
+  })
+
+  it('o botão aparece durante o carregamento e quando a reserva falha', async () => {
+    vi.mocked(obterReserva).mockReturnValue(new Promise(() => {}))
+    renderizar()
+    expect(screen.getByRole('link', { name: 'Voltar para a lista de reservas' })).toBeTruthy()
+  })
+
+  it('o botão aparece quando o carregamento da reserva falha', async () => {
+    vi.mocked(obterReserva).mockRejectedValue(new ErroDaApi(0, 'SEM_CONEXAO', 'Sem conexão.'))
+    renderizar()
+    expect(await screen.findByRole('alert')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Voltar para a lista de reservas' })).toBeTruthy()
   })
 })

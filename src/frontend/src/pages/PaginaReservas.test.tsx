@@ -17,7 +17,7 @@ import MensagensProvider from '../components/mensagens/MensagensProvider.tsx'
 import { ContextoDeSessao } from '../components/sessao/contextoDeSessao.ts'
 import { valorDaSessao } from '../testes/renderizar.tsx'
 import { USUARIO_GESTOR, USUARIO_SOLICITANTE } from '../testes/usuarios.ts'
-import { caminhoDeVolta } from '../navegacao.ts'
+import BotaoVoltar from '../components/reservas/BotaoVoltar.tsx'
 import PaginaReservas, { ATRASO_DO_SOLICITANTE_MS } from './PaginaReservas.tsx'
 
 vi.mock('../api/espacos.ts', () => ({
@@ -686,11 +686,6 @@ describe('PaginaReservas — paginação', () => {
     )
   }
 
-  function DetalheDeTeste() {
-    const { state } = useLocation()
-    return <Link to={caminhoDeVolta(state)}>Voltar para as reservas</Link>
-  }
-
   function renderizarComHistorico(entradas: string[]) {
     render(
       <MensagensProvider>
@@ -708,7 +703,7 @@ describe('PaginaReservas — paginação', () => {
                   </>
                 }
               />
-              <Route path="/reservas/:reservaId" element={<DetalheDeTeste />} />
+              <Route path="/reservas/:reservaId" element={<BotaoVoltar />} />
             </Routes>
           </ContextoDeSessao.Provider>
         </MemoryRouter>
@@ -858,10 +853,18 @@ describe('PaginaReservas — paginação', () => {
 
     await screen.findByText(/Página 2 de 3/)
     await userEvent.click(screen.getAllByRole('link', { name: /ver detalhes$/ })[0])
-    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para as reservas' }))
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para a lista de reservas' }))
 
     await screen.findByText(/Página 2 de 3/)
     expect(busca()).toBe('?pagina=2')
     expect(listarReservas).toHaveBeenLastCalledWith(filtros({ pagina: '2' }))
+    expect(document.activeElement).toBe(screen.getByRole('heading', { level: 1 }))
+  })
+
+  it('sem vir do botão Voltar, o foco não vai para o título', async () => {
+    renderizarComHistorico(['/reservas?pagina=2'])
+
+    await screen.findByText(/Página 2 de 3/)
+    expect(document.activeElement).not.toBe(screen.getByRole('heading', { level: 1 }))
   })
 })

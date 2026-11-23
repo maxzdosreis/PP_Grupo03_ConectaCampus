@@ -1,6 +1,6 @@
 import { BotaoDeIcone } from '../components/botao/Botao.tsx'
 import { useEffect, useEffectEvent, useMemo, useRef, useState, type Ref } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { listarEspacos } from '../api/espacos.ts'
 import {
   listarReservas,
@@ -29,7 +29,7 @@ import { useFocoAoRecarregar } from '../hooks/useFocoAoRecarregar.ts'
 import { useSessao } from '../hooks/useSessao.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { useValorAtrasado } from '../hooks/useValorAtrasado.ts'
-import { CAMINHO_DA_NOVA_RESERVA, rotuloDasReservas } from '../navegacao.ts'
+import { CAMINHO_DA_NOVA_RESERVA, chegouDeVolta, rotuloDasReservas } from '../navegacao.ts'
 
 export const ATRASO_DO_SOLICITANTE_MS = 400
 const PARAMETRO_DA_PAGINA = 'pagina'
@@ -105,6 +105,16 @@ function PaginaReservas() {
   const regiaoDaTabela = useRef<HTMLDivElement>(null)
   const listaCarregando =
     estado.tipo === 'carregando' || espacos.estado.tipo === 'carregando' || ultimaPagina !== null
+  const local = useLocation()
+  const navegar = useNavigate()
+  const focarNoTituloAoVoltar = useEffectEvent(() => {
+    if (!chegouDeVolta(local.state)) return
+    titulo.current?.focus()
+    navegar(local, { replace: true, state: null })
+  })
+  useEffect(() => {
+    focarNoTituloAoVoltar()
+  }, [])
   const focarNaListaAoCarregar = useFocoAoRecarregar(
     listaCarregando,
     () => regiaoDaTabela.current ?? titulo.current,
