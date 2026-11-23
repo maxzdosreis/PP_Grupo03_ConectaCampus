@@ -45,6 +45,7 @@
   --sombra-leve: 0 1px 3px rgb(15 23 42 / 0.12), 0 1px 2px rgb(15 23 42 / 0.08);
   --largura-maxima: 64rem;
   --tamanho-toque: 2.75rem;
+  --altura-campo: 3rem;
   --tamanho-icone: 20px;
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

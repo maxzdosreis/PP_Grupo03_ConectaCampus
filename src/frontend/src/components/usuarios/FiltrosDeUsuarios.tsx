@@ -1,7 +1,7 @@
 import type { FiltrosDeUsuarios as FiltrosDaApi } from '../../api/usuarios.ts'
 import { BotaoDeIcone } from '../botao/Botao.tsx'
-import Campo from '../formulario/Campo.tsx'
-import estilos from './FiltrosDeUsuarios.module.css'
+import BarraDeFiltros from '../filtros/BarraDeFiltros.tsx'
+import CampoFiltro from '../filtros/CampoFiltro.tsx'
 
 export type ValoresDosFiltrosDeUsuarios = Required<Omit<FiltrosDaApi, 'pagina'>>
 
@@ -33,40 +33,36 @@ function FiltrosDeUsuarios({
   aoLimpar,
 }: PropriedadesDosFiltros) {
   return (
-    <fieldset className={estilos.filtros}>
-      <legend className={estilos.legenda}>Filtros</legend>
-      <div className={estilos.campos}>
-        <Campo rotulo="Busca" dica="Nome, e-mail ou matrícula">
-          {(controle) => (
-            <input
-              {...controle}
-              type="text"
-              value={textoDaBusca}
-              onChange={(evento) => aoDigitarBusca(evento.target.value)}
-            />
-          )}
-        </Campo>
-        <Seletor
-          rotulo="Perfil"
-          rotuloDeTodos="Todos os perfis"
-          opcoes={PERFIS}
-          valor={valores.perfil}
-          aoMudar={(perfil) => aoMudar('perfil', perfil)}
-        />
-        <Seletor
-          rotulo="Situação"
-          rotuloDeTodos="Todas as situações"
-          opcoes={SITUACOES}
-          valor={valores.ativo}
-          aoMudar={(ativo) => aoMudar('ativo', ativo)}
-        />
-      </div>
-      {temFiltros && (
-        <div className={estilos.rodape}>
-          <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
-        </div>
-      )}
-    </fieldset>
+    <BarraDeFiltros
+      acoes={
+        temFiltros && <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
+      }
+    >
+      <CampoFiltro rotulo="Busca" dica="Nome, e-mail ou matrícula">
+        {(controle) => (
+          <input
+            {...controle}
+            type="text"
+            value={textoDaBusca}
+            onChange={(evento) => aoDigitarBusca(evento.target.value)}
+          />
+        )}
+      </CampoFiltro>
+      <Seletor
+        rotulo="Perfil"
+        rotuloDeTodos="Todos os perfis"
+        opcoes={PERFIS}
+        valor={valores.perfil}
+        aoMudar={(perfil) => aoMudar('perfil', perfil)}
+      />
+      <Seletor
+        rotulo="Situação"
+        rotuloDeTodos="Todas as situações"
+        opcoes={SITUACOES}
+        valor={valores.ativo}
+        aoMudar={(ativo) => aoMudar('ativo', ativo)}
+      />
+    </BarraDeFiltros>
   )
 }
 
@@ -81,7 +77,7 @@ type PropriedadesDoSeletor = {
 function Seletor({ rotulo, rotuloDeTodos, opcoes, valor, aoMudar }: PropriedadesDoSeletor) {
   const valorAusente = valor !== '' && !opcoes.some((opcao) => opcao.valor === valor)
   return (
-    <Campo rotulo={rotulo}>
+    <CampoFiltro rotulo={rotulo}>
       {(controle) => (
         <select {...controle} value={valor} onChange={(evento) => aoMudar(evento.target.value)}>
           <option value="">{rotuloDeTodos}</option>
@@ -93,7 +89,7 @@ function Seletor({ rotulo, rotuloDeTodos, opcoes, valor, aoMudar }: Propriedades
           ))}
         </select>
       )}
-    </Campo>
+    </CampoFiltro>
   )
 }
 

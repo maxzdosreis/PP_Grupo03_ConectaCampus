@@ -1,8 +1,8 @@
 import type { Espaco } from '../../api/espacos.ts'
 import type { FiltrosDeReservas as FiltrosDaApi, SituacaoDeReserva } from '../../api/reservas.ts'
 import { BotaoDeIcone } from '../botao/Botao.tsx'
-import Campo from '../formulario/Campo.tsx'
-import estilos from './FiltrosDeReservas.module.css'
+import BarraDeFiltros, { CaixaDeFiltro } from '../filtros/BarraDeFiltros.tsx'
+import CampoFiltro from '../filtros/CampoFiltro.tsx'
 import { rotuloDoEspacoDesconhecido } from './nomeDoEspaco.ts'
 
 export type ValoresDosFiltros = Required<Omit<FiltrosDaApi, 'pagina'>>
@@ -44,65 +44,60 @@ function FiltrosDeReservas({
   aoDigitarSolicitante,
   aoLimpar,
 }: PropriedadesDosFiltros) {
+  const rodape = filtrarPorSolicitante && (
+    <CaixaDeFiltro
+      rotulo="Somente minhas reservas"
+      marcada={valores.minhas}
+      aoMudar={(marcada) => aoMudar('minhas', marcada)}
+    />
+  )
+
   return (
-    <fieldset className={estilos.filtros}>
-      <legend className={estilos.legenda}>Filtros</legend>
-      <div className={estilos.campos}>
-        <SeletorDoFiltro
-          rotulo="Espaço"
-          rotuloDeTodos="Todos os espaços"
-          opcoes={espacos?.map(opcaoDoEspaco) ?? null}
-          valor={valores.espaco}
-          rotuloDoValorAusente={rotuloDoEspacoDesconhecido}
-          aoMudar={(espaco) => aoMudar('espaco', espaco)}
-        />
-        <SeletorDoFiltro
-          rotulo="Situação"
-          rotuloDeTodos="Todas as situações"
-          opcoes={situacoes}
-          valor={valores.situacao}
-          rotuloDoValorAusente={(situacao) => situacao}
-          aoMudar={(situacao) => aoMudar('situacao', situacao)}
-        />
-        <Campo rotulo="Data">
+    <BarraDeFiltros
+      acoes={
+        temFiltros && <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
+      }
+      rodape={rodape}
+    >
+      <SeletorDoFiltro
+        rotulo="Espaço"
+        rotuloDeTodos="Todos os espaços"
+        opcoes={espacos?.map(opcaoDoEspaco) ?? null}
+        valor={valores.espaco}
+        rotuloDoValorAusente={rotuloDoEspacoDesconhecido}
+        aoMudar={(espaco) => aoMudar('espaco', espaco)}
+      />
+      <SeletorDoFiltro
+        rotulo="Situação"
+        rotuloDeTodos="Todas as situações"
+        opcoes={situacoes}
+        valor={valores.situacao}
+        rotuloDoValorAusente={(situacao) => situacao}
+        aoMudar={(situacao) => aoMudar('situacao', situacao)}
+      />
+      <CampoFiltro rotulo="Data">
+        {(controle) => (
+          <input
+            {...controle}
+            type="date"
+            value={valores.data}
+            onChange={(evento) => aoMudar('data', evento.target.value)}
+          />
+        )}
+      </CampoFiltro>
+      {filtrarPorSolicitante && (
+        <CampoFiltro rotulo="Solicitante" dica="Nome ou matrícula">
           {(controle) => (
             <input
               {...controle}
-              type="date"
-              value={valores.data}
-              onChange={(evento) => aoMudar('data', evento.target.value)}
+              type="text"
+              value={textoDoSolicitante}
+              onChange={(evento) => aoDigitarSolicitante(evento.target.value)}
             />
           )}
-        </Campo>
-        {filtrarPorSolicitante && (
-          <Campo rotulo="Solicitante" dica="Nome ou matrícula">
-            {(controle) => (
-              <input
-                {...controle}
-                type="text"
-                value={textoDoSolicitante}
-                onChange={(evento) => aoDigitarSolicitante(evento.target.value)}
-              />
-            )}
-          </Campo>
-        )}
-      </div>
-      <div className={estilos.rodape}>
-        {filtrarPorSolicitante && (
-          <label className={estilos.marcavel}>
-            <input
-              type="checkbox"
-              checked={valores.minhas}
-              onChange={(evento) => aoMudar('minhas', evento.target.checked)}
-            />
-            Somente minhas reservas
-          </label>
-        )}
-        {temFiltros && (
-          <BotaoDeIcone acao="limpar" rotulo="Limpar filtros" onClick={aoLimpar} />
-        )}
-      </div>
-    </fieldset>
+        </CampoFiltro>
+      )}
+    </BarraDeFiltros>
   )
 }
 
@@ -125,7 +120,7 @@ function SeletorDoFiltro({
 }: PropriedadesDoSeletor) {
   const valorAusente = valor !== '' && !opcoes?.some((opcao) => opcao.valor === valor)
   return (
-    <Campo rotulo={rotulo}>
+    <CampoFiltro rotulo={rotulo}>
       {(controle) => (
         <select
           {...controle}
@@ -142,7 +137,7 @@ function SeletorDoFiltro({
           ))}
         </select>
       )}
-    </Campo>
+    </CampoFiltro>
   )
 }
 
