@@ -1,8 +1,5 @@
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--espaco-3) var(--espaco-5);
+.barra {
+  min-width: 0;
   margin: 0;
   padding: var(--espaco-3) var(--espaco-4) var(--espaco-4);
   border: 1px solid var(--cor-borda);
@@ -15,19 +12,26 @@
   font-weight: 600;
 }
 
-.tipo {
+.linha {
   display: flex;
-  flex-direction: column;
-  gap: var(--espaco-1);
-  flex: 1 1 14rem;
-  max-width: 20rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: var(--espaco-3) var(--espaco-4);
+}
+
+.rodape {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--espaco-3);
 }
 
 .marcavel {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: var(--espaco-2);
-  min-height: 2.5rem;
+  min-height: var(--altura-campo);
   cursor: pointer;
 }
 
@@ -36,4 +40,15 @@
   height: 1.5rem;
   margin: 0;
   accent-color: var(--cor-primaria);
+}
+
+@media (max-width: 30rem) {
+  .linha {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .linha > * {
+    max-width: none;
+  }
 }

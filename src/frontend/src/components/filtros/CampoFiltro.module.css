@@ -1,0 +1,54 @@
+.campo {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+  max-width: 18rem;
+}
+
+.rotulo {
+  overflow: hidden;
+  font-size: var(--fonte-pequena);
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.campo :is(input, select) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: var(--altura-campo);
+  text-overflow: ellipsis;
+}
+
+.campo input::placeholder {
+  color: var(--cor-texto-suave);
+  opacity: 1;
+}
+
+.campo :is(input, select):disabled {
+  background-color: var(--cor-desabilitado-fundo);
+}
+
+.campo select {
+  padding-right: 2.5rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2352606d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+.campo input[type='date']::-webkit-calendar-picker-indicator {
+  padding: var(--espaco-1);
+  cursor: pointer;
+}
+
+@media (max-width: 30rem) {
+  .campo {
+    flex: 0 0 auto;
+    max-width: none;
+  }
+}
