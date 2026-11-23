@@ -22,6 +22,17 @@ export type OrigemDaReserva = {
   voltarPara: string
 }
 
+export const ESTADO_DE_VOLTA = { aoVoltar: true } as const
+
+export function chegouDeVolta(estado: unknown): boolean {
+  return (
+    typeof estado === 'object' &&
+    estado !== null &&
+    'aoVoltar' in estado &&
+    estado.aoVoltar === true
+  )
+}
+
 export function rotuloDasReservas(ehGestor: boolean): string {
   return ehGestor ? 'Reservas' : 'Minhas reservas'
 }

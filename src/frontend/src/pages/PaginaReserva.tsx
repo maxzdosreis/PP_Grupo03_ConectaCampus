@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type RefObject } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { obterEspaco } from '../api/espacos.ts'
 import {
   listarHistoricoDaReserva,
@@ -12,6 +12,7 @@ import Carregando from '../components/estados/Carregando.tsx'
 import EstadoVazio from '../components/estados/EstadoVazio.tsx'
 import FalhaAoCarregar from '../components/estados/FalhaAoCarregar.tsx'
 import AcoesDaReserva from '../components/reservas/AcoesDaReserva.tsx'
+import BotaoVoltar from '../components/reservas/BotaoVoltar.tsx'
 import DetalhesDaReserva from '../components/reservas/DetalhesDaReserva.tsx'
 import DialogoDeSituacao from '../components/reservas/DialogoDeSituacao.tsx'
 import LinhaDoTempo from '../components/reservas/LinhaDoTempo.tsx'
@@ -20,7 +21,6 @@ import { useConsulta, type EstadoDaConsulta } from '../hooks/useConsulta.ts'
 import { useFocoAoRecarregar } from '../hooks/useFocoAoRecarregar.ts'
 import { useTituloDaPagina } from '../hooks/useTituloDaPagina.ts'
 import { formatarData, formatarIntervalo } from '../formatacao.ts'
-import { caminhoDeVolta } from '../navegacao.ts'
 import estilos from './PaginaReserva.module.css'
 
 const ID_DE_RESERVA = /^[1-9]\d*$/
@@ -42,19 +42,10 @@ function IdentificadorInvalido() {
   return <ReservaNaoEncontrada />
 }
 
-function LinkDeVolta() {
-  const { state } = useLocation()
-  return (
-    <p>
-      <Link to={caminhoDeVolta(state)}>Voltar para as reservas</Link>
-    </p>
-  )
-}
-
 function ReservaNaoEncontrada() {
   return (
     <>
-      <LinkDeVolta />
+      <BotaoVoltar />
       <h1>{TITULO_PADRAO}</h1>
       <EstadoVazio
         titulo={TITULO_NAO_ENCONTRADA}
@@ -94,7 +85,7 @@ function DetalheDaReserva({ id }: { id: number }) {
 
   return (
     <>
-      <LinkDeVolta />
+      <BotaoVoltar />
       <h1 ref={titulo} tabIndex={-1}>
         {textoDoTitulo}
       </h1>
