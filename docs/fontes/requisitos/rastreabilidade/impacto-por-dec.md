@@ -13,6 +13,7 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 | [DEC-13](#dec-13) | Decidida | 7 | 0 | 10 | 31 | 31 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-05](#dec-05) | Decidida | 1 | 1 | 7 | 15 | 15 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-07](#dec-07) | Decidida | 6 | 0 | 4 | 22 | 22 (0) | decidida: outra resposta só por CR (comportamental) |
+| [DEC-28](#dec-28) | Adotada provisoriamente | 0 | 0 | 0 | 0 | 0 (0) | editorial |
 | [DEC-01](#dec-01) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-02](#dec-02) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
 | [DEC-03](#dec-03) | Decidida | 0 | 0 | 0 | 0 | 0 (0) | decidida: outra resposta só por CR (comportamental) |
@@ -120,6 +121,28 @@ Para cada DEC, tudo o que muda se a resposta for diferente da opção adotada: R
 - **TA:** [TA-36](../historias/US-05-cadastrar-espaco.md#ta-36), [TA-38](../historias/US-05-cadastrar-espaco.md#ta-38), [TA-39](../historias/US-05-cadastrar-espaco.md#ta-39), [TA-48](../historias/US-06-editar-espaco.md#ta-48), [TA-49](../historias/US-06-editar-espaco.md#ta-49), [TA-50](../historias/US-06-editar-espaco.md#ta-50), [TA-56](../historias/US-06-editar-espaco.md#ta-56), [TA-68](../historias/US-08-solicitar-reserva.md#ta-68), [TA-69](../historias/US-08-solicitar-reserva.md#ta-69), [TA-70](../historias/US-08-solicitar-reserva.md#ta-70), [TA-72](../historias/US-08-solicitar-reserva.md#ta-72), [TA-74](../historias/US-08-solicitar-reserva.md#ta-74), [TA-79](../historias/US-08-solicitar-reserva.md#ta-79), [TA-80](../historias/US-08-solicitar-reserva.md#ta-80), [TA-81](../historias/US-08-solicitar-reserva.md#ta-81), [TA-82](../historias/US-08-solicitar-reserva.md#ta-82), [TA-83](../historias/US-08-solicitar-reserva.md#ta-83), [TA-84](../historias/US-08-solicitar-reserva.md#ta-84), [TA-93](../historias/US-09-ver-a-agenda-do-dia.md#ta-93), [TA-94](../historias/US-09-ver-a-agenda-do-dia.md#ta-94), [TA-95](../historias/US-09-ver-a-agenda-do-dia.md#ta-95), [TA-97](../historias/US-09-ver-a-agenda-do-dia.md#ta-97)
 - **Endpoint ou tela:** `POST /api/espacos/`; `/espacos`; `PATCH /api/espacos/{id}/`; `POST /api/reservas/`; `/reservas/nova`; `GET /api/reservas/regras-de-agenda/`; `GET /api/espacos/`; `GET /api/reservas/ocupacao/`
 - **Código:** `espacos/application/casos_de_uso.py::CadastrarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo`, `espacos/domain/horario_de_funcionamento.py::HorarioDeFuncionamento`, `espacos/application/casos_de_uso.py::EditarEspaco.executar`, `espacos/domain/espaco_esportivo.py::EspacoEsportivo.alterar_dados`, `espacos/infrastructure/repositorio_django.py::RepositorioEspacosDjango.salvar`, `espacos/domain/excecoes.py::HorarioIncompativelComReservas`, `reservas/domain/regras_de_agenda.py::garantir_regras_de_agenda`, `reservas/domain/reserva.py::Reserva.solicitar`, `reservas/domain/funcionamento.py::FuncionamentoDoEspaco`, `reservas/domain/regras_de_agenda.py::data_limite_para_reservar`, `reservas/domain/regras_de_agenda.py::DURACAO_SUGERIDA`, `reservas/api/serializers.py::RegrasDeAgendaSaidaSerializer.vigentes`, `espacos/api/serializers.py::EspacoSaidaSerializer`, `reservas/domain/regras_de_agenda.py::horarios_livres`, `reservas/application/casos_de_uso.py::ConsultarOcupacaoDoDia.executar`, `reservas/domain/regras_de_agenda.py::garantir_data_reservavel`, `reservas/domain/regras_de_agenda.py::motivo_de_indisponibilidade`
+
+## <a id="dec-28"></a>DEC-28 · O Redis guarda projeções da agenda e das filas; o PostgreSQL segue como fonte da verdade
+
+| Campo | Conteúdo |
+|---|---|
+| **Estado** | Adotada provisoriamente ([ficha](../decisoes/DEC-28.md)) |
+| **Pergunta** | O Redis, que hoje só conta as tentativas de login, cadastro e troca de senha, pode também guardar a agenda dos espaços e as filas e contagens de reservas, sem tirar do PostgreSQL a garantia de integridade das reservas? Se puder, o que ele guarda, o que acontece quando ele falha ou perde os dados, e o que fica fora? |
+| **Opção adotada** | **a) Papéis.** O PostgreSQL é a fonte da verdade das reservas, e a restrição de exclusão `reservas_reserva_sem_sobreposicao_no_espaco` continua sendo a guarda final contra conflito de horário. O Redis guarda só **projeções**, que podem ser reconstruídas a partir do PostgreSQL. O Redis nunca decide conflito, e não há pré-checagem de conflito em script Lua sobre a projeção. **b) Estruturas e chaves** (nomes lógicos). O prefixo é o que o projeto já usa em `contas/api/limites.py`: o `KEY_PREFIX` `conecta-campus` das `CACHES` e a versão padrão do cache do Django, de modo que a chave física é `conecta-campus:1:<nome lógico>`. `agenda:espaco:{id}:{data}` é um Sorted Set com score igual ao início da reserva em minutos; `reservas:pendentes` é um Sorted Set com score igual ao momento da solicitação; `reservas:situacao:{situacao}` é um Set de ids de reserva. **c) Falhas.** A leitura da agenda cai para o PostgreSQL quando a chave não existe ou o Redis falha, e nunca responde 503 por causa disso. A escrita da projeção acontece depois do commit; se falhar, só vai para o log, a reserva fica salva e a projeção se corrige pelo comando de reconstrução ou na próxima leitura. É diferente do limite de tentativas, que continua falhando fechado com 503 ([RNF-F12](../requisitos/rnf.md#rnf-f12) não muda). **d) Persistência.** O Redis padrão continua sem persistência. Um override opcional do Compose com AOF existe só para a demonstração (RDS-09); como a projeção é reconstruível, perder o Redis não perde dado. **e) Escopo essencial:** porta e adaptador da agenda, sincronização depois do commit, leitura com fallback, comando `reconstruir_agenda_redis`, fila de pendentes e contagens, persistência opcional, testes e medição (RDS-03 a RDS-10). **Opcionais:** cache de espaço em Hash com TTL e ranking de espaços (RDS-11 e RDS-12). A resposta da API de ocupação do dia não muda de formato. **f)** A consulta do Gestor à fila e às contagens (RDS-08) é funcionalidade nova: exige um CR e um RF próprios, abertos na própria RDS-08, e fica fora do que esta DEC decide. **g) Fora do escopo:** mover reservas, usuários ou espaços para o Redis como banco primário; pub/sub e filas de mensagens; pré-checagem de conflito no Redis. |
+| **Responsável** | Max Zimmermann dos Reis (grupo). |
+| **Prazo** | Adotada em 24/11/2026; confirmação do grupo pendente. |
+| **Tipo de mudança se a resposta for outra** | editorial |
+| **Regressão estimada** | 0 TAs a rever (0 manuais), de 0 CAs em 0 histórias: 0 CAs dependem diretamente da DEC e 0 verificam os RF afetados |
+
+- **RF:** nenhum
+- **RNF:** nenhum
+- **UC (passo, alternativa ou exceção):** nenhum
+- **US:** —
+- **CA que dependem da DEC:** —
+- **CA dos RF afetados (regressão):** —
+- **TA:** —
+- **Endpoint ou tela:** nenhum
+- **Código:** nenhum
 
 ## <a id="dec-01"></a>DEC-01 · React no frontend
 

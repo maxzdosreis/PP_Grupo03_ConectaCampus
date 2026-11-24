@@ -13,6 +13,7 @@ Perguntas que o grupo leva à Aula 7: as DECs com prazo em 06/11/2026 e os ponto
 | 0.1 | 05/11/2026 | Max Zimmermann dos Reis | Criação: DEC-05, 06, 07, 09, 10, 11 e 13; DEC-08 e DEC-12 "se houver tempo"; pontos a confirmar abertos (REQ-06). Sem aprovação. |
 | 0.1 | 06/11/2026 | Max Zimmermann dos Reis | Respostas da Aula 7 registradas: resposta do professor e data em cada DEC, decisão do grupo separada onde a resposta não cobriu tudo, conclusão com o CR e a tarefa, tabela de pontos preenchida, entrega e apresentação e a seção Resultado (GES-02). Sem aprovação. |
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | Contagens de CAs e TAs por DEC (DEC-05, DEC-06, DEC-07, DEC-09 e DEC-13) depois da aplicação dos CR-01 a CR-04 na especificação (REQ-13); a DEC-07 passa a ter o RF-05 e o RF-06 e as US-05 e US-06. Respostas e opções sem mudança. Sem aprovação. |
+| 0.1 | 24/11/2026 | Max Zimmermann dos Reis | Seção da DEC-28 (adotada depois da Aula 7, não perguntada), exigida pelo gerador da rastreabilidade para toda DEC não decidida (RDS-01). Nada das respostas da Aula 7 mudou. Sem aprovação. |
 
 ## Decisões com prazo em 06/11/2026
 
@@ -118,6 +119,15 @@ Fora da pauta; cada resposta virou uma DEC nova, já decidida.
 | Capa do `modelagem.pdf` | (sem as palavras exatas) a capa não entra nas 6 páginas e não precisa ser formal: só o título e os nomes. | [DEC-21](DEC-21.md) |
 | Modelo do `contribuicoes.pdf` | (sem as palavras exatas) não há modelo. | [DEC-22](DEC-22.md) |
 | Apresentação | (sem as palavras exatas) em aula, com o notebook do grupo, mostrando o sistema funcionando, em até 10 minutos. | [DEC-23](DEC-23.md) |
+
+## Adotada depois da Aula 7, sem pergunta ao professor
+
+### <a id="dec-28"></a>DEC-28 — O Redis guarda projeções da agenda e das filas; o PostgreSQL segue como fonte da verdade
+
+- **Pergunta:** o Redis pode guardar projeções da agenda e das filas, mantendo o PostgreSQL como fonte da verdade das reservas? É um extra técnico do Trabalho G2, fora das seis funcionalidades mínimas.
+- **Adotado:** sim; o Redis guarda só o que se reconstrói a partir do PostgreSQL, e a restrição de exclusão do banco segue como guarda final contra conflito de horário ([DEC-28](DEC-28.md)).
+- **Se a resposta for outra:** 0 CAs e 0 TAs em 0 histórias; nenhum RF, UC, US ou CA depende da DEC ([impacto](../rastreabilidade/impacto-por-dec.md#dec-28)).
+- **Resposta do professor:** não perguntada. Fica aqui porque o gerador da rastreabilidade lista na pauta toda DEC ainda não decidida; não foi levada à Aula 7.
 
 ## Resultado
 
