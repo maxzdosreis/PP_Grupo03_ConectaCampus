@@ -172,6 +172,7 @@ class AgendaDoDiaEmMemoria(AgendaDoDia):
     def __init__(self, *, indisponivel: bool = False) -> None:
         self.indisponivel = indisponivel
         self._dias: dict[tuple[int, date], dict[int, HorarioOcupado]] = {}
+        self._versoes: dict[tuple[int, date], int] = {}
 
     def registrar(
         self,
@@ -183,12 +184,14 @@ class AgendaDoDiaEmMemoria(AgendaDoDia):
         if not situacao.ocupa_horario:
             raise ValueError(f"A situação {situacao.value} não ocupa horário.")
         self._exigir_disponivel()
+        self._avancar_versao(espaco_id, intervalo.data)
         dia = self._dias.get((espaco_id, intervalo.data))
         if dia is not None:
             dia[reserva_id] = HorarioOcupado(intervalo=intervalo, situacao=situacao)
 
     def remover(self, espaco_id: int, reserva_id: int, data: date) -> None:
         self._exigir_disponivel()
+        self._avancar_versao(espaco_id, data)
         dia = self._dias.get((espaco_id, data))
         if dia is not None:
             dia.pop(reserva_id, None)
@@ -201,11 +204,27 @@ class AgendaDoDiaEmMemoria(AgendaDoDia):
         ordenados = sorted(dia.items(), key=lambda item: _ordem_no_redis(*item))
         return tuple(ocupado for _, ocupado in ordenados)
 
-    def substituir(
-        self, espaco_id: int, data: date, ocupados: Mapping[int, HorarioOcupado]
-    ) -> None:
+    def versao(self, espaco_id: int, data: date) -> int:
         self._exigir_disponivel()
+        return self._versoes.get((espaco_id, data), 0)
+
+    def substituir(
+        self,
+        espaco_id: int,
+        data: date,
+        ocupados: Mapping[int, HorarioOcupado],
+        *,
+        versao: int,
+    ) -> bool:
+        self._exigir_disponivel()
+        if self._versoes.get((espaco_id, data), 0) != versao:
+            return False
         self._dias[(espaco_id, data)] = dict(ocupados)
+        return True
+
+    def _avancar_versao(self, espaco_id: int, data: date) -> None:
+        chave = (espaco_id, data)
+        self._versoes[chave] = self._versoes.get(chave, 0) + 1
 
     def _exigir_disponivel(self) -> None:
         if self.indisponivel:

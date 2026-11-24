@@ -57,12 +57,16 @@ class AgendaDoDia(Protocol):
     ) -> None:
         """Grava ou atualiza a reserva na agenda do dia `intervalo.data`.
 
-        Sem projeção desse espaço e dia, não faz nada (uma agenda parcial seria
-        lida como completa). Situação que não ocupa horário lança `ValueError`.
+        Sem projeção desse espaço e dia, não grava nada (uma agenda parcial seria
+        lida como completa), mas avança a `versao` do dia. Situação que não
+        ocupa horário lança `ValueError`.
         """
 
     def remover(self, espaco_id: int, reserva_id: int, data: date) -> None:
-        """Tira a reserva da agenda do dia. Idempotente; sem projeção, não faz nada."""
+        """Tira a reserva da agenda do dia. Idempotente.
+
+        Sem projeção, não grava nada, mas avança a `versao` do dia.
+        """
 
     def listar(self, espaco_id: int, data: date) -> tuple[HorarioOcupado, ...] | None:
         """Horários ocupados do dia, ordenados por início.
@@ -71,11 +75,26 @@ class AgendaDoDia(Protocol):
         sem reservas.
         """
 
+    def versao(self, espaco_id: int, data: date) -> int:
+        """Contador do dia, que `registrar` e `remover` avançam a cada chamada.
+
+        Leia-o **antes** de consultar o PostgreSQL e passe-o a `substituir`.
+        """
+
     def substituir(
-        self, espaco_id: int, data: date, ocupados: Mapping[int, HorarioOcupado]
-    ) -> None:
+        self,
+        espaco_id: int,
+        data: date,
+        ocupados: Mapping[int, HorarioOcupado],
+        *,
+        versao: int,
+    ) -> bool:
         """Recria a projeção do dia a partir do que está no PostgreSQL.
 
         `ocupados` liga o id de cada reserva ao seu horário: o id faz parte do
         membro, para `registrar` e `remover` acharem a reserva depois.
+
+        Só grava se a `versao` do dia ainda for a lida antes da consulta; senão
+        alguém registrou ou removeu no meio e o retrato está velho. Devolve
+        `True` se gravou e `False` se descartou (a próxima leitura refaz).
         """

@@ -16,7 +16,6 @@ from reservas.infrastructure.agenda_redis import (
 )
 from reservas.tests.fakes import DIA, AgendaDoDiaEmMemoria, intervalo
 
-# O conftest só leva o cache para o banco 1 do Redis nos testes que usam banco.
 pytestmark = pytest.mark.django_db
 
 ESPACO = 3
@@ -34,12 +33,19 @@ def agenda(request):
     return AgendaDoDiaRedis(relogio=lambda: AGORA)
 
 
+def _substituir(agenda, espaco_id, data, ocupados):
+    gravou = agenda.substituir(
+        espaco_id, data, ocupados, versao=agenda.versao(espaco_id, data)
+    )
+    assert gravou
+
+
 def test_listar_sem_projecao_devolve_none(agenda):
     assert agenda.listar(ESPACO, DIA) is None
 
 
 def test_substituir_com_lista_vazia_cria_projecao_de_dia_vazio(agenda):
-    agenda.substituir(ESPACO, DIA, {})
+    _substituir(agenda, ESPACO, DIA, {})
 
     assert agenda.listar(ESPACO, DIA) == ()
 
@@ -57,7 +63,7 @@ def test_remover_sem_projecao_nao_cria_nada(agenda):
 
 
 def test_registrar_com_projecao_acrescenta_o_horario(agenda):
-    agenda.substituir(ESPACO, DIA, {})
+    _substituir(agenda, ESPACO, DIA, {})
 
     agenda.registrar(ESPACO, 1, MANHA.intervalo, MANHA.situacao)
 
@@ -65,7 +71,7 @@ def test_registrar_com_projecao_acrescenta_o_horario(agenda):
 
 
 def test_remover_com_projecao_tira_o_horario_e_mantem_o_dia_vazio(agenda):
-    agenda.substituir(ESPACO, DIA, {1: MANHA})
+    _substituir(agenda, ESPACO, DIA, {1: MANHA})
 
     agenda.remover(ESPACO, 1, DIA)
 
@@ -74,7 +80,7 @@ def test_remover_com_projecao_tira_o_horario_e_mantem_o_dia_vazio(agenda):
 
 def test_registrar_de_novo_com_outra_situacao_troca_o_membro(agenda):
     solicitada = HorarioOcupado(MANHA.intervalo, SituacaoReserva.SOLICITADA)
-    agenda.substituir(ESPACO, DIA, {1: solicitada})
+    _substituir(agenda, ESPACO, DIA, {1: solicitada})
 
     agenda.registrar(ESPACO, 1, MANHA.intervalo, SituacaoReserva.CONFIRMADA)
 
@@ -82,7 +88,7 @@ def test_registrar_de_novo_com_outra_situacao_troca_o_membro(agenda):
 
 
 def test_registrar_nao_confunde_ids_com_o_mesmo_prefixo(agenda):
-    agenda.substituir(ESPACO, DIA, {12: TARDE})
+    _substituir(agenda, ESPACO, DIA, {12: TARDE})
 
     agenda.registrar(ESPACO, 1, MANHA.intervalo, MANHA.situacao)
 
@@ -90,13 +96,13 @@ def test_registrar_nao_confunde_ids_com_o_mesmo_prefixo(agenda):
 
 
 def test_listar_ordena_por_inicio(agenda):
-    agenda.substituir(ESPACO, DIA, {1: TARDE, 2: NOITE, 3: MANHA})
+    _substituir(agenda, ESPACO, DIA, {1: TARDE, 2: NOITE, 3: MANHA})
 
     assert agenda.listar(ESPACO, DIA) == (MANHA, TARDE, NOITE)
 
 
 def test_reserva_que_termina_a_meia_noite_volta_com_hora_fim_00_00(agenda):
-    agenda.substituir(ESPACO, DIA, {1: NOITE})
+    _substituir(agenda, ESPACO, DIA, {1: NOITE})
 
     (ocupado,) = agenda.listar(ESPACO, DIA)
 
@@ -108,7 +114,7 @@ def test_reserva_que_termina_a_meia_noite_volta_com_hora_fim_00_00(agenda):
     "situacao", [s for s in SituacaoReserva if not s.ocupa_horario]
 )
 def test_registrar_situacao_que_nao_ocupa_horario_lanca_value_error(agenda, situacao):
-    agenda.substituir(ESPACO, DIA, {})
+    _substituir(agenda, ESPACO, DIA, {})
 
     with pytest.raises(ValueError, match="não ocupa horário"):
         agenda.registrar(ESPACO, 1, MANHA.intervalo, situacao)
@@ -117,7 +123,7 @@ def test_registrar_situacao_que_nao_ocupa_horario_lanca_value_error(agenda, situ
 
 
 def test_remover_e_idempotente(agenda):
-    agenda.substituir(ESPACO, DIA, {1: MANHA})
+    _substituir(agenda, ESPACO, DIA, {1: MANHA})
 
     agenda.remover(ESPACO, 1, DIA)
     agenda.remover(ESPACO, 1, DIA)
@@ -126,9 +132,9 @@ def test_remover_e_idempotente(agenda):
 
 
 def test_dias_e_espacos_diferentes_nao_se_misturam(agenda):
-    agenda.substituir(ESPACO, DIA, {1: MANHA})
-    agenda.substituir(ESPACO, OUTRO_DIA, {})
-    agenda.substituir(ESPACO + 1, DIA, {})
+    _substituir(agenda, ESPACO, DIA, {1: MANHA})
+    _substituir(agenda, ESPACO, OUTRO_DIA, {})
+    _substituir(agenda, ESPACO + 1, DIA, {})
 
     agenda.registrar(ESPACO, 2, TARDE.intervalo, TARDE.situacao)
 
@@ -138,14 +144,70 @@ def test_dias_e_espacos_diferentes_nao_se_misturam(agenda):
 
 
 def test_substituir_apaga_o_que_havia_antes(agenda):
-    agenda.substituir(ESPACO, DIA, {1: MANHA, 2: TARDE})
+    _substituir(agenda, ESPACO, DIA, {1: MANHA, 2: TARDE})
 
-    agenda.substituir(ESPACO, DIA, {3: NOITE})
+    _substituir(agenda, ESPACO, DIA, {3: NOITE})
 
     assert agenda.listar(ESPACO, DIA) == (NOITE,)
 
 
-# --- só o adaptador Redis ---------------------------------------------------
+def test_substituir_com_versao_atual_grava_e_devolve_true(agenda):
+    versao = agenda.versao(ESPACO, DIA)
+
+    gravou = agenda.substituir(ESPACO, DIA, {1: MANHA}, versao=versao)
+
+    assert gravou is True
+    assert agenda.listar(ESPACO, DIA) == (MANHA,)
+
+
+def test_registro_sem_projecao_durante_a_reconstrucao_nao_se_perde(agenda):
+    versao = agenda.versao(ESPACO, DIA)
+    agenda.registrar(ESPACO, 2, TARDE.intervalo, TARDE.situacao)
+
+    gravou = agenda.substituir(ESPACO, DIA, {1: MANHA}, versao=versao)
+
+    assert gravou is False
+    assert agenda.listar(ESPACO, DIA) is None
+
+
+def test_remocao_sem_projecao_durante_a_reconstrucao_descarta_o_retrato(agenda):
+    versao = agenda.versao(ESPACO, DIA)
+    agenda.remover(ESPACO, 1, DIA)
+
+    assert agenda.substituir(ESPACO, DIA, {1: MANHA}, versao=versao) is False
+    assert agenda.listar(ESPACO, DIA) is None
+
+
+def test_registro_com_projecao_durante_a_reconstrucao_preserva_o_registro(agenda):
+    _substituir(agenda, ESPACO, DIA, {})
+    versao = agenda.versao(ESPACO, DIA)
+    agenda.registrar(ESPACO, 2, TARDE.intervalo, TARDE.situacao)
+
+    gravou = agenda.substituir(ESPACO, DIA, {1: MANHA}, versao=versao)
+
+    assert gravou is False
+    assert agenda.listar(ESPACO, DIA) == (TARDE,)
+
+
+def test_depois_de_descartar_a_proxima_reconstrucao_com_versao_nova_grava(agenda):
+    versao = agenda.versao(ESPACO, DIA)
+    agenda.registrar(ESPACO, 2, TARDE.intervalo, TARDE.situacao)
+    agenda.substituir(ESPACO, DIA, {}, versao=versao)
+
+    _substituir(agenda, ESPACO, DIA, {2: TARDE})
+
+    assert agenda.listar(ESPACO, DIA) == (TARDE,)
+
+
+def test_versoes_de_dias_e_espacos_diferentes_sao_independentes(agenda):
+    versao = agenda.versao(ESPACO, DIA)
+    agenda.registrar(ESPACO, 2, TARDE.intervalo, TARDE.situacao)
+    agenda.remover(ESPACO, 2, OUTRO_DIA)
+    agenda.remover(ESPACO + 1, 2, DIA)
+
+    assert agenda.versao(ESPACO, DIA) == versao + 1
+    assert agenda.versao(ESPACO, OUTRO_DIA) == 1
+    assert agenda.versao(ESPACO + 1, DIA) == 1
 
 
 def _chave(espaco_id=ESPACO, data=DIA):
@@ -157,7 +219,7 @@ def _cliente(chave, *, escrita=False):
 
 
 def test_chave_fisica_tem_o_prefixo_do_projeto_e_o_banco_de_teste():
-    AgendaDoDiaRedis(relogio=lambda: AGORA).substituir(ESPACO, DIA, {})
+    _substituir(AgendaDoDiaRedis(relogio=lambda: AGORA), ESPACO, DIA, {})
 
     chave = _chave()
     cliente = _cliente(chave)
@@ -168,7 +230,7 @@ def test_chave_fisica_tem_o_prefixo_do_projeto_e_o_banco_de_teste():
 
 
 def test_ttl_vai_ate_o_fim_do_dia_mais_a_folga():
-    AgendaDoDiaRedis(relogio=lambda: AGORA).substituir(ESPACO, DIA, {})
+    _substituir(AgendaDoDiaRedis(relogio=lambda: AGORA), ESPACO, DIA, {})
 
     fim_do_dia = datetime(2026, 10, 26, tzinfo=FUSO_HORARIO)
     esperado = (fim_do_dia - AGORA + FOLGA_DO_TTL).total_seconds()
@@ -177,15 +239,27 @@ def test_ttl_vai_ate_o_fim_do_dia_mais_a_folga():
 
 def test_ttl_nunca_fica_abaixo_do_piso_para_um_dia_passado():
     depois = AGORA + timedelta(days=30)
-    AgendaDoDiaRedis(relogio=lambda: depois).substituir(ESPACO, DIA, {})
+    _substituir(AgendaDoDiaRedis(relogio=lambda: depois), ESPACO, DIA, {})
 
     piso = TTL_MINIMO.total_seconds()
     assert piso - 5 <= _cliente(_chave()).ttl(_chave()) <= piso
 
 
+def test_chave_da_versao_tem_prazo_para_expirar():
+    redis = AgendaDoDiaRedis(relogio=lambda: AGORA)
+    redis.remover(ESPACO, 1, DIA)
+
+    chave = cache.make_key("agenda:versao:espaco:3:2026-10-25")
+    assert (
+        0
+        < _cliente(chave).ttl(chave)
+        <= (FOLGA_DO_TTL + timedelta(days=5)).total_seconds()
+    )
+
+
 def test_registrar_renova_o_ttl_com_o_mesmo_calculo():
     redis = AgendaDoDiaRedis(relogio=lambda: AGORA)
-    redis.substituir(ESPACO, DIA, {})
+    _substituir(redis, ESPACO, DIA, {})
     _cliente(_chave(), escrita=True).expire(_chave(), 30)
 
     redis.registrar(ESPACO, 1, MANHA.intervalo, MANHA.situacao)
@@ -197,7 +271,8 @@ OPERACOES = {
     "registrar": lambda a: a.registrar(ESPACO, 1, MANHA.intervalo, MANHA.situacao),
     "remover": lambda a: a.remover(ESPACO, 1, DIA),
     "listar": lambda a: a.listar(ESPACO, DIA),
-    "substituir": lambda a: a.substituir(ESPACO, DIA, {}),
+    "substituir": lambda a: a.substituir(ESPACO, DIA, {}, versao=0),
+    "versao": lambda a: a.versao(ESPACO, DIA),
 }
 
 

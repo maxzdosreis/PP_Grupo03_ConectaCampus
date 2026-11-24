@@ -20,29 +20,48 @@ TTL_MINIMO = timedelta(hours=1)
 _SENTINELA = "_"
 _SCORE_DA_SENTINELA = -1
 
-_REGISTRAR = """
-if not redis.call("ZSCORE", KEYS[1], ARGV[1]) then
-    return 0
-end
-for _, membro in ipairs(redis.call("ZRANGE", KEYS[1], 0, -1)) do
-    if string.sub(membro, 1, string.len(ARGV[2])) == ARGV[2] then
-        redis.call("ZREM", KEYS[1], membro)
-    end
-end
-redis.call("ZADD", KEYS[1], ARGV[3], ARGV[4])
-redis.call("EXPIRE", KEYS[1], ARGV[5])
-return 1
+_AVANCAR_VERSAO = """
+redis.call("INCR", KEYS[2])
+redis.call("EXPIRE", KEYS[2], ARGV[3])
 """
 
-_REMOVER = """
+_EXIGIR_PROJECAO = """
 if not redis.call("ZSCORE", KEYS[1], ARGV[1]) then
     return 0
 end
+"""
+
+_TIRAR_A_RESERVA = """
 for _, membro in ipairs(redis.call("ZRANGE", KEYS[1], 0, -1)) do
     if string.sub(membro, 1, string.len(ARGV[2])) == ARGV[2] then
         redis.call("ZREM", KEYS[1], membro)
     end
 end
+"""
+
+_REGISTRAR = (
+    _AVANCAR_VERSAO
+    + _EXIGIR_PROJECAO
+    + _TIRAR_A_RESERVA
+    + """
+redis.call("ZADD", KEYS[1], ARGV[4], ARGV[5])
+redis.call("EXPIRE", KEYS[1], ARGV[3])
+return 1
+"""
+)
+
+_REMOVER = _AVANCAR_VERSAO + _EXIGIR_PROJECAO + _TIRAR_A_RESERVA + "return 1"
+
+_SUBSTITUIR = """
+local atual = tonumber(redis.call("GET", KEYS[2]) or "0")
+if atual ~= tonumber(ARGV[1]) then
+    return 0
+end
+redis.call("DEL", KEYS[1])
+for i = 3, #ARGV, 2 do
+    redis.call("ZADD", KEYS[1], ARGV[i], ARGV[i + 1])
+end
+redis.call("EXPIRE", KEYS[1], ARGV[2])
 return 1
 """
 
@@ -64,13 +83,13 @@ class AgendaDoDiaRedis(AgendaDoDia):
         try:
             script = _cliente(chave, escrita=True).register_script(_REGISTRAR)
             script(
-                keys=[chave],
+                keys=[chave, _chave_da_versao(espaco_id, intervalo.data)],
                 args=[
                     _SENTINELA,
                     _prefixo(reserva_id),
+                    self._ttl_em_segundos(intervalo.data),
                     _inicio_em_minutos(intervalo),
                     _membro(reserva_id, intervalo, situacao),
-                    self._ttl_em_segundos(intervalo.data),
                 ],
             )
         except RedisError as erro:
@@ -80,7 +99,10 @@ class AgendaDoDiaRedis(AgendaDoDia):
         chave = _chave(espaco_id, data)
         try:
             script = _cliente(chave, escrita=True).register_script(_REMOVER)
-            script(keys=[chave], args=[_SENTINELA, _prefixo(reserva_id)])
+            script(
+                keys=[chave, _chave_da_versao(espaco_id, data)],
+                args=[_SENTINELA, _prefixo(reserva_id), self._ttl_em_segundos(data)],
+            )
         except RedisError as erro:
             _indisponivel(erro)
 
@@ -100,22 +122,40 @@ class AgendaDoDiaRedis(AgendaDoDia):
             if _texto(membro) != _SENTINELA
         )
 
-    def substituir(
-        self, espaco_id: int, data: date, ocupados: Mapping[int, HorarioOcupado]
-    ) -> None:
-        chave = _chave(espaco_id, data)
-        membros = {_SENTINELA: _SCORE_DA_SENTINELA}
-        for reserva_id, ocupado in ocupados.items():
-            membro = _membro(reserva_id, ocupado.intervalo, ocupado.situacao)
-            membros[membro] = _inicio_em_minutos(ocupado.intervalo)
+    def versao(self, espaco_id: int, data: date) -> int:
+        chave = _chave_da_versao(espaco_id, data)
         try:
-            with _cliente(chave, escrita=True).pipeline(transaction=True) as pipeline:
-                pipeline.delete(chave)
-                pipeline.zadd(chave, membros)
-                pipeline.expire(chave, self._ttl_em_segundos(data))
-                pipeline.execute()
+            valor = _cliente(chave, escrita=False).get(chave)
         except RedisError as erro:
             _indisponivel(erro)
+        return int(valor) if valor is not None else 0
+
+    def substituir(
+        self,
+        espaco_id: int,
+        data: date,
+        ocupados: Mapping[int, HorarioOcupado],
+        *,
+        versao: int,
+    ) -> bool:
+        chave = _chave(espaco_id, data)
+        argumentos = [
+            versao,
+            self._ttl_em_segundos(data),
+            _SCORE_DA_SENTINELA,
+            _SENTINELA,
+        ]
+        for reserva_id, ocupado in ocupados.items():
+            argumentos.append(_inicio_em_minutos(ocupado.intervalo))
+            argumentos.append(_membro(reserva_id, ocupado.intervalo, ocupado.situacao))
+        try:
+            script = _cliente(chave, escrita=True).register_script(_SUBSTITUIR)
+            gravou = script(
+                keys=[chave, _chave_da_versao(espaco_id, data)], args=argumentos
+            )
+        except RedisError as erro:
+            _indisponivel(erro)
+        return bool(gravou)
 
     def _ttl_em_segundos(self, data: date) -> int:
         fim_do_dia = datetime.combine(
@@ -127,6 +167,10 @@ class AgendaDoDiaRedis(AgendaDoDia):
 
 def _chave(espaco_id: int, data: date) -> str:
     return cache.make_key(f"agenda:espaco:{espaco_id}:{data.isoformat()}")
+
+
+def _chave_da_versao(espaco_id: int, data: date) -> str:
+    return cache.make_key(f"agenda:versao:espaco:{espaco_id}:{data.isoformat()}")
 
 
 def _cliente(chave: str, *, escrita: bool):
