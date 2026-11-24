@@ -334,3 +334,80 @@ def test_data_da_agenda_e_a_do_intervalo_da_reserva():
     # Assert
     assert cenario.agenda_do_dia() == ()
     assert len(cenario.agenda.listar(ESPACO, outro_dia)) == 1
+
+
+class _AgendaComCorrida(AgendaDoDiaEmMemoria):
+    def __init__(self, mudancas):
+        super().__init__()
+        self.mudancas = list(mudancas)
+        self.chamadas = 0
+
+    def registrar(self, *args):
+        super().registrar(*args)
+        self._outra_operacao()
+
+    def remover(self, *args):
+        super().remover(*args)
+        self._outra_operacao()
+
+    def _outra_operacao(self):
+        self.chamadas += 1
+        if self.mudancas:
+            self.mudancas.pop(0)()
+
+
+def _cenario_com_corrida(destinos):
+    cenario = Cenario()
+    agenda = _AgendaComCorrida([])
+    agenda.substituir(ESPACO, DIA, {}, versao=0)
+    cenario.agenda = agenda
+    cenario.decorator = RepositorioReservasComAgenda(
+        cenario.repositorio, agenda, cenario.acoes.append
+    )
+    reserva_id = cenario.salvar_nova().id
+    agenda.mudancas = [
+        lambda destino=destino: cenario.mudar(reserva_id, destino)
+        for destino in destinos
+    ]
+    return cenario
+
+
+def test_acao_atrasada_nao_deixa_a_agenda_com_o_estado_superado():
+    # Arrange
+    cenario = _cenario_com_corrida([SituacaoReserva.CANCELADA])
+    criacao = cenario.acoes.pop()
+
+    # Act
+    criacao()
+
+    # Assert
+    assert cenario.agenda_do_dia() == ()
+    assert cenario.agenda.chamadas == 2
+
+
+def test_acao_atrasada_reaplica_a_situacao_mais_nova_que_ainda_ocupa_horario():
+    # Arrange
+    cenario = _cenario_com_corrida([SituacaoReserva.CONFIRMADA])
+    criacao = cenario.acoes.pop()
+
+    # Act
+    criacao()
+
+    # Assert
+    assert _situacoes(cenario.agenda_do_dia()) == [SituacaoReserva.CONFIRMADA]
+
+
+def test_sincronizacao_desiste_e_avisa_se_a_reserva_nao_para_de_mudar(caplog):
+    # Arrange
+    cenario = _cenario_com_corrida(
+        [SituacaoReserva.CONFIRMADA, SituacaoReserva.CONCLUIDA]
+    )
+    criacao = cenario.acoes.pop()
+
+    # Act
+    with caplog.at_level(logging.WARNING):
+        criacao()
+
+    # Assert
+    assert cenario.agenda.chamadas == 3
+    assert any("continuou mudando" in r.getMessage() for r in caplog.records)

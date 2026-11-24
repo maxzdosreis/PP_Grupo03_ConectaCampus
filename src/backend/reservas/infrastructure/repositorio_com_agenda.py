@@ -17,6 +17,7 @@ from reservas.domain.reserva import Reserva
 
 logger = logging.getLogger(__name__)
 
+TENTATIVAS_DE_CONVERGENCIA = 3
 AposOCommit = Callable[[Callable[[], None]], None]
 
 
@@ -44,22 +45,36 @@ class RepositorioReservasComAgenda(RepositorioReservas):
     def _sincronizar(self, reserva_id: int | None) -> None:
         if reserva_id is None:
             return
-        atual = self._interno.obter_por_id(reserva_id)
-        if atual is None:
-            return
         try:
-            if atual.situacao.ocupa_horario:
-                self._agenda.registrar(
-                    atual.espaco_id, reserva_id, atual.intervalo, atual.situacao
-                )
-            else:
-                self._agenda.remover(atual.espaco_id, reserva_id, atual.intervalo.data)
+            self._convergir(reserva_id)
         except AgendaIndisponivel:
             logger.warning(
                 "Agenda do Redis não atualizada para a reserva %s; "
                 "a reconstrução da agenda a refaz.",
                 reserva_id,
             )
+
+    def _convergir(self, reserva_id: int) -> None:
+        aplicada = None
+        for _ in range(TENTATIVAS_DE_CONVERGENCIA):
+            atual = self._interno.obter_por_id(reserva_id)
+            if atual is None or atual.situacao is aplicada:
+                return
+            self._aplicar(atual)
+            aplicada = atual.situacao
+        logger.warning(
+            "A reserva %s continuou mudando durante a sincronização da agenda; "
+            "a reconstrução da agenda a refaz.",
+            reserva_id,
+        )
+
+    def _aplicar(self, reserva: Reserva) -> None:
+        if reserva.situacao.ocupa_horario:
+            self._agenda.registrar(
+                reserva.espaco_id, reserva.id, reserva.intervalo, reserva.situacao
+            )
+        else:
+            self._agenda.remover(reserva.espaco_id, reserva.id, reserva.intervalo.data)
 
     def em_transacao(self) -> AbstractContextManager[None]:
         return self._interno.em_transacao()
