@@ -1,13 +1,19 @@
 import os
 import re
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date, datetime, time
 from time import tzset
 from zoneinfo import ZoneInfo
 
 from compartilhado.domain.erros import ConflitoDeEstado, RecursoNaoEncontrado
-from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
+from reservas.application.ocupacao_do_dia import HorarioOcupado
+from reservas.application.portas import (
+    AgendaDoDia,
+    AgendaIndisponivel,
+    ConsultaDeEspacos,
+    EspacoReservavel,
+)
 from reservas.application.repositorio import (
     TAMANHO_MAXIMO_DA_PAGINA,
     FiltrosDeReservas,
@@ -158,6 +164,83 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
     def obter_espaco_reservavel_travado(self, espaco_id: int) -> EspacoReservavel:
         self.eventos.append("travar")
         return self.obter_espaco_reservavel(espaco_id)
+
+
+class AgendaDoDiaEmMemoria(AgendaDoDia):
+    """Mesma semântica do Redis: miss × dia vazio e escrita sem projeção é no-op."""
+
+    def __init__(self, *, indisponivel: bool = False) -> None:
+        self.indisponivel = indisponivel
+        self._dias: dict[tuple[int, date], dict[int, HorarioOcupado]] = {}
+        self._versoes: dict[tuple[int, date], int] = {}
+
+    def registrar(
+        self,
+        espaco_id: int,
+        reserva_id: int,
+        intervalo: IntervaloDeHorario,
+        situacao: SituacaoReserva,
+    ) -> None:
+        if not situacao.ocupa_horario:
+            raise ValueError(f"A situação {situacao.value} não ocupa horário.")
+        self._exigir_disponivel()
+        self._avancar_versao(espaco_id, intervalo.data)
+        dia = self._dias.get((espaco_id, intervalo.data))
+        if dia is not None:
+            dia[reserva_id] = HorarioOcupado(intervalo=intervalo, situacao=situacao)
+
+    def remover(self, espaco_id: int, reserva_id: int, data: date) -> None:
+        self._exigir_disponivel()
+        self._avancar_versao(espaco_id, data)
+        dia = self._dias.get((espaco_id, data))
+        if dia is not None:
+            dia.pop(reserva_id, None)
+
+    def listar(self, espaco_id: int, data: date) -> tuple[HorarioOcupado, ...] | None:
+        self._exigir_disponivel()
+        dia = self._dias.get((espaco_id, data))
+        if dia is None:
+            return None
+        ordenados = sorted(dia.items(), key=lambda item: _ordem_no_redis(*item))
+        return tuple(ocupado for _, ocupado in ordenados)
+
+    def versao(self, espaco_id: int, data: date) -> int:
+        self._exigir_disponivel()
+        return self._versoes.get((espaco_id, data), 0)
+
+    def substituir(
+        self,
+        espaco_id: int,
+        data: date,
+        ocupados: Mapping[int, HorarioOcupado],
+        *,
+        versao: int,
+    ) -> bool:
+        self._exigir_disponivel()
+        if self._versoes.get((espaco_id, data), 0) != versao:
+            return False
+        self._dias[(espaco_id, data)] = dict(ocupados)
+        return True
+
+    def _avancar_versao(self, espaco_id: int, data: date) -> None:
+        chave = (espaco_id, data)
+        self._versoes[chave] = self._versoes.get(chave, 0) + 1
+
+    def _exigir_disponivel(self) -> None:
+        if self.indisponivel:
+            raise AgendaIndisponivel
+
+
+def _ordem_no_redis(reserva_id: int, ocupado: HorarioOcupado) -> tuple[int, str]:
+    """Score (início em minutos) e, no empate, o membro, como o Sorted Set."""
+    horario = ocupado.intervalo
+    fim = (
+        24 * 60
+        if horario.termina_a_meia_noite()
+        else _minutos(f"{horario.hora_fim:%H:%M}")
+    )
+    inicio = _minutos(f"{horario.hora_inicio:%H:%M}")
+    return inicio, f"{reserva_id}:{fim}:{ocupado.situacao.value}"
 
 
 class RepositorioReservasEmMemoria(RepositorioReservas):
