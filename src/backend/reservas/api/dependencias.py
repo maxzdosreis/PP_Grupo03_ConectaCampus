@@ -12,7 +12,9 @@ from reservas.application.casos_de_uso import (
     CriarReserva,
     ObterReserva,
 )
+from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
+from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
 
@@ -32,9 +34,17 @@ def agora() -> datetime:
     return timezone.now()
 
 
+def _repositorio_com_agenda(
+    relogio: Callable[[], datetime],
+) -> RepositorioReservasComAgenda:
+    return RepositorioReservasComAgenda(
+        RepositorioReservasDjango(), AgendaDoDiaRedis(relogio)
+    )
+
+
 def criar_reserva(relogio: Callable[[], datetime] = timezone.now) -> CriarReserva:
     return CriarReserva(
-        RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), relogio
+        _repositorio_com_agenda(relogio), ConsultaDeEspacosViaFachada(), relogio
     )
 
 
@@ -49,7 +59,7 @@ def obter_reserva() -> ObterReserva:
 def alterar_situacao_reserva(
     relogio: Callable[[], datetime] = timezone.now,
 ) -> AlterarSituacaoReserva:
-    return AlterarSituacaoReserva(RepositorioReservasDjango(), relogio)
+    return AlterarSituacaoReserva(_repositorio_com_agenda(relogio), relogio)
 
 
 def consultar_historico_da_reserva() -> ConsultarHistoricoDaReserva:
