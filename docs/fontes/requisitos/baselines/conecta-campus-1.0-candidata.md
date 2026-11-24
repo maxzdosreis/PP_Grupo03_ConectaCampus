@@ -2,7 +2,7 @@
 
 | Identificação | Responsabilidade | Fonte oficial |
 |---|---|---|
-| **BL-01 • 0.1 • Rascunho** (manifesto da baseline candidata) | Autor: Max Zimmermann dos Reis • Revisor: a definir • Aprovador: a definir | `docs/fontes/requisitos/baselines/conecta-campus-1.0-candidata.md` |
+| **BL-01 • 0.1 • Rascunho** (manifesto da baseline candidata) | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha | `docs/fontes/requisitos/baselines/conecta-campus-1.0-candidata.md` |
 
 Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + aprovação registrada + local de consulta**. Este arquivo tem o manifesto e as versões exatas; a aprovação e a referência Git ainda **não existem**. Ele é uma candidata: nada aqui está aprovado, nenhum documento mudou de estado, e salvo, commit ou push não são aprovação (A4·s14, s22–24).
 
@@ -36,11 +36,11 @@ Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + apro
 Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcadores abaixo; não edite à mão. O `--verificar` acusa qualquer artefato que mude depois do manifesto, e a versão acordada é a que tem este hash, não "o arquivo mais novo". Na aprovação, todos os documentos devem estar na versão e no estado aprovados (1.0 • Aprovado), e o manifesto é gerado de novo.
 
 <!-- manifesto:inicio -->
-115 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `39b73265`.
+116 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `9706a733`.
 
 | Artefato | ID | Versão | Estado | Caminho (a partir de `docs/fontes/requisitos/`) | SHA-256 |
 |---|---|---|---|---|---|
-| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `4da20434` |
+| Requisitos do Conecta Campus — fonte oficial | IND-01 | 0.1 | Rascunho | `README.md` | `e809fe39` |
 | Casos de uso | UCD-01 | 0.1 | Rascunho | `casos-de-uso/README.md` | `a8a54fa0` |
 | UC-02 · Autenticar | UC-02 | 0.1 | Rascunho | `casos-de-uso/UC-02-autenticar.md` | `6f6e5b65` |
 | UC-04 · Solicitar reserva | UC-04 | 0.1 | Rascunho | `casos-de-uso/UC-04-solicitar-reserva.md` | `72929dcc` |
@@ -77,8 +77,9 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | DEC-25 — Atendente responsável como papel da especificação; um perfil cobre Atendente e Gestor no sistema mínimo | DEC-25 | 0.1 | Rascunho | `decisoes/DEC-25.md` | `3f4763da` |
 | DEC-26 — O usuário autenticado pode trocar a própria senha | DEC-26 | 0.1 | Rascunho | `decisoes/DEC-26.md` | `9c2e4f7a` |
 | DEC-27 — O Gestor gerencia usuários pela tela: perfil e situação da conta | DEC-27 | 0.1 | Rascunho | `decisoes/DEC-27.md` | `aea004e2` |
-| Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `d24c846c` |
-| Pauta para o professor — Aula 7 (06/11/2026) | PAU-01 | 0.1 | Rascunho | `decisoes/pauta-aula-7.md` | `97957e49` |
+| DEC-28 — O Redis guarda projeções da agenda e das filas; o PostgreSQL segue como fonte da verdade | DEC-28 | 0.1 | Rascunho | `decisoes/DEC-28.md` | `53023e97` |
+| Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `a5c39f0c` |
+| Pauta para o professor — Aula 7 (06/11/2026) | PAU-01 | 0.1 | Rascunho | `decisoes/pauta-aula-7.md` | `38342391` |
 | Conecta Campus: Especificação de Requisitos | RS-GRUPO03 | 0.1 | Rascunho | `entrega/RS_Grupo03_Especificacao.md` | `e0271d77` |
 | Evidências do Levantamento de Requisitos | sem cabeçalho | — | — | `entrega/RS_Grupo03_Evidencias.md` | `e5a8c73c` |
 | Ensaio cronometrado da apresentação de Requisitos | APR-03 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Ensaio.md` | `eb3b7194` |
@@ -138,7 +139,7 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | Modelo de pedido de mudança (CR) | MCR-01 | 0.1 | Rascunho | `mudancas/modelo-cr.md` | `a4aa7557` |
 | Rastreabilidade | RAS-01 | 0.1 | Rascunho | `rastreabilidade/README.md` | `a890ae11` |
 | Cobertura da rastreabilidade | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/cobertura.md` | `45b72706` |
-| Mapa de impacto por decisão (DEC) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/impacto-por-dec.md` | `6e7c6a82` |
+| Mapa de impacto por decisão (DEC) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/impacto-por-dec.md` | `e545d8ed` |
 | Matriz de rastreabilidade (planilha, gerada) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.csv` | `29445692` |
 | Matriz de rastreabilidade (NS → RF → UC → US → CA/TA → endpoint ou tela → código) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/matriz.md` | `eb20ecbb` |
 | Rastreabilidade das regras de negócio (RN → RF → UC → US → CA) | Parte da RAS-01 | 0.1 | Rascunho | `rastreabilidade/regras-de-negocio.md` | `bea28abe` |
@@ -164,6 +165,7 @@ Pelo CS-07, cada DEC abaixo precisa estar **decidida** ou **aceita como premissa
 <!-- decisoes:inicio -->
 | DEC | Título | Estado | Prazo | CAs afetados | Na pauta |
 |---|---|---|---|---|---|
+| [DEC-28](../decisoes/DEC-28.md) | O Redis guarda projeções da agenda e das filas; o PostgreSQL segue como fonte da verdade | Adotada provisoriamente | Adotada em 24/11/2026; confirmação do grupo pendente. | [0](../rastreabilidade/impacto-por-dec.md#dec-28) | [pauta](../decisoes/pauta-aula-7.md#dec-28) |
 <!-- decisoes:fim -->
 
 Nenhuma DEC aberta: as DEC-05 a DEC-13 foram decididas na Aula 7 (06/11/2026), e os pontos a confirmar respondidos e as respostas sobre entrega e apresentação viraram as DEC-14 a DEC-23 ([resultado](../decisoes/pauta-aula-7.md#resultado)). As respostas que mudam o comportamento viraram os [CR-01 a CR-04](../mudancas/README.md#índice), aprovados e aguardando implementação. Segue aberto só o ponto 4 do `CLAUDE.md` (composição do grupo nas duas disciplinas), que não foi perguntado ([índice das decisões](../decisoes/README.md#pontos-a-confirmar-ainda-abertos)).
