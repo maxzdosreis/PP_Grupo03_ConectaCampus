@@ -33,6 +33,7 @@ Os contratos de `pyproject.toml` são conferidos por `lint-imports` ([comando](#
 | Contrato | O que garante |
 |---|---|
 | Domínio é Python puro | `domain` de `compartilhado`, `espacos`, `reservas` e `contas` não importa `django` nem `rest_framework`. |
+| Domínio e aplicação não conhecem o Redis | `domain` e `application` dos contextos não importam `redis`, nem por outro módulo do projeto; a DEC-28 mantém o Redis na `infrastructure`. |
 | compartilhado não depende dos contextos | `compartilhado` não importa `espacos`, `reservas`, `contas` nem `config`. |
 | Só a camada api usa compartilhado.api | `domain`, `application` e `infrastructure` dos contextos não importam `compartilhado.api`. |
 | Camadas de cada contexto | Em `espacos`, `reservas` e `contas`: `api` → `infrastructure` → `application` → `domain`, nunca ao contrário. |
