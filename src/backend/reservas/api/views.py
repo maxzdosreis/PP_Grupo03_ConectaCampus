@@ -1,13 +1,16 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
+from compartilhado.api.permissoes import ApenasGestor
 from compartilhado.api.respostas import mensagem_de_contagem, resposta_sucesso
 from reservas.api import dependencias
 from reservas.api.autenticacao import ator_autenticado, solicitante_autenticado
 from reservas.api.serializers import (
     AlteracaoDeSituacaoSerializer,
+    ContagemDaSituacaoSaidaSerializer,
+    FiltrosDaFilaSerializer,
     FiltrosDeOcupacaoSerializer,
     FiltrosReservasSerializer,
     OcupacaoDoDiaSaidaSerializer,
@@ -50,6 +53,41 @@ class ReservasView(APIView):
             "Reserva solicitada com sucesso. Aguarde a confirmação do gestor.",
             _saida(reserva, ator_autenticado(request), dependencias.agora()),
             status=status.HTTP_201_CREATED,
+        )
+
+
+class FilaDePendentesView(APIView):
+    permission_classes = [IsAuthenticated, ApenasGestor]
+
+    def get(self, request):
+        ator = ator_autenticado(request)
+        filtros = FiltrosDaFilaSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+        pagina = dependencias.consultar_fila_de_pendentes().executar(
+            filtros.para_paginacao(), ator=ator
+        )
+        return resposta_sucesso(
+            mensagem_de_contagem(
+                pagina.total,
+                nenhum="Nenhuma reserva pendente.",
+                um="1 reserva pendente.",
+                varios="{total} reservas pendentes.",
+            ),
+            _saida(pagina.itens, ator, dependencias.agora(), many=True),
+            paginacao=PaginacaoSaidaSerializer(pagina).data,
+        )
+
+
+class ContagemPorSituacaoView(APIView):
+    permission_classes = [IsAuthenticated, ApenasGestor]
+
+    def get(self, request):
+        contagem = dependencias.contar_reservas_por_situacao().executar(
+            ator=ator_autenticado(request)
+        )
+        return resposta_sucesso(
+            "Contagem das reservas por situação.",
+            ContagemDaSituacaoSaidaSerializer.da_contagem(contagem),
         )
 
 

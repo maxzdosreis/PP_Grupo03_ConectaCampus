@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -105,6 +106,27 @@ class RepositorioReservas(Protocol):
         páginas 1 a total_de_paginas(), em ordem, dá a lista completa, sem
         repetição. Uma página depois da última vem sem itens, com o total certo.
         A paginação acontece na consulta, sem carregar as demais reservas.
+        """
+
+    def listar_pendentes(self, paginacao: Paginacao) -> PaginaDeReservas:
+        """Devolve uma página das reservas Solicitadas, da mais antiga para a mais
+        nova (`criada_em` e, no empate, id), na ordem da fila de pendentes.
+
+        total conta todas as Solicitadas. Uma página depois da última vem sem
+        itens, com o total certo. A paginação acontece na consulta.
+        """
+
+    def listar_por_ids(self, ids: Sequence[int]) -> list[Reserva]:
+        """Devolve as reservas dos ids pedidos, de qualquer situação, na ordem dos ids.
+
+        Ids inexistentes ficam de fora, sem erro. Ids repetidos devolvem uma só
+        reserva. Quem pede decide o que fazer com as que não interessam.
+        """
+
+    def contar_por_situacao(self) -> dict[SituacaoReserva, int]:
+        """Quantas reservas há em cada situação, na ordem de `SituacaoReserva`.
+
+        Sempre traz as cinco situações, com zero quando não há nenhuma.
         """
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:

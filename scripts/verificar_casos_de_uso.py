@@ -21,7 +21,7 @@ FICHAS_COMPLETAS = {
     "UC-10-alterar-situacao-da-reserva.md": ["UC-10", "UC-11", "UC-12", "UC-13", "UC-17", "UC-18", "UC-19"],
     "UC-14-cadastrar-espaco.md": ["UC-14"],
 }
-UCS_RESUMIDOS = ["UC-01", "UC-03", "UC-06", "UC-07", "UC-08", "UC-09", "UC-15", "UC-16", "UC-20", "UC-21", "UC-22", "UC-23"]
+UCS_RESUMIDOS = ["UC-01", "UC-03", "UC-06", "UC-07", "UC-08", "UC-09", "UC-15", "UC-16", "UC-20", "UC-21", "UC-22", "UC-23", "UC-24"]
 
 PASSO = re.compile(r'^\d+\.\s+<a id="p(\d+)"></a>')
 ITEM_COMPLETO = re.compile(r'^####\s+<a id="([ae])(\d+)-(\d+)"></a>([AE])(\d+)\.(\d+)\b')

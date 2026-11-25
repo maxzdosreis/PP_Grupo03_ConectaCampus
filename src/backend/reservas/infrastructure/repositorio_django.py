@@ -1,8 +1,9 @@
+from collections.abc import Sequence
 from contextlib import AbstractContextManager
 from datetime import date, datetime
 
 from django.db import IntegrityError, transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import TruncDate
 
 from reservas.application.portas import RegistroDoIndice
@@ -83,6 +84,43 @@ class RepositorioReservasDjango(RepositorioReservas):
             total=total,
             paginacao=paginacao,
         )
+
+    def listar_pendentes(self, paginacao: Paginacao) -> PaginaDeReservas:
+        consulta = ReservaModel.objects.filter(
+            situacao=SituacaoReserva.SOLICITADA
+        ).order_by("criada_em", "id")
+        total = consulta.count()
+        deslocamento = paginacao.deslocamento()
+        if deslocamento >= total:
+            return PaginaDeReservas(itens=(), total=total, paginacao=paginacao)
+        modelos = consulta[deslocamento : deslocamento + paginacao.tamanho]
+        return PaginaDeReservas(
+            itens=tuple(_para_entidade(model) for model in modelos),
+            total=total,
+            paginacao=paginacao,
+        )
+
+    def listar_por_ids(self, ids: Sequence[int]) -> list[Reserva]:
+        if not ids:
+            return []
+        por_id = {
+            model.pk: model for model in ReservaModel.objects.filter(pk__in=set(ids))
+        }
+        return [
+            _para_entidade(por_id[reserva_id])
+            for reserva_id in dict.fromkeys(ids)
+            if reserva_id in por_id
+        ]
+
+    def contar_por_situacao(self) -> dict[SituacaoReserva, int]:
+        contagens = dict(
+            ReservaModel.objects.order_by()
+            .values_list("situacao")
+            .annotate(total=Count("pk"))
+        )
+        return {
+            situacao: contagens.get(situacao.value, 0) for situacao in SituacaoReserva
+        }
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         consulta = ReservaModel.objects.filter(

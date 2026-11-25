@@ -26,6 +26,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | Evidência e código do RF-16, RF-18, RF-19, RF-20 e RF-24.1 depois de implementar o CR-01 (RES-11): a marca "implementação pendente" sai e entram os testes novos, o código e os códigos de erro. Enunciados sem mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Evidência e código do RF-22 depois de implementar o CR-02 (RES-12): a marca "implementação pendente" sai, os testes citados passam a ser os das tentativas recusadas e do histórico com os campos novos. Enunciado sem mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Evidência e código do RF-11.5 depois de implementar o CR-03 (ESP-07): a marca "implementação pendente" sai, os testes de borda por espaço, de virada de dia e de propriedade entram, e os testes da regra anterior (horário único) saem da lista. Enunciado sem mudança. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | RF-44, RF-44.1 e RF-44.2 novos: o Gestor consulta a fila de reservas pendentes e a contagem por situação, a partir da NS-08 ([CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md), tarefa RDS-08; [UC-24](../casos-de-uso/README.md#uc-24), [US-23](../historias/US-23-consultar-a-fila-de-pendentes.md)). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
 
 ## Pedido de reserva
 
@@ -469,6 +470,61 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Código (complementar)** | `reservas/domain/reserva.py::Reserva.alterar_situacao`, `reservas/domain/situacao.py::papel_pode_levar_a`, `reservas/domain/excecoes.py::AlteracaoDeSituacaoNaoPermitida` |
 | **Regras de negócio** | [RN-09](regras-de-negocio.md#rn-09). Glossário e detalhes: [Transição de situação](../glossario.md#transicao-de-situacao) (`DESTINOS_POR_PAPEL`), [perfil](../glossario.md#perfil) |
 | **Decisões** | [DEC-04](../decisoes/DEC-04.md) |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+## Fila de decisão do Gestor
+
+### <a id="rf-44"></a>RF-44 · Consultar a fila de reservas pendentes
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao Gestor consultar as reservas que aguardam decisão (situação Solicitada), da que foi pedida há mais tempo para a mais recente e, no empate, na ordem em que foram registradas, em páginas de 20 (até 100), com a quantidade de reservas pendentes e os mesmos dados e ações disponíveis da consulta de reservas; uma reserva deixa de aparecer na fila assim que sai da situação Solicitada, e o resultado é o mesmo em qualquer condição de funcionamento do sistema. |
+| **Origem** | NS-08 |
+| **Funcionalidade** | Extra (RDS-08) |
+| **Prioridade (QFD)** | Normal — sem a fila, o Gestor teria de filtrar a lista inteira para achar o que espera a decisão dele; é a leitura que acompanha a [NS-09](../visao.md#ns-09). |
+| **Vínculos** | UC: [UC-24 Consultar a fila de pendentes e as contagens](../casos-de-uso/README.md#uc-24) (fluxo principal e alternativas) — na ficha: [UC-24 passos 1 e 2](../casos-de-uso/fichas-resumidas.md#uc24-p1), [UC-24 passo 5](../casos-de-uso/fichas-resumidas.md#uc24-p5), [A2.1](../casos-de-uso/fichas-resumidas.md#uc24-a2-1), [A2.2](../casos-de-uso/fichas-resumidas.md#uc24-a2-2) · US/CA: [US-23 · CA-01](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-01) (TA-209), [US-23 · CA-04](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-04) (TA-212), [US-23 · CA-05](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-05) (TA-213), [US-23 · CA-03](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-03) (TA-211), [US-23 · CA-06](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-06) (TA-214) |
+| **Evidência (complementar)** | `GET /api/reservas/pendentes/?pagina=&tamanho=` (só Gestor; sem tela). `reservas/tests/test_api_fila_de_pendentes.py::test_fila_vem_em_ordem_de_solicitacao_com_o_formato_da_reserva`, `::test_fila_vazia_diz_que_nao_ha_pendentes`, `::test_fila_com_uma_reserva_usa_o_singular`, `::test_fila_pagina_e_depois_da_ultima_vem_vazia_com_o_total`, `::test_confirmar_pela_api_tira_da_fila_e_muda_a_contagem_sem_reconstruir`, `::test_nova_solicitacao_entra_no_fim_da_fila_sem_reconstruir`, `::test_resposta_com_a_projecao_montada_e_a_do_banco_sao_iguais`; `reservas/tests/test_repositorio_reservas.py::test_listar_pendentes_ordena_por_criada_em_e_nao_por_id_nem_por_horario`, `::test_listar_pendentes_desempata_pelo_id_com_ids_de_um_e_dois_digitos` |
+| **Código (complementar)** | `reservas/application/fila_de_pendentes.py::ConsultarFilaDePendentes`, `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.listar_pendentes`, `reservas/api/views.py::FilaDePendentesView` |
+| **Regras de negócio** | [Fila de pendentes](../glossario.md#fila-de-pendentes), [Reserva](../glossario.md#reserva), [situação da reserva](../glossario.md#situacao). A fila mostra só reservas realmente Solicitadas no momento da consulta. |
+| **Decisões** | — |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-44-1"></a>RF-44.1 · Consultar a contagem de reservas por situação
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao Gestor ver quantas reservas há em cada uma das cinco situações (Solicitada, Confirmada, Recusada, Cancelada e Concluída), na ordem das situações e com zero quando não há nenhuma, e o total de reservas; os números mudam assim que uma reserva muda de situação e são os mesmos em qualquer condição de funcionamento do sistema. |
+| **Pai** | [RF-44](#rf-44) |
+| **Origem** | NS-08 |
+| **Funcionalidade** | Extra (RDS-08) |
+| **Prioridade (QFD)** | Normal — dá ao Gestor o tamanho do trabalho (quantas pendentes, quantas confirmadas) sem percorrer a lista. |
+| **Vínculos** | UC: [UC-24 Consultar a fila de pendentes e as contagens](../casos-de-uso/README.md#uc-24) (fluxo principal) — na ficha: [UC-24 passos 3 e 4](../casos-de-uso/fichas-resumidas.md#uc24-p3) · US/CA: [US-23 · CA-02](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-02) (TA-210), [US-23 · CA-03](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-03) (TA-211), [US-23 · CA-06](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-06) (TA-214) |
+| **Evidência (complementar)** | `GET /api/reservas/contagem-por-situacao/` (só Gestor; sem tela). `reservas/tests/test_api_fila_de_pendentes.py::test_contagem_traz_as_cinco_situacoes_na_ordem_com_zeros`, `::test_contagem_sem_reservas_traz_tudo_zerado`, `::test_resposta_com_a_projecao_fora_do_ar_e_a_mesma_e_nunca_503`; `reservas/tests/test_repositorio_reservas.py::test_contar_por_situacao_conta_cada_situacao`; `reservas/tests/test_fila_de_pendentes.py::test_contagem_traz_as_cinco_situacoes_com_zero` |
+| **Código (complementar)** | `reservas/application/fila_de_pendentes.py::ContarReservasPorSituacao`, `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.contar_por_situacao`, `reservas/api/views.py::ContagemPorSituacaoView` |
+| **Regras de negócio** | [Contagem por situação](../glossario.md#contagem-por-situacao), [situação da reserva](../glossario.md#situacao) |
+| **Decisões** | — |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-44-2"></a>RF-44.2 · Recusar a consulta de quem não é Gestor ou com página inválida
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que a fila de pendentes e a contagem por situação sejam consultadas por quem não está identificado (pedindo que entre) ou é Solicitante (informando que não tem permissão), sem mostrar reserva nem número algum, e que a fila seja consultada com uma página ou um tamanho de página inválidos, informando o campo. |
+| **Pai** | [RF-44](#rf-44) |
+| **Origem** | NS-08 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Esperado — a fila mostra reservas de todos, e só o Gestor decide sobre elas ([NS-11](../visao.md#ns-11)). |
+| **Vínculos** | UC: [UC-24 Consultar a fila de pendentes e as contagens](../casos-de-uso/README.md#uc-24) (exceção) — na ficha: [UC-24 E1.1](../casos-de-uso/fichas-resumidas.md#uc24-e1-1), [UC-24 E2.1](../casos-de-uso/fichas-resumidas.md#uc24-e2-1) · US/CA: [US-23 · CA-08](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-08) (TA-216), [US-23 · CA-07](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-07) (TA-215) |
+| **Evidência (complementar)** | `GET /api/reservas/pendentes/` e `GET /api/reservas/contagem-por-situacao/`: 401 `NAO_AUTENTICADO` ao anônimo; 403 `ACAO_NAO_PERMITIDA` ao Solicitante, antes de validar a página; 400 `DADOS_INVALIDOS` com o campo; 405 `METODO_NAO_PERMITIDO` aos outros métodos; as duas rotas estão na [matriz de acesso](../../matriz_de_acesso.md). `reservas/tests/test_api_fila_de_pendentes.py::test_anonimo_recebe_401 [x]`, `::test_solicitante_recebe_403_mesmo_com_reservas_proprias [x]`, `::test_solicitante_com_parametro_invalido_recebe_403_e_nao_400`, `::test_parametro_invalido_recebe_400_com_o_campo [x]`, `::test_outros_metodos_recebem_405 [x]`; `reservas/tests/test_fila_de_pendentes.py::test_solicitante_nao_consulta_a_fila`, `::test_solicitante_nao_consulta_a_contagem`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| **Código (complementar)** | `reservas/application/fila_de_pendentes.py::ConsultarFilaDePendentes`, `reservas/api/serializers.py::FiltrosDaFilaSerializer`, `compartilhado/api/permissoes.py::ApenasGestor` |
+| **Regras de negócio** | [Perfil](../glossario.md#perfil), [Gestor](../glossario.md#gestor) |
+| **Decisões** | — |
 | **Revisão** | 0.1 |
 | **Estado** | Rascunho |
 | **Responsável** | Max Zimmermann dos Reis |
