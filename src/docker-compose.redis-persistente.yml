@@ -1,0 +1,8 @@
+services:
+  redis:
+    command: redis-server --save "" --appendonly yes --appendfsync everysec
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
