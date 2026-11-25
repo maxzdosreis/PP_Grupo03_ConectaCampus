@@ -4,8 +4,10 @@ from espacos.application.casos_de_uso import (
     VerificarEspacoDisponivel,
     VerificarEspacoParaReservar,
 )
+from espacos.application.leitor_de_espacos_em_cache import LeitorDeEspacosComCache
 from espacos.application.portas import ReservasDoEspaco
 from espacos.infrastructure import consulta_de_reservas
+from espacos.infrastructure.cache_de_espacos_redis import CacheDeEspacosRedis
 from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
 
 
@@ -20,7 +22,8 @@ class EspacoDisponivel:
 
 
 def verificar_espaco_disponivel(espaco_id: int) -> EspacoDisponivel:
-    espaco = VerificarEspacoDisponivel(RepositorioEspacosDjango()).executar(espaco_id)
+    leitor = LeitorDeEspacosComCache(RepositorioEspacosDjango(), CacheDeEspacosRedis())
+    espaco = VerificarEspacoDisponivel(leitor).executar(espaco_id)
     return _como_disponivel(espaco)
 
 

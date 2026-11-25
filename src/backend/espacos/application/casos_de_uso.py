@@ -1,7 +1,7 @@
 from datetime import time
 
 from espacos.application.portas import ReservasDoEspaco
-from espacos.application.repositorio import RepositorioEspacos
+from espacos.application.repositorio import LeitorDeEspacos, RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
     EspacoNaoEncontrado,
@@ -47,7 +47,7 @@ class ListarEspacos:
 
 
 class ObterEspaco:
-    def __init__(self, repositorio: RepositorioEspacos) -> None:
+    def __init__(self, repositorio: LeitorDeEspacos) -> None:
         self._repositorio = repositorio
 
     def executar(self, espaco_id: int) -> EspacoEsportivo:
@@ -55,7 +55,7 @@ class ObterEspaco:
 
 
 class VerificarEspacoDisponivel:
-    def __init__(self, repositorio: RepositorioEspacos) -> None:
+    def __init__(self, repositorio: LeitorDeEspacos) -> None:
         self._repositorio = repositorio
 
     def executar(self, espaco_id: int) -> EspacoEsportivo:
@@ -140,9 +140,7 @@ class AtivarEspaco:
         return self._repositorio.salvar(espaco)
 
 
-def _obter_ou_falhar(
-    repositorio: RepositorioEspacos, espaco_id: int
-) -> EspacoEsportivo:
+def _obter_ou_falhar(repositorio: LeitorDeEspacos, espaco_id: int) -> EspacoEsportivo:
     espaco = repositorio.obter_por_id(espaco_id)
     if espaco is None:
         raise EspacoNaoEncontrado(espaco_id)
