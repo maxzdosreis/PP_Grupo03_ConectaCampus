@@ -70,5 +70,8 @@ def consultar_ocupacao_do_dia(
     relogio: Callable[[], datetime] = timezone.now,
 ) -> ConsultarOcupacaoDoDia:
     return ConsultarOcupacaoDoDia(
-        RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), relogio
+        RepositorioReservasDjango(),
+        ConsultaDeEspacosViaFachada(),
+        AgendaDoDiaRedis(relogio),
+        relogio,
     )

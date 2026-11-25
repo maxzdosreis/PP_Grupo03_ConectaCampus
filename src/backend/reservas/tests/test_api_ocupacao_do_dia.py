@@ -2,8 +2,12 @@ import json
 from datetime import timedelta
 
 import pytest
+from django.core.cache import cache
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
+from redis.exceptions import RedisError
 from rest_framework.test import APIClient
 
 from reservas.domain.excecoes import DataRetroativa
@@ -214,3 +218,101 @@ def test_espaco_inativo_responde_409(cliente_solicitante, cliente_gestor, espaco
     # Assert
     assert resposta.status_code == 409
     assert resposta.data["erro"]["codigo"] == "ESPACO_INATIVO"
+
+
+def _chave_da_agenda(espaco_id, data):
+    return cache.make_key(f"agenda:espaco:{espaco_id}:{data.isoformat()}")
+
+
+def _consultas_a_reservas(captura):
+    return [c for c in captura.captured_queries if "reservas_reserva" in c["sql"]]
+
+
+def _redis_fora_do_ar(monkeypatch):
+    def cliente_que_falha(chave, *, escrita):
+        raise RedisError("fora do ar")
+
+    monkeypatch.setattr(
+        "reservas.infrastructure.agenda_redis._cliente", cliente_que_falha
+    )
+
+
+def test_primeira_consulta_cria_a_chave_e_a_segunda_nao_consulta_a_tabela(
+    cliente_solicitante, espaco_id
+):
+    # Arrange
+    chave = _chave_da_agenda(espaco_id, _amanha())
+    assert not cache._cache.get_client(chave).exists(chave)
+
+    # Act
+    with CaptureQueriesContext(connection) as primeira:
+        resposta_1 = _consultar(cliente_solicitante, espaco_id, _amanha())
+    with CaptureQueriesContext(connection) as segunda:
+        resposta_2 = _consultar(cliente_solicitante, espaco_id, _amanha())
+
+    # Assert
+    assert chave.startswith("conecta-campus:1:agenda:espaco:")
+    assert cache._cache.get_client(chave).exists(chave)
+    assert len(_consultas_a_reservas(primeira)) == 1
+    assert _consultas_a_reservas(segunda) == []
+    assert resposta_2.data == resposta_1.data
+
+
+def test_reserva_nova_aparece_vinda_do_redis_e_o_cancelamento_a_tira(
+    cliente_solicitante, cliente_gestor, espaco_id, django_capture_on_commit_callbacks
+):
+    # Arrange
+    _consultar(cliente_solicitante, espaco_id, _amanha())
+
+    # Act
+    with django_capture_on_commit_callbacks(execute=True):
+        reserva_id = _solicitar(cliente_solicitante, espaco_id, "10:00", "11:00")
+    with CaptureQueriesContext(connection) as depois_de_criar:
+        criada = _consultar(cliente_solicitante, espaco_id, _amanha())
+    with django_capture_on_commit_callbacks(execute=True):
+        cliente_gestor.patch(
+            reverse("reservas:situacao", args=[reserva_id]),
+            {"situacao": "CANCELADA", "motivo": MOTIVO},
+            format="json",
+        )
+    with CaptureQueriesContext(connection) as depois_de_cancelar:
+        cancelada = _consultar(cliente_solicitante, espaco_id, _amanha())
+
+    # Assert
+    assert _consultas_a_reservas(depois_de_criar) == []
+    assert [o["hora_inicio"] for o in criada.data["dados"]["ocupados"]] == ["10:00"]
+    assert _consultas_a_reservas(depois_de_cancelar) == []
+    assert cancelada.data["dados"]["ocupados"] == []
+
+
+def test_resposta_e_igual_com_redis_e_com_redis_falhando(
+    cliente_solicitante, espaco_id, monkeypatch, django_capture_on_commit_callbacks
+):
+    # Arrange
+    with django_capture_on_commit_callbacks(execute=True):
+        _solicitar(cliente_solicitante, espaco_id, "10:00", "11:00")
+        _solicitar(cliente_solicitante, espaco_id, "23:00", "00:00")
+    com_redis = _consultar(cliente_solicitante, espaco_id, _amanha())
+    _redis_fora_do_ar(monkeypatch)
+
+    # Act
+    sem_redis = _consultar(cliente_solicitante, espaco_id, _amanha())
+
+    # Assert
+    assert sem_redis.status_code == 200
+    assert sem_redis.data == com_redis.data
+
+
+def test_redis_fora_do_ar_responde_200_com_os_horarios_certos(
+    cliente_solicitante, espaco_id, monkeypatch
+):
+    # Arrange
+    _solicitar(cliente_solicitante, espaco_id, "10:00", "11:00")
+    _redis_fora_do_ar(monkeypatch)
+
+    # Act
+    resposta = _consultar(cliente_solicitante, espaco_id, _amanha())
+
+    # Assert
+    assert resposta.status_code == 200
+    assert [o["hora_inicio"] for o in resposta.data["dados"]["ocupados"]] == ["10:00"]
