@@ -12,6 +12,10 @@ from reservas.application.casos_de_uso import (
     CriarReserva,
     ObterReserva,
 )
+from reservas.application.fila_de_pendentes import (
+    ConsultarFilaDePendentes,
+    ContarReservasPorSituacao,
+)
 from reservas.application.reconstruir_agenda import ReconstruirAgenda
 from reservas.application.reconstruir_indice import ReconstruirIndice
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
@@ -74,6 +78,18 @@ def reconstruir_agenda(
 ) -> ReconstruirAgenda:
     return ReconstruirAgenda(
         RepositorioReservasDjango(), AgendaDoDiaRedis(relogio), relogio
+    )
+
+
+def consultar_fila_de_pendentes() -> ConsultarFilaDePendentes:
+    return ConsultarFilaDePendentes(
+        RepositorioReservasDjango(), IndiceDeReservasRedis()
+    )
+
+
+def contar_reservas_por_situacao() -> ContarReservasPorSituacao:
+    return ContarReservasPorSituacao(
+        RepositorioReservasDjango(), IndiceDeReservasRedis()
     )
 
 

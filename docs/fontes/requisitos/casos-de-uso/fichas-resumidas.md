@@ -23,6 +23,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | UC-23 · Gerir usuários (ficha resumida), da [DEC-27](../decisoes/DEC-27.md) e do [CR-07](../mudancas/CR-07-gestao-de-usuarios.md) (AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | UC-09 A3.2: o código da RES-12 (CR-02) mostra as tentativas recusadas. Fichas sem outra mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | ESP-07 (CR-03) implementada: o passo 4 do UC-06 (funcionamento do espaço) passa a valer no código; nenhum passo nem exceção muda. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | UC-24 · Consultar a fila de pendentes e as contagens (ficha resumida), do [CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md) (RDS-08). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -455,3 +456,39 @@ Casos de uso de instalação e operação, fora do negócio ([decisão e](README
 **RFs cobertos:** [RF-40](../requisitos/rf-gerais.md#rf-40) → [passos 1 a 3](#uc22-p1), [E2.1](#uc22-e2-1), [E2.2](#uc22-e2-2)
 
 **Histórias derivadas:** [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md)
+
+## <a id="uc-24"></a>UC-24 · Consultar a fila de pendentes e as contagens
+
+| Campo | Conteúdo |
+|---|---|
+| **Ator primário** | Atendente responsável |
+| **Meta** | Ver o que espera decisão, na ordem em que foi pedido, e quantas reservas há em cada situação. |
+| **Precondição** | O ator está autenticado ([UC-02](UC-02-autenticar.md)) com o perfil Gestor. |
+| **Ficha completa relacionada** | [UC-10 Alterar situação da reserva](UC-10-alterar-situacao-da-reserva.md) (a decisão sobre uma pendente parte daqui, [passo 1](UC-10-alterar-situacao-da-reserva.md#p1)). |
+
+**Fluxo principal**
+
+1. <a id="uc24-p1"></a>O Atendente responsável pede a fila de reservas pendentes.
+2. <a id="uc24-p2"></a>O sistema mostra as reservas Solicitadas, da pedida há mais tempo para a mais recente, em páginas de até 20, com os mesmos dados e as [ações disponíveis](../glossario.md#acao-disponivel) da consulta de reservas, e a quantidade de pendentes.
+3. <a id="uc24-p3"></a>O Atendente pede a contagem de reservas por situação.
+4. <a id="uc24-p4"></a>O sistema mostra as cinco situações, na ordem do ciclo de vida, cada uma com a quantidade de reservas (zero quando não há nenhuma), e o total.
+5. <a id="uc24-p5"></a>Quando uma reserva deixa de estar Solicitada (por decisão do Atendente em [UC-10](UC-10-alterar-situacao-da-reserva.md) ou por cancelamento do Solicitante), ela sai da fila e a contagem muda na consulta seguinte, sem nada a refazer.
+
+**Alternativas**
+
+- <a id="uc24-a2-1"></a>**A2.1** · Ver outra página: o Atendente pede outra página, e o sistema mostra aquela página da mesma fila, com o mesmo total; uma página depois da última mostra a lista vazia, com o total certo.
+- <a id="uc24-a2-2"></a>**A2.2** · Nenhuma reserva pendente: o sistema informa "Nenhuma reserva pendente.", sem erro.
+- <a id="uc24-a4-1"></a>**A4.1** · O sistema não consegue usar o apoio de consulta: a fila e a contagem saem do cadastro de reservas, com o mesmo resultado, sem aviso de falha para o ator.
+
+**Exceções**
+
+Na ordem em que o sistema confere.
+
+| Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
+|---|---|---|---|---|
+| <a id="uc24-e1-1"></a>E1.1 · Sem permissão ou sem identificação | O ator não está identificado, ou é Solicitante. | Quem não está identificado é levado a entrar; o Solicitante é informado de que não tem permissão. Nenhuma reserva nem número é mostrado. | Nada é mostrado nem alterado. | [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) |
+| <a id="uc24-e2-1"></a>E2.1 · Página inválida | A página não é um número inteiro a partir de 1, ou o tamanho da página não é um número de 1 a 100. | O sistema informa "Verifique os dados informados.", com o campo com problema. | Nada é mostrado nem alterado. | [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) |
+
+**RFs cobertos:** [RF-44](../requisitos/rf-reservas.md#rf-44) → [passos 1 e 2](#uc24-p1), [passo 5](#uc24-p5), [A2.1](#uc24-a2-1), [A2.2](#uc24-a2-2), [A4.1](#uc24-a4-1) · [RF-44.1](../requisitos/rf-reservas.md#rf-44-1) → [passos 3 e 4](#uc24-p3) · [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) → [E1.1](#uc24-e1-1), [E2.1](#uc24-e2-1)
+
+**Histórias derivadas:** [US-23 Consultar a fila de pendentes e as contagens](../historias/US-23-consultar-a-fila-de-pendentes.md)

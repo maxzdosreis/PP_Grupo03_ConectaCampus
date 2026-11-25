@@ -1208,3 +1208,223 @@ def test_listar_para_indice_no_banco_le_so_tres_colunas_em_uma_consulta():
     assert "LIMIT 2" in sql
     assert "finalidade" not in sql
     assert "reservas_registro_de_situacao" not in sql
+
+
+def _salvar_solicitada_criada_em(repositorio, minutos, hora, **sobrescritas):
+    return _salvar_na_situacao(
+        repositorio,
+        S.SOLICITADA,
+        agora=AGORA + timedelta(minutes=minutos),
+        hora_inicio=time(hora, 0),
+        hora_fim=time(hora + 1, 0),
+        **sobrescritas,
+    )
+
+
+def _ids_da_pagina(pagina):
+    return [reserva.id for reserva in pagina.itens]
+
+
+def test_listar_pendentes_ordena_por_criada_em_e_nao_por_id_nem_por_horario(
+    repositorio,
+):
+    # Arrange
+    tarde = _salvar_solicitada_criada_em(repositorio, 30, 8)
+    cedo = _salvar_solicitada_criada_em(repositorio, 0, 15)
+    meio = _salvar_solicitada_criada_em(repositorio, 10, 12)
+
+    # Act
+    pagina = repositorio.listar_pendentes(Paginacao())
+
+    # Assert
+    assert _ids_da_pagina(pagina) == [cedo.id, meio.id, tarde.id]
+    assert pagina.total == 3
+
+
+def test_listar_pendentes_desempata_pelo_id_com_ids_de_um_e_dois_digitos(repositorio):
+    # Arrange
+    salvas = [_salvar_solicitada_criada_em(repositorio, 0, 7 + i) for i in range(12)]
+
+    # Act
+    pagina = repositorio.listar_pendentes(Paginacao(tamanho=100))
+
+    # Assert
+    assert _ids_da_pagina(pagina) == [reserva.id for reserva in salvas]
+    assert _ids_da_pagina(pagina) == sorted(_ids_da_pagina(pagina))
+
+
+def test_listar_pendentes_ignora_as_que_nao_estao_solicitadas(repositorio):
+    # Arrange
+    pendente = _salvar_solicitada_criada_em(repositorio, 0, 8)
+    _salvar_na_situacao(repositorio, S.CONFIRMADA)
+    _salvar_na_situacao(
+        repositorio,
+        S.CANCELADA,
+        motivo="Chuva",
+        hora_inicio=time(12, 0),
+        hora_fim=time(13, 0),
+    )
+
+    # Act
+    pagina = repositorio.listar_pendentes(Paginacao())
+
+    # Assert
+    assert _ids_da_pagina(pagina) == [pendente.id]
+    assert pagina.total == 1
+
+
+def test_listar_pendentes_pagina_e_a_ultima_pagina_vem_com_o_resto(repositorio):
+    # Arrange
+    salvas = [_salvar_solicitada_criada_em(repositorio, i, 7 + i) for i in range(5)]
+    ids = [reserva.id for reserva in salvas]
+
+    # Act
+    primeira = repositorio.listar_pendentes(Paginacao(numero=1, tamanho=2))
+    ultima = repositorio.listar_pendentes(Paginacao(numero=3, tamanho=2))
+
+    # Assert
+    assert _ids_da_pagina(primeira) == ids[:2]
+    assert _ids_da_pagina(ultima) == ids[4:]
+    assert primeira.total == ultima.total == 5
+    assert primeira.total_de_paginas() == 3
+
+
+def test_listar_pendentes_depois_da_ultima_pagina_vem_vazio_com_o_total(repositorio):
+    # Arrange
+    _salvar_solicitada_criada_em(repositorio, 0, 8)
+    _salvar_solicitada_criada_em(repositorio, 1, 10)
+
+    # Act
+    pagina = repositorio.listar_pendentes(Paginacao(numero=2, tamanho=2))
+
+    # Assert
+    assert pagina.itens == ()
+    assert pagina.total == 2
+
+
+def test_listar_pendentes_sem_reservas_vem_vazio(repositorio):
+    pagina = repositorio.listar_pendentes(Paginacao())
+
+    assert pagina.itens == ()
+    assert pagina.total == 0
+    assert pagina.total_de_paginas() == 0
+
+
+@pytest.mark.django_db
+def test_listar_pendentes_no_banco_faz_count_e_limit_e_depois_do_fim_so_conta():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    for i in range(3):
+        _salvar_solicitada_criada_em(repositorio, i, 8 + i)
+
+    # Act
+    with CaptureQueriesContext(connection) as da_pagina:
+        repositorio.listar_pendentes(Paginacao(numero=1, tamanho=2))
+    with CaptureQueriesContext(connection) as depois_do_fim:
+        repositorio.listar_pendentes(Paginacao(numero=5, tamanho=2))
+
+    # Assert
+    assert len(da_pagina) == 2
+    assert 'ORDER BY "reservas_reserva"."criada_em" ASC, ' in da_pagina[1]["sql"]
+    assert "LIMIT 2" in da_pagina[1]["sql"]
+    assert len(depois_do_fim) == 1
+
+
+def test_listar_por_ids_devolve_na_ordem_dos_ids_pedidos(repositorio):
+    # Arrange
+    a, b, c = (_salvar_solicitada_criada_em(repositorio, i, 8 + i) for i in range(3))
+
+    # Act
+    reservas = repositorio.listar_por_ids([c.id, a.id, b.id])
+
+    # Assert
+    assert [reserva.id for reserva in reservas] == [c.id, a.id, b.id]
+
+
+def test_listar_por_ids_omite_inexistentes_e_repetidos_e_traz_qualquer_situacao(
+    repositorio,
+):
+    # Arrange
+    pendente = _salvar_solicitada_criada_em(repositorio, 0, 8)
+    confirmada = _salvar_na_situacao(
+        repositorio, S.CONFIRMADA, hora_inicio=time(10, 0), hora_fim=time(11, 0)
+    )
+
+    # Act
+    reservas = repositorio.listar_por_ids(
+        [confirmada.id, ID_INEXISTENTE, pendente.id, confirmada.id]
+    )
+
+    # Assert
+    assert [(r.id, r.situacao) for r in reservas] == [
+        (confirmada.id, S.CONFIRMADA),
+        (pendente.id, S.SOLICITADA),
+    ]
+
+
+def test_listar_por_ids_sem_ids_devolve_lista_vazia(repositorio):
+    assert repositorio.listar_por_ids([]) == []
+
+
+@pytest.mark.django_db
+def test_listar_por_ids_no_banco_faz_uma_consulta_so():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    salvas = [_salvar_solicitada_criada_em(repositorio, i, 8 + i) for i in range(3)]
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.listar_por_ids([r.id for r in salvas])
+
+    # Assert
+    assert len(consultas) == 1
+
+
+def test_contar_por_situacao_sem_reservas_traz_as_cinco_com_zero(repositorio):
+    contagem = repositorio.contar_por_situacao()
+
+    assert list(contagem) == list(SituacaoReserva)
+    assert set(contagem.values()) == {0}
+
+
+def test_contar_por_situacao_conta_cada_situacao(repositorio):
+    # Arrange
+    _salvar_solicitada_criada_em(repositorio, 0, 8)
+    _salvar_solicitada_criada_em(repositorio, 1, 9)
+    _salvar_na_situacao(
+        repositorio, S.CONFIRMADA, hora_inicio=time(11, 0), hora_fim=time(12, 0)
+    )
+    _salvar_na_situacao(
+        repositorio,
+        S.CANCELADA,
+        motivo="Chuva",
+        hora_inicio=time(13, 0),
+        hora_fim=time(14, 0),
+    )
+
+    # Act
+    contagem = repositorio.contar_por_situacao()
+
+    # Assert
+    assert contagem == {
+        S.SOLICITADA: 2,
+        S.CONFIRMADA: 1,
+        S.RECUSADA: 0,
+        S.CANCELADA: 1,
+        S.CONCLUIDA: 0,
+    }
+
+
+@pytest.mark.django_db
+def test_contar_por_situacao_no_banco_faz_um_group_by():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    _salvar_solicitada_criada_em(repositorio, 0, 8)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.contar_por_situacao()
+
+    # Assert
+    assert len(consultas) == 1
+    assert "GROUP BY" in consultas[0]["sql"]

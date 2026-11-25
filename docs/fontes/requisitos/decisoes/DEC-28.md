@@ -15,7 +15,7 @@
 | **Alternativas** | **i)** Redis como banco primário das reservas, como no esboço do artigo: descartada, porque perde a restrição de exclusão do PostgreSQL e duplica regras de domínio. **j)** Pré-checagem de conflito em Lua sobre a projeção: descartada, porque uma projeção desatualizada geraria falsos conflitos. **k)** Falhar fechado também na agenda: descartada, porque a indisponibilidade do cache não deve impedir a consulta. **l)** Ligar a persistência do Redis padrão: descartada, porque mudaria o RNF-F12 sem necessidade, já que a projeção se reconstrói. **m)** Cache de JSON por `cache.set`: descartada, porque não usa as estruturas do Redis e obriga a desserializar tudo. |
 | **Responsável** | Max Zimmermann dos Reis (grupo). |
 | **Prazo** | Adotada em 24/11/2026; confirmação do grupo pendente. |
-| **Artefatos afetados** | A atualizar nas tarefas seguintes, não nesta: documento de modelagem (`modelagem.md`), README da raiz (limitações conhecidas), README do contexto de reservas, SRS e RNF se surgir requisito novo, e a matriz de acesso (RDS-08). · **REQ-06:** nenhuma história nem critério de aceite depende desta DEC: 0 critérios de aceite e 0 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-28)). |
+| **Artefatos afetados** | A atualizar nas tarefas seguintes, não nesta: documento de modelagem (`modelagem.md`), README da raiz (limitações conhecidas), README do contexto de reservas, SRS e RNF se surgir requisito novo, e a matriz de acesso (RDS-08, que abriu o [CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md)). · **REQ-06:** nenhuma história nem critério de aceite depende desta DEC: 0 critérios de aceite e 0 testes de aceite ([mapa de impacto](../rastreabilidade/impacto-por-dec.md#dec-28)). |
 | **Origem** | Tarefa RDS-01 do backlog do Trabalho G2 (NoSQL). |
 | **Observações** | Esta DEC não altera a [DEC-04](DEC-04.md), a [DEC-08](DEC-08.md) (cobertura de 100% em `domain` e `application`), a [DEC-11](DEC-11.md) nem a [DEC-12](DEC-12.md); o [RNF-F12](../requisitos/rnf.md#rnf-f12) segue valendo. A especificação entregue em 13/11/2026 e o projeto entregue em 20/11/2026 não foram alterados; o histórico dos arquivos da fonte oficial registra a mudança. |
 
@@ -24,3 +24,4 @@
 | Versão | Data | Autor | Alteração |
 |---|---|---|---|
 | 0.1 | 24/11/2026 | Max Zimmermann dos Reis | Criação e adoção provisória, na tarefa RDS-01. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | A tarefa RDS-08 abriu o [CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md), com o RF-44, o UC-24 e a US-23 (item f). A decisão não mudou. |

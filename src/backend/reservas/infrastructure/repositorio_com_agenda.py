@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from contextlib import AbstractContextManager
 from datetime import date, datetime
 
@@ -20,6 +20,7 @@ from reservas.application.repositorio import (
 )
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
+from reservas.domain.situacao import SituacaoReserva
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +123,15 @@ class RepositorioReservasComAgenda(RepositorioReservas):
         self, filtros: FiltrosDeReservas, paginacao: Paginacao
     ) -> PaginaDeReservas:
         return self._interno.listar(filtros, paginacao)
+
+    def listar_pendentes(self, paginacao: Paginacao) -> PaginaDeReservas:
+        return self._interno.listar_pendentes(paginacao)
+
+    def listar_por_ids(self, ids: Sequence[int]) -> list[Reserva]:
+        return self._interno.listar_por_ids(ids)
+
+    def contar_por_situacao(self) -> dict[SituacaoReserva, int]:
+        return self._interno.contar_por_situacao()
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         return self._interno.listar_que_ocupam_horario(espaco_id, data)

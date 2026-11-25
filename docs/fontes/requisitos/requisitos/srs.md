@@ -34,6 +34,7 @@ Modelo: estrutura de SRS do A3·s8 (introdução, descrição geral, requisitos 
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-04 implementado na tarefa AUT-12: L-06 fechada e a auditoria do RF-32.1 (Co) passa a dizer que o código segue a regra. Sem aprovação. |
 | 0.1 | 18/11/2026 | Max Zimmermann dos Reis | L-03 passa a citar os limites por conta (troca de senha e alteração de usuários), em linha com o RNF-F12 (DOC-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 19/11/2026 | Max Zimmermann dos Reis | RNF-U02 a RNF-U05 verificados (FE-08, [VER-01](../verificacoes/FE-08-usabilidade.md)): estados da tabela de RNF e da auditoria atualizados (a meta do RNF-U02 passa a 9 de 9 telas, como na ficha desde a DOC-11; o menor contraste de borda calculado é 3,41:1); a L-09 deixa de cobrir RNF-U02, U04 e U05 e fica com a parte que falta do RNF-U03. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | RDS-08: RF-44, RF-44.1 e RF-44.2 nas tabelas (resumo, 4.2, 6.1, 6.2, 6.4, QFD e auditoria; 73 fichas, 44 RF principais) e a rota `GET /api/reservas/pendentes/` e `GET /api/reservas/contagem-por-situacao/`: o Gestor consulta a fila de pendentes e a contagem por situação ([CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md)). Nenhum RNF muda. Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -99,7 +100,7 @@ O cliente (a instituição) não opera o sistema e não é ator.
 | Componente | Responsabilidade | RF |
 |---|---|---|
 | **Cadastro de espaços** | Manter a lista de espaços esportivos igual à realidade e dizer quais aceitam pedidos. | [RF-01 a RF-10](rf-espacos.md) |
-| **Reservas** | Receber pedidos, impedir dois usos no mesmo período, registrar cada decisão e mostrar o histórico. | [RF-11 a RF-27](rf-reservas.md) |
+| **Reservas** | Receber pedidos, impedir dois usos no mesmo período, registrar cada decisão e mostrar o histórico. | [RF-11 a RF-27](rf-reservas.md) e [RF-44 e filhos](rf-reservas.md#rf-44) |
 | **Agenda** | Mostrar as regras de uso e o que está ocupado e livre num espaço e dia, antes do pedido. | [RF-28 a RF-31](rf-agenda.md) |
 | **Contas e acesso** | Identificar quem age, com o perfil que define o que cada um pode fazer, e permitir trocar a própria senha e, ao Gestor, gerir os perfis e as contas dos usuários. | [RF-32 a RF-37](rf-contas.md), [RF-41](rf-contas.md#rf-41) e [RF-42 e RF-43](rf-contas.md#rf-42) |
 | **Mensagens e operação** | Dizer o resultado de toda operação; permitir instalar, verificar e demonstrar o sistema. | [RF-38 a RF-40](rf-gerais.md) |
@@ -172,6 +173,9 @@ F = funcionalidade do enunciado (F1 a F6) ou Extra. QFD: N normal, E esperado, F
 | [RF-25](rf-reservas.md#rf-25) | Recusar situação ausente ou desconhecida | NS-09 | F5 | N | Rascunho |
 | [RF-26](rf-reservas.md#rf-26) | Recusar recusa ou cancelamento sem motivo válido | NS-09 | F5 | E | Rascunho |
 | [RF-27](rf-reservas.md#rf-27) | Recusar mudança de situação que o perfil não pode fazer | NS-11 | F5 | E | Rascunho |
+| [RF-44](rf-reservas.md#rf-44) | Consultar a fila de reservas pendentes | NS-08 | Extra | N | Rascunho |
+| [RF-44.1](rf-reservas.md#rf-44-1) | Consultar a contagem de reservas por situação | NS-08 | Extra | N | Rascunho |
+| [RF-44.2](rf-reservas.md#rf-44-2) | Recusar a consulta de quem não é Gestor ou com página inválida | NS-08 | F5 | E | Rascunho |
 | [RF-28](rf-agenda.md#rf-28) | Consultar as regras de agenda | NS-06 | Extra | Fa | Rascunho |
 | [RF-29](rf-agenda.md#rf-29) | Ver os horários ocupados de um espaço num dia | NS-05 | Extra | Fa | Rascunho |
 | [RF-29.1](rf-agenda.md#rf-29-1) | Recusar consulta da agenda sem espaço ou sem data | NS-05 | F5 | E | Rascunho |
@@ -201,7 +205,7 @@ F = funcionalidade do enunciado (F1 a F6) ou Extra. QFD: N normal, E esperado, F
 | [RF-43.1](rf-contas.md#rf-43-1) | Recusar que o Gestor rebaixe ou desative a própria conta | NS-11 | F5 | N | Rascunho |
 | [RF-43.2](rf-contas.md#rf-43-2) | Recusar que o sistema fique sem Gestor ativo | NS-11 | F5 | E | Rascunho |
 
-**Contagem:** 70 fichas (43 RF principais e 27 filhos). Por área: espaços 17, reservas 25, agenda 6, contas 19, mensagens e operação 3.
+**Contagem:** 73 fichas (44 RF principais e 29 filhos). Por área: espaços 17, reservas 28, agenda 6, contas 19, mensagens e operação 3.
 
 ## 4. Interfaces
 
@@ -243,6 +247,8 @@ Em todas as telas, o resultado de cada operação aparece como mensagem ([RF-38]
 | `GET /api/espacos/{id}/` · `PATCH /api/espacos/{id}/` | RF-03 · RF-06 |
 | `POST /api/espacos/{id}/desativar/` · `POST /api/espacos/{id}/ativar/` | RF-07 · RF-08 |
 | `GET /api/reservas/` · `POST /api/reservas/` | RF-12, RF-13 · RF-11 |
+| `GET /api/reservas/pendentes/` | RF-44, RF-44.2 |
+| `GET /api/reservas/contagem-por-situacao/` | RF-44.1, RF-44.2 |
 | `GET /api/reservas/situacoes/` · `GET /api/reservas/regras-de-agenda/` | RF-15 · RF-28 |
 | `GET /api/reservas/ocupacao/?espaco=&data=` | RF-29 a RF-31 |
 | `GET /api/reservas/{id}/` · `GET /api/reservas/{id}/historico/` | RF-14 · RF-22 |
@@ -317,7 +323,7 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | NS-05 | Ver o que está ocupado e livre antes de pedir | RF-29, RF-29.1, RF-29.2, RF-30, RF-31 | — |
 | NS-06 | Conhecer as regras de uso e ter os pedidos fora delas impedidos | RF-11.2, RF-11.5, RF-28 | RF-31 |
 | NS-07 | Acompanhar os próprios pedidos | RF-13, RF-14 | RF-15, RF-26 |
-| NS-08 | Localizar pedidos por critérios combinados | RF-12, RF-12.1, RF-12.2, RF-15 | RF-14 |
+| NS-08 | Localizar pedidos por critérios combinados | RF-12, RF-12.1, RF-12.2, RF-15, RF-44, RF-44.1, RF-44.2 | RF-14 |
 | NS-09 | Decidir sobre cada pedido | RF-16, RF-17, RF-18, RF-19, RF-20, RF-24, RF-24.1, RF-25, RF-26 | RF-27 |
 | NS-10 | Desistir do próprio pedido | RF-21 | RF-16, RF-26 |
 | NS-11 | Saber quem pediu e só quem tem autoridade decide | RF-10, RF-27, RF-33, RF-33.1, RF-33.2, RF-34, RF-34.1, RF-35, RF-36, RF-37, RF-42, RF-43, RF-43.1, RF-43.2 | RF-16, RF-22, RF-32.2, RF-32.3, RF-41, RF-41.1, RF-41.2 |
@@ -336,9 +342,9 @@ Toda NS tem pelo menos um RF; todo RF tem uma NS principal (a coluna "NS" da [ta
 | F2 | Cadastrar solicitação com solicitante, item, data e situação inicial | RF-11 | ✔ |
 | F3 | Consultar por pelo menos dois critérios | RF-12 (espaço, situação, data, solicitante, "somente as minhas"), RF-12.2 (em páginas, com o total), RF-13, RF-14, RF-15 | ✔ |
 | F4 | Alterar a situação com pelo menos três estados | RF-16 a RF-21 (cinco situações) | ✔ |
-| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 33 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-24.1, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1, RF-41.1, RF-41.2, RF-43.1, RF-43.2. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
+| F5 | Impedir operações inválidas: campo obrigatório vazio, item inexistente, mudança de situação não permitida | 34 recusas: RF-02.1, RF-05.1, RF-05.2, RF-06.1, RF-06.2, RF-07.1, RF-08.1, RF-09, RF-10, RF-11.1 a RF-11.5, RF-12.1, RF-23 a RF-27, RF-24.1, RF-29.1, RF-29.2, RF-32.1 a RF-32.3, RF-33.1, RF-33.2, RF-34.1, RF-41.1, RF-41.2, RF-43.1, RF-43.2, RF-44.2. Os três casos do enunciado: campo vazio (RF-05.1, RF-11.1, RF-25), item inexistente (RF-09, RF-11.3, RF-23), mudança não permitida (RF-24). | ✔ |
 | F6 | Mensagens claras de sucesso e erro | RF-38 (e RNF-U01) | ✔ |
-| Extra | Além das seis | RF-06, RF-07, RF-08, RF-22, RF-28 a RF-31, RF-32 a RF-37, RF-39 a RF-43 (19 fichas, sem contar as recusas, que são F5) | — |
+| Extra | Além das seis | RF-06, RF-07, RF-08, RF-22, RF-28 a RF-31, RF-32 a RF-37, RF-39 a RF-44 (21 fichas, sem contar as recusas, que são F5) | — |
 
 ### 6.3 RF e RNF → DEC
 
@@ -443,6 +449,9 @@ UC, US, CA e TA de cada RF estão na [matriz gerada](../rastreabilidade/matriz.m
 | RF-43 | `contas/tests/test_api_gestao_de_usuarios.py::test_gestor_promove_um_solicitante` |
 | RF-43.1 | `contas/tests/test_api_gestao_de_usuarios.py::test_gestor_nao_rebaixa_a_si_mesmo` |
 | RF-43.2 | `contas/tests/test_concorrencia_de_gestao.py::test_dois_gestores_se_tirando_do_cargo_ao_mesmo_tempo_deixam_um_ativo [x]` |
+| RF-44 | `reservas/tests/test_api_fila_de_pendentes.py::test_fila_vem_em_ordem_de_solicitacao_com_o_formato_da_reserva` |
+| RF-44.1 | `reservas/tests/test_api_fila_de_pendentes.py::test_contagem_traz_as_cinco_situacoes_na_ordem_com_zeros` |
+| RF-44.2 | `reservas/tests/test_api_fila_de_pendentes.py::test_solicitante_recebe_403_mesmo_com_reservas_proprias [x]` |
 | RF-38 | `compartilhado/tests/test_tratador_de_erros.py::test_campo_obrigatorio_ausente_indica_o_campo_que_falhou` |
 | RF-39 | `exemplos/tests/test_carregar_dados_exemplo.py::test_rodar_duas_vezes_nao_duplica_e_informa_que_ja_existiam` |
 | RF-40 | `reservas/tests/test_api_permissoes.py::test_vocabularios_e_health_nao_exigem_login` (sem teste do 503: [L-08](#lacunas)) |
@@ -457,17 +466,17 @@ Classificação do ponto de vista do **cliente** (a instituição), não do enun
 
 | Classe | Fichas | RF |
 |---|---|---|
-| Normal | 26 | RF-01, RF-03, RF-05, RF-05.1, RF-09, RF-11, RF-11.1, RF-11.3, RF-11.4, RF-12, RF-13, RF-14, RF-17, RF-18, RF-19, RF-20, RF-22, RF-23, RF-24, RF-24.1, RF-25, RF-37, RF-38, RF-42, RF-43, RF-43.1 |
-| Esperado | 38 | as demais, salvo as três abaixo |
+| Normal | 28 | RF-01, RF-03, RF-05, RF-05.1, RF-09, RF-11, RF-11.1, RF-11.3, RF-11.4, RF-12, RF-13, RF-14, RF-17, RF-18, RF-19, RF-20, RF-22, RF-23, RF-24, RF-24.1, RF-25, RF-37, RF-38, RF-42, RF-43, RF-43.1, RF-44, RF-44.1 |
+| Esperado | 39 | as demais, salvo as três abaixo |
 | Fascinante | 3 | RF-28, RF-29, RF-30 |
 
-**Risco de *scope creep* (A2·s14).** Dezenove fichas são extras ao enunciado (seção 6.2), e três delas são fascinantes. Elas não comprometeram as seis funcionalidades mínimas porque:
+**Risco de *scope creep* (A2·s14).** Vinte e uma fichas são extras ao enunciado (seção 6.2), e três delas são fascinantes. Elas não comprometeram as seis funcionalidades mínimas porque:
 
 1. **Vieram depois.** As seis funcionalidades estavam integradas e testadas antes de cada extra; a regra 2 do projeto ("escopo mínimo primeiro") e a contingência da [DEC-04](../decisoes/DEC-04.md) mandam cortar o extra que ameaçar o prazo (risco R-03 da Visão).
 2. **Não mudam as regras das seis.** A agenda do dia ([RF-29](rf-agenda.md#rf-29), [RF-30](rf-agenda.md#rf-30)) só lê reservas e reaproveita as mesmas regras de conflito e de agenda do pedido; o pedido continua sendo verificado por inteiro no envio. As regras de agenda consultáveis ([RF-28](rf-agenda.md#rf-28)) leem as mesmas constantes da recusa ([RF-11.5](rf-reservas.md#rf-11-5)). Uma propriedade testada prova que a agenda mostra livre exatamente o que o pedido aceitaria.
 3. **Nenhum fascinante é exigido por um normal.** Se os três fossem retirados, nenhuma das seis funcionalidades deixaria de funcionar.
 
-O risco que fica é de **prazo** (R-01): daqui até a entrega não entra nenhum RF novo além do [RF-33.2](rf-contas.md#rf-33-2) (AUT-08), uma recusa que fecha a lacuna [L-03](#l-03), e do [RF-41](rf-contas.md#rf-41) com os filhos (AUT-10, trocar a própria senha, [DEC-26](../decisoes/DEC-26.md)) e do [RF-42](rf-contas.md#rf-42) e do [RF-43](rf-contas.md#rf-43) com os filhos (AUT-11, gestão de usuários pelo Gestor, [DEC-27](../decisoes/DEC-27.md)), todos sem tocar nas seis funcionalidades; o tempo vai para documentação e ensaio.
+O risco que fica é de **prazo** (R-01): daqui até a entrega não entra nenhum RF novo além do [RF-33.2](rf-contas.md#rf-33-2) (AUT-08), uma recusa que fecha a lacuna [L-03](#l-03), e do [RF-41](rf-contas.md#rf-41) com os filhos (AUT-10, trocar a própria senha, [DEC-26](../decisoes/DEC-26.md)) e do [RF-42](rf-contas.md#rf-42) e do [RF-43](rf-contas.md#rf-43) com os filhos (AUT-11, gestão de usuários pelo Gestor, [DEC-27](../decisoes/DEC-27.md)) e do [RF-44](rf-reservas.md#rf-44) com os filhos (RDS-08, fila de pendentes e contagem por situação do Gestor, [CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md)), todos sem tocar nas seis funcionalidades; o tempo vai para documentação e ensaio.
 
 ## Lacunas
 
@@ -572,6 +581,9 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RF-43 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | O perfil e a situação são lidos do banco a cada pedido: rebaixar e desativar valem na próxima ação, com a mesma credencial. |
 | RF-43.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RF-43.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A recusa só é alcançável pela API numa corrida ou depois de o ator perder o perfil; a trava das linhas é provada com duas conexões. |
+| RF-44 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A fila e a contagem saem do mesmo resultado, venha ele do apoio de consulta ou do cadastro; a prova compara os dois. |
+| RF-44.1 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
+| RF-44.2 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 
 ### Requisitos não funcionais
 
@@ -611,7 +623,7 @@ Critérios do A3·s9: **Cl**aro · **Ne**cessário · **Vi**ável · **Co**mplet
 | RNF-S05 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | |
 | RNF-S06 | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | A verificar antes da entrega ([L-09](#l-09)). |
 
-**Resumo:** 9 ✘ em 103 fichas, todos com ação: 7 em Completo (DEC-13 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
+**Resumo:** 9 ✘ em 106 fichas, todos com ação: 7 em Completo (DEC-13 e, desde a REQ-04, L-14; o RF-17 ganhou também a L-13), 1 em Verificável (L-08) e 1 em Rastreável (L-10).
 
 ## 10. Checklist de revisão por pares
 

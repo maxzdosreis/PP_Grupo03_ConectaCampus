@@ -64,6 +64,8 @@ _TABELA = [
     ("reservas:situacoes",        "GET",    None,                  200,   200,   200,   200),
     ("reservas:regras_de_agenda", "GET",    None,                  200,   200,   200,   200),
     ("reservas:ocupacao",         "GET",    None,                  401,   200,   200,   200),
+    ("reservas:pendentes",        "GET",    None,                  401,   403,   403,   200),
+    ("reservas:contagem_por_situacao", "GET", None,                401,   403,   403,   200),
     ("reservas:detalhe",          "GET",    None,                  401,   200,   404,   200),
     ("reservas:detalhe",          "DELETE", None,                  401,   405,   405,   405),
     ("reservas:situacao",         "PATCH",  "confirmar",           401,   403,   404,   200),

@@ -45,6 +45,8 @@
 | `reservas:situacoes` | `/api/reservas/situacoes/` | GET | — | 200 | 200 | 200 | 200 |
 | `reservas:regras_de_agenda` | `/api/reservas/regras-de-agenda/` | GET | — | 200 | 200 | 200 | 200 |
 | `reservas:ocupacao` | `/api/reservas/ocupacao/?espaco={id}&data=<amanhã>` | GET | — | 401 | 200 | 200 | 200 |
+| `reservas:pendentes` | `/api/reservas/pendentes/` | GET | — | 401 | 403 | 403 | 200 |
+| `reservas:contagem_por_situacao` | `/api/reservas/contagem-por-situacao/` | GET | — | 401 | 403 | 403 | 200 |
 | `reservas:detalhe` | `/api/reservas/{id}/` | GET | — | 401 | 200 | 404 | 200 |
 | `reservas:detalhe` | `/api/reservas/{id}/` | DELETE | — | 401 | 405 | 405 | 405 |
 | `reservas:situacao` | `/api/reservas/{id}/situacao/` | PATCH | `CONFIRMADA` | 401 | 403 | 404 | 200 |
@@ -65,6 +67,7 @@
 - **Gestão de espaços (ESP-04):** cadastrar, editar (`PATCH`), desativar e reativar são só do gestor; os dois solicitantes recebem 403. As rotas de ação só aceitam `POST`: um `GET` nelas responde 405 a quem está logado, porque a restrição ao gestor vale só para o método implementado.
 - **Histórico:** segue a visibilidade do detalhe. O dono e o gestor leem; outro solicitante recebe 404, como no detalhe.
 - **Agenda do dia (FE-07):** qualquer pessoa logada consulta, inclusive o outro solicitante, que vê o 10:00–11:00 do dono como ocupado. A resposta só traz intervalo e situação, sem nome, matrícula, id, finalidade nem motivo (`reservas/tests/test_api_ocupacao_do_dia.py::test_solicitante_ve_a_reserva_de_outra_pessoa_sem_nenhum_dado_pessoal`). A query string (`espaco` e `data` de amanhã) vem de `_CONSULTA_DO_CENARIO`.
+- **Fila de pendentes e contagem por situação (RDS-08, CR-09):** só o gestor consulta. O dono e o outro solicitante recebem 403 `ACAO_NAO_PERMITIDA`, inclusive quando têm reservas pendentes; outros métodos respondem 405 a quem está logado. A recusa vem do caso de uso, antes de qualquer leitura.
 
 ## Outros testes de segurança (fora da matriz)
 

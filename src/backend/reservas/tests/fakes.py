@@ -1,6 +1,6 @@
 import os
 import re
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import date, datetime, time
 from time import tzset
@@ -321,6 +321,9 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         self._proximo_id = 1
         self.chamadas_de_salvar = 0
         self.tentativas_registradas = 0
+        self.chamadas_de_listar_pendentes = 0
+        self.chamadas_de_listar_por_ids = 0
+        self.chamadas_de_contar_por_situacao = 0
 
     @contextmanager
     def em_transacao(self) -> Iterator[None]:
@@ -379,6 +382,38 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
             total=len(encontradas),
             paginacao=paginacao,
         )
+
+    def listar_pendentes(self, paginacao: Paginacao) -> PaginaDeReservas:
+        self.chamadas_de_listar_pendentes += 1
+        fila = sorted(
+            (
+                r
+                for r in self._reservas.values()
+                if r.situacao is SituacaoReserva.SOLICITADA
+            ),
+            key=lambda reserva: (reserva.criada_em, reserva.id),
+        )
+        inicio = paginacao.deslocamento()
+        return PaginaDeReservas(
+            itens=tuple(
+                _copiar(r, r.id) for r in fila[inicio : inicio + paginacao.tamanho]
+            ),
+            total=len(fila),
+            paginacao=paginacao,
+        )
+
+    def listar_por_ids(self, ids: Sequence[int]) -> list[Reserva]:
+        self.chamadas_de_listar_por_ids += 1
+        return [
+            _copiar(self._reservas[reserva_id], reserva_id)
+            for reserva_id in dict.fromkeys(ids)
+            if reserva_id in self._reservas
+        ]
+
+    def contar_por_situacao(self) -> dict[SituacaoReserva, int]:
+        self.chamadas_de_contar_por_situacao += 1
+        situacoes = [reserva.situacao for reserva in self._reservas.values()]
+        return {situacao: situacoes.count(situacao) for situacao in SituacaoReserva}
 
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         self.eventos.append("listar")

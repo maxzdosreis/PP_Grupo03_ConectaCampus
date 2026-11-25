@@ -24,6 +24,8 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`. "Logado" = qualquer perf
 | `GET /api/reservas/regras-de-agenda/` | público | 200 | — |
 | `POST /api/reservas/` | logado (em nome próprio) | 201 | 400 `DADOS_INVALIDOS`, `HORARIO_INVALIDO`, `DATA_RETROATIVA`, `FORA_DO_HORARIO_DE_FUNCIONAMENTO`, `DURACAO_INVALIDA`, `ANTECEDENCIA_EXCEDIDA`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO`, `CONFLITO_DE_HORARIO` |
 | `GET /api/reservas/?espaco=&situacao=&data=&solicitante=&minhas=&pagina=&tamanho=` | logado (Solicitante: só as próprias) | 200 | 400 `DADOS_INVALIDOS` (filtro, página ou tamanho em formato inválido) |
+| `GET /api/reservas/pendentes/?pagina=&tamanho=` | só Gestor | 200 | 400 `DADOS_INVALIDOS` (página ou tamanho inválidos); 403 `ACAO_NAO_PERMITIDA` |
+| `GET /api/reservas/contagem-por-situacao/` | só Gestor | 200 | 403 `ACAO_NAO_PERMITIDA` |
 | `GET /api/reservas/ocupacao/?espaco=&data=` | logado | 200 | 400 `DADOS_INVALIDOS`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO` |
 | `GET /api/reservas/{id}/` | Gestor; Solicitante só a própria | 200 | 404 `RESERVA_NAO_ENCONTRADA` |
 | `PATCH /api/reservas/{id}/situacao/` | Gestor; Solicitante só cancela a própria | 200 | 400 `MOTIVO_OBRIGATORIO`, `SITUACAO_INVALIDA`, `DADOS_INVALIDOS`; 403 `ACAO_NAO_PERMITIDA`; 404; 409 `TRANSICAO_DE_SITUACAO_INVALIDA`, `CONCLUSAO_ANTES_DO_TERMINO`, `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO`, `RESERVA_DESATUALIZADA` |
@@ -128,7 +130,7 @@ Se uma reserva muda enquanto o dia é refeito, o comando tenta de novo (até 3 v
 
 ## Filas e contagens no Redis
 
-Além da agenda, o Redis guarda um índice com a **fila de reservas pendentes** (as `SOLICITADA`, da mais antiga para a mais nova) e a **contagem por situação**. Ele ainda não tem endpoint: a consulta do Gestor é a RDS-08, e hoje só a porta `IndiceDeReservas` (`application/portas.py`) sabe lê-lo. O índice nunca decide nada; quem decide estado e conflito é o PostgreSQL.
+Além da agenda, o Redis guarda um índice com a **fila de reservas pendentes** (as `SOLICITADA`, da mais antiga para a mais nova) e a **contagem por situação**. A consulta do Gestor a ele são os endpoints de [Fila de pendentes e contagens](#fila-de-pendentes-e-contagens), pela porta `IndiceDeReservas` (`application/portas.py`). O índice nunca decide nada; quem decide estado e conflito é o PostgreSQL.
 
 | Chave (depois do prefixo `conecta-campus:1:`) | Tipo | Conteúdo |
 |---|---|---|
@@ -142,6 +144,37 @@ Além da agenda, o Redis guarda um índice com a **fila de reservas pendentes** 
 - **Sincronização.** O mesmo `RepositorioReservasComAgenda` atualiza o índice depois do commit, a toda mudança de situação (a agenda só registra as que ocupam horário). É por estado, não por transição: repetir ou inverter a ordem das chamadas termina no estado da última. Sem o índice montado, nada é gravado, mas a versão avança.
 - **Sem prazo.** As chaves definitivas não expiram, porque reservas passadas continuam contando por situação. As temporárias da reconstrução vivem no máximo 10 minutos.
 - **Falhas.** Se o Redis falhar na hora de atualizar, a reserva continua salva, o erro vai para o log e a agenda é atualizada do mesmo jeito (as duas projeções falham sozinhas). O comando acima refaz o índice. A troca do índice reconstruído é atômica: nenhuma leitura vê metade nova e metade velha.
+
+## Fila de pendentes e contagens
+
+Duas consultas só do Gestor (RDS-08); o Solicitante recebe **403** `ACAO_NAO_PERMITIDA` e quem não está identificado, **401**, sem ver reserva nem número. As duas só aceitam `GET`.
+
+- `GET /api/reservas/pendentes/?pagina=&tamanho=`: as reservas `SOLICITADA`, da pedida há mais tempo para a mais recente (`criada_em` e, no empate, o id), em páginas (padrão 20, até 100, como a lista). Cada item tem o formato da lista de reservas, com as `acoes_disponiveis`. A `mensagem` conta o total: "Nenhuma reserva pendente.", "1 reserva pendente." ou "N reservas pendentes.". Página ou tamanho inválidos → **400** `DADOS_INVALIDOS` com o campo (depois da checagem de perfil, então o Solicitante recebe 403 mesmo com parâmetro inválido). Uma página depois da última vem vazia, com o total certo.
+- `GET /api/reservas/contagem-por-situacao/`: as cinco situações, na ordem de `SituacaoReserva`, cada uma com `situacao`, `rotulo` e `total` (zero quando não há reserva), e o `total` geral.
+
+```bash
+curl "http://localhost:8000/api/reservas/pendentes/?tamanho=2" -H "Authorization: Bearer $ACCESS"
+```
+
+```json
+{"mensagem": "3 reservas pendentes.", "paginacao": {"pagina": 1, "tamanho": 2, "total": 3, "total_de_paginas": 2}, "dados": [{"id": 8, "espaco_id": 1, "solicitante": {"usuario_id": 2, "nome": "Bruno Lima", "matricula": "2026002"}, "data": "2026-12-01", "hora_inicio": "15:00", "hora_fim": "16:00", "finalidade": "Treino", "situacao": "SOLICITADA", "situacao_rotulo": "Solicitada", "motivo_da_situacao": null, "criada_em": "2026-11-25T11:20:01.100000-03:00", "acoes_disponiveis": [{"situacao": "CONFIRMADA", "rotulo": "Confirmar", "exige_motivo": false}, {"situacao": "RECUSADA", "rotulo": "Recusar", "exige_motivo": true}, {"situacao": "CANCELADA", "rotulo": "Cancelar", "exige_motivo": true}]}, "..."]}
+```
+
+```bash
+curl http://localhost:8000/api/reservas/contagem-por-situacao/ -H "Authorization: Bearer $ACCESS"
+```
+
+```json
+{"mensagem": "Contagem das reservas por situação.", "dados": {"total": 10, "situacoes": [{"situacao": "SOLICITADA", "rotulo": "Solicitada", "total": 3}, {"situacao": "CONFIRMADA", "rotulo": "Confirmada", "total": 2}, {"situacao": "RECUSADA", "rotulo": "Recusada", "total": 2}, {"situacao": "CANCELADA", "rotulo": "Cancelada", "total": 2}, {"situacao": "CONCLUIDA", "rotulo": "Concluída", "total": 1}]}}
+```
+
+**De onde vem cada dado** (`application/fila_de_pendentes.py`, `ConsultarFilaDePendentes` e `ContarReservasPorSituacao`):
+
+- **Fila.** O índice do Redis dá só os **ids e a ordem** da página (`pendentes(limite, deslocamento)`) e o total (a contagem de `SOLICITADA`). Os dados de cada reserva vêm sempre do PostgreSQL (`listar_por_ids`, na ordem dos ids). Uma reserva do índice que o banco já não considera `SOLICITADA`, ou que não existe, é descartada da página: a projeção pode estar atrasada, e a resposta só mostra pendentes de verdade.
+- **Contagem.** Vem inteira do índice (`contagem_por_situacao()`), sem tocar na tabela de reservas.
+- **Quando o índice não serve.** Se ele não está montado (`None`) ou o Redis falha (`IndiceIndisponivel`), a resposta sai inteira do PostgreSQL (`listar_pendentes` e `contar_por_situacao`), com **a mesma ordem** (`criada_em`, depois id, a do score e do membro com 19 dígitos) e o mesmo formato. A falha vai só para o log (aviso); nunca vira 503 nem muda o corpo da resposta, ao contrário do login, que continua recusando sem o Redis.
+- **Por que a leitura não refaz o índice.** Reconstruir varre o banco inteiro e não cabe no caminho de uma requisição. Quem o refaz é o comando [`reconstruir_agenda_redis`](#reconstruir-a-agenda-as-filas-e-as-contagens-no-redis); até lá, as consultas saem do PostgreSQL, mais lentas (um `COUNT` e um `LIMIT/OFFSET` na fila, um `GROUP BY` na contagem) e iguais.
+- **Sem índice no banco para a fila.** `ORDER BY criada_em, id` entre as `SOLICITADA` não tem índice próprio; é a leitura de reserva do PostgreSQL mais cara hoje, e a medição fica para a RDS-10.
 
 ## Consultar reservas
 
@@ -359,6 +392,7 @@ Se o banco foi criado antes do histórico (RES-07), as reservas antigas aparecem
 | Casos de uso (`CriarReserva`, `ConsultarReservas`, `ObterReserva`, `AlterarSituacaoReserva`, `ConsultarHistoricoDaReserva`, `ConsultarOcupacaoDoDia`) | `application/casos_de_uso.py` |
 | Reconstrução da agenda do Redis (`ReconstruirAgenda`), do índice de filas e contagens (`ReconstruirIndice`) e o comando `reconstruir_agenda_redis` | `application/reconstruir_agenda.py`, `application/reconstruir_indice.py`, `management/commands/reconstruir_agenda_redis.py` |
 | Índice de filas e contagens no Redis (`IndiceDeReservasRedis`) e a sincronização depois do commit | `infrastructure/indice_redis.py`, `infrastructure/repositorio_com_agenda.py` |
+| Consulta do Gestor à fila de pendentes e às contagens (`ConsultarFilaDePendentes`, `ContarReservasPorSituacao`) e a leitura sem o índice (`listar_pendentes`, `listar_por_ids`, `contar_por_situacao`) | `application/fila_de_pendentes.py`, `application/repositorio.py`, `infrastructure/repositorio_django.py` |
 | Como um espaço é consultado | `application/portas.py` e `infrastructure/consulta_de_espacos.py` |
 | Models, constraints (inclusive a de sobreposição) e gravação do histórico | `infrastructure/models.py`, `infrastructure/repositorio_django.py` |
 | Rotas, filtros e formato da saída | `api/views.py`, `api/serializers.py`, `api/urls.py`; o usuário logado é lido só em `api/autenticacao.py` |
