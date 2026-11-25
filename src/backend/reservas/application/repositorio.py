@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Protocol
 
+from reservas.application.portas import RegistroDoIndice
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
@@ -124,4 +125,13 @@ class RepositorioReservas(Protocol):
     def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
         """Lista o histórico da reserva por registrado_em e, no empate, na ordem
         em que os registros foram gravados. Id inexistente devolve lista vazia.
+        """
+
+    def listar_para_indice(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoIndice]:
+        """Até `limite` reservas com id maior que `depois_de_id`, por id.
+
+        Só id, situação e criada_em, para a reconstrução do índice ler em lotes
+        sem trazer a tabela inteira nem o histórico.
         """

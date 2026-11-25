@@ -5,7 +5,13 @@ from datetime import date, datetime
 
 from django.db import transaction
 
-from reservas.application.portas import AgendaDoDia, AgendaIndisponivel
+from reservas.application.portas import (
+    AgendaDoDia,
+    AgendaIndisponivel,
+    IndiceDeReservas,
+    IndiceIndisponivel,
+    RegistroDoIndice,
+)
 from reservas.application.repositorio import (
     FiltrosDeReservas,
     Paginacao,
@@ -19,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 TENTATIVAS_DE_CONVERGENCIA = 3
 AposOCommit = Callable[[Callable[[], None]], None]
+Aplicacao = Callable[[Reserva], None]
 
 
 def _apos_o_commit(acao: Callable[[], None]) -> None:
@@ -30,10 +37,12 @@ class RepositorioReservasComAgenda(RepositorioReservas):
         self,
         interno: RepositorioReservas,
         agenda: AgendaDoDia,
+        indice: IndiceDeReservas,
         apos_o_commit: AposOCommit = _apos_o_commit,
     ) -> None:
         self._interno = interno
         self._agenda = agenda
+        self._indice = indice
         self._apos_o_commit = apos_o_commit
 
     def salvar(self, reserva: Reserva) -> Reserva:
@@ -45,36 +54,58 @@ class RepositorioReservasComAgenda(RepositorioReservas):
     def _sincronizar(self, reserva_id: int | None) -> None:
         if reserva_id is None:
             return
+        self._sincronizar_projecao(
+            reserva_id, self._aplicar_na_agenda, AgendaIndisponivel, "agenda"
+        )
+        self._sincronizar_projecao(
+            reserva_id,
+            self._aplicar_no_indice,
+            IndiceIndisponivel,
+            "índice de filas e contagens",
+        )
+
+    def _sincronizar_projecao(
+        self,
+        reserva_id: int,
+        aplicar: Aplicacao,
+        indisponivel: type[Exception],
+        nome: str,
+    ) -> None:
         try:
-            self._convergir(reserva_id)
-        except AgendaIndisponivel:
+            self._convergir(reserva_id, aplicar, nome)
+        except indisponivel:
             logger.warning(
-                "Agenda do Redis não atualizada para a reserva %s; "
+                "Redis não atualizado (%s) para a reserva %s; "
                 "a reconstrução da agenda a refaz.",
+                nome,
                 reserva_id,
             )
 
-    def _convergir(self, reserva_id: int) -> None:
+    def _convergir(self, reserva_id: int, aplicar: Aplicacao, nome: str) -> None:
         aplicada = None
         for _ in range(TENTATIVAS_DE_CONVERGENCIA):
             atual = self._interno.obter_por_id(reserva_id)
             if atual is None or atual.situacao is aplicada:
                 return
-            self._aplicar(atual)
+            aplicar(atual)
             aplicada = atual.situacao
         logger.warning(
-            "A reserva %s continuou mudando durante a sincronização da agenda; "
+            "A reserva %s continuou mudando durante a sincronização do Redis (%s); "
             "a reconstrução da agenda a refaz.",
             reserva_id,
+            nome,
         )
 
-    def _aplicar(self, reserva: Reserva) -> None:
+    def _aplicar_na_agenda(self, reserva: Reserva) -> None:
         if reserva.situacao.ocupa_horario:
             self._agenda.registrar(
                 reserva.espaco_id, reserva.id, reserva.intervalo, reserva.situacao
             )
         else:
             self._agenda.remover(reserva.espaco_id, reserva.id, reserva.intervalo.data)
+
+    def _aplicar_no_indice(self, reserva: Reserva) -> None:
+        self._indice.aplicar(reserva.id, reserva.situacao, reserva.criada_em)
 
     def em_transacao(self) -> AbstractContextManager[None]:
         return self._interno.em_transacao()
@@ -107,3 +138,8 @@ class RepositorioReservasComAgenda(RepositorioReservas):
 
     def listar_historico(self, reserva_id: int) -> list[RegistroDeSituacao]:
         return self._interno.listar_historico(reserva_id)
+
+    def listar_para_indice(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoIndice]:
+        return self._interno.listar_para_indice(depois_de_id, limite)

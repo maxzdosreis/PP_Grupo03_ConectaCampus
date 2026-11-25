@@ -7,6 +7,7 @@ from django.utils import timezone
 from redis.exceptions import RedisError
 
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
+from reservas.infrastructure.indice_redis import IndiceDeReservasRedis
 from reservas.infrastructure.repositorio_com_agenda import (
     RepositorioReservasComAgenda,
 )
@@ -141,7 +142,7 @@ def test_rollback_da_transacao_de_fora_nao_chega_ao_redis(
     # Arrange
     _criar_projecao(ESPACO_AVULSO, DIA)
     repositorio = RepositorioReservasComAgenda(
-        RepositorioReservasDjango(), AgendaDoDiaRedis()
+        RepositorioReservasDjango(), AgendaDoDiaRedis(), IndiceDeReservasRedis()
     )
 
     def salvar_e_falhar():
@@ -170,7 +171,7 @@ def test_dentro_de_em_transacao_a_agenda_so_muda_no_commit_de_fora(
     # Arrange
     _criar_projecao(ESPACO_AVULSO, DIA)
     repositorio = RepositorioReservasComAgenda(
-        RepositorioReservasDjango(), AgendaDoDiaRedis()
+        RepositorioReservasDjango(), AgendaDoDiaRedis(), IndiceDeReservasRedis()
     )
 
     def salvar_e_olhar_o_redis():
@@ -193,7 +194,7 @@ def test_sem_transacao_aberta_a_agenda_e_atualizada_na_hora():
     # Arrange
     _criar_projecao(ESPACO_AVULSO, DIA)
     repositorio = RepositorioReservasComAgenda(
-        RepositorioReservasDjango(), AgendaDoDiaRedis()
+        RepositorioReservasDjango(), AgendaDoDiaRedis(), IndiceDeReservasRedis()
     )
 
     # Act

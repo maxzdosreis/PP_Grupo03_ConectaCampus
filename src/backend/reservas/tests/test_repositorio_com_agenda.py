@@ -20,6 +20,7 @@ from reservas.tests.fakes import (
     DIA,
     GESTOR,
     AgendaDoDiaEmMemoria,
+    IndiceDeReservasEmMemoria,
     RepositorioReservasEmMemoria,
     intervalo,
     momento_para,
@@ -35,9 +36,10 @@ class Cenario:
     def __init__(self, *, projecao_do_dia: bool = True, indisponivel: bool = False):
         self.repositorio = RepositorioReservasEmMemoria()
         self.agenda = AgendaDoDiaEmMemoria()
+        self.indice = IndiceDeReservasEmMemoria()
         self.acoes: list = []
         self.decorator = RepositorioReservasComAgenda(
-            self.repositorio, self.agenda, self.acoes.append
+            self.repositorio, self.agenda, self.indice, self.acoes.append
         )
         if projecao_do_dia:
             self.agenda.substituir(
@@ -244,7 +246,7 @@ def test_reserva_que_sumiu_antes_da_acao_nao_toca_na_agenda():
     interno.obter_por_id.return_value = None
     agenda = MagicMock()
     acoes: list = []
-    decorator = RepositorioReservasComAgenda(interno, agenda, acoes.append)
+    decorator = RepositorioReservasComAgenda(interno, agenda, MagicMock(), acoes.append)
 
     # Act
     decorator.salvar(reserva_solicitada())
@@ -260,7 +262,7 @@ def test_entidade_sem_id_nao_toca_na_agenda():
     interno.salvar.return_value = reserva_solicitada()
     agenda = MagicMock()
     acoes: list = []
-    decorator = RepositorioReservasComAgenda(interno, agenda, acoes.append)
+    decorator = RepositorioReservasComAgenda(interno, agenda, MagicMock(), acoes.append)
 
     # Act
     decorator.salvar(reserva_solicitada())
@@ -276,7 +278,7 @@ def test_tentativa_recusada_e_leituras_nao_tocam_na_agenda_e_sao_delegadas():
     interno = MagicMock(spec=RepositorioReservas)
     agenda = MagicMock()
     acoes: list = []
-    decorator = RepositorioReservasComAgenda(interno, agenda, acoes.append)
+    decorator = RepositorioReservasComAgenda(interno, agenda, MagicMock(), acoes.append)
     filtros, paginacao, registro = FiltrosDeReservas(), Paginacao(), object()
 
     # Act
@@ -308,7 +310,9 @@ def test_o_padrao_de_agendamento_usa_o_on_commit_robusto(monkeypatch):
         lambda acao, **opcoes: chamadas.append((acao, opcoes)),
     )
     decorator = RepositorioReservasComAgenda(
-        RepositorioReservasEmMemoria(), AgendaDoDiaEmMemoria()
+        RepositorioReservasEmMemoria(),
+        AgendaDoDiaEmMemoria(),
+        IndiceDeReservasEmMemoria(),
     )
 
     # Act
@@ -362,7 +366,7 @@ def _cenario_com_corrida(destinos):
     agenda.substituir(ESPACO, DIA, {}, versao=0)
     cenario.agenda = agenda
     cenario.decorator = RepositorioReservasComAgenda(
-        cenario.repositorio, agenda, cenario.acoes.append
+        cenario.repositorio, agenda, cenario.indice, cenario.acoes.append
     )
     reserva_id = cenario.salvar_nova().id
     agenda.mudancas = [
@@ -423,3 +427,123 @@ def test_listar_dias_com_reservas_que_ocupam_horario_delega_ao_repositorio_inter
 
     # Assert
     assert dias == [(ESPACO, DIA)]
+
+
+def _com_indice_montado(cenario: Cenario) -> Cenario:
+    cenario.indice.substituir([], versao=cenario.indice.versao())
+    return cenario
+
+
+def test_o_indice_recebe_a_reserva_criada_depois_do_commit():
+    # Arrange
+    cenario = _com_indice_montado(Cenario())
+    salva = cenario.salvar_nova()
+    assert cenario.indice.pendentes(10) == ()
+
+    # Act
+    cenario.executar_acoes()
+
+    # Assert
+    assert cenario.indice.pendentes(10) == (salva.id,)
+
+
+def test_o_indice_acompanha_as_mudancas_de_situacao_ate_as_finais():
+    # Arrange
+    cenario = _com_indice_montado(Cenario())
+    salva = cenario.salvar_nova()
+    cenario.executar_acoes()
+
+    # Act e Assert
+    for nova in (SituacaoReserva.CONFIRMADA, SituacaoReserva.CANCELADA):
+        cenario.mudar(salva.id, nova)
+        cenario.executar_acoes()
+        assert cenario.indice.contagem_por_situacao()[nova] == 1
+    assert cenario.indice.pendentes(10) == ()
+
+
+def test_o_indice_nao_montado_so_avanca_a_versao():
+    # Arrange
+    cenario = Cenario()
+    cenario.salvar_nova()
+
+    # Act
+    cenario.executar_acoes()
+
+    # Assert
+    assert cenario.indice.versao() == 1
+    assert cenario.indice.pendentes(10) is None
+
+
+def test_falha_so_da_agenda_ainda_atualiza_o_indice_e_deixa_um_aviso(caplog):
+    # Arrange
+    cenario = _com_indice_montado(Cenario(indisponivel=True))
+    salva = cenario.salvar_nova()
+
+    # Act
+    with caplog.at_level(logging.WARNING):
+        cenario.executar_acoes()
+
+    # Assert
+    assert cenario.indice.pendentes(10) == (salva.id,)
+    avisos = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(avisos) == 1
+    assert "agenda" in avisos[0]
+    assert str(salva.id) in avisos[0]
+
+
+def test_falha_so_do_indice_ainda_atualiza_a_agenda_e_deixa_um_aviso(caplog):
+    # Arrange
+    cenario = Cenario()
+    cenario.indice.indisponivel = True
+    cenario.salvar_nova()
+
+    # Act
+    with caplog.at_level(logging.WARNING):
+        cenario.executar_acoes()
+
+    # Assert
+    assert len(cenario.agenda_do_dia()) == 1
+    avisos = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(avisos) == 1
+    assert "índice de filas e contagens" in avisos[0]
+    assert "reconstrução" in avisos[0]
+
+
+def test_falha_das_duas_projecoes_nao_lanca_e_avisa_duas_vezes(caplog):
+    # Arrange
+    cenario = Cenario(indisponivel=True)
+    cenario.indice.indisponivel = True
+    cenario.salvar_nova()
+
+    # Act
+    with caplog.at_level(logging.WARNING):
+        cenario.executar_acoes()
+
+    # Assert
+    assert len([r for r in caplog.records if r.levelno == logging.WARNING]) == 2
+
+
+def test_acoes_do_indice_em_ordem_invertida_terminam_no_estado_atual():
+    # Arrange
+    cenario = _com_indice_montado(Cenario())
+    salva = cenario.salvar_nova()
+    cenario.mudar(salva.id, SituacaoReserva.CONFIRMADA)
+
+    # Act
+    cenario.executar_acoes(ordem=lambda acoes: acoes[::-1])
+
+    # Assert
+    assert cenario.indice.pendentes(10) == ()
+    assert cenario.indice.contagem_por_situacao()[SituacaoReserva.CONFIRMADA] == 1
+
+
+def test_listar_para_indice_delega_ao_repositorio_interno():
+    # Arrange
+    cenario = Cenario()
+    salva = cenario.repositorio.salvar(reserva_solicitada())
+
+    # Act
+    registros = cenario.decorator.listar_para_indice(0, 10)
+
+    # Assert
+    assert [r.reserva_id for r in registros] == [salva.id]

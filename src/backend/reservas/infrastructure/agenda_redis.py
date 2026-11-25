@@ -10,6 +10,8 @@ from reservas.application.ocupacao_do_dia import HorarioOcupado
 from reservas.application.portas import AgendaDoDia, AgendaIndisponivel
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO, IntervaloDeHorario
 from reservas.domain.situacao import SituacaoReserva
+from reservas.infrastructure.redis_comum import cliente as _cliente
+from reservas.infrastructure.redis_comum import texto as _texto
 
 logger = logging.getLogger(__name__)
 
@@ -200,10 +202,6 @@ def _chave_da_versao(espaco_id: int, data: date) -> str:
     return cache.make_key(f"agenda:versao:espaco:{espaco_id}:{data.isoformat()}")
 
 
-def _cliente(chave: str, *, escrita: bool):
-    return cache._cache.get_client(chave, write=escrita)
-
-
 def _indisponivel(erro: RedisError) -> None:
     logger.exception("Redis indisponível na agenda do dia")
     raise AgendaIndisponivel from erro
@@ -231,10 +229,6 @@ def _membro(
     reserva_id: int, intervalo: IntervaloDeHorario, situacao: SituacaoReserva
 ) -> str:
     return f"{reserva_id}:{_fim_em_minutos(intervalo)}:{situacao.value}"
-
-
-def _texto(valor: bytes | str) -> str:
-    return valor.decode() if isinstance(valor, bytes) else valor
 
 
 def _hora_de(minutos: int) -> time:

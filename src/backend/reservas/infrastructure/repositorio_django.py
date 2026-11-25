@@ -5,6 +5,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
 from django.db.models.functions import TruncDate
 
+from reservas.application.portas import RegistroDoIndice
 from reservas.application.repositorio import (
     FiltrosDeReservas,
     Paginacao,
@@ -121,6 +122,19 @@ class RepositorioReservasDjango(RepositorioReservas):
             reserva_id=reserva_id
         ).order_by("registrado_em", "id")
         return [_para_registro(model) for model in consulta]
+
+    def listar_para_indice(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoIndice]:
+        consulta = (
+            ReservaModel.objects.filter(pk__gt=depois_de_id)
+            .order_by("pk")
+            .values_list("pk", "situacao", "criada_em")[:limite]
+        )
+        return [
+            RegistroDoIndice(reserva_id, SituacaoReserva(situacao), criada_em)
+            for reserva_id, situacao, criada_em in consulta
+        ]
 
     def _lancar_conflito_de_horario(self, reserva: Reserva) -> None:
         existentes = self.listar_que_ocupam_horario(

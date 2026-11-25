@@ -1,6 +1,6 @@
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Protocol
 
 from reservas.application.ocupacao_do_dia import HorarioOcupado
@@ -103,4 +103,72 @@ class AgendaDoDia(Protocol):
         Só grava se a `versao` do dia ainda for a lida antes da consulta; senão
         alguém registrou ou removeu no meio e o retrato está velho. Devolve
         `True` se gravou e `False` se descartou (a próxima leitura refaz).
+        """
+
+
+class IndiceIndisponivel(Exception):
+    """O índice de filas e contagens não pôde ser lido ou gravado.
+
+    Independente de `AgendaIndisponivel`: as duas projeções falham sozinhas.
+    Nunca chega à API; quem lê cai para o PostgreSQL e quem escreve só registra
+    no log.
+    """
+
+
+@dataclass(frozen=True)
+class RegistroDoIndice:
+    reserva_id: int
+    situacao: SituacaoReserva
+    criada_em: datetime
+
+
+def validar_janela(limite: int, deslocamento: int) -> None:
+    if limite <= 0:
+        raise ValueError("O limite deve ser maior que zero.")
+    if deslocamento < 0:
+        raise ValueError("O deslocamento não pode ser negativo.")
+
+
+class IndiceDeReservas(Protocol):
+    """Projeção da fila de pendentes e da contagem por situação.
+
+    Reconstruível do PostgreSQL e nunca decide nada (DEC-28). Uma operação com
+    a projeção fora do ar lança `IndiceIndisponivel`.
+    """
+
+    def aplicar(
+        self, reserva_id: int, situacao: SituacaoReserva, criada_em: datetime
+    ) -> None:
+        """Põe a reserva na situação dada, tirando-a das outras e da fila.
+
+        Por estado, não por transição: idempotente e imune à ordem das chamadas.
+        Sem o índice montado, não grava nada, mas avança a `versao` (uma
+        projeção parcial seria lida como completa).
+        """
+
+    def pendentes(self, limite: int, deslocamento: int = 0) -> tuple[int, ...] | None:
+        """Ids das reservas Solicitadas, da mais antiga para a mais nova.
+
+        `None` se o índice não está montado (miss); `()` se montado e vazio.
+        Limite <= 0 ou deslocamento < 0 lança `ValueError`.
+        """
+
+    def contagem_por_situacao(self) -> dict[SituacaoReserva, int] | None:
+        """Quantas reservas há em cada uma das situações (zero quando vazia).
+
+        `None` se o índice não está montado.
+        """
+
+    def versao(self) -> int:
+        """Contador que `aplicar` avança a cada chamada, montado ou não.
+
+        Leia-o **antes** de consultar o PostgreSQL e passe-o a `substituir`.
+        """
+
+    def substituir(self, registros: Iterable[RegistroDoIndice], *, versao: int) -> bool:
+        """Recria o índice inteiro a partir do que está no PostgreSQL.
+
+        A troca é atômica e só acontece se a `versao` ainda for a lida antes da
+        consulta; senão devolve `False` e nada muda. Falha no meio não deixa
+        o índice pela metade.
         """
