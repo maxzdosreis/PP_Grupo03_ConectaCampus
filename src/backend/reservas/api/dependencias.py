@@ -13,8 +13,10 @@ from reservas.application.casos_de_uso import (
     ObterReserva,
 )
 from reservas.application.reconstruir_agenda import ReconstruirAgenda
+from reservas.application.reconstruir_indice import ReconstruirIndice
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
+from reservas.infrastructure.indice_redis import IndiceDeReservasRedis
 from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
@@ -39,7 +41,7 @@ def _repositorio_com_agenda(
     relogio: Callable[[], datetime],
 ) -> RepositorioReservasComAgenda:
     return RepositorioReservasComAgenda(
-        RepositorioReservasDjango(), AgendaDoDiaRedis(relogio)
+        RepositorioReservasDjango(), AgendaDoDiaRedis(relogio), IndiceDeReservasRedis()
     )
 
 
@@ -73,6 +75,10 @@ def reconstruir_agenda(
     return ReconstruirAgenda(
         RepositorioReservasDjango(), AgendaDoDiaRedis(relogio), relogio
     )
+
+
+def reconstruir_indice() -> ReconstruirIndice:
+    return ReconstruirIndice(RepositorioReservasDjango(), IndiceDeReservasRedis())
 
 
 def consultar_ocupacao_do_dia(

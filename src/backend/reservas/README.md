@@ -107,9 +107,9 @@ curl "http://localhost:8000/api/reservas/ocupacao/?espaco=1&data=AAAA-MM-DD" -H 
 
 Para uma data em que não é possível reservar (ontem, hoje depois do fechamento do espaço ou além da antecedência máxima), `reservavel` é `false`, `livres` vem vazio e `motivo_indisponivel` traz a mesma mensagem que a solicitação receberia (ex.: "Não é possível reservar um horário que já passou."). Espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; inativo → **409** `ESPACO_INATIVO`; sem `espaco` ou `data` → **400** `DADOS_INVALIDOS` com o campo em `campos`.
 
-## Reconstruir a agenda no Redis
+## Reconstruir a agenda, as filas e as contagens no Redis
 
-A agenda do dia que o Redis guarda é uma projeção do PostgreSQL, que continua sendo a fonte da verdade. No Compose padrão o Redis não persiste nada: depois de reiniciá-lo, ou se a projeção ficar diferente do banco por qualquer motivo, um comando refaz tudo a partir das reservas. A partir de `src/`:
+A agenda do dia, a fila de pendentes e a contagem por situação que o Redis guarda são projeções do PostgreSQL, que continua sendo a fonte da verdade. No Compose padrão o Redis não persiste nada: depois de reiniciá-lo, ou se uma projeção ficar diferente do banco por qualquer motivo, um comando refaz tudo a partir das reservas. A partir de `src/`:
 
 ```bash
 docker compose exec backend python manage.py reconstruir_agenda_redis
@@ -117,11 +117,31 @@ docker compose exec backend python manage.py reconstruir_agenda_redis
 
 ```text
 Agenda reconstruída: 4 dias, 9 reservas, 1 dia esvaziado.
+Filas e contagens reconstruídas: 9 reservas, 3 pendentes.
 ```
+
+A segunda linha conta todas as reservas do banco e quantas estão na fila de pendentes. Se uma reserva muda enquanto o índice é refeito, o comando tenta de novo (até 3 vezes) e, se continuar mudando, descarta o índice e avisa; é só rodar outra vez. Se o Redis cair depois de a agenda terminar, o erro diz que a agenda foi refeita e as filas e contagens não.
 
 O comando refaz, de hoje em diante (data de Brasília), todo dia que tem reserva Solicitada ou Confirmada no banco **e** todo dia que já tem projeção no Redis: um dia que ficou com a projeção velha e hoje não tem mais reserva ativa é gravado vazio (conta como "esvaziado"). Dias anteriores a hoje não são tocados; o prazo de cada chave cuida deles. É idempotente: rodar de novo deixa o mesmo estado e o mesmo resumo, e não precisa de `DJANGO_DEBUG`, porque não cria usuário nem senha.
 
 Se uma reserva muda enquanto o dia é refeito, o comando tenta de novo (até 3 vezes) e, se continuar mudando, descarta o dia e avisa "N dias foram descartados"; é só rodar outra vez. Se o Redis ficar fora do ar, o comando termina com erro: os dias já refeitos continuam válidos e basta rodar de novo quando ele voltar.
+
+## Filas e contagens no Redis
+
+Além da agenda, o Redis guarda um índice com a **fila de reservas pendentes** (as `SOLICITADA`, da mais antiga para a mais nova) e a **contagem por situação**. Ele ainda não tem endpoint: a consulta do Gestor é a RDS-08, e hoje só a porta `IndiceDeReservas` (`application/portas.py`) sabe lê-lo. O índice nunca decide nada; quem decide estado e conflito é o PostgreSQL.
+
+| Chave (depois do prefixo `conecta-campus:1:`) | Tipo | Conteúdo |
+|---|---|---|
+| `reservas:pendentes` | Sorted Set | id da reserva com 19 dígitos (`0000000000000000012`), com o momento da solicitação (`criada_em`) como score |
+| `reservas:situacao:SOLICITADA` (e as outras quatro) | Set | ids das reservas naquela situação; cada reserva está em exatamente um |
+| `reservas:indice:montado` | texto `1` | sinal de que o índice foi montado |
+| `reservas:indice:versao` | contador | avança a cada atualização; protege a reconstrução |
+
+- **Fila em ordem.** O Redis desempata scores iguais pela ordem do texto, que poria o id 10 antes do 9; os zeros à esquerda fazem a ordem do texto ser a numérica.
+- **Sinal `montado`.** O Redis apaga Sets vazios, então "nenhuma pendente" e "índice perdido" seriam iguais. Sem o sinal, a leitura devolve `None` (miss) e quem lê cai para o PostgreSQL; com ele, um índice vazio é `()` e a contagem traz as cinco situações com zero.
+- **Sincronização.** O mesmo `RepositorioReservasComAgenda` atualiza o índice depois do commit, a toda mudança de situação (a agenda só registra as que ocupam horário). É por estado, não por transição: repetir ou inverter a ordem das chamadas termina no estado da última. Sem o índice montado, nada é gravado, mas a versão avança.
+- **Sem prazo.** As chaves definitivas não expiram, porque reservas passadas continuam contando por situação. As temporárias da reconstrução vivem no máximo 10 minutos.
+- **Falhas.** Se o Redis falhar na hora de atualizar, a reserva continua salva, o erro vai para o log e a agenda é atualizada do mesmo jeito (as duas projeções falham sozinhas). O comando acima refaz o índice. A troca do índice reconstruído é atômica: nenhuma leitura vê metade nova e metade velha.
 
 ## Consultar reservas
 
@@ -337,7 +357,8 @@ Se o banco foi criado antes do histórico (RES-07), as reservas antigas aparecem
 | Horário de funcionamento do espaço (`funcionamento.py`), duração, duração sugerida, antecedência, horários livres | `domain/funcionamento.py` e `domain/regras_de_agenda.py` |
 | Conflito de horário | `domain/conflito_de_horario.py` |
 | Casos de uso (`CriarReserva`, `ConsultarReservas`, `ObterReserva`, `AlterarSituacaoReserva`, `ConsultarHistoricoDaReserva`, `ConsultarOcupacaoDoDia`) | `application/casos_de_uso.py` |
-| Reconstrução da agenda do Redis (`ReconstruirAgenda`) e o comando `reconstruir_agenda_redis` | `application/reconstruir_agenda.py`, `management/commands/reconstruir_agenda_redis.py` |
+| Reconstrução da agenda do Redis (`ReconstruirAgenda`), do índice de filas e contagens (`ReconstruirIndice`) e o comando `reconstruir_agenda_redis` | `application/reconstruir_agenda.py`, `application/reconstruir_indice.py`, `management/commands/reconstruir_agenda_redis.py` |
+| Índice de filas e contagens no Redis (`IndiceDeReservasRedis`) e a sincronização depois do commit | `infrastructure/indice_redis.py`, `infrastructure/repositorio_com_agenda.py` |
 | Como um espaço é consultado | `application/portas.py` e `infrastructure/consulta_de_espacos.py` |
 | Models, constraints (inclusive a de sobreposição) e gravação do histórico | `infrastructure/models.py`, `infrastructure/repositorio_django.py` |
 | Rotas, filtros e formato da saída | `api/views.py`, `api/serializers.py`, `api/urls.py`; o usuário logado é lido só em `api/autenticacao.py` |

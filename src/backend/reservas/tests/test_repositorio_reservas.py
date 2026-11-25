@@ -1141,3 +1141,70 @@ def test_listar_dias_com_reservas_que_ocupam_horario_usa_a_data_local_do_inicio(
     # Act / Assert
     assert repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA) == [(3, DIA)]
     assert repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA_SEGUINTE) == []
+
+
+def _salvar_varias(repositorio, quantidade):
+    return [
+        _salvar_na_situacao(
+            repositorio,
+            S.SOLICITADA,
+            espaco_id=indice + 1,
+            hora_inicio=time(10, 0),
+            hora_fim=time(11, 0),
+        )
+        for indice in range(quantidade)
+    ]
+
+
+def test_listar_para_indice_devolve_id_situacao_e_criada_em_por_id(repositorio):
+    # Arrange
+    primeira = _salvar_na_situacao(repositorio, S.SOLICITADA)
+    segunda = _salvar_na_situacao(repositorio, S.CANCELADA, motivo="Chuva", espaco_id=4)
+
+    # Act
+    registros = repositorio.listar_para_indice(0, 10)
+
+    # Assert
+    assert [(r.reserva_id, r.situacao, r.criada_em) for r in registros] == [
+        (primeira.id, S.SOLICITADA, AGORA),
+        (segunda.id, S.CANCELADA, AGORA),
+    ]
+
+
+def test_listar_para_indice_em_lotes_cobre_todas_sem_repetir(repositorio):
+    # Arrange
+    salvas = _salvar_varias(repositorio, 5)
+
+    # Act
+    lidos, ultimo = [], 0
+    while lote := repositorio.listar_para_indice(ultimo, 2):
+        assert len(lote) <= 2
+        lidos.extend(r.reserva_id for r in lote)
+        ultimo = lote[-1].reserva_id
+
+    # Assert
+    assert lidos == [reserva.id for reserva in salvas]
+
+
+def test_listar_para_indice_depois_do_ultimo_id_devolve_vazio(repositorio):
+    salvas = _salvar_varias(repositorio, 2)
+
+    assert repositorio.listar_para_indice(salvas[-1].id, 10) == []
+
+
+@pytest.mark.django_db
+def test_listar_para_indice_no_banco_le_so_tres_colunas_em_uma_consulta():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    _salvar_varias(repositorio, 3)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.listar_para_indice(0, 2)
+
+    # Assert
+    assert len(consultas) == 1
+    sql = consultas[0]["sql"]
+    assert "LIMIT 2" in sql
+    assert "finalidade" not in sql
+    assert "reservas_registro_de_situacao" not in sql

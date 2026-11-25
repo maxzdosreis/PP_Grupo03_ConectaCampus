@@ -13,6 +13,10 @@ from reservas.application.portas import (
     AgendaIndisponivel,
     ConsultaDeEspacos,
     EspacoReservavel,
+    IndiceDeReservas,
+    IndiceIndisponivel,
+    RegistroDoIndice,
+    validar_janela,
 )
 from reservas.application.repositorio import (
     TAMANHO_MAXIMO_DA_PAGINA,
@@ -247,6 +251,67 @@ def _ordem_no_redis(reserva_id: int, ocupado: HorarioOcupado) -> tuple[int, str]
     return inicio, f"{reserva_id}:{fim}:{ocupado.situacao.value}"
 
 
+class IndiceDeReservasEmMemoria(IndiceDeReservas):
+    def __init__(self, *, indisponivel: bool = False) -> None:
+        self.indisponivel = indisponivel
+        self._montado = False
+        self._versao = 0
+        self._situacoes: dict[int, SituacaoReserva] = {}
+        self._criadas_em: dict[int, datetime] = {}
+
+    def aplicar(
+        self, reserva_id: int, situacao: SituacaoReserva, criada_em: datetime
+    ) -> None:
+        self._exigir_disponivel()
+        self._versao += 1
+        if self._montado:
+            self._situacoes[reserva_id] = situacao
+            self._criadas_em[reserva_id] = criada_em
+
+    def pendentes(self, limite: int, deslocamento: int = 0) -> tuple[int, ...] | None:
+        validar_janela(limite, deslocamento)
+        self._exigir_disponivel()
+        if not self._montado:
+            return None
+        fila = sorted(
+            (
+                reserva_id
+                for reserva_id, situacao in self._situacoes.items()
+                if situacao is SituacaoReserva.SOLICITADA
+            ),
+            key=lambda reserva_id: (
+                self._criadas_em[reserva_id].timestamp(),
+                reserva_id,
+            ),
+        )
+        return tuple(fila[deslocamento : deslocamento + limite])
+
+    def contagem_por_situacao(self) -> dict[SituacaoReserva, int] | None:
+        self._exigir_disponivel()
+        if not self._montado:
+            return None
+        situacoes = list(self._situacoes.values())
+        return {situacao: situacoes.count(situacao) for situacao in SituacaoReserva}
+
+    def versao(self) -> int:
+        self._exigir_disponivel()
+        return self._versao
+
+    def substituir(self, registros: Iterable[RegistroDoIndice], *, versao: int) -> bool:
+        self._exigir_disponivel()
+        materializados = list(registros)
+        if self._versao != versao:
+            return False
+        self._situacoes = {r.reserva_id: r.situacao for r in materializados}
+        self._criadas_em = {r.reserva_id: r.criada_em for r in materializados}
+        self._montado = True
+        return True
+
+    def _exigir_disponivel(self) -> None:
+        if self.indisponivel:
+            raise IndiceIndisponivel
+
+
 class RepositorioReservasEmMemoria(RepositorioReservas):
     def __init__(self, eventos: list[str] | None = None) -> None:
         self.eventos = eventos if eventos is not None else []
@@ -347,6 +412,15 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
             and reserva.situacao.ocupa_horario
             and reserva.intervalo.fim() > momento
         )
+
+    def listar_para_indice(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoIndice]:
+        ids = sorted(i for i in self._reservas if i > depois_de_id)[:limite]
+        return [
+            RegistroDoIndice(i, self._reservas[i].situacao, self._reservas[i].criada_em)
+            for i in ids
+        ]
 
     def _ordenadas(self, reservas: Iterable[Reserva]) -> list[Reserva]:
         encontradas = sorted(
