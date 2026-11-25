@@ -49,6 +49,11 @@ _TROCAR = """
 local atual = tonumber(redis.call("GET", KEYS[1]) or "0")
 local vale = atual == tonumber(ARGV[1])
 for i = 0, 5 do
+    if vale and ARGV[2 + i] == "1" and redis.call("EXISTS", KEYS[9 + i]) == 0 then
+        vale = false
+    end
+end
+for i = 0, 5 do
     local definitiva = KEYS[3 + i]
     local temporaria = KEYS[9 + i]
     if not vale then
@@ -128,12 +133,15 @@ class IndiceDeReservasRedis(IndiceDeReservas):
         sufixo = uuid4().hex
         temporarias = _chaves_temporarias(sufixo)
         try:
-            self._montar_temporarias(registros, temporarias)
+            criadas = self._montar_temporarias(registros, temporarias)
             definitivas = [_chave_da_fila()]
             definitivas += [_chave_da_situacao(item) for item in _SITUACOES]
             chaves = [_chave_da_versao(), _chave_do_sinal(), *definitivas]
             script = cliente(chaves[0], escrita=True).register_script(_TROCAR)
-            trocou = script(keys=[*chaves, *temporarias], args=[versao])
+            trocou = script(
+                keys=[*chaves, *temporarias],
+                args=[versao, *(int(chave in criadas) for chave in temporarias)],
+            )
         except RedisError as erro:
             _indisponivel(erro)
         finally:
@@ -142,25 +150,26 @@ class IndiceDeReservasRedis(IndiceDeReservas):
 
     def _montar_temporarias(
         self, registros: Iterable[RegistroDoIndice], temporarias: list[str]
-    ) -> None:
+    ) -> set[str]:
         fila, *por_situacao = temporarias
         chaves_por_situacao = dict(zip(_SITUACOES, por_situacao, strict=True))
         gravador = cliente(fila, escrita=True)
+        criadas: set[str] = set()
         for lote in _em_lotes(registros):
             canal = gravador.pipeline(transaction=False)
-            tocadas = set()
             for registro in lote:
                 destino = chaves_por_situacao[registro.situacao]
                 canal.sadd(destino, registro.reserva_id)
-                tocadas.add(destino)
+                criadas.add(destino)
                 if registro.situacao is SituacaoReserva.SOLICITADA:
                     canal.zadd(
                         fila, {_membro(registro.reserva_id): _score(registro.criada_em)}
                     )
-                    tocadas.add(fila)
-            for chave in tocadas:
+                    criadas.add(fila)
+            for chave in criadas:
                 canal.expire(chave, TTL_DAS_TEMPORARIAS)
             canal.execute()
+        return criadas
 
 
 def _em_lotes(

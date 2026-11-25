@@ -504,3 +504,58 @@ def test_erro_do_redis_vira_indice_indisponivel_e_e_logado(
 def test_fake_indisponivel_lanca_indice_indisponivel(operacao):
     with pytest.raises(IndiceIndisponivel):
         operacao(IndiceDeReservasEmMemoria(indisponivel=True))
+
+
+def test_temporaria_que_expirou_antes_da_troca_descarta_sem_publicar_contagem_parcial(
+    monkeypatch,
+):
+    # Arrange
+    monkeypatch.setattr(indice_redis, "LOTE_DE_GRAVACAO", 2)
+    indice = IndiceDeReservasRedis()
+    _montar(indice, _registro(1), _registro(2, CONFIRMADA))
+
+    def expira_uma_no_meio():
+        yield _registro(10, CONFIRMADA)
+        yield _registro(11, CONFIRMADA)
+        for chave in _temporarias():
+            if chave.endswith(":situacao:CONFIRMADA"):
+                cliente(chave, escrita=True).delete(chave)
+        yield _registro(12, SOLICITADA)
+        yield _registro(13, SOLICITADA)
+
+    # Act
+    gravou = indice.substituir(expira_uma_no_meio(), versao=indice.versao())
+
+    # Assert
+    assert gravou is False
+    assert indice.pendentes(10) == (1,)
+    assert indice.contagem_por_situacao() == _contagem(SOLICITADA=1, CONFIRMADA=1)
+    assert _temporarias() == set()
+
+
+def test_cada_lote_renova_o_prazo_das_temporarias_ja_criadas(monkeypatch):
+    # Arrange
+    monkeypatch.setattr(indice_redis, "LOTE_DE_GRAVACAO", 1)
+    indice = IndiceDeReservasRedis()
+    prazos = []
+
+    def com_leitura_de_prazo():
+        yield _registro(1, CONFIRMADA)
+        for i in (2, 3):
+            for chave in _temporarias():
+                if chave.endswith(":situacao:CONFIRMADA"):
+                    cliente(chave, escrita=True).expire(chave, 5)
+            yield _registro(i, SOLICITADA)
+            prazos.append(
+                [
+                    cliente(c, escrita=False).ttl(c)
+                    for c in _temporarias()
+                    if c.endswith(":situacao:CONFIRMADA")
+                ]
+            )
+
+    # Act
+    indice.substituir(com_leitura_de_prazo(), versao=indice.versao())
+
+    # Assert
+    assert prazos[-1][0] > 500
