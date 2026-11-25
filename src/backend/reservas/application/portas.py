@@ -75,6 +75,12 @@ class AgendaDoDia(Protocol):
         sem reservas.
         """
 
+    def dias_projetados(self, a_partir_de: date) -> frozenset[tuple[int, date]]:
+        """Pares (espaço, data) com projeção existente e data >= `a_partir_de`.
+
+        Inclui os dias vazios (só o sentinela). Só leitura.
+        """
+
     def versao(self, espaco_id: int, data: date) -> int:
         """Contador do dia, que `registrar` e `remover` avançam a cada chamada.
 

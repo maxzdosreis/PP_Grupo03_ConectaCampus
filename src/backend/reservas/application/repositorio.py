@@ -109,6 +109,12 @@ class RepositorioReservas(Protocol):
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         """Lista as reservas Solicitadas ou Confirmadas do espaço naquele dia."""
 
+    def listar_dias_com_reservas_que_ocupam_horario(
+        self, a_partir_de: date
+    ) -> list[tuple[int, date]]:
+        """Pares distintos (espaço, data de início) das reservas Solicitadas ou
+        Confirmadas com data >= `a_partir_de`, ordenados por espaço e data."""
+
     def listar_ativas_a_partir_de(
         self, espaco_id: int, momento: datetime
     ) -> list[Reserva]:

@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
+from django.db.models.functions import TruncDate
 
 from reservas.application.repositorio import (
     FiltrosDeReservas,
@@ -89,6 +90,21 @@ class RepositorioReservasDjango(RepositorioReservas):
             situacao__in=SITUACOES_QUE_OCUPAM_HORARIO,
         ).order_by("inicio", "id")
         return [_para_entidade(model) for model in consulta]
+
+    def listar_dias_com_reservas_que_ocupam_horario(
+        self, a_partir_de: date
+    ) -> list[tuple[int, date]]:
+        consulta = (
+            ReservaModel.objects.filter(
+                inicio__date__gte=a_partir_de,
+                situacao__in=SITUACOES_QUE_OCUPAM_HORARIO,
+            )
+            .annotate(dia=TruncDate("inicio"))
+            .values_list("espaco_id", "dia")
+            .distinct()
+            .order_by("espaco_id", "dia")
+        )
+        return list(consulta)
 
     def listar_ativas_a_partir_de(
         self, espaco_id: int, momento: datetime

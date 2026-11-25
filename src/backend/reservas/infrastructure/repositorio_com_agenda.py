@@ -95,6 +95,11 @@ class RepositorioReservasComAgenda(RepositorioReservas):
     def listar_que_ocupam_horario(self, espaco_id: int, data: date) -> list[Reserva]:
         return self._interno.listar_que_ocupam_horario(espaco_id, data)
 
+    def listar_dias_com_reservas_que_ocupam_horario(
+        self, a_partir_de: date
+    ) -> list[tuple[int, date]]:
+        return self._interno.listar_dias_com_reservas_que_ocupam_horario(a_partir_de)
+
     def listar_ativas_a_partir_de(
         self, espaco_id: int, momento: datetime
     ) -> list[Reserva]:

@@ -204,6 +204,10 @@ class AgendaDoDiaEmMemoria(AgendaDoDia):
         ordenados = sorted(dia.items(), key=lambda item: _ordem_no_redis(*item))
         return tuple(ocupado for _, ocupado in ordenados)
 
+    def dias_projetados(self, a_partir_de: date) -> frozenset[tuple[int, date]]:
+        self._exigir_disponivel()
+        return frozenset(chave for chave in self._dias if chave[1] >= a_partir_de)
+
     def versao(self, espaco_id: int, data: date) -> int:
         self._exigir_disponivel()
         return self._versoes.get((espaco_id, data), 0)
@@ -319,6 +323,18 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
             if reserva.espaco_id == espaco_id
             and reserva.intervalo.data == data
             and reserva.situacao.ocupa_horario
+        )
+
+    def listar_dias_com_reservas_que_ocupam_horario(
+        self, a_partir_de: date
+    ) -> list[tuple[int, date]]:
+        return sorted(
+            {
+                (reserva.espaco_id, reserva.intervalo.data)
+                for reserva in self._reservas.values()
+                if reserva.situacao.ocupa_horario
+                and reserva.intervalo.data >= a_partir_de
+            }
         )
 
     def listar_ativas_a_partir_de(

@@ -10,6 +10,7 @@ from reservas.application.portas import AgendaIndisponivel
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.agenda_redis import (
+    CONTAGEM_DO_SCAN,
     FOLGA_DO_TTL,
     TTL_MINIMO,
     AgendaDoDiaRedis,
@@ -273,6 +274,7 @@ OPERACOES = {
     "listar": lambda a: a.listar(ESPACO, DIA),
     "substituir": lambda a: a.substituir(ESPACO, DIA, {}, versao=0),
     "versao": lambda a: a.versao(ESPACO, DIA),
+    "dias_projetados": lambda a: a.dias_projetados(DIA),
 }
 
 
@@ -299,3 +301,64 @@ def test_erro_do_redis_vira_agenda_indisponivel_e_e_logado(
 def test_fake_indisponivel_lanca_agenda_indisponivel(operacao):
     with pytest.raises(AgendaIndisponivel):
         operacao(AgendaDoDiaEmMemoria(indisponivel=True))
+
+
+def test_dias_projetados_inclui_dias_vazios_e_filtra_por_data(agenda):
+    _substituir(agenda, ESPACO, DIA, {1: MANHA})
+    _substituir(agenda, ESPACO + 1, DIA, {})
+    _substituir(agenda, ESPACO, OUTRO_DIA, {})
+    _substituir(agenda, ESPACO, date(2026, 10, 1), {})
+
+    assert agenda.dias_projetados(DIA) == {
+        (ESPACO, DIA),
+        (ESPACO + 1, DIA),
+        (ESPACO, OUTRO_DIA),
+    }
+    assert agenda.dias_projetados(OUTRO_DIA) == {(ESPACO, OUTRO_DIA)}
+
+
+def test_dias_projetados_sem_projecao_devolve_vazio(agenda):
+    assert agenda.dias_projetados(DIA) == frozenset()
+
+
+def test_dias_projetados_ignora_a_chave_de_versao(agenda):
+    agenda.remover(ESPACO, 1, DIA)
+
+    assert agenda.versao(ESPACO, DIA) == 1
+    assert agenda.dias_projetados(DIA) == frozenset()
+
+
+def test_dias_projetados_ignora_chave_ilegivel_e_avisa(caplog):
+    redis = AgendaDoDiaRedis(relogio=lambda: AGORA)
+    _substituir(redis, ESPACO, DIA, {})
+    ilegivel = cache.make_key("agenda:espaco:abc:2026-10-25")
+    _cliente(ilegivel, escrita=True).set(ilegivel, "x")
+
+    with caplog.at_level(
+        logging.WARNING, logger="reservas.infrastructure.agenda_redis"
+    ):
+        dias = redis.dias_projetados(DIA)
+
+    assert dias == {(ESPACO, DIA)}
+    assert "Chave da agenda ignorada" in caplog.text
+
+
+def test_dias_projetados_usa_scan_com_contagem_e_nunca_keys(monkeypatch):
+    redis = AgendaDoDiaRedis(relogio=lambda: AGORA)
+    cliente = _cliente(_chave())
+    chamadas = {}
+    original = type(cliente).scan_iter
+
+    def espiar(self, *args, **kwargs):
+        chamadas.update(kwargs)
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(type(cliente), "scan_iter", espiar)
+    monkeypatch.setattr(
+        type(cliente), "keys", lambda *a, **k: pytest.fail("KEYS é proibido")
+    )
+
+    redis.dias_projetados(DIA)
+
+    assert chamadas["match"] == cache.make_key("agenda:espaco:*")
+    assert chamadas["count"] == CONTAGEM_DO_SCAN

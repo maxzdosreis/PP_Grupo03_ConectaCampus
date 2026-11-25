@@ -17,6 +17,9 @@ MINUTOS_NO_DIA = 24 * 60
 FOLGA_DO_TTL = timedelta(days=1)
 TTL_MINIMO = timedelta(hours=1)
 
+CONTAGEM_DO_SCAN = 500
+_PREFIXO_DA_PROJECAO = "agenda:espaco:"
+
 _SENTINELA = "_"
 _SCORE_DA_SENTINELA = -1
 
@@ -122,6 +125,21 @@ class AgendaDoDiaRedis(AgendaDoDia):
             if _texto(membro) != _SENTINELA
         )
 
+    def dias_projetados(self, a_partir_de: date) -> frozenset[tuple[int, date]]:
+        padrao = cache.make_key(f"{_PREFIXO_DA_PROJECAO}*")
+        prefixo = cache.make_key(_PREFIXO_DA_PROJECAO)
+        dias = set()
+        try:
+            for chave in _cliente(padrao, escrita=False).scan_iter(
+                match=padrao, count=CONTAGEM_DO_SCAN
+            ):
+                dia = _interpretar_chave(_texto(chave), prefixo)
+                if dia is not None and dia[1] >= a_partir_de:
+                    dias.add(dia)
+        except RedisError as erro:
+            _indisponivel(erro)
+        return frozenset(dias)
+
     def versao(self, espaco_id: int, data: date) -> int:
         chave = _chave_da_versao(espaco_id, data)
         try:
@@ -166,7 +184,16 @@ class AgendaDoDiaRedis(AgendaDoDia):
 
 
 def _chave(espaco_id: int, data: date) -> str:
-    return cache.make_key(f"agenda:espaco:{espaco_id}:{data.isoformat()}")
+    return cache.make_key(f"{_PREFIXO_DA_PROJECAO}{espaco_id}:{data.isoformat()}")
+
+
+def _interpretar_chave(chave: str, prefixo: str) -> tuple[int, date] | None:
+    try:
+        espaco, data = chave.removeprefix(prefixo).split(":")
+        return int(espaco), date.fromisoformat(data)
+    except ValueError:
+        logger.warning("Chave da agenda ignorada, formato inesperado: %s", chave)
+        return None
 
 
 def _chave_da_versao(espaco_id: int, data: date) -> str:

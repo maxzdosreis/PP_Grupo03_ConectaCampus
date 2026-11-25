@@ -5,7 +5,11 @@ from dataclasses import replace
 from datetime import date, datetime, time
 
 from compartilhado.domain.erros import ErroDeDominio
-from reservas.application.ocupacao_do_dia import HorarioOcupado, OcupacaoDoDia
+from reservas.application.ocupacao_do_dia import (
+    HorarioOcupado,
+    OcupacaoDoDia,
+    ocupados_por_reserva,
+)
 from reservas.application.portas import (
     AgendaDoDia,
     AgendaIndisponivel,
@@ -227,24 +231,9 @@ class ConsultarOcupacaoDoDia:
         return tuple(ocupados.values())
 
     def _do_postgres(self, espaco_id: int, data: date) -> dict[int, HorarioOcupado]:
-        reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
-        return {
-            reserva.id: _ao_minuto(reserva.intervalo, reserva.situacao)
-            for reserva in reservas
-        }
-
-
-def _ao_minuto(
-    intervalo: IntervaloDeHorario, situacao: SituacaoReserva
-) -> HorarioOcupado:
-    return HorarioOcupado(
-        intervalo=IntervaloDeHorario(
-            data=intervalo.data,
-            hora_inicio=intervalo.hora_inicio.replace(second=0, microsecond=0),
-            hora_fim=intervalo.hora_fim.replace(second=0, microsecond=0),
-        ),
-        situacao=situacao,
-    )
+        return ocupados_por_reserva(
+            self._repositorio.listar_que_ocupam_horario(espaco_id, data)
+        )
 
 
 class ContarReservasAtivasForaDaJanela:

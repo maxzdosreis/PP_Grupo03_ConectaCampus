@@ -107,6 +107,22 @@ curl "http://localhost:8000/api/reservas/ocupacao/?espaco=1&data=AAAA-MM-DD" -H 
 
 Para uma data em que não é possível reservar (ontem, hoje depois do fechamento do espaço ou além da antecedência máxima), `reservavel` é `false`, `livres` vem vazio e `motivo_indisponivel` traz a mesma mensagem que a solicitação receberia (ex.: "Não é possível reservar um horário que já passou."). Espaço inexistente → **404** `ESPACO_NAO_ENCONTRADO`; inativo → **409** `ESPACO_INATIVO`; sem `espaco` ou `data` → **400** `DADOS_INVALIDOS` com o campo em `campos`.
 
+## Reconstruir a agenda no Redis
+
+A agenda do dia que o Redis guarda é uma projeção do PostgreSQL, que continua sendo a fonte da verdade. No Compose padrão o Redis não persiste nada: depois de reiniciá-lo, ou se a projeção ficar diferente do banco por qualquer motivo, um comando refaz tudo a partir das reservas. A partir de `src/`:
+
+```bash
+docker compose exec backend python manage.py reconstruir_agenda_redis
+```
+
+```text
+Agenda reconstruída: 4 dias, 9 reservas, 1 dia esvaziado.
+```
+
+O comando refaz, de hoje em diante (data de Brasília), todo dia que tem reserva Solicitada ou Confirmada no banco **e** todo dia que já tem projeção no Redis: um dia que ficou com a projeção velha e hoje não tem mais reserva ativa é gravado vazio (conta como "esvaziado"). Dias anteriores a hoje não são tocados; o prazo de cada chave cuida deles. É idempotente: rodar de novo deixa o mesmo estado e o mesmo resumo, e não precisa de `DJANGO_DEBUG`, porque não cria usuário nem senha.
+
+Se uma reserva muda enquanto o dia é refeito, o comando tenta de novo (até 3 vezes) e, se continuar mudando, descarta o dia e avisa "N dias foram descartados"; é só rodar outra vez. Se o Redis ficar fora do ar, o comando termina com erro: os dias já refeitos continuam válidos e basta rodar de novo quando ele voltar.
+
 ## Consultar reservas
 
 Listar as reservas (`GET /api/reservas/`) exige login e devolve as reservas ordenadas pelo início (e, no empate, pelo id), em páginas. Filtros opcionais, que funcionam sozinhos ou combinados:
@@ -321,6 +337,7 @@ Se o banco foi criado antes do histórico (RES-07), as reservas antigas aparecem
 | Horário de funcionamento do espaço (`funcionamento.py`), duração, duração sugerida, antecedência, horários livres | `domain/funcionamento.py` e `domain/regras_de_agenda.py` |
 | Conflito de horário | `domain/conflito_de_horario.py` |
 | Casos de uso (`CriarReserva`, `ConsultarReservas`, `ObterReserva`, `AlterarSituacaoReserva`, `ConsultarHistoricoDaReserva`, `ConsultarOcupacaoDoDia`) | `application/casos_de_uso.py` |
+| Reconstrução da agenda do Redis (`ReconstruirAgenda`) e o comando `reconstruir_agenda_redis` | `application/reconstruir_agenda.py`, `management/commands/reconstruir_agenda_redis.py` |
 | Como um espaço é consultado | `application/portas.py` e `infrastructure/consulta_de_espacos.py` |
 | Models, constraints (inclusive a de sobreposição) e gravação do histórico | `infrastructure/models.py`, `infrastructure/repositorio_django.py` |
 | Rotas, filtros e formato da saída | `api/views.py`, `api/serializers.py`, `api/urls.py`; o usuário logado é lido só em `api/autenticacao.py` |
