@@ -1093,3 +1093,51 @@ def test_reserva_ate_a_meia_noite_so_aparece_no_dia_em_que_comecou(repositorio):
     # Assert
     assert len(do_dia) == 1
     assert do_seguinte == []
+
+
+def test_listar_dias_com_reservas_que_ocupam_horario_devolve_pares_ordenados(
+    repositorio,
+):
+    # Arrange
+    _salvar_reservas_para_listagem(repositorio)
+    _salvar_na_situacao(
+        repositorio, S.SOLICITADA, hora_inicio=time(14, 0), hora_fim=time(15, 0)
+    )
+
+    # Act
+    dias = repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA)
+
+    # Assert
+    assert dias == [(3, DIA), (3, DIA_SEGUINTE), (4, DIA_SEGUINTE)]
+
+
+def test_listar_dias_com_reservas_que_ocupam_horario_respeita_a_data_inicial(
+    repositorio,
+):
+    # Arrange
+    _salvar_reservas_para_listagem(repositorio)
+
+    # Act
+    dias = repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA_SEGUINTE)
+
+    # Assert
+    assert dias == [(3, DIA_SEGUINTE), (4, DIA_SEGUINTE)]
+
+
+def test_listar_dias_com_reservas_que_ocupam_horario_sem_reservas_devolve_vazio(
+    repositorio,
+):
+    assert repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA) == []
+
+
+def test_listar_dias_com_reservas_que_ocupam_horario_usa_a_data_local_do_inicio(
+    repositorio,
+):
+    # Arrange
+    _salvar_na_situacao(
+        repositorio, S.SOLICITADA, hora_inicio=time(23, 0), hora_fim=time(0, 0)
+    )
+
+    # Act / Assert
+    assert repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA) == [(3, DIA)]
+    assert repositorio.listar_dias_com_reservas_que_ocupam_horario(DIA_SEGUINTE) == []

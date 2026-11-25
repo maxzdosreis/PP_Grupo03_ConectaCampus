@@ -411,3 +411,15 @@ def test_sincronizacao_desiste_e_avisa_se_a_reserva_nao_para_de_mudar(caplog):
     # Assert
     assert cenario.agenda.chamadas == 3
     assert any("continuou mudando" in r.getMessage() for r in caplog.records)
+
+
+def test_listar_dias_com_reservas_que_ocupam_horario_delega_ao_repositorio_interno():
+    # Arrange
+    cenario = Cenario()
+    cenario.repositorio.salvar(reserva_solicitada())
+
+    # Act
+    dias = cenario.decorator.listar_dias_com_reservas_que_ocupam_horario(DIA)
+
+    # Assert
+    assert dias == [(ESPACO, DIA)]
