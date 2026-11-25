@@ -1,11 +1,16 @@
 import logging
 from collections.abc import Callable
+from contextlib import suppress
 from dataclasses import replace
 from datetime import date, datetime, time
 
 from compartilhado.domain.erros import ErroDeDominio
 from reservas.application.ocupacao_do_dia import HorarioOcupado, OcupacaoDoDia
-from reservas.application.portas import ConsultaDeEspacos
+from reservas.application.portas import (
+    AgendaDoDia,
+    AgendaIndisponivel,
+    ConsultaDeEspacos,
+)
 from reservas.application.repositorio import (
     FiltrosDeReservas,
     Paginacao,
@@ -169,35 +174,77 @@ class ConsultarOcupacaoDoDia:
         self,
         repositorio: RepositorioReservas,
         consulta_de_espacos: ConsultaDeEspacos,
+        agenda: AgendaDoDia,
         relogio: Callable[[], datetime],
     ) -> None:
         self._repositorio = repositorio
         self._consulta_de_espacos = consulta_de_espacos
+        self._agenda = agenda
         self._relogio = relogio
 
     def executar(self, *, espaco_id: int, data: date) -> OcupacaoDoDia:
         funcionamento = self._consulta_de_espacos.obter_espaco_reservavel(
             espaco_id
         ).funcionamento
-        reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
+        ocupados = self._ocupados_do_dia(espaco_id, data)
         agora = self._relogio()
         motivo = motivo_de_indisponibilidade(data, agora, funcionamento)
-        intervalos = [reserva.intervalo for reserva in reservas]
         livres = horarios_livres(
-            intervalos, data=data, agora=agora, funcionamento=funcionamento
+            [ocupado.intervalo for ocupado in ocupados],
+            data=data,
+            agora=agora,
+            funcionamento=funcionamento,
         )
         return OcupacaoDoDia(
             data=data,
             horario_de_abertura=funcionamento.abertura(),
             horario_de_fechamento=funcionamento.fechamento(),
-            ocupados=tuple(
-                HorarioOcupado(intervalo=reserva.intervalo, situacao=reserva.situacao)
-                for reserva in reservas
-            ),
+            ocupados=ocupados,
             livres=() if motivo else tuple(livres),
             reservavel=motivo is None,
             motivo_indisponivel=motivo,
         )
+
+    def _ocupados_do_dia(
+        self, espaco_id: int, data: date
+    ) -> tuple[HorarioOcupado, ...]:
+        try:
+            agendados = self._agenda.listar(espaco_id, data)
+        except AgendaIndisponivel:
+            return tuple(self._do_postgres(espaco_id, data).values())
+        if agendados is not None:
+            return agendados
+        return self._repovoar(espaco_id, data)
+
+    def _repovoar(self, espaco_id: int, data: date) -> tuple[HorarioOcupado, ...]:
+        try:
+            versao = self._agenda.versao(espaco_id, data)
+        except AgendaIndisponivel:
+            return tuple(self._do_postgres(espaco_id, data).values())
+        ocupados = self._do_postgres(espaco_id, data)
+        with suppress(AgendaIndisponivel):
+            self._agenda.substituir(espaco_id, data, ocupados, versao=versao)
+        return tuple(ocupados.values())
+
+    def _do_postgres(self, espaco_id: int, data: date) -> dict[int, HorarioOcupado]:
+        reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
+        return {
+            reserva.id: _ao_minuto(reserva.intervalo, reserva.situacao)
+            for reserva in reservas
+        }
+
+
+def _ao_minuto(
+    intervalo: IntervaloDeHorario, situacao: SituacaoReserva
+) -> HorarioOcupado:
+    return HorarioOcupado(
+        intervalo=IntervaloDeHorario(
+            data=intervalo.data,
+            hora_inicio=intervalo.hora_inicio.replace(second=0, microsecond=0),
+            hora_fim=intervalo.hora_fim.replace(second=0, microsecond=0),
+        ),
+        situacao=situacao,
+    )
 
 
 class ContarReservasAtivasForaDaJanela:
