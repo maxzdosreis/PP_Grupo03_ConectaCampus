@@ -2,7 +2,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime
 
-from reservas.application.ocupacao_do_dia import ocupados_por_reserva
+from reservas.application.ocupacao_do_dia import HorarioOcupado, ocupados_por_reserva
 from reservas.application.portas import AgendaDoDia
 from reservas.application.repositorio import RepositorioReservas
 from reservas.domain.intervalo_de_horario import FUSO_HORARIO
@@ -50,6 +50,8 @@ class ReconstruirAgenda:
             versao = self._agenda.versao(espaco_id, data)
             reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
             ocupados = ocupados_por_reserva(reservas)
+            if not self._retrato_continua_atual(espaco_id, data, ocupados):
+                continue
             esvaziado = (
                 estava_projetado
                 and not ocupados
@@ -62,6 +64,12 @@ class ReconstruirAgenda:
                     dias_esvaziados=int(esvaziado),
                 )
         return ResultadoDaReconstrucao(dias_descartados=1)
+
+    def _retrato_continua_atual(
+        self, espaco_id: int, data: date, ocupados: dict[int, HorarioOcupado]
+    ) -> bool:
+        reservas = self._repositorio.listar_que_ocupam_horario(espaco_id, data)
+        return ocupados_por_reserva(reservas) == ocupados
 
 
 def _somar(

@@ -247,3 +247,44 @@ def test_agenda_indisponivel_sobe_sem_ser_engolida(operacao):
     # Act / Assert
     with pytest.raises(AgendaIndisponivel):
         _reconstruir(repositorio, AgendaQueFalhaEm(operacao))
+
+
+class RepositorioQueMudaDepoisDaLeitura(RepositorioReservasEmMemoria):
+    def __init__(self, *, mudancas: int) -> None:
+        super().__init__()
+        self._mudancas = mudancas
+
+    def listar_que_ocupam_horario(self, espaco_id, data):
+        lidas = super().listar_que_ocupam_horario(espaco_id, data)
+        if self._mudancas > 0:
+            self._mudancas -= 1
+            _guardar(self, espaco_id=espaco_id, data=data, inicio=12 + self._mudancas)
+        return lidas
+
+
+def test_mudanca_no_banco_sem_aviso_a_agenda_faz_reler_antes_de_gravar():
+    # Arrange
+    repositorio = RepositorioQueMudaDepoisDaLeitura(mudancas=1)
+    agenda = AgendaDoDiaEmMemoria()
+    _guardar(repositorio, inicio=10)
+
+    # Act
+    resultado = _reconstruir(repositorio, agenda)
+
+    # Assert
+    assert resultado == ResultadoDaReconstrucao(dias_refeitos=1, reservas_gravadas=2)
+    assert len(agenda.listar(3, DIA)) == 2
+
+
+def test_banco_que_nao_para_de_mudar_sem_aviso_descarta_o_dia():
+    # Arrange
+    repositorio = RepositorioQueMudaDepoisDaLeitura(mudancas=2 * TENTATIVAS_POR_DIA)
+    agenda = AgendaDoDiaEmMemoria()
+    _guardar(repositorio, inicio=10)
+
+    # Act
+    resultado = _reconstruir(repositorio, agenda)
+
+    # Assert
+    assert resultado == ResultadoDaReconstrucao(dias_descartados=1)
+    assert agenda.listar(3, DIA) is None
