@@ -1,6 +1,10 @@
 from contextlib import contextmanager
 
-from espacos.application.portas import ReservasDoEspaco
+from espacos.application.portas import (
+    CacheDeEspacos,
+    CacheDeEspacosIndisponivel,
+    ReservasDoEspaco,
+)
 from espacos.application.repositorio import RepositorioEspacos
 from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
@@ -50,6 +54,7 @@ class RepositorioEspacosEmMemoria(RepositorioEspacos):
         self._espacos: dict[int, EspacoEsportivo] = {}
         self._proximo_id = 1
         self.chamadas_de_salvar = 0
+        self.leituras = 0
         self.eventos = eventos if eventos is not None else []
         self.ids_travados: list[int] = []
         self.transacoes_abertas = 0
@@ -87,6 +92,7 @@ class RepositorioEspacosEmMemoria(RepositorioEspacos):
         return _copiar(espaco, espaco_id)
 
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
+        self.leituras += 1
         espaco = self._espacos.get(espaco_id)
         return _copiar(espaco, espaco_id) if espaco else None
 
@@ -123,3 +129,45 @@ def _copiar(espaco: EspacoEsportivo, espaco_id: int | None) -> EspacoEsportivo:
         ativo=espaco.ativo,
         horario=espaco.horario,
     )
+
+
+class CacheDeEspacosEmMemoria(CacheDeEspacos):
+    def __init__(self) -> None:
+        self._guardados: dict[int, EspacoEsportivo] = {}
+        self._versoes: dict[int, int] = {}
+        self.indisponivel = False
+        self.quebrados: set[int] = set()
+        self.invalidacoes: list[int] = []
+
+    def obter(self, espaco_id: int) -> EspacoEsportivo | None:
+        self._exigir_disponivel()
+        if espaco_id in self.quebrados:
+            self.quebrados.discard(espaco_id)
+            self._guardados.pop(espaco_id, None)
+            return None
+        espaco = self._guardados.get(espaco_id)
+        return _copiar(espaco, espaco_id) if espaco else None
+
+    def versao(self, espaco_id: int) -> int:
+        self._exigir_disponivel()
+        return self._versoes.get(espaco_id, 0)
+
+    def guardar(self, espaco: EspacoEsportivo, *, versao: int) -> bool:
+        self._exigir_disponivel()
+        if self._versoes.get(espaco.id, 0) != versao:
+            return False
+        self._guardados[espaco.id] = _copiar(espaco, espaco.id)
+        return True
+
+    def invalidar(self, espaco_id: int) -> None:
+        self._exigir_disponivel()
+        self.invalidacoes.append(espaco_id)
+        self._guardados.pop(espaco_id, None)
+        self._versoes[espaco_id] = self._versoes.get(espaco_id, 0) + 1
+
+    def guardado(self, espaco_id: int) -> bool:
+        return espaco_id in self._guardados
+
+    def _exigir_disponivel(self) -> None:
+        if self.indisponivel:
+            raise CacheDeEspacosIndisponivel

@@ -172,3 +172,18 @@ Cada espaço tem o seu horário de funcionamento, que as reservas usam (pela fac
 ```bash
 curl -X POST http://localhost:8000/api/espacos/ -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" -d '{"nome": "Quadra de Dia", "tipo": "QUADRA_DE_AREIA", "capacidade": 12, "abertura": "08:00", "fechamento": "22:00"}'
 ```
+
+## Cache de espaço no Redis
+
+Uma cópia de **leitura** do espaço fica no Redis (cache-aside), só para tirar consultas à tabela de espaços das leituras informativas. Nenhuma resposta da API muda.
+
+- **O que é guardado:** um Hash `espaco:{id}` (nome, tipo, capacidade, ativo, abertura e fechamento em minutos), gravado junto com o `EXPIRE` por um script Lua, então nunca existe Hash sem TTL nem pela metade. Espaço inexistente não é guardado. Hash vazio, incompleto ou com valor que a entidade recusa conta como *miss* (a chave quebrada é apagada e vai para o log).
+- **Quem lê o cache:** `GET /api/espacos/{id}/` (`ObterEspaco`) e a ocupação do dia, por `publico.verificar_espaco_disponivel`.
+- **Quem nunca lê:** a trava e a validação para reservar (`verificar_espaco_disponivel_para_reserva`, `CriarReserva`), o cadastro, a edição, a ativação, a desativação e a lista de espaços. Quem decide ou grava lê só o PostgreSQL.
+- **TTL de 300 s** (`TTL_DO_ESPACO_EM_SEGUNDOS`): é o teto de velhice quando uma invalidação falha.
+- **Invalidação:** editar, desativar e reativar apagam o Hash e avançam uma versão **depois do commit** (`transaction.on_commit`); rollback não invalida. O leitor lê a versão antes do PostgreSQL e só grava no cache se ela não avançou, o que impede um valor lido antes do commit de ressuscitar depois da invalidação. O cadastro não invalida (não há cache de ausência).
+- **Falhas:** Redis fora do ar, travado ou com a chave de outro tipo → a leitura vai ao PostgreSQL e responde igual, sem 503 e sem erro novo; falha na invalidação só vira aviso no log e a escrita vale.
+- **Limite conhecido:** com a invalidação falhando, a leitura informativa pode mostrar o espaço antigo por até o TTL. A decisão nunca é afetada.
+
+Código: `application/leitor_de_espacos_em_cache.py`, a porta `CacheDeEspacos` em `application/portas.py`, `infrastructure/cache_de_espacos_redis.py` e `infrastructure/repositorio_que_invalida.py`.
+

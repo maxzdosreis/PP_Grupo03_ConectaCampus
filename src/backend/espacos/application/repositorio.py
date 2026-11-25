@@ -5,6 +5,11 @@ from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.tipo_espaco import TipoEspaco
 
 
+class LeitorDeEspacos(Protocol):
+    def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
+        """Devolve o espaço ou None. Quem só lê (RDS-11) pode ter um cache atrás."""
+
+
 class RepositorioEspacos(Protocol):
     def salvar(self, espaco: EspacoEsportivo) -> EspacoEsportivo:
         """Insere quando o id é None e atualiza quando já existe.

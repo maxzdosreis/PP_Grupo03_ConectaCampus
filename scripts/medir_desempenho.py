@@ -28,7 +28,8 @@ TAMANHO_DO_LOTE = 2000
 RODADAS_PADRAO = 5
 REAMOSTRAGENS = 2000
 SEMENTE_DO_BOOTSTRAP = 20261125
-CENARIOS_DA_OCUPACAO = ("PG", "REDIS_ACERTO", "REDIS_ERRO")
+SEM_CACHE_DE_ESPACO = "REDIS_ACERTO_SEM_CACHE_DE_ESPACO"
+CENARIOS_DA_OCUPACAO = ("PG", "REDIS_ACERTO", "REDIS_ERRO", SEM_CACHE_DE_ESPACO)
 NIVEIS = ("API", "Caso de uso")
 
 
@@ -59,7 +60,7 @@ class Resultado:
 
 
 def _argumentos() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=(__doc__ or "Mede o desempenho.").splitlines()[0])
     parser.add_argument("--reservas", type=int, default=1000)
     parser.add_argument("--espacos", type=int, default=5)
     parser.add_argument("--solicitantes", type=int, default=20)
@@ -361,18 +362,30 @@ def _montar_casos():
 
     from reservas.application.casos_de_uso import ConsultarOcupacaoDoDia
     from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
-    from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
+    from espacos import publico
+    from espacos.application.casos_de_uso import VerificarEspacoDisponivel
+    from espacos.infrastructure.repositorio_django import RepositorioEspacosDjango
+    from reservas.infrastructure.consulta_de_espacos import (
+        ConsultaDeEspacosViaFachada,
+        _como_reservavel,
+    )
     from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
-    def caso(agenda):
+    class ConsultaSemCacheDeEspacos(ConsultaDeEspacosViaFachada):
+        def obter_espaco_reservavel(self, espaco_id):
+            espaco = VerificarEspacoDisponivel(RepositorioEspacosDjango()).executar(espaco_id)
+            return _como_reservavel(publico._como_disponivel(espaco))
+
+    def caso(agenda, consulta=None):
         return ConsultarOcupacaoDoDia(
-            RepositorioReservasDjango(), ConsultaDeEspacosViaFachada(), agenda, timezone.now
+            RepositorioReservasDjango(), consulta or ConsultaDeEspacosViaFachada(), agenda, timezone.now
         )
 
     return {
         "PG": caso(AgendaSempreIndisponivel()),
         "REDIS_ACERTO": caso(AgendaDoDiaRedis()),
         "REDIS_ERRO": caso(AgendaDoDiaRedis()),
+        SEM_CACHE_DE_ESPACO: caso(AgendaDoDiaRedis(), ConsultaSemCacheDeEspacos()),
     }
 
 
@@ -384,8 +397,8 @@ class _ComposicaoDaApi:
         from reservas.api import dependencias
 
         self.original = dependencias.consultar_ocupacao_do_dia
-        if self.nome == "PG":
-            caso = self.casos["PG"]
+        if self.nome in ("PG", SEM_CACHE_DE_ESPACO):
+            caso = self.casos[self.nome]
             dependencias.consultar_ocupacao_do_dia = lambda *_, **__: caso
 
     def __exit__(self, *_):
@@ -467,7 +480,7 @@ def _ocupacao(cenario, args) -> tuple[list[Resultado], list[Reconstrucao]]:
     def preparar(nome):
         if nome == "REDIS_ERRO":
             _apagar_a_chave_do_dia(cenario)
-        elif nome == "REDIS_ACERTO":
+        elif nome in ("REDIS_ACERTO", SEM_CACHE_DE_ESPACO):
             _garantir_projecao(cenario)
 
     def pela_api(nome):
@@ -552,9 +565,11 @@ def _comparacoes(resultados: list[Resultado]) -> list[dict]:
         pg = amostras[f"Ocupação do dia: PG, {nivel}"]
         acerto = amostras[f"Ocupação do dia: REDIS_ACERTO, {nivel}"]
         erro = amostras[f"Ocupação do dia: REDIS_ERRO, {nivel}"]
+        sem_cache = amostras[f"Ocupação do dia: {SEM_CACHE_DE_ESPACO}, {nivel}"]
         for rotulo, a, b in (
             ("PG − REDIS_ACERTO (ganho do acerto)", pg, acerto),
             ("REDIS_ERRO − PG (custo extra do miss)", erro, pg),
+            ("SEM_CACHE_DE_ESPACO − REDIS_ACERTO (ganho do cache de espaço, RDS-11)", sem_cache, acerto),
         ):
             diferenca, inferior, superior = _ic_da_diferenca(a, b)
             comparacoes.append(
