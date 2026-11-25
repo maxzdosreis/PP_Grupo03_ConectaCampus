@@ -20,7 +20,22 @@ O projeto se chama `conecta-campus` no Compose (`name:` do `docker-compose.yml`)
 | `postgres_data` (volume nomeado; no Docker, `conecta-campus_postgres_data`) | `db` | Os dados do banco. Sobrevive a `docker compose down` e só é apagado com `docker compose down -v`. |
 | `./backend:/app` (bind mount) | `backend` | O código do backend montado no container: editar um arquivo recarrega o `runserver`. |
 | `./frontend:/app` (bind mount) | `frontend` | O código do frontend montado no container, com recarga do Vite. A observação de arquivos usa polling (`CHOKIDAR_USEPOLLING` e `watch.usePolling` no `vite.config.ts`), porque o bind mount do Windows não avisa mudanças. |
+| `redis_data` (só no [override do Redis persistente](#redis-com-persistência-opcional-para-a-demonstração); no Docker, `conecta-campus_redis_data`) | `redis` | O AOF do Redis, em `/data`. Não existe no modo padrão. `docker compose down` o mantém, e `down -v` o apaga junto com o do banco. |
 | `/app/node_modules` (volume anônimo) | `frontend` | Mantém as dependências instaladas na imagem, para o bind mount não escondê-las. Depois de mudar o `package.json`, recrie-o (veja os [comandos do frontend](frontend/README.md#comandos)). |
+
+## Redis com persistência (opcional, para a demonstração)
+
+O Redis padrão não persiste nada: a agenda e o índice de reservas são projeções que o PostgreSQL reconstrói, e a contagem do limite de tentativas zera ao reiniciar. O arquivo `docker-compose.redis-persistente.yml` é um override que só serve para a demonstração, para comparar "reinicia e perde tudo" com "reinicia e continua". **Não é para produção.**
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.redis-persistente.yml up -d redis
+```
+
+- **O que muda:** o `command` do `redis` é substituído por `redis-server --save "" --appendonly yes --appendfsync everysec` (AOF gravado a cada segundo; snapshots RDB seguem desligados, então o AOF é o único mecanismo) e o volume `redis_data` é montado em `/data`. Imagem e `healthcheck` são os do arquivo base. Uma queda brusca pode perder até cerca de 1 s de escrita.
+- **Trocar de modo exige recriar o container:** use `up -d redis` com a lista de arquivos desejada. `docker compose restart redis` mantém o comando antigo.
+- **Voltar ao padrão:** `docker compose up -d redis` (só o arquivo base). O volume continua existindo, mas é ignorado.
+- **Zerar o AOF guardado:** com o Redis parado (`docker compose stop redis`), `docker volume rm conecta-campus_redis_data`. `docker compose down` mantém o volume; `docker compose down -v` apaga o do banco **e** o do Redis.
+- **Cuidado com dado velho:** com o override ligado, os contadores do limite de tentativas também sobrevivem ao reinício (aceitável só na demonstração). Se o PostgreSQL mudar ou for recriado (`down -v`) e o override for ligado de novo, o Redis carrega o AOF antigo. Corrija com `docker compose exec backend python manage.py reconstruir_agenda_redis` ou zere o volume.
 
 ## Variáveis de ambiente (`.env`)
 
