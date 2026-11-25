@@ -150,19 +150,42 @@ def test_reserva_que_ja_nao_e_solicitada_no_banco_some_da_pagina(repositorio, in
 
     # Assert
     assert _ids(pagina) == [pendente.id]
+    assert pagina.total == 1
+    assert repositorio.chamadas_de_listar_pendentes == 1
 
 
-def test_id_do_indice_que_nao_existe_no_banco_e_descartado(repositorio, indice):
+def test_id_do_indice_que_nao_existe_no_banco_cai_para_o_repositorio(
+    repositorio, indice, caplog
+):
     # Arrange
     _solicitar(repositorio, 0, 8)
     _montar(indice, repositorio)
     indice.aplicar(404, S.SOLICITADA, AGORA - timedelta(days=1))
 
     # Act
-    pagina = _fila(repositorio, indice).executar(Paginacao(), ator=GESTOR)
+    with caplog.at_level(logging.WARNING):
+        pagina = _fila(repositorio, indice).executar(Paginacao(), ator=GESTOR)
 
     # Assert
     assert len(pagina.itens) == 1
+    assert pagina.total == 1
+    assert "Índice desatualizado" in caplog.text
+
+
+def test_pagina_cheia_com_id_velho_traz_as_proximas_pendentes_e_o_total_certo(
+    repositorio, indice
+):
+    # Arrange
+    primeira, segunda, terceira = (_solicitar(repositorio, i, 8 + i) for i in range(3))
+    _montar(indice, repositorio)
+    _confirmar(repositorio, primeira)
+
+    # Act
+    pagina = _fila(repositorio, indice).executar(Paginacao(tamanho=2), ator=GESTOR)
+
+    # Assert
+    assert _ids(pagina) == [segunda.id, terceira.id]
+    assert pagina.total == 2
 
 
 def test_fila_sem_indice_montado_cai_para_o_repositorio(repositorio, indice):

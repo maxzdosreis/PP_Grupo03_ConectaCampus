@@ -255,7 +255,7 @@ def test_resposta_com_a_projecao_fora_do_ar_e_a_mesma_e_nunca_503(
 def test_projecao_atrasada_nao_mostra_reserva_que_ja_saiu_de_solicitada(
     cliente_gestor, tres_pendentes
 ):
-    # Arrange: o índice é montado e, depois, o banco muda sem avisá-lo
+    # Arrange
     _montar_o_indice()
     from reservas.infrastructure.models import ReservaModel
 
@@ -268,9 +268,7 @@ def test_projecao_atrasada_nao_mostra_reserva_que_ja_saiu_de_solicitada(
 
     # Assert
     assert [r["id"] for r in resposta.json()["dados"]] == tres_pendentes["ordem"][1:]
-
-
-# --- a projeção acompanha as mudanças sem reconstruir ------------------------
+    assert resposta.json()["paginacao"]["total"] == 2
 
 
 def test_confirmar_pela_api_tira_da_fila_e_muda_a_contagem_sem_reconstruir(

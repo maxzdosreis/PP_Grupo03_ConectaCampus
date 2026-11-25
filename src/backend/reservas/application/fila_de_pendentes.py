@@ -42,6 +42,9 @@ class ConsultarFilaDePendentes:
             for reserva in reservas
             if reserva.situacao is SituacaoReserva.SOLICITADA
         )
+        if len(pendentes) != len(ids):
+            logger.warning("Índice desatualizado; a fila sai do PostgreSQL.")
+            return None
         return PaginaDeReservas(
             itens=pendentes,
             total=contagem[SituacaoReserva.SOLICITADA],
