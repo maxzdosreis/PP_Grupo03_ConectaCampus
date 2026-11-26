@@ -27,6 +27,7 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Evidência e código do RF-22 depois de implementar o CR-02 (RES-12): a marca "implementação pendente" sai, os testes citados passam a ser os das tentativas recusadas e do histórico com os campos novos. Enunciado sem mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | Evidência e código do RF-11.5 depois de implementar o CR-03 (ESP-07): a marca "implementação pendente" sai, os testes de borda por espaço, de virada de dia e de propriedade entram, e os testes da regra anterior (horário único) saem da lista. Enunciado sem mudança. Sem aprovação. |
 | 0.1 | 25/11/2026 | Max Zimmermann dos Reis | RF-44, RF-44.1 e RF-44.2 novos: o Gestor consulta a fila de reservas pendentes e a contagem por situação, a partir da NS-08 ([CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md), tarefa RDS-08; [UC-24](../casos-de-uso/README.md#uc-24), [US-23](../historias/US-23-consultar-a-fila-de-pendentes.md)). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | RF-45 e RF-45.1 novos: o Gestor consulta o ranking de espaços mais reservados, a partir da NS-08 ([CR-10](../mudancas/CR-10-ranking-de-espacos.md), tarefa RDS-12; [UC-25](../casos-de-uso/README.md#uc-25), [US-24](../historias/US-24-consultar-o-ranking-de-espacos.md)). Mudança posterior à entrega de 13/11/2026: a especificação entregue não foi alterada. Sem aprovação. |
 
 ## Pedido de reserva
 
@@ -523,6 +524,41 @@ Caminhos de teste a partir de `src/backend/`, salvo os do frontend (`src/fronten
 | **Vínculos** | UC: [UC-24 Consultar a fila de pendentes e as contagens](../casos-de-uso/README.md#uc-24) (exceção) — na ficha: [UC-24 E1.1](../casos-de-uso/fichas-resumidas.md#uc24-e1-1), [UC-24 E2.1](../casos-de-uso/fichas-resumidas.md#uc24-e2-1) · US/CA: [US-23 · CA-08](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-08) (TA-216), [US-23 · CA-07](../historias/US-23-consultar-a-fila-de-pendentes.md#us-23-ca-07) (TA-215) |
 | **Evidência (complementar)** | `GET /api/reservas/pendentes/` e `GET /api/reservas/contagem-por-situacao/`: 401 `NAO_AUTENTICADO` ao anônimo; 403 `ACAO_NAO_PERMITIDA` ao Solicitante, antes de validar a página; 400 `DADOS_INVALIDOS` com o campo; 405 `METODO_NAO_PERMITIDO` aos outros métodos; as duas rotas estão na [matriz de acesso](../../matriz_de_acesso.md). `reservas/tests/test_api_fila_de_pendentes.py::test_anonimo_recebe_401 [x]`, `::test_solicitante_recebe_403_mesmo_com_reservas_proprias [x]`, `::test_solicitante_com_parametro_invalido_recebe_403_e_nao_400`, `::test_parametro_invalido_recebe_400_com_o_campo [x]`, `::test_outros_metodos_recebem_405 [x]`; `reservas/tests/test_fila_de_pendentes.py::test_solicitante_nao_consulta_a_fila`, `::test_solicitante_nao_consulta_a_contagem`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
 | **Código (complementar)** | `reservas/application/fila_de_pendentes.py::ConsultarFilaDePendentes`, `reservas/api/serializers.py::FiltrosDaFilaSerializer`, `compartilhado/api/permissoes.py::ApenasGestor` |
+| **Regras de negócio** | [Perfil](../glossario.md#perfil), [Gestor](../glossario.md#gestor) |
+| **Decisões** | — |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+### <a id="rf-45"></a>RF-45 · Consultar o ranking de espaços mais reservados
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve permitir ao Gestor consultar os espaços com mais reservas que contam (Confirmada ou Concluída), considerando todo o período, do que tem mais para o que tem menos e, no empate, do menor para o maior código do espaço, mostrando de cada um a posição, o código, o nome (do cadastro de espaços, inclusive de um espaço desativado) e o total, até a quantidade pedida (de 1 a 20, cinco quando não informada) e sem os espaços que não têm nenhuma reserva que conta; uma reserva Confirmada que passa a Concluída continua contando uma só vez, uma que é Cancelada deixa de contar, o total muda assim que a reserva muda de situação, e o resultado é o mesmo em qualquer condição de funcionamento do sistema. |
+| **Origem** | NS-08 |
+| **Funcionalidade** | Extra (RDS-12) |
+| **Prioridade (QFD)** | Normal — dá ao Gestor a visão dos espaços mais procurados sem contar a lista de reservas à mão. |
+| **Vínculos** | UC: [UC-25 Consultar o ranking de espaços](../casos-de-uso/README.md#uc-25) (fluxo principal e alternativas) — na ficha: [UC-25 passos 1 e 2](../casos-de-uso/fichas-resumidas.md#uc25-p1), [UC-25 passo 3](../casos-de-uso/fichas-resumidas.md#uc25-p3), [A2.1](../casos-de-uso/fichas-resumidas.md#uc25-a2-1), [A2.2](../casos-de-uso/fichas-resumidas.md#uc25-a2-2), [A3.1](../casos-de-uso/fichas-resumidas.md#uc25-a3-1) · US/CA: [US-24 · CA-01](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-01) (TA-217), [US-24 · CA-02](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-02) (TA-218), [US-24 · CA-03](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-03) (TA-219), [US-24 · CA-04](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-04) (TA-220), [US-24 · CA-05](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-05) (TA-221), [US-24 · CA-06](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-06) (TA-222), [US-24 · CA-07](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-07) (TA-223), [US-24 · CA-08](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-08) (TA-224) |
+| **Evidência (complementar)** | `GET /api/reservas/ranking-de-espacos/?limite=` (só Gestor; sem tela). `reservas/tests/test_api_ranking_de_espacos.py::test_ranking_vem_em_ordem_com_posicao_nome_e_total`, `::test_limite_corta_a_lista_e_o_padrao_e_cinco`, `::test_sem_reservas_confirmadas_diz_que_nao_ha_ranking`, `::test_cancelar_uma_confirmada_pela_api_tira_do_ranking_sem_reconstruir`, `::test_repetir_o_mesmo_pedido_nao_conta_duas_vezes`, `::test_resposta_com_o_ranking_montado_e_a_do_banco_sao_iguais`, `::test_resposta_com_o_redis_fora_do_ar_e_a_mesma_e_nunca_503`; `reservas/tests/test_repositorio_reservas.py::test_ranking_ordena_por_total_decrescente_e_no_empate_por_id_do_espaco [x]`, `::test_ranking_conta_so_confirmadas_e_concluidas [x]` |
+| **Código (complementar)** | `reservas/application/ranking_de_espacos.py::ConsultarRankingDeEspacos`, `reservas/infrastructure/repositorio_django.py::RepositorioReservasDjango.contar_por_espaco_que_contam_no_ranking`, `reservas/api/views.py::RankingDeEspacosView`, `reservas/domain/situacao.py::SITUACOES_QUE_CONTAM_NO_RANKING` |
+| **Regras de negócio** | [Ranking de espaços](../glossario.md#ranking-de-espacos), [Reserva que conta no ranking](../glossario.md#reserva-que-conta-no-ranking), [situação da reserva](../glossario.md#situacao). O ranking é só informação de apoio: nunca decide nada. |
+| **Decisões** | — |
+| **Revisão** | 0.1 |
+| **Estado** | Rascunho |
+| **Responsável** | Max Zimmermann dos Reis |
+
+#### <a id="rf-45-1"></a>RF-45.1 · Recusar o ranking a quem não é Gestor ou com limite inválido
+
+| Campo | Conteúdo |
+|---|---|
+| **Enunciado** | O sistema deve impedir que o ranking de espaços seja consultado por quem não está identificado (pedindo que entre) ou é Solicitante (informando que não tem permissão), sem mostrar espaço nem número algum, e que seja consultado com um limite que não seja um número inteiro de 1 a 20, informando o campo. |
+| **Pai** | [RF-45](#rf-45) |
+| **Origem** | NS-08 |
+| **Funcionalidade** | F5 |
+| **Prioridade (QFD)** | Esperado — o ranking mostra o uso de todos os espaços, e só o Gestor o consulta ([NS-11](../visao.md#ns-11)). |
+| **Vínculos** | UC: [UC-25 Consultar o ranking de espaços](../casos-de-uso/README.md#uc-25) (exceção) — na ficha: [UC-25 E1.1](../casos-de-uso/fichas-resumidas.md#uc25-e1-1), [UC-25 E2.1](../casos-de-uso/fichas-resumidas.md#uc25-e2-1) · US/CA: [US-24 · CA-10](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-10) (TA-226), [US-24 · CA-09](../historias/US-24-consultar-o-ranking-de-espacos.md#us-24-ca-09) (TA-225) |
+| **Evidência (complementar)** | `GET /api/reservas/ranking-de-espacos/`: 401 `NAO_AUTENTICADO` ao anônimo; 403 `ACAO_NAO_PERMITIDA` ao Solicitante, antes de validar o limite; 400 `DADOS_INVALIDOS` com o campo; 405 `METODO_NAO_PERMITIDO` aos outros métodos; a rota está na [matriz de acesso](../../matriz_de_acesso.md). `reservas/tests/test_api_ranking_de_espacos.py::test_anonimo_recebe_401`, `::test_solicitante_recebe_403_mesmo_com_reservas_confirmadas`, `::test_solicitante_com_limite_invalido_recebe_403_e_nao_400`, `::test_limite_invalido_recebe_400_com_o_campo [x]`, `::test_outros_metodos_recebem_405 [x]`; `reservas/tests/test_ranking_de_espacos_caso_de_uso.py::test_solicitante_nao_consulta_o_ranking`; `config/tests/test_matriz_de_acesso.py::test_matriz_de_acesso [x]` |
+| **Código (complementar)** | `reservas/application/ranking_de_espacos.py::ConsultarRankingDeEspacos`, `reservas/api/serializers.py::FiltrosDoRankingSerializer`, `compartilhado/api/permissoes.py::ApenasGestor` |
 | **Regras de negócio** | [Perfil](../glossario.md#perfil), [Gestor](../glossario.md#gestor) |
 | **Decisões** | — |
 | **Revisão** | 0.1 |

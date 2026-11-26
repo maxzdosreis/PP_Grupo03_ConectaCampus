@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from contextlib import contextmanager
 
 from espacos.application.portas import (
@@ -106,6 +107,13 @@ class RepositorioEspacosEmMemoria(RepositorioEspacos):
         ]
         encontrados.sort(key=lambda espaco: espaco.nome)
         return [_copiar(espaco, espaco.id) for espaco in encontrados]
+
+    def listar_nomes(self, ids: Iterable[int]) -> dict[int, str]:
+        return {
+            espaco_id: self._espacos[espaco_id].nome
+            for espaco_id in set(ids)
+            if espaco_id in self._espacos
+        }
 
     def existe_com_nome(self, nome: str, *, ignorar_id: int | None = None) -> bool:
         return any(

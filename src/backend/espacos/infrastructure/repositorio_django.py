@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from contextlib import AbstractContextManager
 
 from django.db import IntegrityError, transaction
@@ -52,6 +53,10 @@ class RepositorioEspacosDjango(RepositorioEspacos):
         if tipo is not None:
             consulta = consulta.filter(tipo=tipo)
         return [_para_entidade(model) for model in consulta]
+
+    def listar_nomes(self, ids: Iterable[int]) -> dict[int, str]:
+        consulta = EspacoEsportivoModel.objects.filter(pk__in=set(ids))
+        return dict(consulta.values_list("pk", "nome"))
 
     def existe_com_nome(self, nome: str, *, ignorar_id: int | None = None) -> bool:
         consulta = EspacoEsportivoModel.objects.filter(nome__iexact=nome)

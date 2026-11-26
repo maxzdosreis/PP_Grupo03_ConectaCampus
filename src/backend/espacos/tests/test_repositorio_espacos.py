@@ -346,3 +346,48 @@ def test_model_mostra_o_nome_do_espaco():
 
     # Assert
     assert texto == "Quadra Central"
+
+
+def test_listar_nomes_devolve_o_nome_de_cada_espaco_pedido_inclusive_inativo(
+    repositorio,
+):
+    # Arrange
+    ativo = repositorio.salvar(novo_espaco(nome="Ginásio A"))
+    inativo = repositorio.salvar(novo_espaco(nome="Campo Velho", ativo=False))
+    repositorio.salvar(novo_espaco(nome="Fora do pedido"))
+
+    # Act
+    resultado = repositorio.listar_nomes([ativo.id, inativo.id])
+
+    # Assert
+    assert resultado == {ativo.id: "Ginásio A", inativo.id: "Campo Velho"}
+
+
+def test_listar_nomes_ignora_ids_inexistentes_e_repetidos(repositorio):
+    # Arrange
+    espaco = repositorio.salvar(novo_espaco(nome="Ginásio A"))
+
+    # Act
+    resultado = repositorio.listar_nomes([espaco.id, espaco.id, ID_INEXISTENTE])
+
+    # Assert
+    assert resultado == {espaco.id: "Ginásio A"}
+
+
+def test_listar_nomes_sem_ids_devolve_dicionario_vazio(repositorio):
+    assert repositorio.listar_nomes([]) == {}
+
+
+@pytest.mark.django_db
+def test_listar_nomes_no_banco_faz_uma_consulta_so():
+    # Arrange
+    repositorio = RepositorioEspacosDjango()
+    primeiro = repositorio.salvar(novo_espaco(nome="Ginásio A"))
+    segundo = repositorio.salvar(novo_espaco(nome="Campo B"))
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.listar_nomes([primeiro.id, segundo.id])
+
+    # Assert
+    assert len(consultas) == 1

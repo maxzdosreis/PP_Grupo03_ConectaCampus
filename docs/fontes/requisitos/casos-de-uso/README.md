@@ -23,6 +23,7 @@ Diagrama UML de casos de uso do Conecta Campus, índice dos casos de uso (UC-xx)
 | 0.1 | 10/11/2026 | Max Zimmermann dos Reis | RF → UC: RF-24.1 (recusa por horário do [CR-01](../mudancas/CR-01-situacao-e-horario-da-reserva.md)) em UC-10 E6.8 e no índice; a contagem passa a 63 RF; UC-13 também guarda as tentativas recusadas ([CR-02](../mudancas/CR-02-tentativas-recusadas-no-historico.md)). Código nas tarefas RES-11 e RES-12 (REQ-13). Mudança comportamental da especificação. Sem aprovação. |
 | 0.1 | 16/11/2026 | Max Zimmermann dos Reis | UC-23 · Gerir usuários (Gestor do serviço, diagrama do negócio) e RF → UC do RF-42, RF-43, RF-43.1 e RF-43.2; a contagem passa a 70 RF ([DEC-27](../decisoes/DEC-27.md), [CR-07](../mudancas/CR-07-gestao-de-usuarios.md), AUT-11). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 | 0.1 | 25/11/2026 | Max Zimmermann dos Reis | UC-24 · Consultar a fila de pendentes e as contagens (Atendente responsável, diagrama do negócio) e RF → UC do RF-44, RF-44.1 e RF-44.2; a contagem passa a 73 RF ([CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md), RDS-08). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | UC-25 · Consultar o ranking de espaços (Atendente responsável, diagrama do negócio) e RF → UC do RF-45 e RF-45.1; a contagem passa a 75 RF ([CR-10](../mudancas/CR-10-ranking-de-espacos.md), RDS-12). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -106,7 +107,7 @@ A cor só reforça o estereótipo `«subfunção»`, que já aparece escrito: o 
 | [UC-04 Solicitar reserva](UC-04-solicitar-reserva.md) | completa, com o [fluxo de decisão](UC-04-solicitar-reserva.md#fluxo-de-decisão) | UC-04, com UC-05 e UC-13 (passos) e a extensão UC-06 (alternativa A3.1) |
 | [UC-10 Alterar situação da reserva](UC-10-alterar-situacao-da-reserva.md) | completa, com a tabela de variações | UC-10 e os filhos UC-11, UC-17, UC-18 e UC-19, com UC-12 e UC-13 (passos) |
 | [UC-14 Cadastrar espaço](UC-14-cadastrar-espaco.md) | completa | UC-14 |
-| [Fichas resumidas](fichas-resumidas.md) | resumida | UC-01, UC-03, UC-06, UC-07, UC-08, UC-09, UC-15, UC-16, UC-23, UC-24; apoio: UC-20, UC-21, UC-22 |
+| [Fichas resumidas](fichas-resumidas.md) | resumida | UC-01, UC-03, UC-06, UC-07, UC-08, UC-09, UC-15, UC-16, UC-23, UC-24, UC-25; apoio: UC-20, UC-21, UC-22 |
 
 Fonte do fluxo de decisão: [`fluxo-solicitar-reserva.puml`](fluxo-solicitar-reserva.puml) (diagrama de atividade, A3·s17), com as imagens geradas como as dos diagramas de casos de uso.
 
@@ -166,10 +167,11 @@ Nível: **objetivo** = objetivo do usuário (o "nível do mar"); **subfunção**
 | <a id="uc-22"></a>UC-22 | Verificar se o sistema está no ar | Saber se o sistema, o banco de dados e o cache respondem, antes de usar ou demonstrar. | Equipe de TI (UCD-02) | — | objetivo (apoio) | [RF-40](../requisitos/rf-gerais.md#rf-40) | [US-19 Verificar se o sistema está no ar](../historias/US-19-verificar-se-o-sistema-esta-no-ar.md) | [Ficha resumida, apoio](fichas-resumidas.md#uc-22) |
 | <a id="uc-23"></a>UC-23 | Gerir usuários | Dar ou tirar acessos: promover, rebaixar, desativar e reativar a conta de outra pessoa, sem deixar o sistema sem Gestor. | Gestor do serviço | — | objetivo | [RF-42](../requisitos/rf-contas.md#rf-42), [RF-43](../requisitos/rf-contas.md#rf-43), [RF-43.1](../requisitos/rf-contas.md#rf-43-1), [RF-43.2](../requisitos/rf-contas.md#rf-43-2) | [US-22 Gerir usuários](../historias/US-22-gerir-usuarios.md) | [Ficha resumida](fichas-resumidas.md#uc-23) |
 | <a id="uc-24"></a>UC-24 | Consultar a fila de pendentes e as contagens | Ver o que espera decisão, na ordem em que foi pedido, e quantas reservas há em cada situação. | Atendente responsável | — | objetivo | [RF-44](../requisitos/rf-reservas.md#rf-44), [RF-44.1](../requisitos/rf-reservas.md#rf-44-1), [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) | [US-23 Consultar a fila de pendentes e as contagens](../historias/US-23-consultar-a-fila-de-pendentes.md) | [Ficha resumida](fichas-resumidas.md#uc-24) |
+| <a id="uc-25"></a>UC-25 | Consultar o ranking de espaços | Ver quais espaços têm mais reservas confirmadas, em ordem, para saber onde está a procura. | Atendente responsável | — | objetivo | [RF-45](../requisitos/rf-reservas.md#rf-45), [RF-45.1](../requisitos/rf-reservas.md#rf-45-1) | [US-24 Consultar o ranking de espaços](../historias/US-24-consultar-o-ranking-de-espacos.md) | [Ficha resumida](fichas-resumidas.md#uc-25) |
 
 ## Rastreabilidade RF → UC
 
-Todos os 73 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "Como entra" diz o papel do RF no caso de uso: **fluxo principal**, **alternativa** (outro caminho que ainda alcança a meta), **exceção** (a meta não é alcançada) ou **transversal** (qualidade de todos os casos de uso), seguido do passo, da alternativa ou da exceção exata nas fichas (REQ-04), com link. A coluna UC também está em cada ficha (campo "Vínculos") e na [matriz de rastreabilidade](../rastreabilidade/matriz.md), gerada a partir desta tabela (REQ-06).
+Todos os 75 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "Como entra" diz o papel do RF no caso de uso: **fluxo principal**, **alternativa** (outro caminho que ainda alcança a meta), **exceção** (a meta não é alcançada) ou **transversal** (qualidade de todos os casos de uso), seguido do passo, da alternativa ou da exceção exata nas fichas (REQ-04), com link. A coluna UC também está em cada ficha (campo "Vínculos") e na [matriz de rastreabilidade](../rastreabilidade/matriz.md), gerada a partir desta tabela (REQ-06).
 
 | RF | Título | UC | Como entra | Também em |
 |---|---|---|---|---|
@@ -243,6 +245,8 @@ Todos os 73 RF da [tabela-resumo da SRS](../requisitos/srs.md#tabela-resumo). "C
 | [RF-44](../requisitos/rf-reservas.md#rf-44) | Consultar a fila de reservas pendentes | [UC-24 Consultar a fila de pendentes e as contagens](#uc-24) | fluxo principal — [UC-24 passos 1 e 2](fichas-resumidas.md#uc24-p1) | — |
 | [RF-44.1](../requisitos/rf-reservas.md#rf-44-1) | Consultar a contagem de reservas por situação | [UC-24 Consultar a fila de pendentes e as contagens](#uc-24) | fluxo principal — [UC-24 passos 3 e 4](fichas-resumidas.md#uc24-p3) | — |
 | [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) | Recusar a consulta de quem não é Gestor ou com página inválida | [UC-24 Consultar a fila de pendentes e as contagens](#uc-24) | exceção — [UC-24 E1.1](fichas-resumidas.md#uc24-e1-1), [UC-24 E2.1](fichas-resumidas.md#uc24-e2-1) | — |
+| [RF-45](../requisitos/rf-reservas.md#rf-45) | Consultar o ranking de espaços mais reservados | [UC-25 Consultar o ranking de espaços](#uc-25) | fluxo principal — [UC-25 passos 1 e 2](fichas-resumidas.md#uc25-p1), [UC-25 passo 3](fichas-resumidas.md#uc25-p3) | — |
+| [RF-45.1](../requisitos/rf-reservas.md#rf-45-1) | Recusar o ranking a quem não é Gestor ou com limite inválido | [UC-25 Consultar o ranking de espaços](#uc-25) | exceção — [UC-25 E1.1](fichas-resumidas.md#uc25-e1-1), [UC-25 E2.1](fichas-resumidas.md#uc25-e2-1) | — |
 | [RF-38](../requisitos/rf-gerais.md#rf-38) | Ver o resultado de cada operação | — (todos) | transversal (qualidade de todos os casos de uso) | — |
 | [RF-39](../requisitos/rf-gerais.md#rf-39) | Carregar dados de exemplo | [UC-21 Carregar dados de exemplo](#uc-21) | fluxo principal — [UC-21 passos 1 a 4](fichas-resumidas.md#uc21-p1) | — |
 | [RF-40](../requisitos/rf-gerais.md#rf-40) | Verificar se o sistema está no ar | [UC-22 Verificar se o sistema está no ar](#uc-22) | fluxo principal — [UC-22 passos 1 a 3](fichas-resumidas.md#uc22-p1) | — |

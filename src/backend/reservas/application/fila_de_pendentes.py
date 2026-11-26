@@ -21,7 +21,7 @@ class ConsultarFilaDePendentes:
         self._indice = indice
 
     def executar(self, paginacao: Paginacao, *, ator: Ator) -> PaginaDeReservas:
-        _exigir_gestor(ator)
+        exigir_gestor(ator)
         pagina = self._pelo_indice(paginacao)
         if pagina is None:
             return self._repositorio.listar_pendentes(paginacao)
@@ -60,7 +60,7 @@ class ContarReservasPorSituacao:
         self._indice = indice
 
     def executar(self, *, ator: Ator) -> dict[SituacaoReserva, int]:
-        _exigir_gestor(ator)
+        exigir_gestor(ator)
         contagem = self._pelo_indice()
         if contagem is None:
             return self._repositorio.contar_por_situacao()
@@ -74,6 +74,6 @@ class ContarReservasPorSituacao:
             return None
 
 
-def _exigir_gestor(ator: Ator) -> None:
+def exigir_gestor(ator: Ator) -> None:
     if ator.papel is not PapelDoAtor.GESTOR:
         raise AcaoNaoPermitida

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Protocol
 
-from reservas.application.portas import RegistroDoIndice
+from reservas.application.portas import RegistroDoIndice, RegistroDoRanking
 from reservas.domain.registro_de_situacao import RegistroDeSituacao
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
@@ -156,4 +156,23 @@ class RepositorioReservas(Protocol):
 
         Só id, situação e criada_em, para a reconstrução do índice ler em lotes
         sem trazer a tabela inteira nem o histórico.
+        """
+
+    def contar_por_espaco_que_contam_no_ranking(
+        self, limite: int
+    ) -> tuple[tuple[int, int], ...]:
+        """Pares (espaço, total) das reservas cuja situação conta no ranking.
+
+        Ordem do negócio: total decrescente e, no empate, id do espaço crescente.
+        Espaços sem reserva que conta não aparecem. Até `limite` pares; limite
+        <= 0 lança `ValueError`. É a mesma ordem do ranking projetado.
+        """
+
+    def listar_para_ranking(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoRanking]:
+        """Até `limite` reservas com id maior que `depois_de_id`, por id.
+
+        Só id da reserva, id do espaço e situação, para a reconstrução do
+        ranking ler em lotes sem trazer a tabela inteira.
         """

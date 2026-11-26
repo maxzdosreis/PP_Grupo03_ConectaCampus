@@ -55,6 +55,7 @@ rectangle "Conecta Campus" {
   usecase "UC-19 Concluir reserva" as UC19
   usecase "UC-23 Gerir usuários" as UC23
   usecase "UC-24 Consultar a fila de pendentes e as contagens" as UC24
+  usecase "UC-25 Consultar o ranking de espaços" as UC25
 
   usecase "UC-01 Cadastrar-se" as UC01
   usecase "UC-02 Autenticar" as UC02
@@ -79,6 +80,7 @@ Atendente -- UC17
 Atendente -- UC18
 Atendente -- UC19
 Atendente -- UC24
+Atendente -- UC25
 
 ' Inclusões (obrigatórias): base ..> incluído ("...>" é a mesma seta, mais longa, só de layout)
 UC04 ..> UC05 : <<include>>

@@ -27,6 +27,10 @@ class SituacaoReserva(StrEnum):
     def ocupa_horario(self) -> bool:
         return self in SITUACOES_QUE_OCUPAM_HORARIO
 
+    @property
+    def conta_no_ranking(self) -> bool:
+        return self in SITUACOES_QUE_CONTAM_NO_RANKING
+
 
 _ROTULOS = {
     SituacaoReserva.SOLICITADA: "Solicitada",
@@ -79,6 +83,10 @@ SITUACOES_QUE_EXIGEM_MOTIVO = frozenset(
 
 SITUACOES_QUE_OCUPAM_HORARIO = frozenset(
     {SituacaoReserva.SOLICITADA, SituacaoReserva.CONFIRMADA}
+)
+
+SITUACOES_QUE_CONTAM_NO_RANKING = frozenset(
+    {SituacaoReserva.CONFIRMADA, SituacaoReserva.CONCLUIDA}
 )
 
 SITUACOES_SO_A_PARTIR_DO_TERMINO = frozenset({SituacaoReserva.CONCLUIDA})

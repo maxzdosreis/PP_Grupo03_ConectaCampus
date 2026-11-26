@@ -1,5 +1,6 @@
 import os
 import re
+from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from datetime import date, datetime, time
@@ -15,7 +16,10 @@ from reservas.application.portas import (
     EspacoReservavel,
     IndiceDeReservas,
     IndiceIndisponivel,
+    RankingDeEspacos,
+    RankingIndisponivel,
     RegistroDoIndice,
+    RegistroDoRanking,
     validar_janela,
 )
 from reservas.application.repositorio import (
@@ -169,10 +173,16 @@ class ConsultaDeEspacosEmMemoria(ConsultaDeEspacos):
         self.eventos.append("travar")
         return self.obter_espaco_reservavel(espaco_id)
 
+    def nomes_dos_espacos(self, ids: Iterable[int]) -> Mapping[int, str]:
+        self.ids_com_nome_consultados = list(ids)
+        return {
+            espaco_id: self._espacos[espaco_id].nome
+            for espaco_id in self.ids_com_nome_consultados
+            if espaco_id in self._espacos
+        }
+
 
 class AgendaDoDiaEmMemoria(AgendaDoDia):
-    """Mesma semântica do Redis: miss × dia vazio e escrita sem projeção é no-op."""
-
     def __init__(self, *, indisponivel: bool = False) -> None:
         self.indisponivel = indisponivel
         self._dias: dict[tuple[int, date], dict[int, HorarioOcupado]] = {}
@@ -312,6 +322,58 @@ class IndiceDeReservasEmMemoria(IndiceDeReservas):
             raise IndiceIndisponivel
 
 
+class RankingDeEspacosEmMemoria(RankingDeEspacos):
+    def __init__(self, *, indisponivel: bool = False) -> None:
+        self.indisponivel = indisponivel
+        self._montado = False
+        self._versao = 0
+        self._livro: dict[int, int] = {}
+
+    def aplicar(
+        self, reserva_id: int, espaco_id: int, situacao: SituacaoReserva
+    ) -> None:
+        self._exigir_disponivel()
+        self._versao += 1
+        if not self._montado:
+            return
+        if situacao.conta_no_ranking:
+            self._livro.setdefault(reserva_id, espaco_id)
+        else:
+            self._livro.pop(reserva_id, None)
+
+    def top(self, limite: int) -> tuple[tuple[int, int], ...] | None:
+        validar_janela(limite, 0)
+        self._exigir_disponivel()
+        if not self._montado:
+            return None
+        totais = Counter(self._livro.values())
+        ordem = sorted(totais.items(), key=lambda par: (-par[1], par[0]))
+        return tuple(ordem[:limite])
+
+    def versao(self) -> int:
+        self._exigir_disponivel()
+        return self._versao
+
+    def substituir(
+        self, registros: Iterable[RegistroDoRanking], *, versao: int
+    ) -> bool:
+        self._exigir_disponivel()
+        materializados = list(registros)
+        if self._versao != versao:
+            return False
+        self._livro = {
+            r.reserva_id: r.espaco_id
+            for r in materializados
+            if r.situacao.conta_no_ranking
+        }
+        self._montado = True
+        return True
+
+    def _exigir_disponivel(self) -> None:
+        if self.indisponivel:
+            raise RankingIndisponivel
+
+
 class RepositorioReservasEmMemoria(RepositorioReservas):
     def __init__(self, eventos: list[str] | None = None) -> None:
         self.eventos = eventos if eventos is not None else []
@@ -324,6 +386,7 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         self.chamadas_de_listar_pendentes = 0
         self.chamadas_de_listar_por_ids = 0
         self.chamadas_de_contar_por_situacao = 0
+        self.chamadas_de_contar_por_espaco = 0
 
     @contextmanager
     def em_transacao(self) -> Iterator[None]:
@@ -454,6 +517,30 @@ class RepositorioReservasEmMemoria(RepositorioReservas):
         ids = sorted(i for i in self._reservas if i > depois_de_id)[:limite]
         return [
             RegistroDoIndice(i, self._reservas[i].situacao, self._reservas[i].criada_em)
+            for i in ids
+        ]
+
+    def contar_por_espaco_que_contam_no_ranking(
+        self, limite: int
+    ) -> tuple[tuple[int, int], ...]:
+        validar_janela(limite, 0)
+        self.chamadas_de_contar_por_espaco += 1
+        totais = Counter(
+            reserva.espaco_id
+            for reserva in self._reservas.values()
+            if reserva.situacao.conta_no_ranking
+        )
+        ordem = sorted(totais.items(), key=lambda par: (-par[1], par[0]))
+        return tuple(ordem[:limite])
+
+    def listar_para_ranking(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoRanking]:
+        ids = sorted(i for i in self._reservas if i > depois_de_id)[:limite]
+        return [
+            RegistroDoRanking(
+                i, self._reservas[i].espaco_id, self._reservas[i].situacao
+            )
             for i in ids
         ]
 

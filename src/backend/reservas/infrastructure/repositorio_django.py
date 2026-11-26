@@ -6,7 +6,11 @@ from django.db import IntegrityError, transaction
 from django.db.models import Count, Q, QuerySet
 from django.db.models.functions import TruncDate
 
-from reservas.application.portas import RegistroDoIndice
+from reservas.application.portas import (
+    RegistroDoIndice,
+    RegistroDoRanking,
+    validar_janela,
+)
 from reservas.application.repositorio import (
     FiltrosDeReservas,
     Paginacao,
@@ -21,7 +25,11 @@ from reservas.domain.registro_de_situacao import (
     ResultadoDoRegistro,
 )
 from reservas.domain.reserva import Reserva
-from reservas.domain.situacao import SITUACOES_QUE_OCUPAM_HORARIO, SituacaoReserva
+from reservas.domain.situacao import (
+    SITUACOES_QUE_CONTAM_NO_RANKING,
+    SITUACOES_QUE_OCUPAM_HORARIO,
+    SituacaoReserva,
+)
 from reservas.domain.solicitante import Solicitante
 from reservas.infrastructure.models import (
     CONSTRAINT_SEM_SOBREPOSICAO,
@@ -172,6 +180,33 @@ class RepositorioReservasDjango(RepositorioReservas):
         return [
             RegistroDoIndice(reserva_id, SituacaoReserva(situacao), criada_em)
             for reserva_id, situacao, criada_em in consulta
+        ]
+
+    def contar_por_espaco_que_contam_no_ranking(
+        self, limite: int
+    ) -> tuple[tuple[int, int], ...]:
+        validar_janela(limite, 0)
+        consulta = (
+            ReservaModel.objects.filter(situacao__in=SITUACOES_QUE_CONTAM_NO_RANKING)
+            .order_by()
+            .values("espaco_id")
+            .annotate(total=Count("pk"))
+            .order_by("-total", "espaco_id")
+            .values_list("espaco_id", "total")[:limite]
+        )
+        return tuple(consulta)
+
+    def listar_para_ranking(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoRanking]:
+        consulta = (
+            ReservaModel.objects.filter(pk__gt=depois_de_id)
+            .order_by("pk")
+            .values_list("pk", "espaco_id", "situacao")[:limite]
+        )
+        return [
+            RegistroDoRanking(reserva_id, espaco_id, SituacaoReserva(situacao))
+            for reserva_id, espaco_id, situacao in consulta
         ]
 
     def _lancar_conflito_de_horario(self, reserva: Reserva) -> None:

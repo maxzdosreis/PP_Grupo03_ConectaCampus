@@ -8,6 +8,7 @@ from espacos.application.casos_de_uso import (
     EditarEspaco,
     ListarEspacos,
     ObterEspaco,
+    ObterNomesDosEspacos,
     VerificarEspacoDisponivel,
 )
 from espacos.domain.excecoes import (
@@ -272,3 +273,15 @@ def test_verificar_espaco_disponivel_inexistente_lanca_espaco_nao_encontrado(
 
     # Assert
     assert erro.value.espaco_id == ID_INEXISTENTE
+
+
+def test_obter_nomes_dos_espacos_repassa_os_ids_e_devolve_so_leitura():
+    # Arrange
+    repositorio = RepositorioEspacosEmMemoria()
+    espaco = repositorio.salvar(novo_espaco(nome="Ginásio A", ativo=False))
+
+    # Act
+    resultado = ObterNomesDosEspacos(repositorio).executar([espaco.id, ID_INEXISTENTE])
+
+    # Assert
+    assert resultado == {espaco.id: "Ginásio A"}

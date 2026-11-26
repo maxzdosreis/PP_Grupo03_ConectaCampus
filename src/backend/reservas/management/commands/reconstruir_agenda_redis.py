@@ -1,7 +1,15 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from reservas.api.dependencias import reconstruir_agenda, reconstruir_indice
-from reservas.application.portas import AgendaIndisponivel, IndiceIndisponivel
+from reservas.api.dependencias import (
+    reconstruir_agenda,
+    reconstruir_indice,
+    reconstruir_ranking,
+)
+from reservas.application.portas import (
+    AgendaIndisponivel,
+    IndiceIndisponivel,
+    RankingIndisponivel,
+)
 from reservas.application.reconstruir_agenda import ResultadoDaReconstrucao
 from reservas.application.reconstruir_indice import ResultadoDaReconstrucaoDoIndice
 
@@ -15,12 +23,18 @@ MENSAGEM_INDICE_INDISPONIVEL = (
     "comando de novo quando ele voltar."
 )
 
+MENSAGEM_RANKING_INDISPONIVEL = (
+    "A agenda e as filas foram reconstruídas, mas o Redis ficou indisponível "
+    "durante a reconstrução do ranking de espaços, que continua como estava; "
+    "rode o comando de novo quando ele voltar."
+)
+
 
 class Command(BaseCommand):
     help = (
         "Refaz no Redis, a partir do PostgreSQL, a agenda (de hoje em diante) e "
-        "as filas e contagens de reservas por situação. É seguro rodar várias "
-        "vezes e pode ser usado depois de reiniciar o Redis."
+        "as filas e contagens de reservas por situação e o ranking de espaços. "
+        "É seguro rodar várias vezes e pode ser usado depois de reiniciar o Redis."
     )
 
     def handle(self, *args, **options):
@@ -32,6 +46,7 @@ class Command(BaseCommand):
         if resultado.dias_descartados:
             self.stdout.write(self.style.WARNING(_aviso(resultado.dias_descartados)))
         self._reconstruir_o_indice()
+        self._reconstruir_o_ranking()
 
     def _reconstruir_o_indice(self) -> None:
         try:
@@ -42,6 +57,16 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(_aviso_do_indice()))
         else:
             self.stdout.write(self.style.SUCCESS(_resumo_do_indice(indice)))
+
+    def _reconstruir_o_ranking(self) -> None:
+        try:
+            ranking = reconstruir_ranking().executar()
+        except RankingIndisponivel as erro:
+            raise CommandError(MENSAGEM_RANKING_INDISPONIVEL) from erro
+        if ranking.descartado:
+            self.stdout.write(self.style.WARNING(_aviso_do_ranking()))
+        else:
+            self.stdout.write(self.style.SUCCESS(_resumo_do_ranking(ranking)))
 
 
 def _plural(quantidade: int, singular: str, plural: str) -> str:
@@ -72,5 +97,20 @@ def _resumo_do_indice(resultado: ResultadoDaReconstrucaoDoIndice) -> str:
 def _aviso_do_indice() -> str:
     return (
         "As filas e contagens foram descartadas porque as reservas mudaram "
+        "durante a reconstrução; rode o comando de novo."
+    )
+
+
+def _resumo_do_ranking(resultado) -> str:
+    espacos = _plural(resultado.espacos, "espaço", "espaços")
+    reservas = _plural(
+        resultado.reservas_contadas, "reserva contada", "reservas contadas"
+    )
+    return f"Ranking de espaços reconstruído: {espacos}, {reservas}."
+
+
+def _aviso_do_ranking() -> str:
+    return (
+        "O ranking de espaços foi descartado porque as reservas mudaram "
         "durante a reconstrução; rode o comando de novo."
     )

@@ -11,6 +11,7 @@ from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
 from reservas.infrastructure.indice_redis import IndiceDeReservasRedis
+from reservas.infrastructure.ranking_redis import RankingDeEspacosRedis
 from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 from reservas.tests.fakes import ANA, FUNCIONAMENTO_PADRAO, GESTOR
@@ -54,6 +55,7 @@ def _com_agenda():
         RepositorioReservasDjango(),
         AgendaDoDiaRedis(),
         IndiceDeReservasRedis(),
+        RankingDeEspacosRedis(),
         apos_o_commit=lambda acao: acao(),
     )
 

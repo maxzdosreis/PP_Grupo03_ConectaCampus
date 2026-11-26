@@ -1,3 +1,5 @@
+from collections.abc import Iterable, Mapping
+
 from espacos import publico
 from reservas.application.portas import ConsultaDeEspacos, EspacoReservavel
 from reservas.domain.funcionamento import FuncionamentoDoEspaco
@@ -11,6 +13,9 @@ class ConsultaDeEspacosViaFachada(ConsultaDeEspacos):
         return _como_reservavel(
             publico.verificar_espaco_disponivel_para_reserva(espaco_id)
         )
+
+    def nomes_dos_espacos(self, ids: Iterable[int]) -> Mapping[int, str]:
+        return publico.nomes_dos_espacos(ids)
 
 
 def _como_reservavel(espaco: publico.EspacoDisponivel) -> EspacoReservavel:
