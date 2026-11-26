@@ -1,0 +1,9 @@
+# Comando: docker compose exec -T backend ruff check . 2>&1 | tail -n 5; docker compose exec -T 
+#   backend ruff format --check . 2>&1 | tail -n 3
+# Data: 2026-11-26 08:42:48 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 3)
+# Redis: 8.10.3
+# Modo: padrao (depois da correcao dos 3 F401 na arvore de trabalho)
+#
+All checks passed!
+245 files already formatted

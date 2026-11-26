@@ -1,0 +1,148 @@
+# Comando: cd backend
+#   echo "## Construtores de chave (cache.make_key) por arquivo"
+#   grep -n "make_key(" reservas/infrastructure/agenda_redis.py 
+#   reservas/infrastructure/indice_redis.py reservas/infrastructure/ranking_redis.py 
+#   espacos/infrastructure/cache_de_espacos_redis.py contas/api/limites.py
+#   echo; echo "## Scripts Lua registrados (register_script): arquivo:linha"
+#   grep -rn "register_script" --include=*.py contas espacos reservas compartilhado | grep -v 
+#   "/tests/"
+#   echo "total de register_script: $(grep -rn 'register_script' --include=*.py contas espacos 
+#   reservas compartilhado | grep -v '/tests/' | wc -l)"
+#   echo; echo "## Constantes com o texto Lua"
+#   grep -rnE '^_[A-Z_]+ = ("""|f""")' --include=*.py contas espacos reservas | grep -v "/tests/"
+#   echo; echo "## Camadas de uma criacao de reserva (POST /api/reservas/)"
+#   grep -n "dependencias.criar_reserva" reservas/api/views.py
+#   grep -n "^def criar_reserva\|^def _repositorio_com_agenda" reservas/api/dependencias.py
+#   grep -n "def executar" reservas/application/casos_de_uso.py | head -1
+#   grep -n "obter_espaco_reservavel_travado" reservas/application/casos_de_uso.py 
+#   reservas/infrastructure/consulta_de_espacos.py
+#   grep -n "def verificar_espaco_disponivel_para_reserva" espacos/publico.py
+#   grep -n "select_for_update" espacos/infrastructure/repositorio_django.py
+#   grep -n "garantir_horario_livre(reserva" reservas/application/casos_de_uso.py
+#   grep -n "    def salvar" reservas/infrastructure/repositorio_com_agenda.py 
+#   reservas/infrastructure/repositorio_django.py
+#   grep -n "transaction.on_commit" reservas/infrastructure/repositorio_com_agenda.py
+#   grep -n "    def registrar\|    def aplicar" reservas/infrastructure/agenda_redis.py 
+#   reservas/infrastructure/indice_redis.py reservas/infrastructure/ranking_redis.py
+#   grep -n "CONSTRAINT_SEM_SOBREPOSICAO =\|ExclusionConstraint(" reservas/infrastructure/models.py
+#   echo; echo "## Contrato do import-linter (trecho do pyproject.toml)"
+#   sed -n 94,106p pyproject.toml
+#   echo; echo "## Onde o pacote redis e importado (fora de testes)"
+#   grep -rn "^import redis\|^from redis" --include=*.py contas espacos reservas compartilhado 
+#   config | grep -v "/tests/"
+#   echo; echo "## O mesmo contrato, executado (lint-imports)"
+#   docker compose exec -T backend lint-imports 2>&1 | tr -d '\r' | tail -n 20
+# Data: 2026-11-26 00:10:39 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: codigo + lint-imports (padrao)
+#
+## Construtores de chave (cache.make_key) por arquivo
+reservas/infrastructure/agenda_redis.py:131:        padrao = cache.make_key(f"{_PREFIXO_DA_PROJECAO}*")
+reservas/infrastructure/agenda_redis.py:132:        prefixo = cache.make_key(_PREFIXO_DA_PROJECAO)
+reservas/infrastructure/agenda_redis.py:189:    return cache.make_key(f"{_PREFIXO_DA_PROJECAO}{espaco_id}:{data.isoformat()}")
+reservas/infrastructure/agenda_redis.py:202:    return cache.make_key(f"agenda:versao:espaco:{espaco_id}:{data.isoformat()}")
+reservas/infrastructure/indice_redis.py:192:    return [cache.make_key(f"reservas:tmp:{sufixo}:{nome}") for nome in nomes]
+reservas/infrastructure/indice_redis.py:196:    return cache.make_key("reservas:pendentes")
+reservas/infrastructure/indice_redis.py:200:    return cache.make_key(f"reservas:situacao:{situacao.value}")
+reservas/infrastructure/indice_redis.py:204:    return cache.make_key("reservas:indice:montado")
+reservas/infrastructure/indice_redis.py:208:    return cache.make_key("reservas:indice:versao")
+reservas/infrastructure/ranking_redis.py:202:    return [cache.make_key(f"ranking:tmp:{sufixo}:{nome}") for nome in nomes]
+reservas/infrastructure/ranking_redis.py:206:    return cache.make_key("ranking:espacos")
+reservas/infrastructure/ranking_redis.py:210:    return cache.make_key("ranking:contadas")
+reservas/infrastructure/ranking_redis.py:214:    return cache.make_key("ranking:montado")
+reservas/infrastructure/ranking_redis.py:218:    return cache.make_key("ranking:versao")
+espacos/infrastructure/cache_de_espacos_redis.py:94:    return cache.make_key(f"espaco:{espaco_id}")
+espacos/infrastructure/cache_de_espacos_redis.py:98:    return cache.make_key(f"espaco:versao:{espaco_id}")
+contas/api/limites.py:107:    nome = cache.make_key(chave)
+
+## Scripts Lua registrados (register_script): arquivo:linha
+contas/api/limites.py:109:    registrar = cliente.register_script(_REGISTRAR_TENTATIVA)
+espacos/infrastructure/cache_de_espacos_redis.py:69:            script = cliente(chave, escrita=True).register_script(_GUARDAR)
+espacos/infrastructure/cache_de_espacos_redis.py:78:            script = cliente(chave, escrita=True).register_script(_INVALIDAR)
+reservas/infrastructure/agenda_redis.py:89:            script = _cliente(chave, escrita=True).register_script(_REGISTRAR)
+reservas/infrastructure/agenda_redis.py:106:            script = _cliente(chave, escrita=True).register_script(_REMOVER)
+reservas/infrastructure/agenda_redis.py:172:            script = _cliente(chave, escrita=True).register_script(_SUBSTITUIR)
+reservas/infrastructure/indice_redis.py:83:            script = cliente(chaves[0], escrita=True).register_script(_APLICAR)
+reservas/infrastructure/indice_redis.py:140:            script = cliente(chaves[0], escrita=True).register_script(_TROCAR)
+reservas/infrastructure/ranking_redis.py:85:            script = cliente(chaves[0], escrita=True).register_script(_APLICAR)
+reservas/infrastructure/ranking_redis.py:141:            script = cliente(chaves[0], escrita=True).register_script(_TROCAR)
+total de register_script: 10
+
+## Constantes com o texto Lua
+contas/api/limites.py:16:_REGISTRAR_TENTATIVA = """
+espacos/infrastructure/cache_de_espacos_redis.py:17:_GUARDAR = """
+espacos/infrastructure/cache_de_espacos_redis.py:28:_INVALIDAR = """
+reservas/infrastructure/agenda_redis.py:28:_AVANCAR_VERSAO = """
+reservas/infrastructure/agenda_redis.py:33:_EXIGIR_PROJECAO = """
+reservas/infrastructure/agenda_redis.py:39:_TIRAR_A_RESERVA = """
+reservas/infrastructure/agenda_redis.py:60:_SUBSTITUIR = """
+reservas/infrastructure/indice_redis.py:27:_APLICAR = """
+reservas/infrastructure/indice_redis.py:48:_TROCAR = """
+reservas/infrastructure/ranking_redis.py:24:_APLICAR = """
+reservas/infrastructure/ranking_redis.py:46:_TROCAR = """
+
+## Camadas de uma criacao de reserva (POST /api/reservas/)
+51:        reserva = dependencias.criar_reserva().executar(
+47:def _repositorio_com_agenda(
+58:def criar_reserva(relogio: Callable[[], datetime] = timezone.now) -> CriarReserva:
+53:    def executar(
+reservas/application/casos_de_uso.py:70:            espaco = self._consulta_de_espacos.obter_espaco_reservavel_travado(
+reservas/infrastructure/consulta_de_espacos.py:12:    def obter_espaco_reservavel_travado(self, espaco_id: int) -> EspacoReservavel:
+36:def verificar_espaco_disponivel_para_reserva(espaco_id: int) -> EspacoDisponivel:
+38:            EspacoEsportivoModel.objects.select_for_update()
+72:        return EspacoEsportivoModel.objects.select_for_update().get(pk=espaco.id)
+86:            garantir_horario_livre(reserva, existentes)
+reservas/infrastructure/repositorio_com_agenda.py:54:    def salvar(self, reserva: Reserva) -> Reserva:
+reservas/infrastructure/repositorio_django.py:45:    def salvar(self, reserva: Reserva) -> Reserva:
+36:    transaction.on_commit(acao, robust=True)
+reservas/infrastructure/agenda_redis.py:78:    def registrar(
+reservas/infrastructure/indice_redis.py:77:    def aplicar(
+reservas/infrastructure/ranking_redis.py:75:    def aplicar(
+39:CONSTRAINT_SEM_SOBREPOSICAO = "reservas_reserva_sem_sobreposicao_no_espaco"
+101:            ExclusionConstraint(
+
+## Contrato do import-linter (trecho do pyproject.toml)
+[[tool.importlinter.contracts]]
+name = "Domínio e aplicação não conhecem o Redis"
+type = "forbidden"
+source_modules = [
+    "compartilhado.domain",
+    "espacos.domain",
+    "espacos.application",
+    "reservas.domain",
+    "reservas.application",
+    "contas.domain",
+    "contas.application",
+]
+forbidden_modules = ["redis"]
+
+## Onde o pacote redis e importado (fora de testes)
+contas/api/limites.py:8:from redis.exceptions import RedisError
+espacos/infrastructure/cache_de_espacos_redis.py:4:from redis.exceptions import RedisError
+reservas/infrastructure/agenda_redis.py:7:from redis.exceptions import RedisError
+reservas/infrastructure/indice_redis.py:8:from redis.exceptions import RedisError
+reservas/infrastructure/ranking_redis.py:8:from redis.exceptions import RedisError
+config/views.py:3:from redis.exceptions import RedisError
+
+## O mesmo contrato, executado (lint-imports)
+---------
+Contracts
+---------
+
+Analyzed 279 files, 1277 dependencies.
+--------------------------------------
+
+Domínio é Python puro KEPT
+Domínio e aplicação não conhecem o Redis KEPT
+compartilhado não depende dos contextos KEPT
+Só a camada api usa compartilhado.api KEPT
+Camadas de cada contexto KEPT
+espacos não depende de outros contextos KEPT
+contas não depende de outros contextos KEPT
+reservas não importa contas KEPT
+reservas só conversa com espacos pela fachada pública KEPT
+Domínio e aplicação de reservas não conhecem espacos KEPT
+Nenhum contexto depende dos dados de exemplo KEPT
+
+Contracts: 11 kept, 0 broken.

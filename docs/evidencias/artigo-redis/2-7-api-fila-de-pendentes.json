@@ -1,0 +1,115 @@
+{
+  "_origem": {
+    "comando_com_redis": "curl.exe -s 'http://localhost:8000/api/reservas/pendentes/' -H 'Authorization: Bearer <TOKEN-REMOVIDO>'",
+    "comando_sem_projecao": "redis-cli UNLINK conecta-campus:1:reservas:indice:montado  (so esta chave) e o mesmo curl",
+    "data": "2026-11-26 00:01:25 -0300",
+    "commit": "de351d0",
+    "redis": "8.10.3",
+    "modo": "padrao (sem persistencia)",
+    "perfil": "GESTOR",
+    "chave_apagada": "conecta-campus:1:reservas:indice:montado",
+    "exists_antes": "1",
+    "exists_depois_de_apagar": "0",
+    "tempos_ms_informativos": {
+      "com_projecao": 57.7,
+      "sem_projecao": 157.8
+    },
+    "token": "removido (<TOKEN-REMOVIDO>); chamada feita por urllib com o cabecalho Authorization"
+  },
+  "http_com_projecao": 200,
+  "resposta_com_projecao": {
+    "mensagem": "1 reserva pendente.",
+    "dados": [
+      {
+        "id": 18,
+        "espaco_id": 5,
+        "solicitante": {
+          "usuario_id": 2,
+          "nome": "Bruno Lima",
+          "matricula": "2026101"
+        },
+        "data": "2026-12-01",
+        "hora_inicio": "12:00",
+        "hora_fim": "13:00",
+        "finalidade": "RDS-08 demo",
+        "situacao": "SOLICITADA",
+        "situacao_rotulo": "Solicitada",
+        "motivo_da_situacao": null,
+        "criada_em": "2026-11-25T11:45:38.871740-03:00",
+        "acoes_disponiveis": [
+          {
+            "situacao": "CONFIRMADA",
+            "rotulo": "Confirmar",
+            "exige_motivo": false
+          },
+          {
+            "situacao": "RECUSADA",
+            "rotulo": "Recusar",
+            "exige_motivo": true
+          },
+          {
+            "situacao": "CANCELADA",
+            "rotulo": "Cancelar",
+            "exige_motivo": true
+          }
+        ]
+      }
+    ],
+    "paginacao": {
+      "pagina": 1,
+      "tamanho": 20,
+      "total": 1,
+      "total_de_paginas": 1
+    }
+  },
+  "http_sem_projecao": 200,
+  "resposta_sem_projecao": {
+    "mensagem": "1 reserva pendente.",
+    "dados": [
+      {
+        "id": 18,
+        "espaco_id": 5,
+        "solicitante": {
+          "usuario_id": 2,
+          "nome": "Bruno Lima",
+          "matricula": "2026101"
+        },
+        "data": "2026-12-01",
+        "hora_inicio": "12:00",
+        "hora_fim": "13:00",
+        "finalidade": "RDS-08 demo",
+        "situacao": "SOLICITADA",
+        "situacao_rotulo": "Solicitada",
+        "motivo_da_situacao": null,
+        "criada_em": "2026-11-25T11:45:38.871740-03:00",
+        "acoes_disponiveis": [
+          {
+            "situacao": "CONFIRMADA",
+            "rotulo": "Confirmar",
+            "exige_motivo": false
+          },
+          {
+            "situacao": "RECUSADA",
+            "rotulo": "Recusar",
+            "exige_motivo": true
+          },
+          {
+            "situacao": "CANCELADA",
+            "rotulo": "Cancelar",
+            "exige_motivo": true
+          }
+        ]
+      }
+    ],
+    "paginacao": {
+      "pagina": 1,
+      "tamanho": 20,
+      "total": 1,
+      "total_de_paginas": 1
+    }
+  },
+  "comparacao": {
+    "http_iguais": true,
+    "corpos_identicos": true
+  }
+}

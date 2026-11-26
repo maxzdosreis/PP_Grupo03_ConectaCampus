@@ -1,0 +1,78 @@
+# Comando: R='docker compose exec -T redis redis-cli'
+#   fam(){ for f in agenda: reservas: ranking: espaco: throttle_; do printf '%-10s %s\n' "$f" "$($R 
+#   --scan --pattern "conecta-campus:1:$f*" | wc -l)"; done; echo "DBSIZE $($R DBSIZE)"; }
+#   echo "## Antes: estado normal"; fam
+#   echo; echo "## Apaga so as projecoes de reservas (agenda, fila, contagens, ranking); throttle e 
+#   espaco ficam"
+#   for p in 'agenda:*' 'reservas:*' 'ranking:*'; do docker compose exec -T redis sh -c "redis-cli 
+#   --scan --pattern 'conecta-campus:1:$p' | xargs -r redis-cli unlink" >/dev/null; done
+#   fam
+#   echo; echo "## 1a execucao: docker compose exec backend python manage.py 
+#   reconstruir_agenda_redis"; time docker compose exec -T backend python manage.py 
+#   reconstruir_agenda_redis
+#   echo; echo "## Depois da 1a execucao"; fam
+#   echo; echo "## 2a execucao (idempotencia)"; time docker compose exec -T backend python 
+#   manage.py reconstruir_agenda_redis
+#   echo; echo "## Depois da 2a execucao"; fam
+#   echo; echo "## Conteudo reconstruido"; $R ZRANGE conecta-campus:1:agenda:espaco:5:2026-12-01 0 
+#   -1 WITHSCORES | paste -sd' '; $R ZRANGE conecta-campus:1:reservas:pendentes 0 -1 | paste -sd' 
+#   '; $R ZREVRANGE conecta-campus:1:ranking:espacos 0 -1 WITHSCORES | paste -sd' '
+# Data: 2026-11-25 23:59:09 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; projecoes apagadas por padrao e reconstruidas
+#
+## Antes: estado normal
+agenda:    1
+reservas:  8
+ranking:   4
+espaco:    1
+throttle_  0
+DBSIZE 14
+
+## Apaga so as projecoes de reservas (agenda, fila, contagens, ranking); throttle e espaco ficam
+agenda:    0
+reservas:  0
+ranking:   0
+espaco:    1
+throttle_  0
+DBSIZE 1
+
+## 1a execucao: docker compose exec backend python manage.py reconstruir_agenda_redis
+Agenda reconstruída: 1 dia, 2 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 10 reservas, 1 pendente.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+
+real	0m6.628s
+user	0m0.046s
+sys	0m0.185s
+
+## Depois da 1a execucao
+agenda:    1
+reservas:  7
+ranking:   3
+espaco:    1
+throttle_  0
+DBSIZE 12
+
+## 2a execucao (idempotencia)
+Agenda reconstruída: 1 dia, 2 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 10 reservas, 1 pendente.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+
+real	0m5.771s
+user	0m0.076s
+sys	0m0.184s
+
+## Depois da 2a execucao
+agenda:    1
+reservas:  7
+ranking:   3
+espaco:    1
+throttle_  0
+DBSIZE 12
+
+## Conteudo reconstruido
+_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720
+0000000000000000018
+5 2 2 1 1 1

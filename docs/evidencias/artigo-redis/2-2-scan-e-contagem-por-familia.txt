@@ -1,0 +1,78 @@
+# Comando: R='docker compose exec -T redis redis-cli'
+#   echo "## DBSIZE do banco 0 (todas as chaves do app)"; $R DBSIZE
+#   echo; echo "## SCAN 0 MATCH conecta-campus:1:agenda:* COUNT 100  (repetido com o cursor 
+#   devolvido ate 0)"
+#   c=0; while :; do echo "> SCAN $c MATCH conecta-campus:1:agenda:* COUNT 100"; out=$($R SCAN $c 
+#   MATCH 'conecta-campus:1:agenda:*' COUNT 100); echo "$out"; c=$(echo "$out" | head -1); [ "$c" = 
+#   "0" ] && break; done
+#   echo; echo "## Com COUNT pequeno o SCAN precisa de varias voltas: SCAN <cursor> MATCH 
+#   conecta-campus:1:espaco:* COUNT 4, ate o cursor voltar a 0 (o COUNT e uma dica; uma volta pode 
+#   devolver 0 chaves)"
+#   c=0; while :; do echo "> SCAN $c MATCH conecta-campus:1:espaco:* COUNT 4"; out=$($R SCAN $c 
+#   MATCH 'conecta-campus:1:espaco:*' COUNT 4); echo "$out"; c=$(echo "$out" | head -1); [ "$c" = 
+#   "0" ] && break; done
+#   echo; echo "## Variante da CLI: redis-cli --scan --pattern 'conecta-campus:1:agenda:*'"; $R 
+#   --scan --pattern 'conecta-campus:1:agenda:*'
+#   echo; echo "## Sem filtro: --scan mostra TODAS as familias, inclusive as chaves do limite de 
+#   tentativas (banco 0)"; $R --scan | sort
+#   echo; echo "## Contagem de chaves por familia (via SCAN, nunca KEYS)"
+#   for f in agenda: espaco: reservas: ranking: throttle_; do printf '%-12s %s\n' "$f" "$($R --scan 
+#   --pattern "conecta-campus:1:$f*" | wc -l)"; done
+#   printf '%-12s %s\n' "TOTAL scan" "$($R --scan | wc -l)"
+#   echo; echo "## Por que filtrar: o padrao 'throttle_*' mostra chaves com e-mail de login (dado 
+#   pessoal); ficam fora dos filtros agenda:/reservas:/ranking:/espaco:"
+#   echo "Chaves por_familia que NAO sao projecoes:"; $R --scan --pattern 
+#   'conecta-campus:1:throttle_*' | sed 's/_email_.*/_email_<E-MAIL>/' | sort | uniq -c
+# Data: 2026-11-25 23:58:42 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; dados de exemplo
+#
+## DBSIZE do banco 0 (todas as chaves do app)
+16
+
+## SCAN 0 MATCH conecta-campus:1:agenda:* COUNT 100  (repetido com o cursor devolvido ate 0)
+> SCAN 0 MATCH conecta-campus:1:agenda:* COUNT 100
+0
+conecta-campus:1:agenda:espaco:5:2026-12-01
+
+## Com COUNT pequeno o SCAN precisa de varias voltas: SCAN <cursor> MATCH conecta-campus:1:espaco:* COUNT 4, ate o cursor voltar a 0 (o COUNT e uma dica; uma volta pode devolver 0 chaves)
+> SCAN 0 MATCH conecta-campus:1:espaco:* COUNT 4
+12
+> SCAN 12 MATCH conecta-campus:1:espaco:* COUNT 4
+26
+> SCAN 26 MATCH conecta-campus:1:espaco:* COUNT 4
+27
+> SCAN 27 MATCH conecta-campus:1:espaco:* COUNT 4
+0
+conecta-campus:1:espaco:versao:1
+
+## Variante da CLI: redis-cli --scan --pattern 'conecta-campus:1:agenda:*'
+conecta-campus:1:agenda:espaco:5:2026-12-01
+
+## Sem filtro: --scan mostra TODAS as familias, inclusive as chaves do limite de tentativas (banco 0)
+conecta-campus:1:agenda:espaco:5:2026-12-01
+conecta-campus:1:espaco:versao:1
+conecta-campus:1:ranking:contadas
+conecta-campus:1:ranking:espacos
+conecta-campus:1:ranking:montado
+conecta-campus:1:ranking:versao
+conecta-campus:1:reservas:indice:montado
+conecta-campus:1:reservas:indice:versao
+conecta-campus:1:reservas:pendentes
+conecta-campus:1:reservas:situacao:CANCELADA
+conecta-campus:1:reservas:situacao:CONCLUIDA
+conecta-campus:1:reservas:situacao:CONFIRMADA
+conecta-campus:1:reservas:situacao:RECUSADA
+conecta-campus:1:reservas:situacao:SOLICITADA
+
+## Contagem de chaves por familia (via SCAN, nunca KEYS)
+agenda:      1
+espaco:      1
+reservas:    8
+ranking:     4
+throttle_    0
+TOTAL scan   14
+
+## Por que filtrar: o padrao 'throttle_*' mostra chaves com e-mail de login (dado pessoal); ficam fora dos filtros agenda:/reservas:/ranking:/espaco:
+Chaves por_familia que NAO sao projecoes:

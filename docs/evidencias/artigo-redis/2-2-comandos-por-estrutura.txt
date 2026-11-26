@@ -1,0 +1,142 @@
+# Comando: R='docker compose exec -T redis redis-cli'; K=conecta-campus:1
+#   h(){ echo; echo "## $*"; }
+#   h "Agenda: Sorted Set agenda:espaco:5:2026-12-01"
+#   echo "> ZRANGE $K:agenda:espaco:5:2026-12-01 0 -1 WITHSCORES"; $R ZRANGE 
+#   $K:agenda:espaco:5:2026-12-01 0 -1 WITHSCORES
+#   echo "> ZCARD"; $R ZCARD $K:agenda:espaco:5:2026-12-01
+#   echo "> ZRANGEBYSCORE ... 540 600 WITHSCORES (reservas que COMECAM entre 09:00 e 10:00)"; $R 
+#   ZRANGEBYSCORE $K:agenda:espaco:5:2026-12-01 540 600 WITHSCORES
+#   echo "> TTL"; $R TTL $K:agenda:espaco:5:2026-12-01
+#   h "Fila: Sorted Set reservas:pendentes"
+#   echo "> ZRANGE $K:reservas:pendentes 0 -1 WITHSCORES"; $R ZRANGE $K:reservas:pendentes 0 -1 
+#   WITHSCORES
+#   h "Situacoes: Sets reservas:situacao:*"
+#   for s in SOLICITADA CONFIRMADA CONCLUIDA RECUSADA CANCELADA; do echo "> SCARD $s: $($R SCARD 
+#   $K:reservas:situacao:$s)   SMEMBERS: $($R SMEMBERS $K:reservas:situacao:$s | tr '\n' ' ')"; done
+#   h "Cache de espaco: Hash espaco:1"
+#   echo "> HGETALL $K:espaco:1"; $R HGETALL $K:espaco:1
+#   echo "> TTL"; $R TTL $K:espaco:1
+#   h "Ranking: Sorted Set ranking:espacos e Hash ranking:contadas (livro)"
+#   echo "> ZREVRANGE $K:ranking:espacos 0 -1 WITHSCORES"; $R ZREVRANGE $K:ranking:espacos 0 -1 
+#   WITHSCORES
+#   echo "> HLEN $K:ranking:contadas"; $R HLEN $K:ranking:contadas
+#   echo "> HGETALL $K:ranking:contadas"; $R HGETALL $K:ranking:contadas
+#   h "Limite de tentativas (so TYPE, TTL e tamanho; chaves por e-mail reais nao sao exibidas)"
+#   echo "> (uma tentativa de login com e-mail ficticio cria as chaves do limite)"; curl -s -o 
+#   /dev/null -w "HTTP %{http_code}
+#   " -X POST http://localhost:8000/api/auth/login/ -H "Content-Type: application/json" -d 
+#   '{"email":"nao.existe@exemplo.com","senha":"x"}'
+#   echo "> TYPE $K:throttle_login_ip_172.18.0.1"; $R TYPE $K:throttle_login_ip_172.18.0.1
+#   echo "> TTL"; $R TTL $K:throttle_login_ip_172.18.0.1
+#   echo "> OBJECT ENCODING / MEMORY USAGE / ZCARD"; $R OBJECT ENCODING 
+#   $K:throttle_login_ip_172.18.0.1; $R MEMORY USAGE $K:throttle_login_ip_172.18.0.1; $R ZCARD 
+#   $K:throttle_login_ip_172.18.0.1
+#   echo "> TYPE e TTL da chave por e-mail (e-mail ficticio)"; $R TYPE 
+#   $K:throttle_login_email_nao.existe@exemplo.com; $R TTL 
+#   $K:throttle_login_email_nao.existe@exemplo.com
+#   h "TYPE, OBJECT ENCODING e MEMORY USAGE de uma chave de cada familia"
+#   for k in agenda:espaco:5:2026-12-01 reservas:pendentes reservas:situacao:CONFIRMADA 
+#   reservas:indice:montado reservas:indice:versao ranking:espacos ranking:contadas ranking:montado 
+#   espaco:1 espaco:versao:1 throttle_login_ip_172.18.0.1 
+#   throttle_login_email_nao.existe@exemplo.com; do printf '%-48s type=%-6s encoding=%-10s 
+#   memory=%s bytes ttl=%s\n' "$k" "$($R TYPE $K:$k)" "$($R OBJECT ENCODING $K:$k)" "$($R MEMORY 
+#   USAGE $K:$k)" "$($R TTL $K:$k)"; done
+# Data: 2026-11-25 23:57:33 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; dados de exemplo; reconstruir_agenda_redis executado antes
+#
+
+## Agenda: Sorted Set agenda:espaco:5:2026-12-01
+> ZRANGE conecta-campus:1:agenda:espaco:5:2026-12-01 0 -1 WITHSCORES
+_
+-1
+17:600:CONFIRMADA
+540
+18:780:SOLICITADA
+720
+> ZCARD
+3
+> ZRANGEBYSCORE ... 540 600 WITHSCORES (reservas que COMECAM entre 09:00 e 10:00)
+17:600:CONFIRMADA
+540
+> TTL
+604944
+
+## Fila: Sorted Set reservas:pendentes
+> ZRANGE conecta-campus:1:reservas:pendentes 0 -1 WITHSCORES
+0000000000000000018
+1795617938.87174
+
+## Situacoes: Sets reservas:situacao:*
+> SCARD SOLICITADA: 1   SMEMBERS: 18 
+> SCARD CONFIRMADA: 3   SMEMBERS: 1 2 17 
+> SCARD CONCLUIDA: 1   SMEMBERS: 5 
+> SCARD RECUSADA: 2   SMEMBERS: 3 6 
+> SCARD CANCELADA: 3   SMEMBERS: 4 8 16 
+
+## Cache de espaco: Hash espaco:1
+> HGETALL conecta-campus:1:espaco:1
+nome
+Quadra Poliesportiva Central
+tipo
+QUADRA_POLIESPORTIVA
+capacidade
+30
+ativo
+1
+abertura_em_minutos
+420
+fechamento_em_minutos
+1440
+> TTL
+52
+
+## Ranking: Sorted Set ranking:espacos e Hash ranking:contadas (livro)
+> ZREVRANGE conecta-campus:1:ranking:espacos 0 -1 WITHSCORES
+5
+2
+2
+1
+1
+1
+> HLEN conecta-campus:1:ranking:contadas
+4
+> HGETALL conecta-campus:1:ranking:contadas
+1
+1
+2
+2
+5
+5
+17
+5
+
+## Limite de tentativas (so TYPE, TTL e tamanho; chaves por e-mail reais nao sao exibidas)
+> (uma tentativa de login com e-mail ficticio cria as chaves do limite)
+HTTP 401
+> TYPE conecta-campus:1:throttle_login_ip_172.18.0.1
+zset
+> TTL
+58
+> OBJECT ENCODING / MEMORY USAGE / ZCARD
+listpack
+157
+1
+> TYPE e TTL da chave por e-mail (e-mail ficticio)
+zset
+54
+
+## TYPE, OBJECT ENCODING e MEMORY USAGE de uma chave de cada familia
+agenda:espaco:5:2026-12-01                       type=zset   encoding=listpack   memory=129 bytes ttl=604924
+reservas:pendentes                               type=zset   encoding=listpack   memory=110 bytes ttl=-1
+reservas:situacao:CONFIRMADA                     type=set    encoding=intset     memory=88 bytes ttl=-1
+reservas:indice:montado                          type=string encoding=int        memory=61 bytes ttl=-1
+reservas:indice:versao                           type=string encoding=int        memory=60 bytes ttl=-1
+ranking:espacos                                  type=zset   encoding=listpack   memory=80 bytes ttl=-1
+ranking:contadas                                 type=hash   encoding=listpack   memory=85 bytes ttl=-1
+ranking:montado                                  type=string encoding=int        memory=53 bytes ttl=-1
+espaco:1                                         type=hash   encoding=listpack   memory=196 bytes ttl=20
+espaco:versao:1                                  type=string encoding=int        memory=61 bytes ttl=81369
+throttle_login_ip_172.18.0.1                     type=zset   encoding=listpack   memory=157 bytes ttl=25
+throttle_login_email_nao.existe@exemplo.com      type=zset   encoding=listpack   memory=172 bytes ttl=23

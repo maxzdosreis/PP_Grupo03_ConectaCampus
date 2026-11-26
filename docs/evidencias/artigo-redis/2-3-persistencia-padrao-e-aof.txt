@@ -1,0 +1,120 @@
+# Comando: R='docker compose exec -T redis redis-cli'; K=conecta-campus:1
+#   BASE='-f docker-compose.yml'; OVR='-f docker-compose.yml -f 
+#   docker-compose.redis-persistente.yml'
+#   espera(){ for i in $(seq 1 40); do s=$(docker inspect -f '{{.State.Health.Status}}' 
+#   conecta-campus-redis-1 2>/dev/null); [ "$s" = healthy ] && break; sleep 1; done; echo 
+#   "healthcheck: $s (~${i}s)"; }
+#   estado(){ echo "DBSIZE=$($R DBSIZE)  agenda=[$($R ZRANGE $K:agenda:espaco:5:2026-12-01 0 -1 
+#   WITHSCORES | paste -sd' ')]  pendentes=[$($R ZRANGE $K:reservas:pendentes 0 -1 | paste -sd' 
+#   ')]"; }
+#   echo "################ (a) MODO PADRAO ################"
+#   docker compose exec -T backend python manage.py reconstruir_agenda_redis >/dev/null; echo "-- 
+#   apos reconstruir:"; estado
+#   echo "-- docker compose restart redis"; docker compose restart redis 2>&1 | tail -1; espera
+#   echo "-- logo apos o restart:"; estado
+#   echo "-- reconstruir_agenda_redis:"; docker compose exec -T backend python manage.py 
+#   reconstruir_agenda_redis; estado
+#   echo; echo "################ (b) MODO AOF (override da RDS-09) ################"
+#   echo "-- docker compose $OVR up -d redis"; docker compose $OVR up -d redis 2>&1 | tail -3; 
+#   espera
+#   docker inspect --format 'Cmd={{json .Config.Cmd}}' conecta-campus-redis-1
+#   $R INFO persistence | grep -E 
+#   'aof_enabled|aof_last_write_status|aof_current_size|aof_last_rewrite_status'
+#   docker compose exec -T backend python manage.py reconstruir_agenda_redis >/dev/null; echo "-- 
+#   apos reconstruir:"; estado
+#   $R INFO persistence | grep -E 'aof_enabled|aof_last_write_status|aof_current_size'
+#   echo "-- ls -la /data/appendonlydir"; docker compose exec -T redis ls -la /data/appendonlydir
+#   echo "-- docker compose restart redis (AOF recarregado)"; docker compose $OVR restart redis 
+#   2>&1 | tail -1; espera; estado
+#   echo "-- grava de novo (reconstruir), espera 3 s (fsync everysec), kill -9 e start:"; docker 
+#   compose exec -T backend python manage.py reconstruir_agenda_redis >/dev/null; sleep 3; estado
+#   docker compose $OVR kill redis 2>&1 | tail -1; docker inspect -f 'estado={{.State.Status}} 
+#   exit={{.State.ExitCode}}' conecta-campus-redis-1
+#   docker compose $OVR start redis 2>&1 | tail -1; espera; estado
+#   $R INFO persistence | grep -E 'aof_enabled|aof_last_write_status'
+#   echo; echo "################ volta ao modo padrao ################"
+#   echo "-- docker compose up -d redis (so o arquivo base)"; docker compose up -d redis 2>&1 | 
+#   tail -3; espera
+#   $R INFO persistence | grep -E 'aof_enabled'; docker inspect --format 'Cmd={{json .Config.Cmd}} 
+#   montagens={{json .Mounts}}' conecta-campus-redis-1
+#   echo "-- o AOF antigo e ignorado (container novo, sem volume montado):"; estado
+#   echo "-- docker volume ls | grep redis (o volume ainda existe)"; docker volume ls | grep redis
+#   echo "-- docker volume rm conecta-campus_redis_data (criado nesta coleta; container ja nao o 
+#   monta)"; docker volume rm conecta-campus_redis_data
+#   docker volume ls | grep -c redis_data
+#   docker compose exec -T backend python manage.py reconstruir_agenda_redis; estado
+# Data: 2026-11-26 00:07:46 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao -> AOF (override RDS-09) -> padrao
+#
+################ (a) MODO PADRAO ################
+-- apos reconstruir:
+DBSIZE=17  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+-- docker compose restart redis
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (~5s)
+-- logo apos o restart:
+DBSIZE=0  agenda=[]  pendentes=[]
+-- reconstruir_agenda_redis:
+Agenda reconstruída: 1 dia, 2 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 14 reservas, 1 pendente.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+
+################ (b) MODO AOF (override da RDS-09) ################
+-- docker compose -f docker-compose.yml -f docker-compose.redis-persistente.yml up -d redis
+ Container conecta-campus-redis-1 Recreated 
+ Container conecta-campus-redis-1 Starting 
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (~5s)
+Cmd=["redis-server","--save","","--appendonly","yes","--appendfsync","everysec"]
+aof_enabled:1
+aof_last_write_status:ok
+aof_current_size:0
+-- apos reconstruir:
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+aof_enabled:1
+aof_last_write_status:ok
+aof_current_size:5232
+-- ls -la /data/appendonlydir
+total 24
+drwx------    2 redis    redis         4096 Nov 26 03:08 .
+drwxr-xr-x    3 redis    redis         4096 Nov 26 03:08 ..
+-rw-------    1 redis    redis           89 Nov 26 03:08 appendonly.aof.1.base.rdb
+-rw-------    1 redis    redis         5232 Nov 26 03:08 appendonly.aof.1.incr.aof
+-rw-------    1 redis    redis          102 Nov 26 03:08 appendonly.aof.manifest
+-- docker compose restart redis (AOF recarregado)
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (~5s)
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+-- grava de novo (reconstruir), espera 3 s (fsync everysec), kill -9 e start:
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+ Container conecta-campus-redis-1 Killed 
+estado=exited exit=137
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (~5s)
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]
+aof_enabled:1
+aof_last_write_status:ok
+
+################ volta ao modo padrao ################
+-- docker compose up -d redis (so o arquivo base)
+ Container conecta-campus-redis-1 Recreated 
+ Container conecta-campus-redis-1 Starting 
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (~5s)
+aof_enabled:0
+Cmd=["redis-server","--save","","--appendonly","no"] montagens=[]
+-- o AOF antigo e ignorado (container novo, sem volume montado):
+DBSIZE=0  agenda=[]  pendentes=[]
+-- docker volume ls | grep redis (o volume ainda existe)
+local     back_saas_contabil_redis_data
+local     conecta-campus_redis_data
+-- docker volume rm conecta-campus_redis_data (criado nesta coleta; container ja nao o monta)
+conecta-campus_redis_data
+1
+Agenda reconstruída: 1 dia, 2 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 14 reservas, 1 pendente.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+DBSIZE=11  agenda=[_ -1 17:600:CONFIRMADA 540 18:780:SOLICITADA 720]  pendentes=[0000000000000000018]

@@ -1,0 +1,81 @@
+# Comando: C=doc02-rdb-redis; N=doc02-rdb-net; V=doc02-rdb-vol
+#   R="docker exec $C redis-cli"
+#   espera(){ for i in $(seq 1 30); do [ "$($R ping 2>/dev/null)" = PONG ] && break; sleep 1; done; 
+#   echo "ping ok (~${i}s)"; }
+#   echo "## 0. Ambiente isolado (fora do compose do projeto): rede interna, sem porta publicada, 
+#   volume descartavel, --save 60 1"
+#   docker network create --internal $N >/dev/null && docker volume create $V >/dev/null
+#   docker run -d --name $C --network $N -v $V:/data redis:8-alpine redis-server --save 60 1 
+#   --appendonly no >/dev/null; espera
+#   $R CONFIG GET save | paste -sd' '; $R CONFIG GET appendonly | paste -sd' '
+#   echo; echo "## 1. Grava 3 chaves; ainda sem snapshot"
+#   $R SET chave:a 1 >/dev/null; $R ZADD chave:agenda 540 "17:600:CONFIRMADA" 720 
+#   "18:780:SOLICITADA" >/dev/null; $R HSET chave:espaco nome Quadra capacidade 30 >/dev/null
+#   echo "DBSIZE=$($R DBSIZE)"; $R INFO persistence | grep -E 
+#   'rdb_changes_since_last_save|rdb_last_save_time|rdb_last_bgsave_status'
+#   echo "## 2. BGSAVE"; $R BGSAVE; for i in 1 2 3 4 5 6 7 8 9 10; do [ "$($R INFO persistence | 
+#   grep rdb_bgsave_in_progress | tr -d '\r')" = "rdb_bgsave_in_progress:0" ] && break; sleep 1; 
+#   done
+#   echo "LASTSAVE=$($R LASTSAVE)"; $R INFO persistence | grep -E 
+#   'rdb_changes_since_last_save|rdb_last_save_time|rdb_last_bgsave_status|rdb_last_bgsave_time_sec'
+#   docker exec $C ls -la /data
+#   echo; echo "## 3. Reinicio limpo (docker restart: SIGTERM, o Redis grava o RDB ao encerrar)"
+#   docker restart $C >/dev/null; espera; echo "DBSIZE=$($R DBSIZE)  chave:a=$($R GET chave:a)  
+#   agenda=[$($R ZRANGE chave:agenda 0 -1 WITHSCORES | paste -sd' ')]"
+#   echo; echo "## 4. Grava DEPOIS do ultimo snapshot e mata com SIGKILL (docker kill)"
+#   $R SET chave:depois_do_snapshot 1 >/dev/null; echo "DBSIZE=$($R DBSIZE)"; $R INFO persistence | 
+#   grep -E 'rdb_changes_since_last_save'
+#   docker kill $C >/dev/null; docker inspect -f 'estado={{.State.Status}} 
+#   exit={{.State.ExitCode}}' $C
+#   docker start $C >/dev/null; espera
+#   echo "DBSIZE=$($R DBSIZE)  chave:a=$($R GET chave:a)  chave:depois_do_snapshot=[$($R GET 
+#   chave:depois_do_snapshot)] (vazio = perdida)"
+#   $R KEYS 'chave:*' | sort
+#   echo; echo "## 5. Limpeza do experimento"
+#   docker rm -f $C >/dev/null; docker volume rm $V >/dev/null; docker network rm $N >/dev/null
+#   echo "restantes com prefixo doc02-rdb: containers=$(docker ps -a --format '{{.Names}}' | grep 
+#   -c doc02-rdb) volumes=$(docker volume ls -q | grep -c doc02-rdb) redes=$(docker network ls 
+#   --format '{{.Name}}' | grep -c doc02-rdb)"
+# Data: 2026-11-26 00:09:45 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: experimento RDB isolado: redis:8-alpine, --save 60 1, fora do compose
+#
+## 0. Ambiente isolado (fora do compose do projeto): rede interna, sem porta publicada, volume descartavel, --save 60 1
+ping ok (~1s)
+save 60 1
+appendonly no
+
+## 1. Grava 3 chaves; ainda sem snapshot
+DBSIZE=3
+rdb_changes_since_last_save:5
+rdb_last_save_time:1795662587
+rdb_last_bgsave_status:ok
+## 2. BGSAVE
+Background saving started
+LASTSAVE=1795662591
+rdb_changes_since_last_save:0
+rdb_last_save_time:1795662591
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:0
+total 12
+drwxr-xr-x    2 redis    redis         4096 Nov 26 03:09 .
+drwxr-xr-x    1 root     root          4096 Nov 26 03:09 ..
+-rw-------    1 redis    redis          221 Nov 26 03:09 dump.rdb
+
+## 3. Reinicio limpo (docker restart: SIGTERM, o Redis grava o RDB ao encerrar)
+ping ok (~1s)
+DBSIZE=3  chave:a=1  agenda=[17:600:CONFIRMADA 540 18:780:SOLICITADA 720]
+
+## 4. Grava DEPOIS do ultimo snapshot e mata com SIGKILL (docker kill)
+DBSIZE=4
+rdb_changes_since_last_save:1
+estado=exited exit=137
+ping ok (~1s)
+DBSIZE=3  chave:a=1  chave:depois_do_snapshot=[] (vazio = perdida)
+chave:a
+chave:agenda
+chave:espaco
+
+## 5. Limpeza do experimento
+restantes com prefixo doc02-rdb: containers=0 volumes=0 redes=0

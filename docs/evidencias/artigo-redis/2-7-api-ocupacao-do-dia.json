@@ -1,0 +1,101 @@
+{
+  "_origem": {
+    "comando_com_redis": "curl.exe -s 'http://localhost:8000/api/reservas/ocupacao/?espaco=5&data=2026-12-01' -H 'Authorization: Bearer <TOKEN-REMOVIDO>'",
+    "comando_sem_projecao": "redis-cli UNLINK conecta-campus:1:agenda:espaco:5:2026-12-01  (so esta chave) e o mesmo curl",
+    "data": "2026-11-26 00:01:23 -0300",
+    "commit": "de351d0",
+    "redis": "8.10.3",
+    "modo": "padrao (sem persistencia)",
+    "perfil": "GESTOR",
+    "chave_apagada": "conecta-campus:1:agenda:espaco:5:2026-12-01",
+    "exists_antes": "1",
+    "exists_depois_de_apagar": "0",
+    "tempos_ms_informativos": {
+      "com_projecao": 55.5,
+      "sem_projecao": 61.9
+    },
+    "token": "removido (<TOKEN-REMOVIDO>); chamada feita por urllib com o cabecalho Authorization"
+  },
+  "http_com_projecao": 200,
+  "resposta_com_projecao": {
+    "mensagem": "2 horários ocupados neste dia.",
+    "dados": {
+      "data": "2026-12-01",
+      "horario_de_abertura": "07:00",
+      "horario_de_fechamento": "00:00",
+      "reservavel": true,
+      "motivo_indisponivel": null,
+      "ocupados": [
+        {
+          "hora_inicio": "09:00",
+          "hora_fim": "10:00",
+          "situacao": "CONFIRMADA",
+          "situacao_rotulo": "Confirmada"
+        },
+        {
+          "hora_inicio": "12:00",
+          "hora_fim": "13:00",
+          "situacao": "SOLICITADA",
+          "situacao_rotulo": "Solicitada"
+        }
+      ],
+      "livres": [
+        {
+          "hora_inicio": "07:00",
+          "hora_fim": "09:00"
+        },
+        {
+          "hora_inicio": "10:00",
+          "hora_fim": "12:00"
+        },
+        {
+          "hora_inicio": "13:00",
+          "hora_fim": "00:00"
+        }
+      ]
+    }
+  },
+  "http_sem_projecao": 200,
+  "resposta_sem_projecao": {
+    "mensagem": "2 horários ocupados neste dia.",
+    "dados": {
+      "data": "2026-12-01",
+      "horario_de_abertura": "07:00",
+      "horario_de_fechamento": "00:00",
+      "reservavel": true,
+      "motivo_indisponivel": null,
+      "ocupados": [
+        {
+          "hora_inicio": "09:00",
+          "hora_fim": "10:00",
+          "situacao": "CONFIRMADA",
+          "situacao_rotulo": "Confirmada"
+        },
+        {
+          "hora_inicio": "12:00",
+          "hora_fim": "13:00",
+          "situacao": "SOLICITADA",
+          "situacao_rotulo": "Solicitada"
+        }
+      ],
+      "livres": [
+        {
+          "hora_inicio": "07:00",
+          "hora_fim": "09:00"
+        },
+        {
+          "hora_inicio": "10:00",
+          "hora_fim": "12:00"
+        },
+        {
+          "hora_inicio": "13:00",
+          "hora_fim": "00:00"
+        }
+      ]
+    }
+  },
+  "comparacao": {
+    "http_iguais": true,
+    "corpos_identicos": true
+  }
+}

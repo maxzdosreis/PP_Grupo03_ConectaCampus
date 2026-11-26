@@ -1,0 +1,51 @@
+{
+  "_origem": {
+    "comando_com_redis": "curl.exe -s 'http://localhost:8000/api/espacos/1/' -H 'Authorization: Bearer <TOKEN-REMOVIDO>'",
+    "comando_sem_projecao": "redis-cli UNLINK conecta-campus:1:espaco:1  (so esta chave) e o mesmo curl",
+    "data": "2026-11-26 00:01:29 -0300",
+    "commit": "de351d0",
+    "redis": "8.10.3",
+    "modo": "padrao (sem persistencia)",
+    "perfil": "SOLICITANTE",
+    "chave_apagada": "conecta-campus:1:espaco:1",
+    "exists_antes": "1",
+    "exists_depois_de_apagar": "0",
+    "tempos_ms_informativos": {
+      "com_projecao": 40.0,
+      "sem_projecao": 52.3
+    },
+    "token": "removido (<TOKEN-REMOVIDO>); chamada feita por urllib com o cabecalho Authorization"
+  },
+  "http_com_projecao": 200,
+  "resposta_com_projecao": {
+    "mensagem": "Espaço encontrado.",
+    "dados": {
+      "id": 1,
+      "nome": "Quadra Poliesportiva Central",
+      "tipo": "QUADRA_POLIESPORTIVA",
+      "tipo_rotulo": "Quadra poliesportiva",
+      "capacidade": 30,
+      "ativo": true,
+      "abertura": "07:00",
+      "fechamento": "00:00"
+    }
+  },
+  "http_sem_projecao": 200,
+  "resposta_sem_projecao": {
+    "mensagem": "Espaço encontrado.",
+    "dados": {
+      "id": 1,
+      "nome": "Quadra Poliesportiva Central",
+      "tipo": "QUADRA_POLIESPORTIVA",
+      "tipo_rotulo": "Quadra poliesportiva",
+      "capacidade": 30,
+      "ativo": true,
+      "abertura": "07:00",
+      "fechamento": "00:00"
+    }
+  },
+  "comparacao": {
+    "http_iguais": true,
+    "corpos_identicos": true
+  }
+}

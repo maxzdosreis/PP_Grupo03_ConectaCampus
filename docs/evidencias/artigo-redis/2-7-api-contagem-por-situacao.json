@@ -1,0 +1,91 @@
+{
+  "_origem": {
+    "comando_com_redis": "curl.exe -s 'http://localhost:8000/api/reservas/contagem-por-situacao/' -H 'Authorization: Bearer <TOKEN-REMOVIDO>'",
+    "comando_sem_projecao": "redis-cli UNLINK conecta-campus:1:reservas:indice:montado  (so esta chave) e o mesmo curl",
+    "data": "2026-11-26 00:01:27 -0300",
+    "commit": "de351d0",
+    "redis": "8.10.3",
+    "modo": "padrao (sem persistencia)",
+    "perfil": "GESTOR",
+    "chave_apagada": "conecta-campus:1:reservas:indice:montado",
+    "exists_antes": "0",
+    "exists_depois_de_apagar": "0",
+    "tempos_ms_informativos": {
+      "com_projecao": 82.4,
+      "sem_projecao": 58.7
+    },
+    "token": "removido (<TOKEN-REMOVIDO>); chamada feita por urllib com o cabecalho Authorization"
+  },
+  "http_com_projecao": 200,
+  "resposta_com_projecao": {
+    "mensagem": "Contagem das reservas por situação.",
+    "dados": {
+      "total": 12,
+      "situacoes": [
+        {
+          "situacao": "SOLICITADA",
+          "rotulo": "Solicitada",
+          "total": 1
+        },
+        {
+          "situacao": "CONFIRMADA",
+          "rotulo": "Confirmada",
+          "total": 3
+        },
+        {
+          "situacao": "RECUSADA",
+          "rotulo": "Recusada",
+          "total": 2
+        },
+        {
+          "situacao": "CANCELADA",
+          "rotulo": "Cancelada",
+          "total": 5
+        },
+        {
+          "situacao": "CONCLUIDA",
+          "rotulo": "Concluída",
+          "total": 1
+        }
+      ]
+    }
+  },
+  "http_sem_projecao": 200,
+  "resposta_sem_projecao": {
+    "mensagem": "Contagem das reservas por situação.",
+    "dados": {
+      "total": 12,
+      "situacoes": [
+        {
+          "situacao": "SOLICITADA",
+          "rotulo": "Solicitada",
+          "total": 1
+        },
+        {
+          "situacao": "CONFIRMADA",
+          "rotulo": "Confirmada",
+          "total": 3
+        },
+        {
+          "situacao": "RECUSADA",
+          "rotulo": "Recusada",
+          "total": 2
+        },
+        {
+          "situacao": "CANCELADA",
+          "rotulo": "Cancelada",
+          "total": 5
+        },
+        {
+          "situacao": "CONCLUIDA",
+          "rotulo": "Concluída",
+          "total": 1
+        }
+      ]
+    }
+  },
+  "comparacao": {
+    "http_iguais": true,
+    "corpos_identicos": true
+  }
+}

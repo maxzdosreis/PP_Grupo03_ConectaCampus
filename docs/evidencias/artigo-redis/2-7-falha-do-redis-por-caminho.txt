@@ -1,0 +1,131 @@
+# Comando: R='docker compose exec -T redis redis-cli'; API=http://localhost:8000/api
+#   AG="Authorization: Bearer $TG"; AS="Authorization: Bearer $TS"; J='Content-Type: 
+#   application/json'
+#   leituras(){ for u in "reservas/ocupacao/?espaco=5&data=2026-12-01:$AS" 
+#   "reservas/pendentes/:$AG" "reservas/contagem-por-situacao/:$AG" 
+#   "reservas/ranking-de-espacos/:$AG" "espacos/1/:$AS"; do p="${u%%:Authorization*}"; 
+#   h="Authorization${u#*:Authorization}"; o=$(curl -s -w ' HTTP %{http_code} %{time_total}s' 
+#   "$API/$p" -H "$h"); printf '%-52s md5(corpo)=%s %s
+#   ' "$p" "$(printf '%s' "${o% HTTP *}" | md5sum | cut -c1-12)" "HTTP${o##* HTTP}"; done; }
+#   medir(){ for i in 1 2 3 4 5 6 7 8; do curl -s -o /dev/null -w "%{time_total} " 
+#   "$API/reservas/ocupacao/?espaco=5&data=2026-12-01" -H "$AS"; done; echo; }
+#   echo "## A. Redis no ar: 5 leituras (HTTP, tempo, resumo MD5 do corpo)"; leituras
+#   echo "## A2. Ocupacao do dia, 8 chamadas seguidas (s): Redis no ar"; medir
+#   echo; echo "## B. docker compose stop redis"; docker compose stop redis 2>&1 | tail -1; docker 
+#   compose ps redis --format '{{.Service}} {{.Status}}'
+#   echo; echo "## C. Redis parado: as mesmas 5 leituras (mesmo HTTP e mesmo MD5 do corpo)"; 
+#   leituras
+#   echo "## C2. Ocupacao do dia, 8 chamadas seguidas (s): Redis parado"; medir
+#   echo; echo "## D. Criacao de reserva com o Redis parado (Bruno, 04/12/2026 10:00-11:00, Quadra 
+#   de Tenis 1)"
+#   CORPO='{"espaco_id":5,"data":"2026-12-04","hora_inicio":"10:00","hora_fim":"11:00","finalidade":
+#   "Teste DOC-02 Redis parado"}'
+#   RESP=$(curl -s -w '\nHTTP %{http_code}' -X POST $API/reservas/ -H "$AS" -H "$J" -d "$CORPO"); 
+#   echo "$RESP" | cut -c1-260; echo "$RESP" | tail -1
+#   ID=$(echo "$RESP" | head -1 | python -c "import 
+#   sys,json;print(json.load(sys.stdin)['dados']['id'])"); echo "ID da reserva de teste: $ID"
+#   echo "> GET /reservas/$ID/ (esta salva no PostgreSQL)"; curl -s -o /dev/null -w "HTTP 
+#   %{http_code}\n" $API/reservas/$ID/ -H "$AS"
+#   echo; echo "## E. Login com o Redis parado (UMA tentativa, e-mail ficticio): falha fechada"
+#   curl -s -w '\nHTTP %{http_code}\n' -X POST $API/auth/login/ -H "$J" -d 
+#   '{"email":"nao.existe@exemplo.com","senha":"x"}'
+#   echo; echo "## F. Saude da API"; curl -s -w '\nHTTP %{http_code}\n' $API/health/
+#   echo; echo "## G. Avisos do log do backend (so as mensagens de aviso, contadas; sem corpo, 
+#   cabecalho nem traceback)"
+#   docker compose logs --since 6m backend 2>&1 | tr -d '' | sed 's/^backend-1  | //' | grep -E "indispon|não atualizado|Service Unavailable" | sort | 
+#   uniq -c | sort -rn
+#   echo; echo "## H. docker compose start redis e espera do healthcheck"; docker compose start 
+#   redis 2>&1 | tail -1
+#   for i in $(seq 1 30); do s=$(docker inspect -f '{{.State.Health.Status}}' 
+#   conecta-campus-redis-1); [ "$s" = healthy ] && break; sleep 1; done; echo "healthcheck: $s 
+#   (apos ~${i}s)"; $R DBSIZE
+#   echo; echo "## I. Reconstrucao recupera o estado"; docker compose exec -T backend python 
+#   manage.py reconstruir_agenda_redis; $R DBSIZE
+#   $R ZRANGE conecta-campus:1:agenda:espaco:5:2026-12-04 0 -1 WITHSCORES | paste -sd' '
+#   echo; echo "## J. Redis de volta: as 5 leituras"; leituras
+#   echo; echo "## K. Limpeza: cancela a reserva de teste $ID"
+#   curl -s -o /dev/null -w "HTTP %{http_code}\n" -X PATCH $API/reservas/$ID/situacao/ -H "$AS" -H 
+#   "$J" -d '{"situacao":"CANCELADA","motivo":"Reserva de teste da DOC-02, cancelada ao fim da 
+#   evidencia."}'
+# Data: 2026-11-26 00:05:04 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; Redis parado e religado no meio
+#
+## A. Redis no ar: 5 leituras (HTTP, tempo, resumo MD5 do corpo)
+reservas/ocupacao/?espaco=5&data=2026-12-01          md5(corpo)=9eb7d8169cee HTTP 200 0.035160s
+reservas/pendentes/                                  md5(corpo)=e72a10f735f5 HTTP 200 0.044305s
+reservas/contagem-por-situacao/                      md5(corpo)=c8100252a39c HTTP 200 0.026314s
+reservas/ranking-de-espacos/                         md5(corpo)=9b20abe20c64 HTTP 200 0.044055s
+espacos/1/                                           md5(corpo)=f56971986ed0 HTTP 200 0.054653s
+## A2. Ocupacao do dia, 8 chamadas seguidas (s): Redis no ar
+0.032986 0.034418 0.045203 0.039797 0.033643 0.032368 0.029483 0.045645 
+
+## B. docker compose stop redis
+ Container conecta-campus-redis-1 Stopped 
+
+## C. Redis parado: as mesmas 5 leituras (mesmo HTTP e mesmo MD5 do corpo)
+reservas/ocupacao/?espaco=5&data=2026-12-01          md5(corpo)=9eb7d8169cee HTTP 200 11.412169s
+reservas/pendentes/                                  md5(corpo)=e72a10f735f5 HTTP 200 3.342424s
+reservas/contagem-por-situacao/                      md5(corpo)=c8100252a39c HTTP 200 3.367799s
+reservas/ranking-de-espacos/                         md5(corpo)=9b20abe20c64 HTTP 200 3.365865s
+espacos/1/                                           md5(corpo)=f56971986ed0 HTTP 200 8.053543s
+## C2. Ocupacao do dia, 8 chamadas seguidas (s): Redis parado
+6.655273 6.724082 11.389442 6.649274 11.369838 6.693803 6.679200 11.353191 
+
+## D. Criacao de reserva com o Redis parado (Bruno, 04/12/2026 10:00-11:00, Quadra de Tenis 1)
+{"mensagem":"Reserva solicitada com sucesso. Aguarde a confirmação do gestor.","dados":{"id":22,"espaco_id":5,"solicitante":{"usuario_id":2,"nome":"Bruno Lima","matricula":"2026101"},"data":"2026-12-04","hora_inicio":"10:00","hora_fim":"11:00","finalidade":"
+HTTP 201
+HTTP 201
+ID da reserva de teste: 22
+> GET /reservas/22/ (esta salva no PostgreSQL)
+HTTP 200
+
+## E. Login com o Redis parado (UMA tentativa, e-mail ficticio): falha fechada
+{"erro":{"codigo":"SERVICO_INDISPONIVEL","mensagem":"Serviço temporariamente indisponível. Tente de novo em alguns instantes."}}
+HTTP 503
+
+## F. Saude da API
+{"erro":{"codigo":"CACHE_INDISPONIVEL","mensagem":"Não foi possível conectar ao cache."}}
+HTTP 503
+
+## G. Avisos do log do backend (so as mensagens de aviso, contadas; sem corpo, cabecalho nem traceback)
+     20 Redis indisponível no cache de espaços
+     20 Redis indisponível na agenda do dia
+     20 Cache de espaços indisponível; lendo do PostgreSQL.
+      6 Redis indisponível no índice de filas e contagens
+      4 Redis indisponível no ranking de espaços
+      2 Índice indisponível; a fila sai do PostgreSQL.
+      2 Índice indisponível; a contagem sai do PostgreSQL.
+      2 Service Unavailable: /api/health/
+      2 Service Unavailable: /api/auth/login/
+      2 Redis indisponível no limite de tentativas
+      2 Ranking indisponível; ele sai do PostgreSQL.
+      1 Redis não atualizado (índice de filas e contagens) para a reserva 22; a reconstrução da agenda a refaz.
+      1 Redis não atualizado (índice de filas e contagens) para a reserva 21; a reconstrução da agenda a refaz.
+      1 Redis não atualizado (ranking de espaços) para a reserva 22; a reconstrução da agenda a refaz.
+      1 Redis não atualizado (ranking de espaços) para a reserva 21; a reconstrução da agenda a refaz.
+      1 Redis não atualizado (agenda) para a reserva 22; a reconstrução da agenda a refaz.
+      1 Redis não atualizado (agenda) para a reserva 21; a reconstrução da agenda a refaz.
+
+## H. docker compose start redis e espera do healthcheck
+ Container conecta-campus-redis-1 Started 
+healthcheck: healthy (apos ~5s)
+0
+
+## I. Reconstrucao recupera o estado
+Agenda reconstruída: 2 dias, 3 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 14 reservas, 2 pendentes.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+12
+_ -1 22:660:SOLICITADA 600
+
+## J. Redis de volta: as 5 leituras
+reservas/ocupacao/?espaco=5&data=2026-12-01          md5(corpo)=9eb7d8169cee HTTP 200 0.038807s
+reservas/pendentes/                                  md5(corpo)=0262d17ea540 HTTP 200 0.052453s
+reservas/contagem-por-situacao/                      md5(corpo)=c9609166f5ff HTTP 200 0.044942s
+reservas/ranking-de-espacos/                         md5(corpo)=9b20abe20c64 HTTP 200 0.039655s
+espacos/1/                                           md5(corpo)=f56971986ed0 HTTP 200 0.043083s
+
+## K. Limpeza: cancela a reserva de teste 22
+HTTP 200
