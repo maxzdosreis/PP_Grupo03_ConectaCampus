@@ -23,7 +23,7 @@ from reservas.tests.redis_de_teste import (
     ocupados_do_redis,
     projetar_dia,
     redis_em,
-    redis_limpo_depois,
+    redis_limpo_depois,  # noqa: F401
     servidor_que_nao_responde,
     url_de_porta_fechada,
 )
