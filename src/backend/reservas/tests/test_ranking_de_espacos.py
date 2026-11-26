@@ -465,6 +465,35 @@ def test_as_temporarias_nascem_com_prazo(monkeypatch):
     assert all(0 < prazo <= ranking_redis.TTL_DAS_TEMPORARIAS for prazo in prazos)
 
 
+def test_lote_sem_reserva_que_conta_renova_o_prazo_do_livro_temporario(monkeypatch):
+    # Arrange
+    monkeypatch.setattr(ranking_redis, "LOTE_DE_GRAVACAO", 1)
+    prazo_quase_vencido = 5
+
+    def registros():
+        yield _registro(1, 7, CONFIRMADA)
+        for chave in _redis().keys(_chave("ranking:tmp:*")):
+            _redis().expire(chave, prazo_quase_vencido)
+        yield _registro(2, 7, RECUSADA)
+
+    prazos = []
+    original = RankingDeEspacosRedis._montar_temporarias
+
+    def espiar(self, registros, ranking, livro):
+        criadas = original(self, registros, ranking, livro)
+        prazos.append(_redis().ttl(livro))
+        return criadas
+
+    monkeypatch.setattr(RankingDeEspacosRedis, "_montar_temporarias", espiar)
+
+    # Act
+    resultado = RankingDeEspacosRedis().substituir(registros(), versao=0)
+
+    # Assert
+    assert resultado is True
+    assert prazos[0] > prazo_quase_vencido
+
+
 def test_falha_no_meio_apaga_as_temporarias_e_sobe_ranking_indisponivel(monkeypatch):
     # Arrange
     ranking = RankingDeEspacosRedis()

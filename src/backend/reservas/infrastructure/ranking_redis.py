@@ -162,6 +162,8 @@ class RankingDeEspacosRedis(RankingDeEspacos):
                 if registro.situacao.conta_no_ranking
             }
             if not contadas:
+                if livro in criadas:
+                    gravador.expire(livro, TTL_DAS_TEMPORARIAS)
                 continue
             totais.update(contadas.values())
             canal = gravador.pipeline(transaction=False)
