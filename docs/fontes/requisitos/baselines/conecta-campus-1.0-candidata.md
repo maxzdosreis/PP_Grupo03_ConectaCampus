@@ -36,7 +36,7 @@ Modelo A4·s16: **baseline = manifesto + versões exatas de cada artefato + apro
 Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcadores abaixo; não edite à mão. O `--verificar` acusa qualquer artefato que mude depois do manifesto, e a versão acordada é a que tem este hash, não "o arquivo mais novo". Na aprovação, todos os documentos devem estar na versão e no estado aprovados (1.0 • Aprovado), e o manifesto é gerado de novo.
 
 <!-- manifesto:inicio -->
-120 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `3e22533f`.
+120 artefatos (todo `.md`, `.puml` e `.csv` de `docs/fontes/requisitos/`, menos `baselines/`). SHA-256 do conteúdo com fim de linha LF, 8 primeiros caracteres. Impressão do manifesto: `edd1c6a2`.
 
 | Artefato | ID | Versão | Estado | Caminho (a partir de `docs/fontes/requisitos/`) | SHA-256 |
 |---|---|---|---|---|---|
@@ -81,14 +81,14 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | Decisões (DEC) | IND-02 | 0.1 | Rascunho | `decisoes/README.md` | `28125021` |
 | Pauta para o professor — Aula 7 (06/11/2026) | PAU-01 | 0.1 | Rascunho | `decisoes/pauta-aula-7.md` | `38342391` |
 | Conecta Campus: Especificação de Requisitos | RS-GRUPO03 | 0.1 | Rascunho | `entrega/RS_Grupo03_Especificacao.md` | `e0271d77` |
-| Evidências do Levantamento de Requisitos | sem cabeçalho | — | — | `entrega/RS_Grupo03_Evidencias.md` | `e5a8c73c` |
+| Evidências do Levantamento de Requisitos | EVD-01 | 0.1 | Rascunho | `entrega/RS_Grupo03_Evidencias.md` | `1f4a63f4` |
 | Ensaio cronometrado da apresentação de Requisitos | APR-03 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Ensaio.md` | `eb3b7194` |
 | Perguntas prováveis da apresentação de Requisitos | APR-02 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Perguntas.md` | `cc3cbc45` |
-| Roteiro da apresentação de Requisitos (Aula 8) | APR-01 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Roteiro.md` | `6fb12053` |
+| Roteiro da apresentação de Requisitos (Aula 8) | APR-01 | 0.1 | Rascunho | `entrega/apresentacao/APRESENTACAO_Grupo03_Roteiro.md` | `f0786b47` |
 | Glossário do Conecta Campus | GLO-01 | 0.1 | Rascunho | `glossario.md` | `5fbdae71` |
-| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `69247933` |
+| Histórias de usuário e aceite | HIS-01 | 0.1 | Rascunho | `historias/README.md` | `6fc4ad87` |
 | US-01 · Criar minha conta | US-01 | 0.1 | Rascunho | `historias/US-01-criar-minha-conta.md` | `11b23e1d` |
-| US-02 · Entrar no sistema | US-02 | 0.1 | Rascunho | `historias/US-02-entrar-no-sistema.md` | `30fa97d1` |
+| US-02 · Entrar no sistema | US-02 | 0.1 | Rascunho | `historias/US-02-entrar-no-sistema.md` | `ceea279a` |
 | US-03 · Manter e encerrar a sessão | US-03 | 0.1 | Rascunho | `historias/US-03-manter-e-encerrar-a-sessao.md` | `d2de9f4c` |
 | US-04 · Consultar os espaços | US-04 | 0.1 | Rascunho | `historias/US-04-consultar-os-espacos.md` | `cef3da4b` |
 | US-05 · Cadastrar espaço | US-05 | 0.1 | Rascunho | `historias/US-05-cadastrar-espaco.md` | `80cb3479` |
@@ -96,10 +96,10 @@ Gerado por `python scripts/gerar_rastreabilidade.py --manifesto` entre os marcad
 | US-07 · Desativar e reativar espaço | US-07 | 0.1 | Rascunho | `historias/US-07-desativar-e-reativar-espaco.md` | `2731bcce` |
 | US-08 · Solicitar reserva | US-08 | 0.1 | Rascunho | `historias/US-08-solicitar-reserva.md` | `25e54290` |
 | US-09 · Ver a agenda do dia antes de pedir | US-09 | 0.1 | Rascunho | `historias/US-09-ver-a-agenda-do-dia.md` | `892778f5` |
-| US-10 · Acompanhar minhas reservas | US-10 | 0.1 | Rascunho | `historias/US-10-acompanhar-minhas-reservas.md` | `a050c732` |
+| US-10 · Acompanhar minhas reservas | US-10 | 0.1 | Rascunho | `historias/US-10-acompanhar-minhas-reservas.md` | `bc3503d9` |
 | US-11 · Acompanhar todas as reservas | US-11 | 0.1 | Rascunho | `historias/US-11-acompanhar-todas-as-reservas.md` | `651d5fe4` |
 | US-12 · Ver o detalhe e o histórico de uma reserva | US-12 | 0.1 | Rascunho | `historias/US-12-ver-detalhe-e-historico.md` | `4fe938f1` |
-| US-13 · Cancelar uma reserva | US-13 | 0.1 | Rascunho | `historias/US-13-cancelar-uma-reserva.md` | `2358e6d1` |
+| US-13 · Cancelar uma reserva | US-13 | 0.1 | Rascunho | `historias/US-13-cancelar-uma-reserva.md` | `1f09f2dc` |
 | US-14 · Confirmar uma reserva | US-14 | 0.1 | Rascunho | `historias/US-14-confirmar-uma-reserva.md` | `69c63977` |
 | US-15 · Recusar uma reserva com motivo | US-15 | 0.1 | Rascunho | `historias/US-15-recusar-uma-reserva.md` | `99480542` |
 | US-16 · Concluir uma reserva | US-16 | 0.1 | Rascunho | `historias/US-16-concluir-uma-reserva.md` | `363fde6f` |

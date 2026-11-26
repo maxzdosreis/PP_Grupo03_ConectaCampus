@@ -1,5 +1,16 @@
 # Evidências do Levantamento de Requisitos
 
+| Identificação | Responsabilidade |
+|---|---|
+| **EVD-01 • 0.1 • Rascunho** | Autor: Max Zimmermann dos Reis • Revisor: Matheus Cezar Santos • Aprovador: Eduardo Almeida da Cunha |
+
+## Histórico de revisões
+
+| Versão | Data | Autor | Alteração e referência da aprovação |
+|---|---|---|---|
+| 0.1 | 13/11/2026 | Max Zimmermann dos Reis | Criação: instrumentos, registros, resultados do questionário, síntese e limitações do levantamento (REQ-14). Sem aprovação. |
+| 0.1 | 26/11/2026 | Max Zimmermann dos Reis | Cabeçalho, responsáveis e histórico de revisões, para o documento seguir o padrão da fonte oficial (ENT-01). Conteúdo inalterado. Sem aprovação. |
+
 Projeto Conecta Campus (reserva de quadras e espaços esportivos) • Grupo 03 • Requisitos de Software, semestre 2026/2 • Professor Luis Antonio Leite Francisco da Costa, Unilasalle RS
 
 Turma: [PENDENTE: preencher a turma]
