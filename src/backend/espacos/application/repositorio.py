@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from contextlib import AbstractContextManager
 from typing import Protocol
 
@@ -8,6 +9,14 @@ from espacos.domain.tipo_espaco import TipoEspaco
 class LeitorDeEspacos(Protocol):
     def obter_por_id(self, espaco_id: int) -> EspacoEsportivo | None:
         """Devolve o espaço ou None. Quem só lê (RDS-11) pode ter um cache atrás."""
+
+
+class LeitorDeNomes(Protocol):
+    def listar_nomes(self, ids: Iterable[int]) -> dict[int, str]:
+        """Nome de cada espaço pedido, inclusive os inativos.
+
+        Ids inexistentes ficam de fora, sem erro. Só leitura (RDS-12).
+        """
 
 
 class RepositorioEspacos(Protocol):

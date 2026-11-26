@@ -10,7 +10,10 @@ from reservas.application.portas import (
     AgendaIndisponivel,
     IndiceDeReservas,
     IndiceIndisponivel,
+    RankingDeEspacos,
+    RankingIndisponivel,
     RegistroDoIndice,
+    RegistroDoRanking,
 )
 from reservas.application.repositorio import (
     FiltrosDeReservas,
@@ -39,11 +42,13 @@ class RepositorioReservasComAgenda(RepositorioReservas):
         interno: RepositorioReservas,
         agenda: AgendaDoDia,
         indice: IndiceDeReservas,
+        ranking: RankingDeEspacos,
         apos_o_commit: AposOCommit = _apos_o_commit,
     ) -> None:
         self._interno = interno
         self._agenda = agenda
         self._indice = indice
+        self._ranking = ranking
         self._apos_o_commit = apos_o_commit
 
     def salvar(self, reserva: Reserva) -> Reserva:
@@ -63,6 +68,12 @@ class RepositorioReservasComAgenda(RepositorioReservas):
             self._aplicar_no_indice,
             IndiceIndisponivel,
             "índice de filas e contagens",
+        )
+        self._sincronizar_projecao(
+            reserva_id,
+            self._aplicar_no_ranking,
+            RankingIndisponivel,
+            "ranking de espaços",
         )
 
     def _sincronizar_projecao(
@@ -107,6 +118,9 @@ class RepositorioReservasComAgenda(RepositorioReservas):
 
     def _aplicar_no_indice(self, reserva: Reserva) -> None:
         self._indice.aplicar(reserva.id, reserva.situacao, reserva.criada_em)
+
+    def _aplicar_no_ranking(self, reserva: Reserva) -> None:
+        self._ranking.aplicar(reserva.id, reserva.espaco_id, reserva.situacao)
 
     def em_transacao(self) -> AbstractContextManager[None]:
         return self._interno.em_transacao()
@@ -153,3 +167,13 @@ class RepositorioReservasComAgenda(RepositorioReservas):
         self, depois_de_id: int, limite: int
     ) -> list[RegistroDoIndice]:
         return self._interno.listar_para_indice(depois_de_id, limite)
+
+    def contar_por_espaco_que_contam_no_ranking(
+        self, limite: int
+    ) -> tuple[tuple[int, int], ...]:
+        return self._interno.contar_por_espaco_que_contam_no_ranking(limite)
+
+    def listar_para_ranking(
+        self, depois_de_id: int, limite: int
+    ) -> list[RegistroDoRanking]:
+        return self._interno.listar_para_ranking(depois_de_id, limite)

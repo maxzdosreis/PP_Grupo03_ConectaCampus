@@ -26,6 +26,7 @@ Conferidos com `config/tests/test_matriz_de_acesso.py`. "Logado" = qualquer perf
 | `GET /api/reservas/?espaco=&situacao=&data=&solicitante=&minhas=&pagina=&tamanho=` | logado (Solicitante: só as próprias) | 200 | 400 `DADOS_INVALIDOS` (filtro, página ou tamanho em formato inválido) |
 | `GET /api/reservas/pendentes/?pagina=&tamanho=` | só Gestor | 200 | 400 `DADOS_INVALIDOS` (página ou tamanho inválidos); 403 `ACAO_NAO_PERMITIDA` |
 | `GET /api/reservas/contagem-por-situacao/` | só Gestor | 200 | 403 `ACAO_NAO_PERMITIDA` |
+| `GET /api/reservas/ranking-de-espacos/?limite=` | só Gestor | 200 | 400 `DADOS_INVALIDOS` (limite fora de 1 a 20); 403 `ACAO_NAO_PERMITIDA` |
 | `GET /api/reservas/ocupacao/?espaco=&data=` | logado | 200 | 400 `DADOS_INVALIDOS`; 404 `ESPACO_NAO_ENCONTRADO`; 409 `ESPACO_INATIVO` |
 | `GET /api/reservas/{id}/` | Gestor; Solicitante só a própria | 200 | 404 `RESERVA_NAO_ENCONTRADA` |
 | `PATCH /api/reservas/{id}/situacao/` | Gestor; Solicitante só cancela a própria | 200 | 400 `MOTIVO_OBRIGATORIO`, `SITUACAO_INVALIDA`, `DADOS_INVALIDOS`; 403 `ACAO_NAO_PERMITIDA`; 404; 409 `TRANSICAO_DE_SITUACAO_INVALIDA`, `CONCLUSAO_ANTES_DO_TERMINO`, `RECUSA_OU_CANCELAMENTO_APOS_O_INICIO`, `RESERVA_DESATUALIZADA` |
@@ -111,7 +112,7 @@ Para uma data em que não é possível reservar (ontem, hoje depois do fechament
 
 ## Reconstruir a agenda, as filas e as contagens no Redis
 
-A agenda do dia, a fila de pendentes e a contagem por situação que o Redis guarda são projeções do PostgreSQL, que continua sendo a fonte da verdade. No Compose padrão o Redis não persiste nada: depois de reiniciá-lo, ou se uma projeção ficar diferente do banco por qualquer motivo, um comando refaz tudo a partir das reservas. A partir de `src/`:
+A agenda do dia, a fila de pendentes, a contagem por situação e o ranking de espaços que o Redis guarda são projeções do PostgreSQL, que continua sendo a fonte da verdade. No Compose padrão o Redis não persiste nada: depois de reiniciá-lo, ou se uma projeção ficar diferente do banco por qualquer motivo, um comando refaz tudo a partir das reservas. A partir de `src/`:
 
 ```bash
 docker compose exec backend python manage.py reconstruir_agenda_redis
@@ -120,9 +121,10 @@ docker compose exec backend python manage.py reconstruir_agenda_redis
 ```text
 Agenda reconstruída: 4 dias, 9 reservas, 1 dia esvaziado.
 Filas e contagens reconstruídas: 9 reservas, 3 pendentes.
+Ranking de espaços reconstruído: 2 espaços, 4 reservas contadas.
 ```
 
-A segunda linha conta todas as reservas do banco e quantas estão na fila de pendentes. Se uma reserva muda enquanto o índice é refeito, o comando tenta de novo (até 3 vezes) e, se continuar mudando, descarta o índice e avisa; é só rodar outra vez. Se o Redis cair depois de a agenda terminar, o erro diz que a agenda foi refeita e as filas e contagens não.
+A segunda linha conta todas as reservas do banco e quantas estão na fila de pendentes; a terceira, os espaços com reserva que conta e quantas reservas contam (`CONFIRMADA` ou `CONCLUIDA`). Se uma reserva muda enquanto o índice é refeito, o comando tenta de novo (até 3 vezes) e, se continuar mudando, descarta o índice e avisa; é só rodar outra vez. Se o Redis cair depois de a agenda terminar, o erro diz que a agenda foi refeita e as filas e contagens não; se cair só no ranking, o erro diz que o resto foi refeito e o ranking não. A terceira linha também vira aviso, com a mesma ideia, quando as reservas mudam durante a reconstrução do ranking.
 
 O comando refaz, de hoje em diante (data de Brasília), todo dia que tem reserva Solicitada ou Confirmada no banco **e** todo dia que já tem projeção no Redis: um dia que ficou com a projeção velha e hoje não tem mais reserva ativa é gravado vazio (conta como "esvaziado"). Dias anteriores a hoje não são tocados; o prazo de cada chave cuida deles. É idempotente: rodar de novo deixa o mesmo estado e o mesmo resumo, e não precisa de `DJANGO_DEBUG`, porque não cria usuário nem senha.
 
@@ -175,6 +177,34 @@ curl http://localhost:8000/api/reservas/contagem-por-situacao/ -H "Authorization
 - **Quando o índice não serve.** Se ele não está montado (`None`) ou o Redis falha (`IndiceIndisponivel`), a resposta sai inteira do PostgreSQL (`listar_pendentes` e `contar_por_situacao`), com **a mesma ordem** (`criada_em`, depois id, a do score e do membro com 19 dígitos) e o mesmo formato. A falha vai só para o log (aviso); nunca vira 503 nem muda o corpo da resposta, ao contrário do login, que continua recusando sem o Redis.
 - **Por que a leitura não refaz o índice.** Reconstruir varre o banco inteiro e não cabe no caminho de uma requisição. Quem o refaz é o comando [`reconstruir_agenda_redis`](#reconstruir-a-agenda-as-filas-e-as-contagens-no-redis); até lá, as consultas saem do PostgreSQL, mais lentas (um `COUNT` e um `LIMIT/OFFSET` na fila, um `GROUP BY` na contagem) e iguais.
 - **Sem índice no banco para a fila.** `ORDER BY criada_em, id` entre as `SOLICITADA` não tem índice próprio; é a leitura de reserva do PostgreSQL mais cara hoje, e a medição fica para a RDS-10.
+
+## Ranking de espaços
+
+O Gestor vê quais espaços têm mais reservas que contam (RF-45, CR-10, tarefa RDS-12). É uma leitura de apoio: o ranking nunca decide nada (nem reserva, nem agenda, nem permissão).
+
+- `GET /api/reservas/ranking-de-espacos/?limite=N` (só Gestor; `N` de 1 a 20, padrão 5): `dados` é a lista de `{posicao, espaco_id, nome, total}` e a `mensagem` conta os espaços ("Nenhuma reserva confirmada ainda.", "1 espaço no ranking.", "N espaços no ranking."). Anônimo 401 `NAO_AUTENTICADO`, Solicitante 403 `ACAO_NAO_PERMITIDA` (antes de validar o limite), limite inválido 400 `DADOS_INVALIDOS` com o campo, outros métodos 405.
+
+```bash
+curl "http://localhost:8000/api/reservas/ranking-de-espacos/?limite=2" -H "Authorization: Bearer $ACCESS"
+```
+
+**Regra de contagem.** Conta a reserva `CONFIRMADA` ou `CONCLUIDA` (`SITUACOES_QUE_CONTAM_NO_RANKING`, `SituacaoReserva.conta_no_ranking`, no domínio). `SOLICITADA`, `RECUSADA` e `CANCELADA` não contam. Uma `CONFIRMADA` que vira `CONCLUIDA` continua contando **uma** vez; se for cancelada, deixa de contar. O ranking é do tempo todo (sem filtro de período). A ordem é total decrescente e, no empate, `espaco_id` crescente; espaço com total zero não aparece.
+
+**Estruturas no Redis** (`infrastructure/ranking_redis.py`, `RankingDeEspacosRedis`; nomes lógicos, a chave física leva o prefixo do cache):
+
+| Chave | Tipo | Conteúdo |
+|---|---|---|
+| `ranking:espacos` | Sorted Set | membro = id do espaço, score = total |
+| `ranking:contadas` | Hash | campo = id da reserva, valor = id do espaço: o **livro** das reservas já contadas |
+| `ranking:montado` | String | sinal de que o ranking foi montado (sem ele, a leitura é um miss) |
+| `ranking:versao` | String | contador que cada `aplicar` avança, para a reconstrução descartar um retrato velho |
+
+- **Livro de idempotência.** `aplicar(reserva_id, espaco_id, situacao)` roda num script Lua atômico e age por **estado**, não por evento: se a situação conta, `HSETNX` no livro e, só se o campo era novo, `ZINCRBY +1`; se não conta, `HDEL` e, só se o campo existia, `ZINCRBY -1` (e `ZREM` quando o total chega a zero, para nunca listar espaço com zero). Repetir, atrasar ou inverter as chamadas termina no estado certo, o que um `ZINCRBY` por evento não garante. Sem o ranking montado, `aplicar` não grava nada, mas avança a `versao`.
+- **Desempate.** O `ZREVRANGE` do Redis desempata pela ordem lexicográfica do membro ("10" < "9"), que não é "id crescente". `top(limite)` busca o corte com `ZREVRANGE ... WITHSCORES`, traz **todos** os membros com o score do corte (`ZRANGEBYSCORE`) e ordena e recorta na aplicação, então o empate que atravessa a fronteira do limite também sai na ordem do negócio.
+- **Reconstrução.** `ReconstruirRanking` lê as reservas em lotes (`listar_para_ranking`), agrega e troca tudo num script atômico, por chaves temporárias com TTL, conferindo a `versao` lida antes da consulta (o mesmo molde do índice de filas). O livro tem um campo por reserva que conta e, como o índice, não expira: o custo é de dezenas de bytes por reserva, desprezível no tamanho deste projeto.
+- **Decorator.** `RepositorioReservasComAgenda` aplica o ranking depois do commit, para **toda** situação, como terceira projeção, com o próprio `try/except` (a falha de uma projeção não impede as outras duas) e a mesma convergência por releitura do estado.
+
+**De onde vem cada dado** (`application/ranking_de_espacos.py`, `ConsultarRankingDeEspacos`): os totais saem da projeção (`top`) e podem estar um instante atrás do banco enquanto uma mudança de situação ainda é registrada; os **nomes** saem sempre do cadastro de espaços (`ConsultaDeEspacos.nomes_dos_espacos`, uma consulta por ids, inclusive de espaços inativos; um id sem nome recebe "Espaço {id}"). Se o ranking não está montado (`None`) ou o Redis falha (`RankingIndisponivel`), a resposta sai do PostgreSQL (`contar_por_espaco_que_contam_no_ranking`, um `GROUP BY` com a mesma ordem), com o mesmo resultado e **nunca** 503. A leitura não repovoa o ranking: quem o refaz é o comando [`reconstruir_agenda_redis`](#reconstruir-a-agenda-as-filas-e-as-contagens-no-redis).
 
 ## Consultar reservas
 
@@ -392,6 +422,7 @@ Se o banco foi criado antes do histórico (RES-07), as reservas antigas aparecem
 | Casos de uso (`CriarReserva`, `ConsultarReservas`, `ObterReserva`, `AlterarSituacaoReserva`, `ConsultarHistoricoDaReserva`, `ConsultarOcupacaoDoDia`) | `application/casos_de_uso.py` |
 | Reconstrução da agenda do Redis (`ReconstruirAgenda`), do índice de filas e contagens (`ReconstruirIndice`) e o comando `reconstruir_agenda_redis` | `application/reconstruir_agenda.py`, `application/reconstruir_indice.py`, `management/commands/reconstruir_agenda_redis.py` |
 | Índice de filas e contagens no Redis (`IndiceDeReservasRedis`) e a sincronização depois do commit | `infrastructure/indice_redis.py`, `infrastructure/repositorio_com_agenda.py` |
+| Ranking de espaços: regra de contagem, projeção no Redis (`RankingDeEspacosRedis`, `ReconstruirRanking`), consulta do Gestor (`ConsultarRankingDeEspacos`) e a leitura sem a projeção (`contar_por_espaco_que_contam_no_ranking`, `listar_para_ranking`) | `domain/situacao.py`, `application/portas.py`, `application/ranking_de_espacos.py`, `application/reconstruir_ranking.py`, `infrastructure/ranking_redis.py`, `infrastructure/repositorio_django.py` |
 | Consulta do Gestor à fila de pendentes e às contagens (`ConsultarFilaDePendentes`, `ContarReservasPorSituacao`) e a leitura sem o índice (`listar_pendentes`, `listar_por_ids`, `contar_por_situacao`) | `application/fila_de_pendentes.py`, `application/repositorio.py`, `infrastructure/repositorio_django.py` |
 | Como um espaço é consultado | `application/portas.py` e `infrastructure/consulta_de_espacos.py` |
 | Models, constraints (inclusive a de sobreposição) e gravação do histórico | `infrastructure/models.py`, `infrastructure/repositorio_django.py` |

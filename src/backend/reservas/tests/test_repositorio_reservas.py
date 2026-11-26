@@ -31,6 +31,8 @@ from reservas.tests.fakes import (
     GESTOR,
     ID_INEXISTENTE,
     RepositorioReservasEmMemoria,
+    momento_para,
+    reserva_solicitada,
     todas_as_reservas,
 )
 from reservas.tests.historico import verificar_historico_coerente
@@ -1428,3 +1430,133 @@ def test_contar_por_situacao_no_banco_faz_um_group_by():
     # Assert
     assert len(consultas) == 1
     assert "GROUP BY" in consultas[0]["sql"]
+
+
+def _salvar_para_o_ranking(repositorio, espaco_id, hora, situacao):
+    reserva = reserva_solicitada(
+        espaco_id=espaco_id, hora_inicio=time(hora, 0), hora_fim=time(hora + 1, 0)
+    )
+    if situacao is S.CONCLUIDA:
+        reserva.alterar_situacao(S.CONFIRMADA, ator=GESTOR, agora=AGORA)
+    if situacao is not S.SOLICITADA:
+        reserva.alterar_situacao(
+            situacao,
+            motivo="Chuva" if situacao in (S.CANCELADA, S.RECUSADA) else None,
+            ator=GESTOR,
+            agora=momento_para(situacao),
+        )
+    return repositorio.salvar(reserva)
+
+
+def test_ranking_sem_reservas_devolve_tupla_vazia(repositorio):
+    assert repositorio.contar_por_espaco_que_contam_no_ranking(5) == ()
+
+
+def test_ranking_conta_so_confirmadas_e_concluidas(repositorio):
+    # Arrange
+    for hora, situacao in enumerate(
+        [S.SOLICITADA, S.CONFIRMADA, S.CONCLUIDA, S.RECUSADA, S.CANCELADA], start=8
+    ):
+        _salvar_para_o_ranking(repositorio, 3, hora, situacao)
+
+    # Act
+    ranking = repositorio.contar_por_espaco_que_contam_no_ranking(5)
+
+    # Assert
+    assert ranking == ((3, 2),)
+
+
+def test_ranking_ordena_por_total_decrescente_e_no_empate_por_id_do_espaco(
+    repositorio,
+):
+    # Arrange
+    for espaco_id, quantidade in ((30, 2), (5, 3), (20, 2), (9, 1), (10, 1)):
+        for hora in range(8, 8 + quantidade):
+            _salvar_para_o_ranking(repositorio, espaco_id, hora, S.CONFIRMADA)
+
+    # Act
+    ranking = repositorio.contar_por_espaco_que_contam_no_ranking(10)
+
+    # Assert
+    assert ranking == ((5, 3), (20, 2), (30, 2), (9, 1), (10, 1))
+
+
+def test_ranking_respeita_o_limite_com_empate_na_fronteira(repositorio):
+    # Arrange
+    for espaco_id in (100, 11, 10, 9):
+        _salvar_para_o_ranking(repositorio, espaco_id, 8, S.CONFIRMADA)
+
+    # Act e Assert
+    assert repositorio.contar_por_espaco_que_contam_no_ranking(1) == ((9, 1),)
+    assert repositorio.contar_por_espaco_que_contam_no_ranking(3) == (
+        (9, 1),
+        (10, 1),
+        (11, 1),
+    )
+
+
+@pytest.mark.parametrize("limite", [0, -1])
+def test_ranking_com_limite_invalido_lanca_value_error(repositorio, limite):
+    with pytest.raises(ValueError, match="limite"):
+        repositorio.contar_por_espaco_que_contam_no_ranking(limite)
+
+
+def test_ranking_fica_igual_ao_do_outro_repositorio_depois_de_cancelar(repositorio):
+    # Arrange
+    salva = _salvar_para_o_ranking(repositorio, 3, 8, S.CONFIRMADA)
+    assert repositorio.contar_por_espaco_que_contam_no_ranking(5) == ((3, 1),)
+
+    # Act
+    salva.alterar_situacao(S.CANCELADA, motivo="Chuva", ator=GESTOR, agora=AGORA)
+    repositorio.salvar(salva)
+
+    # Assert
+    assert repositorio.contar_por_espaco_que_contam_no_ranking(5) == ()
+
+
+@pytest.mark.django_db
+def test_ranking_no_banco_faz_um_group_by_com_limit():
+    # Arrange
+    repositorio = RepositorioReservasDjango()
+    _salvar_para_o_ranking(repositorio, 3, 8, S.CONFIRMADA)
+
+    # Act
+    with CaptureQueriesContext(connection) as consultas:
+        repositorio.contar_por_espaco_que_contam_no_ranking(5)
+
+    # Assert
+    assert len(consultas) == 1
+    assert "GROUP BY" in consultas[0]["sql"]
+    assert "LIMIT" in consultas[0]["sql"]
+
+
+def test_listar_para_ranking_traz_id_espaco_e_situacao_em_ordem_de_id(repositorio):
+    # Arrange
+    primeira = _salvar_para_o_ranking(repositorio, 4, 8, S.CONFIRMADA)
+    segunda = _salvar_para_o_ranking(repositorio, 3, 9, S.SOLICITADA)
+
+    # Act
+    registros = repositorio.listar_para_ranking(0, 10)
+
+    # Assert
+    assert [(r.reserva_id, r.espaco_id, r.situacao) for r in registros] == [
+        (primeira.id, 4, S.CONFIRMADA),
+        (segunda.id, 3, S.SOLICITADA),
+    ]
+
+
+def test_listar_para_ranking_pagina_por_id_sem_repetir(repositorio):
+    # Arrange
+    for hora in range(8, 13):
+        _salvar_para_o_ranking(repositorio, 3, hora, S.CONFIRMADA)
+
+    # Act
+    lote = repositorio.listar_para_ranking(0, 2)
+    proximo = repositorio.listar_para_ranking(lote[-1].reserva_id, 2)
+    resto = repositorio.listar_para_ranking(proximo[-1].reserva_id, 2)
+
+    # Assert
+    ids = [r.reserva_id for r in lote + proximo + resto]
+    assert len(lote) == len(proximo) == 2
+    assert len(resto) == 1
+    assert ids == sorted(set(ids))

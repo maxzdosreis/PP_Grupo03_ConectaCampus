@@ -9,6 +9,7 @@ from reservas.application.casos_de_uso import AlterarSituacaoReserva, CriarReser
 from reservas.application.ocupacao_do_dia import HorarioOcupado, ocupados_por_reserva
 from reservas.application.reconstruir_agenda import ReconstruirAgenda
 from reservas.application.reconstruir_indice import ReconstruirIndice
+from reservas.application.reconstruir_ranking import ReconstruirRanking
 from reservas.domain.excecoes import ConflitoDeHorario, TransicaoDeSituacaoInvalida
 from reservas.domain.situacao import SITUACOES_QUE_EXIGEM_MOTIVO, SituacaoReserva
 from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
@@ -20,6 +21,7 @@ from reservas.tests.fakes import (
     AgendaDoDiaEmMemoria,
     ConsultaDeEspacosEmMemoria,
     IndiceDeReservasEmMemoria,
+    RankingDeEspacosEmMemoria,
     RepositorioReservasEmMemoria,
     espaco_reservavel,
 )
@@ -51,10 +53,12 @@ class MaquinaDasProjecoes(RuleBasedStateMachine):
         self.repositorio = RepositorioReservasEmMemoria()
         self.agenda = AgendaDoDiaEmMemoria()
         self.indice = IndiceDeReservasEmMemoria()
+        self.ranking = RankingDeEspacosEmMemoria()
         decorator = RepositorioReservasComAgenda(
             self.repositorio,
             self.agenda,
             self.indice,
+            self.ranking,
             apos_o_commit=self.acoes_adiadas.append,
         )
         consulta = ConsultaDeEspacosEmMemoria(
@@ -67,6 +71,7 @@ class MaquinaDasProjecoes(RuleBasedStateMachine):
                 versao = self.agenda.versao(espaco_id, dia)
                 assert self.agenda.substituir(espaco_id, dia, {}, versao=versao)
         self._reconstruir_o_indice()
+        self._reconstruir_o_ranking()
 
     @rule(
         espaco_id=st.sampled_from(ESPACOS),
@@ -134,6 +139,9 @@ class MaquinaDasProjecoes(RuleBasedStateMachine):
         fila, contagem = self._fila_e_contagem_do_repositorio()
         assert self.indice.pendentes(10_000) == fila
         assert self.indice.contagem_por_situacao() == contagem
+        assert self.ranking.top(10_000) == (
+            self.repositorio.contar_por_espaco_que_contam_no_ranking(10_000)
+        )
 
     def _avancar_o_relogio(self):
         self.agora += timedelta(minutes=1)
@@ -146,9 +154,14 @@ class MaquinaDasProjecoes(RuleBasedStateMachine):
         resultado = ReconstruirIndice(self.repositorio, self.indice).executar()
         assert not resultado.descartado
 
+    def _reconstruir_o_ranking(self):
+        resultado = ReconstruirRanking(self.repositorio, self.ranking).executar()
+        assert not resultado.descartado
+
     def _reconstruir_tudo(self):
         ReconstruirAgenda(self.repositorio, self.agenda, lambda: self.agora).executar()
         self._reconstruir_o_indice()
+        self._reconstruir_o_ranking()
 
     def _agenda_do_dia(self, espaco_id, dia):
         return _ordenados(self.agenda.listar(espaco_id, dia) or ())
@@ -173,6 +186,7 @@ class MaquinaDasProjecoes(RuleBasedStateMachine):
             agendas,
             self.indice.pendentes(10_000),
             self.indice.contagem_por_situacao(),
+            self.ranking.top(10_000),
         )
 
 

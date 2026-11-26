@@ -11,14 +11,18 @@ from django.utils import timezone
 from redis.exceptions import RedisError
 
 from reservas.application.ocupacao_do_dia import ocupados_por_reserva
-from reservas.application.portas import IndiceIndisponivel
+from reservas.application.portas import IndiceIndisponivel, RankingIndisponivel
 from reservas.application.reconstruir_agenda import ResultadoDaReconstrucao
 from reservas.application.reconstruir_indice import ResultadoDaReconstrucaoDoIndice
+from reservas.application.reconstruir_ranking import (
+    ResultadoDaReconstrucaoDoRanking,
+)
 from reservas.domain.reserva import Reserva
 from reservas.domain.situacao import SituacaoReserva
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
 from reservas.infrastructure.indice_redis import IndiceDeReservasRedis
 from reservas.infrastructure.models import ReservaModel
+from reservas.infrastructure.ranking_redis import RankingDeEspacosRedis
 from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 from reservas.management.commands import reconstruir_agenda_redis
@@ -41,7 +45,7 @@ def _da_agenda(saida: str) -> str:
     linhas = [
         linha
         for linha in saida.splitlines(keepends=True)
-        if "Filas e contagens" not in linha
+        if "Filas e contagens" not in linha and "Ranking de espaços" not in linha
     ]
     return "".join(linhas)
 
@@ -282,6 +286,7 @@ def test_a_segunda_linha_vem_depois_da_linha_da_agenda_que_fica_intacta(espaco_i
     assert linhas == [
         "Agenda reconstruída: 1 dia, 1 reserva, 0 dias esvaziados.",
         "Filas e contagens reconstruídas: 1 reserva, 1 pendente.",
+        "Ranking de espaços reconstruído: 0 espaços, 0 reservas contadas.",
     ]
 
 
@@ -321,6 +326,7 @@ def test_decorator_apos_a_reconstrucao_atualiza_fila_e_contagens(espaco_id, indi
         RepositorioReservasDjango(),
         AgendaDoDiaRedis(),
         indice,
+        RankingDeEspacosRedis(),
         apos_o_commit=lambda acao: acao(),
     )
     reserva = Reserva.solicitar(
@@ -377,7 +383,7 @@ def test_texto_da_linha_do_indice_no_singular_no_plural_e_com_aviso(
         reconstruir_agenda_redis, "reconstruir_indice", lambda: CasoDeUsoFixo()
     )
 
-    assert _executar().splitlines()[1:] == [esperada]
+    assert _executar().splitlines()[1:2] == [esperada]
 
 
 def test_indice_descartado_aparece_como_aviso_e_nao_como_sucesso(monkeypatch):
@@ -436,3 +442,138 @@ def test_a_ajuda_do_comando_fala_da_agenda_e_das_filas_e_contagens():
 
     assert "agenda" in ajuda
     assert "filas e contagens" in ajuda
+
+
+def _linha_do_ranking(saida: str) -> str:
+    [linha] = [x for x in saida.splitlines() if "anking de espaços" in x]
+    return linha
+
+
+def test_a_terceira_linha_traz_o_ranking_reconstruido(espaco_id):
+    # Arrange
+    _salvar_na_situacao(espaco_id, 8, SituacaoReserva.CONFIRMADA)
+    _salvar_na_situacao(espaco_id, 9, SituacaoReserva.CONFIRMADA)
+    _salvar_na_situacao(espaco_id, 10, SituacaoReserva.SOLICITADA)
+
+    # Act
+    linhas = _executar().splitlines()
+
+    # Assert
+    assert linhas == [
+        "Agenda reconstruída: 1 dia, 3 reservas, 0 dias esvaziados.",
+        "Filas e contagens reconstruídas: 3 reservas, 1 pendente.",
+        "Ranking de espaços reconstruído: 1 espaço, 2 reservas contadas.",
+    ]
+    assert RankingDeEspacosRedis().top(5) == ((espaco_id, 2),)
+
+
+def test_o_ranking_reconstruido_e_igual_ao_do_postgresql(espaco_id):
+    # Arrange
+    _salvar_na_situacao(espaco_id, 8, SituacaoReserva.CONFIRMADA)
+    _salvar_na_situacao(espaco_id, 9, SituacaoReserva.CANCELADA)
+    assert RankingDeEspacosRedis().top(5) is None
+
+    # Act
+    _executar()
+
+    # Assert
+    do_banco = RepositorioReservasDjango().contar_por_espaco_que_contam_no_ranking(5)
+    assert RankingDeEspacosRedis().top(5) == do_banco == ((espaco_id, 1),)
+
+
+def test_sem_reservas_o_ranking_fica_montado_e_vazio():
+    # Act
+    saida = _executar()
+
+    # Assert
+    assert RankingDeEspacosRedis().top(5) == ()
+    assert _linha_do_ranking(saida) == (
+        "Ranking de espaços reconstruído: 0 espaços, 0 reservas contadas."
+    )
+
+
+@pytest.mark.parametrize(
+    ("resultado", "esperada"),
+    [
+        (
+            ResultadoDaReconstrucaoDoRanking(1, 1, False),
+            "Ranking de espaços reconstruído: 1 espaço, 1 reserva contada.",
+        ),
+        (
+            ResultadoDaReconstrucaoDoRanking(3, 9, False),
+            "Ranking de espaços reconstruído: 3 espaços, 9 reservas contadas.",
+        ),
+        (
+            ResultadoDaReconstrucaoDoRanking(0, 0, True),
+            "O ranking de espaços foi descartado porque as reservas mudaram "
+            "durante a reconstrução; rode o comando de novo.",
+        ),
+    ],
+)
+def test_texto_da_linha_do_ranking_no_singular_no_plural_e_com_aviso(
+    monkeypatch, resultado, esperada
+):
+    class CasoDeUsoFixo:
+        def executar(self):
+            return resultado
+
+    monkeypatch.setattr(
+        reconstruir_agenda_redis, "reconstruir_ranking", lambda: CasoDeUsoFixo()
+    )
+
+    assert _executar().splitlines()[2:] == [esperada]
+
+
+def test_ranking_fora_do_ar_depois_do_resto_vira_command_error_que_diz_isso(
+    monkeypatch,
+):
+    # Arrange
+    class CasoDeUsoQueFalha:
+        def executar(self):
+            raise RankingIndisponivel
+
+    monkeypatch.setattr(
+        reconstruir_agenda_redis, "reconstruir_ranking", lambda: CasoDeUsoQueFalha()
+    )
+
+    # Act e Assert
+    with pytest.raises(CommandError, match="ranking de espaços") as erro:
+        _executar()
+    assert "rode o comando de novo quando ele voltar" in str(erro.value)
+
+
+def test_a_ajuda_do_comando_fala_do_ranking_de_espacos():
+    assert "ranking de espaços" in reconstruir_agenda_redis.Command.help
+
+
+def test_depois_da_reconstrucao_o_decorator_mantem_o_ranking(espaco_id):
+    # Arrange
+    _executar()
+    repositorio = RepositorioReservasComAgenda(
+        RepositorioReservasDjango(),
+        AgendaDoDiaRedis(),
+        IndiceDeReservasRedis(),
+        RankingDeEspacosRedis(),
+        apos_o_commit=lambda acao: acao(),
+    )
+    reserva = Reserva.solicitar(
+        espaco_id=espaco_id,
+        solicitante=ANA,
+        data=AMANHA,
+        hora_inicio=time(8, 0),
+        hora_fim=time(9, 0),
+        finalidade="Treino do time",
+        agora=timezone.now(),
+        funcionamento=FUNCIONAMENTO_PADRAO,
+    )
+
+    # Act
+    salva = repositorio.salvar(reserva)
+    assert RankingDeEspacosRedis().top(5) == ()
+    salva.alterar_situacao(
+        SituacaoReserva.CONFIRMADA, ator=GESTOR, agora=timezone.now()
+    )
+    repositorio.salvar(salva)
+
+    # Assert
+    assert RankingDeEspacosRedis().top(5) == ((espaco_id, 1),)

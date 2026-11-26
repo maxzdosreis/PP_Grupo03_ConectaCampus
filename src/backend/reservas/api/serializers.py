@@ -2,6 +2,11 @@ from datetime import datetime, timedelta
 
 from rest_framework import serializers
 
+from reservas.application.ranking_de_espacos import (
+    LIMITE_MAXIMO_DO_RANKING,
+    LIMITE_MINIMO_DO_RANKING,
+    LIMITE_PADRAO_DO_RANKING,
+)
 from reservas.application.repositorio import (
     TAMANHO_MAXIMO_DA_PAGINA,
     TAMANHO_PADRAO_DA_PAGINA,
@@ -88,6 +93,25 @@ class FiltrosDaFilaSerializer(serializers.Serializer):
             numero=dados.get("pagina") or 1,
             tamanho=dados.get("tamanho") or TAMANHO_PADRAO_DA_PAGINA,
         )
+
+
+class FiltrosDoRankingSerializer(serializers.Serializer):
+    limite = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+        min_value=LIMITE_MINIMO_DO_RANKING,
+        max_value=LIMITE_MAXIMO_DO_RANKING,
+    )
+
+    def para_limite(self) -> int:
+        return self.validated_data.get("limite") or LIMITE_PADRAO_DO_RANKING
+
+
+class PosicaoDoRankingSaidaSerializer(serializers.Serializer):
+    posicao = serializers.IntegerField()
+    espaco_id = serializers.IntegerField()
+    nome = serializers.CharField()
+    total = serializers.IntegerField()
 
 
 class PaginacaoSaidaSerializer(serializers.Serializer):

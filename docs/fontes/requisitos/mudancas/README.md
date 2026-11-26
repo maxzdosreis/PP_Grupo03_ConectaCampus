@@ -26,6 +26,7 @@ Usada depois da primeira baseline; o fluxo está no [README da fonte oficial](..
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | CR-04 implementado na tarefa AUT-12 (seção 9 do CR). Sem aprovação. |
 | 0.1 | 20/11/2026 | Max Zimmermann dos Reis | CR-08 · Login como tela inicial, aberto e aplicado na especificação e no código no mesmo conjunto de mudanças (FE-09). Os CR-01 a CR-07 não mudaram. Sem aprovação. |
 | 0.1 | 25/11/2026 | Max Zimmermann dos Reis | CR-09 · Gestor consulta a fila de pendentes e as contagens por situação, aberto e aplicado na especificação e no código no mesmo PR (RDS-08, item f da [DEC-28](../decisoes/DEC-28.md)). Os CR-01 a CR-08 não mudaram. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | CR-10 · Gestor consulta o ranking de espaços mais reservados, aberto e aplicado na especificação e no código no mesmo PR (RDS-12, itens e e f da [DEC-28](../decisoes/DEC-28.md)). Os CR-01 a CR-09 não mudaram. Sem aprovação. |
 
 ## Índice
 
@@ -41,5 +42,6 @@ Usada depois da primeira baseline; o fluxo está no [README da fonte oficial](..
 | CR-07 | Gestão de usuários pelo Gestor | [DEC-27](../decisoes/DEC-27.md) | Implementado (especificação e código no mesmo PR) | AUT-11 | [CR-07](CR-07-gestao-de-usuarios.md) |
 | CR-08 | Login como tela inicial (sem a tela de Início) | Teste manual de 20/11/2026 | Implementado (especificação e código no mesmo conjunto) | FE-09 | [CR-08](CR-08-login-como-tela-inicial.md) |
 | CR-09 | Gestor consulta a fila de pendentes e as contagens por situação | [DEC-28](../decisoes/DEC-28.md), item f | Implementado (especificação e código no mesmo PR) | RDS-08 | [CR-09](CR-09-fila-de-pendentes-e-contagens.md) |
+| CR-10 | Gestor consulta o ranking de espaços mais reservados | [DEC-28](../decisoes/DEC-28.md), itens e e f | Implementado (especificação e código no mesmo PR) | RDS-12 | [CR-10](CR-10-ranking-de-espacos.md) |
 
 Os quatro primeiros nascem das respostas da [Aula 7](../decisoes/pauta-aula-7.md#resultado) que mudam o comportamento implementado. O CR-05 nasce da [DEC-25](../decisoes/DEC-25.md) (REQ-12) e está proposto. Os CR-01 a CR-04 foram aplicados na especificação em 10/11/2026 (REQ-13): os RF, UC, histórias, CAs e TAs já trazem a regra nova, com a marca "implementação pendente (tarefa X)" nos CAs. O código não mudou e muda nas tarefas indicadas, que marcam o CR como implementado; até lá, a especificação está adiante do código de propósito. O CR-05 também foi aplicado na especificação (sem código).

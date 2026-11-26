@@ -16,11 +16,14 @@ from reservas.application.fila_de_pendentes import (
     ConsultarFilaDePendentes,
     ContarReservasPorSituacao,
 )
+from reservas.application.ranking_de_espacos import ConsultarRankingDeEspacos
 from reservas.application.reconstruir_agenda import ReconstruirAgenda
 from reservas.application.reconstruir_indice import ReconstruirIndice
+from reservas.application.reconstruir_ranking import ReconstruirRanking
 from reservas.infrastructure.agenda_redis import AgendaDoDiaRedis
 from reservas.infrastructure.consulta_de_espacos import ConsultaDeEspacosViaFachada
 from reservas.infrastructure.indice_redis import IndiceDeReservasRedis
+from reservas.infrastructure.ranking_redis import RankingDeEspacosRedis
 from reservas.infrastructure.repositorio_com_agenda import RepositorioReservasComAgenda
 from reservas.infrastructure.repositorio_django import RepositorioReservasDjango
 
@@ -45,7 +48,10 @@ def _repositorio_com_agenda(
     relogio: Callable[[], datetime],
 ) -> RepositorioReservasComAgenda:
     return RepositorioReservasComAgenda(
-        RepositorioReservasDjango(), AgendaDoDiaRedis(relogio), IndiceDeReservasRedis()
+        RepositorioReservasDjango(),
+        AgendaDoDiaRedis(relogio),
+        IndiceDeReservasRedis(),
+        RankingDeEspacosRedis(),
     )
 
 
@@ -95,6 +101,18 @@ def contar_reservas_por_situacao() -> ContarReservasPorSituacao:
 
 def reconstruir_indice() -> ReconstruirIndice:
     return ReconstruirIndice(RepositorioReservasDjango(), IndiceDeReservasRedis())
+
+
+def consultar_ranking_de_espacos() -> ConsultarRankingDeEspacos:
+    return ConsultarRankingDeEspacos(
+        RepositorioReservasDjango(),
+        RankingDeEspacosRedis(),
+        ConsultaDeEspacosViaFachada(),
+    )
+
+
+def reconstruir_ranking() -> ReconstruirRanking:
+    return ReconstruirRanking(RepositorioReservasDjango(), RankingDeEspacosRedis())
 
 
 def consultar_ocupacao_do_dia(

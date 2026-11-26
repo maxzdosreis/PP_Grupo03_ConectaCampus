@@ -14,17 +14,17 @@ Resumo da [matriz](matriz.md) para o `modelagem.pdf` (DOC-01). As contagens por 
 |---|---|---|---|
 | NS com pelo menos um RF | 16 | 17 | 94% |
 | NS que chegam a um TA | 16 | 17 | 94% |
-| RF com NS de origem | 73 | 73 | 100% |
+| RF com NS de origem | 75 | 75 | 100% |
 | RN com pelo menos um RF | 19 | 19 | 100% |
-| RF com UC (sem o transversal) | 72 | 72 | 100% |
-| RF com US e CA (sem o transversal) | 72 | 72 | 100% |
-| CA com TA | 216 | 216 | 100% |
-| TA automatizados | 213 | 216 | 99% |
-| TA manuais (roteiro) | 3 | 216 | 1% |
-| TA pendentes (regra decidida, código na tarefa citada) | 0 | 216 | 0% |
-| RF com endpoint ou tela | 72 | 73 | 99% |
-| RF com código citado | 73 | 73 | 100% |
-| RF com a cadeia completa | 72 | 73 | 99% |
+| RF com UC (sem o transversal) | 74 | 74 | 100% |
+| RF com US e CA (sem o transversal) | 74 | 74 | 100% |
+| CA com TA | 226 | 226 | 100% |
+| TA automatizados | 223 | 226 | 99% |
+| TA manuais (roteiro) | 3 | 226 | 1% |
+| TA pendentes (regra decidida, código na tarefa citada) | 0 | 226 | 0% |
+| RF com endpoint ou tela | 74 | 75 | 99% |
+| RF com código citado | 75 | 75 | 100% |
+| RF com a cadeia completa | 74 | 75 | 99% |
 
 TA manuais: TA-04, TA-181, TA-188 (ver as lacunas de CA sem TA automatizado na [SRS](../requisitos/srs.md#lacunas)).
 
@@ -41,7 +41,7 @@ TA pendentes: nenhum (a especificação está adiante do código de propósito; 
 | [NS-05](../visao.md#ns-05) | 5 | 5 | 1 | 1 | 10 | 10 (0) |
 | [NS-06](../visao.md#ns-06) | 3 | 4 | 3 | 2 | 14 | 14 (0) |
 | [NS-07](../visao.md#ns-07) | 2 | 5 | 3 | 5 | 21 | 21 (0) |
-| [NS-08](../visao.md#ns-08) | 7 | 8 | 3 | 4 | 25 | 25 (0) |
+| [NS-08](../visao.md#ns-08) | 9 | 10 | 4 | 5 | 35 | 35 (0) |
 | [NS-09](../visao.md#ns-09) | 9 | 10 | 7 | 9 | 41 | 41 (0) |
 | [NS-10](../visao.md#ns-10) | 1 | 3 | 3 | 7 | 15 | 15 (0) |
 | [NS-11](../visao.md#ns-11) | 14 | 21 | 8 | 19 | 66 | 66 (1) |
@@ -60,9 +60,9 @@ TA pendentes: nenhum (a especificação está adiante do código de propósito; 
 | F2 | Cadastrar a solicitação | 1 | 1 | 1 | 6 | 6 (0) |
 | F3 | Consultar por dois ou mais critérios | 5 | 2 | 3 | 21 | 21 (0) |
 | F4 | Alterar a situação | 6 | 5 | 9 | 27 | 27 (0) |
-| F5 | Impedir operações inválidas | 34 | 15 | 20 | 90 | 90 (0) |
+| F5 | Impedir operações inválidas | 35 | 16 | 21 | 92 | 92 (0) |
 | F6 | Mensagens de sucesso e erro | 1 | 0 | 0 | 0 | 0 (0) |
-| Extra | Além das seis | 21 | 12 | 19 | 78 | 78 (3) |
+| Extra | Além das seis | 22 | 13 | 20 | 86 | 86 (3) |
 
 ## RNF por forma de verificação
 

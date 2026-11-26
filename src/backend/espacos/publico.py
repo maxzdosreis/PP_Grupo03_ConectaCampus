@@ -1,6 +1,8 @@
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from espacos.application.casos_de_uso import (
+    ObterNomesDosEspacos,
     VerificarEspacoDisponivel,
     VerificarEspacoParaReservar,
 )
@@ -25,6 +27,10 @@ def verificar_espaco_disponivel(espaco_id: int) -> EspacoDisponivel:
     leitor = LeitorDeEspacosComCache(RepositorioEspacosDjango(), CacheDeEspacosRedis())
     espaco = VerificarEspacoDisponivel(leitor).executar(espaco_id)
     return _como_disponivel(espaco)
+
+
+def nomes_dos_espacos(ids: Iterable[int]) -> Mapping[int, str]:
+    return ObterNomesDosEspacos(RepositorioEspacosDjango()).executar(ids)
 
 
 def verificar_espaco_disponivel_para_reserva(espaco_id: int) -> EspacoDisponivel:

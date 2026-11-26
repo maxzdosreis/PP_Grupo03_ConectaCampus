@@ -44,6 +44,7 @@ Prova de que nenhum comportamento existe sem necessidade: cada rota da [matriz d
 | `GET /api/reservas/ocupacao/` | `reservas:ocupacao` | [RF-29](matriz.md#rf-29), [RF-30](matriz.md#rf-30), [RF-31](matriz.md#rf-31) | [NS-05](../visao.md#ns-05), [NS-06](../visao.md#ns-06), [NS-14](../visao.md#ns-14) | — |
 | `GET /api/reservas/pendentes/` | `reservas:pendentes` | [RF-44](matriz.md#rf-44), [RF-44.2](matriz.md#rf-44-2) | [NS-08](../visao.md#ns-08) | — |
 | `GET /api/reservas/contagem-por-situacao/` | `reservas:contagem_por_situacao` | [RF-44.1](matriz.md#rf-44-1), [RF-44.2](matriz.md#rf-44-2) | [NS-08](../visao.md#ns-08) | — |
+| `GET /api/reservas/ranking-de-espacos/` | `reservas:ranking_de_espacos` | [RF-45](matriz.md#rf-45), [RF-45.1](matriz.md#rf-45-1) | [NS-08](../visao.md#ns-08) | — |
 | `GET /api/reservas/{id}/` | `reservas:detalhe` | [RF-14](matriz.md#rf-14), [RF-16](matriz.md#rf-16) | [NS-07](../visao.md#ns-07), [NS-08](../visao.md#ns-08), [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10), [NS-11](../visao.md#ns-11) | — |
 | `DELETE /api/reservas/{id}/` | `reservas:detalhe` | **sem RF** | — | operação inexistente, provada pela matriz: [RNF-R05](../requisitos/rnf.md#rnf-r05) (nada é excluído) |
 | `PATCH /api/reservas/{id}/situacao/` | `reservas:situacao` (corpo: `CONFIRMADA`) | [RF-17](matriz.md#rf-17), [RF-18](matriz.md#rf-18), [RF-19](matriz.md#rf-19), [RF-20](matriz.md#rf-20), [RF-21](matriz.md#rf-21), [RF-24.1](matriz.md#rf-24-1) | [NS-09](../visao.md#ns-09), [NS-10](../visao.md#ns-10) | — |

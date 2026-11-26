@@ -70,3 +70,15 @@ def test_sem_consulta_de_reservas_registrada_e_erro_de_configuracao(monkeypatch)
     # Act / Assert
     with pytest.raises(ImproperlyConfigured, match="Nenhuma consulta de reservas"):
         consulta_de_reservas.consulta_registrada()
+
+
+def test_nomes_dos_espacos_devolve_o_nome_de_cada_id_inclusive_de_inativos():
+    # Arrange
+    ativo = _salvar("Ginásio Central")
+    inativo = _salvar("Campo Velho", ativo=False)
+
+    # Act
+    nomes = publico.nomes_dos_espacos([ativo.id, inativo.id, ID_INEXISTENTE])
+
+    # Assert
+    assert dict(nomes) == {ativo.id: "Ginásio Central", inativo.id: "Campo Velho"}

@@ -24,6 +24,7 @@ Todas as exceções deixam o sistema como estava: nada é gravado, e a pessoa fi
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | UC-09 A3.2: o código da RES-12 (CR-02) mostra as tentativas recusadas. Fichas sem outra mudança. Sem aprovação. |
 | 0.1 | 17/11/2026 | Max Zimmermann dos Reis | ESP-07 (CR-03) implementada: o passo 4 do UC-06 (funcionamento do espaço) passa a valer no código; nenhum passo nem exceção muda. Sem aprovação. |
 | 0.1 | 25/11/2026 | Max Zimmermann dos Reis | UC-24 · Consultar a fila de pendentes e as contagens (ficha resumida), do [CR-09](../mudancas/CR-09-fila-de-pendentes-e-contagens.md) (RDS-08). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
+| 0.1 | 25/11/2026 | Max Zimmermann dos Reis | UC-25 · Consultar o ranking de espaços (ficha resumida), do [CR-10](../mudancas/CR-10-ranking-de-espacos.md) (RDS-12). Mudança posterior à entrega de 13/11/2026. Sem aprovação. |
 
 ## Sumário
 
@@ -492,3 +493,37 @@ Na ordem em que o sistema confere.
 **RFs cobertos:** [RF-44](../requisitos/rf-reservas.md#rf-44) → [passos 1 e 2](#uc24-p1), [passo 5](#uc24-p5), [A2.1](#uc24-a2-1), [A2.2](#uc24-a2-2), [A4.1](#uc24-a4-1) · [RF-44.1](../requisitos/rf-reservas.md#rf-44-1) → [passos 3 e 4](#uc24-p3) · [RF-44.2](../requisitos/rf-reservas.md#rf-44-2) → [E1.1](#uc24-e1-1), [E2.1](#uc24-e2-1)
 
 **Histórias derivadas:** [US-23 Consultar a fila de pendentes e as contagens](../historias/US-23-consultar-a-fila-de-pendentes.md)
+
+## <a id="uc-25"></a>UC-25 · Consultar o ranking de espaços
+
+| Campo | Conteúdo |
+|---|---|
+| **Ator primário** | Atendente responsável |
+| **Meta** | Ver quais espaços têm mais reservas confirmadas, em ordem, para saber onde está a procura e onde sobra horário. |
+| **Precondição** | O ator está autenticado ([UC-02](UC-02-autenticar.md)) com o perfil Gestor. |
+| **Ficha completa relacionada** | [UC-10 Alterar situação da reserva](UC-10-alterar-situacao-da-reserva.md) (as decisões sobre as reservas são o que muda o ranking). |
+
+**Fluxo principal**
+
+1. <a id="uc25-p1"></a>O Atendente responsável pede o ranking de espaços, podendo dizer quantos espaços quer ver (de 1 a 20; cinco quando não diz).
+2. <a id="uc25-p2"></a>O sistema mostra os espaços com mais [reservas que contam no ranking](../glossario.md#reserva-que-conta-no-ranking) (Confirmadas ou Concluídas), do tempo todo, do que tem mais para o que tem menos e, no empate, do menor para o maior código do espaço, cada um com a posição, o código, o nome e o total, e informa quantos espaços estão no ranking.
+3. <a id="uc25-p3"></a>Quando uma reserva é confirmada, concluída ou cancelada (por decisão do Atendente em [UC-10](UC-10-alterar-situacao-da-reserva.md) ou por cancelamento do Solicitante), o total do espaço muda na consulta seguinte, sem nada a refazer: uma Concluída conta uma só vez, e uma Cancelada deixa de contar.
+
+**Alternativas**
+
+- <a id="uc25-a2-1"></a>**A2.1** · Escolher quantos espaços ver: o Atendente informa um limite de 1 a 20, e o sistema mostra só esse número de espaços, do primeiro para baixo.
+- <a id="uc25-a2-2"></a>**A2.2** · Nenhuma reserva confirmada: o sistema informa "Nenhuma reserva confirmada ainda.", sem erro; com um só espaço, informa "1 espaço no ranking.".
+- <a id="uc25-a3-1"></a>**A3.1** · O sistema não consegue usar o apoio de consulta: o ranking sai do cadastro de reservas, com o mesmo resultado e a mesma ordem, sem aviso de falha para o ator.
+
+**Exceções**
+
+Na ordem em que o sistema confere.
+
+| Exceção | Condição | Resultado para o ator | Estado depois | Requisito |
+|---|---|---|---|---|
+| <a id="uc25-e1-1"></a>E1.1 · Sem permissão ou sem identificação | O ator não está identificado, ou é Solicitante. | Quem não está identificado é levado a entrar; o Solicitante é informado de que não tem permissão. Nenhum espaço nem número é mostrado. | Nada é mostrado nem alterado. | [RF-45.1](../requisitos/rf-reservas.md#rf-45-1) |
+| <a id="uc25-e2-1"></a>E2.1 · Limite inválido | O limite não é um número inteiro de 1 a 20. | O sistema informa "Verifique os dados informados.", com o campo com problema. | Nada é mostrado nem alterado. | [RF-45.1](../requisitos/rf-reservas.md#rf-45-1) |
+
+**RFs cobertos:** [RF-45](../requisitos/rf-reservas.md#rf-45) → [passos 1 e 2](#uc25-p1), [passo 3](#uc25-p3), [A2.1](#uc25-a2-1), [A2.2](#uc25-a2-2), [A3.1](#uc25-a3-1) · [RF-45.1](../requisitos/rf-reservas.md#rf-45-1) → [E1.1](#uc25-e1-1), [E2.1](#uc25-e2-1)
+
+**Histórias derivadas:** [US-24 Consultar o ranking de espaços](../historias/US-24-consultar-o-ranking-de-espacos.md)

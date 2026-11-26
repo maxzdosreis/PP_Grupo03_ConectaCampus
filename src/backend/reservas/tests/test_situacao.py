@@ -3,6 +3,7 @@ import itertools
 import pytest
 
 from reservas.domain.situacao import (
+    SITUACOES_QUE_CONTAM_NO_RANKING,
     SITUACOES_QUE_EXIGEM_MOTIVO,
     SITUACOES_QUE_OCUPAM_HORARIO,
     TRANSICOES_PERMITIDAS,
@@ -144,3 +145,23 @@ def test_ocupa_horario_segue_o_conjunto(situacao, ocupa):
 def test_nenhum_estado_final_ocupa_horario(situacao):
     # Assert
     assert situacao.ocupa_horario is False
+
+
+def test_confirmada_e_concluida_contam_no_ranking():
+    # Assert
+    assert frozenset({S.CONFIRMADA, S.CONCLUIDA}) == SITUACOES_QUE_CONTAM_NO_RANKING
+
+
+@pytest.mark.parametrize(
+    ("situacao", "conta"),
+    [
+        (S.SOLICITADA, False),
+        (S.CONFIRMADA, True),
+        (S.RECUSADA, False),
+        (S.CANCELADA, False),
+        (S.CONCLUIDA, True),
+    ],
+)
+def test_conta_no_ranking_segue_o_conjunto(situacao, conta):
+    # Assert
+    assert situacao.conta_no_ranking is conta

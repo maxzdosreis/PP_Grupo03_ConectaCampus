@@ -12,9 +12,11 @@ from reservas.api.serializers import (
     ContagemDaSituacaoSaidaSerializer,
     FiltrosDaFilaSerializer,
     FiltrosDeOcupacaoSerializer,
+    FiltrosDoRankingSerializer,
     FiltrosReservasSerializer,
     OcupacaoDoDiaSaidaSerializer,
     PaginacaoSaidaSerializer,
+    PosicaoDoRankingSaidaSerializer,
     RegistroDeSituacaoSaidaSerializer,
     RegrasDeAgendaSaidaSerializer,
     ReservaEntradaSerializer,
@@ -88,6 +90,26 @@ class ContagemPorSituacaoView(APIView):
         return resposta_sucesso(
             "Contagem das reservas por situação.",
             ContagemDaSituacaoSaidaSerializer.da_contagem(contagem),
+        )
+
+
+class RankingDeEspacosView(APIView):
+    permission_classes = [IsAuthenticated, ApenasGestor]
+
+    def get(self, request):
+        filtros = FiltrosDoRankingSerializer(data=request.query_params)
+        filtros.is_valid(raise_exception=True)
+        posicoes = dependencias.consultar_ranking_de_espacos().executar(
+            filtros.para_limite(), ator=ator_autenticado(request)
+        )
+        return resposta_sucesso(
+            mensagem_de_contagem(
+                len(posicoes),
+                nenhum="Nenhuma reserva confirmada ainda.",
+                um="1 espaço no ranking.",
+                varios="{total} espaços no ranking.",
+            ),
+            PosicaoDoRankingSaidaSerializer(posicoes, many=True).data,
         )
 
 

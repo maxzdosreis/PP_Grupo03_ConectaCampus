@@ -1,7 +1,12 @@
+from collections.abc import Iterable
 from datetime import time
 
 from espacos.application.portas import ReservasDoEspaco
-from espacos.application.repositorio import LeitorDeEspacos, RepositorioEspacos
+from espacos.application.repositorio import (
+    LeitorDeEspacos,
+    LeitorDeNomes,
+    RepositorioEspacos,
+)
 from espacos.domain.espaco_esportivo import EspacoEsportivo
 from espacos.domain.excecoes import (
     EspacoNaoEncontrado,
@@ -52,6 +57,14 @@ class ObterEspaco:
 
     def executar(self, espaco_id: int) -> EspacoEsportivo:
         return _obter_ou_falhar(self._repositorio, espaco_id)
+
+
+class ObterNomesDosEspacos:
+    def __init__(self, repositorio: LeitorDeNomes) -> None:
+        self._repositorio = repositorio
+
+    def executar(self, ids: Iterable[int]) -> dict[int, str]:
+        return self._repositorio.listar_nomes(ids)
 
 
 class VerificarEspacoDisponivel:

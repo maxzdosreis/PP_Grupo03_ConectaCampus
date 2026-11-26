@@ -32,6 +32,12 @@ class ConsultaDeEspacos(Protocol):
         reserva (ESP-08); criações no mesmo espaço passam uma de cada vez.
         """
 
+    def nomes_dos_espacos(self, ids: Iterable[int]) -> Mapping[int, str]:
+        """Nome de cada espaço pedido, inclusive os inativos (só leitura).
+
+        Id sem espaço fica de fora, sem erro; quem chama escolhe o que mostrar.
+        """
+
 
 class AgendaIndisponivel(Exception):
     """A projeção da agenda não pôde ser lida ou gravada.
@@ -171,4 +177,62 @@ class IndiceDeReservas(Protocol):
         A troca é atômica e só acontece se a `versao` ainda for a lida antes da
         consulta; senão devolve `False` e nada muda. Falha no meio não deixa
         o índice pela metade.
+        """
+
+
+class RankingIndisponivel(Exception):
+    """O ranking de espaços não pôde ser lido ou gravado.
+
+    Independente de `AgendaIndisponivel` e de `IndiceIndisponivel`: as três
+    projeções falham sozinhas. Nunca chega à API; quem lê cai para o PostgreSQL
+    e quem escreve só registra no log.
+    """
+
+
+@dataclass(frozen=True)
+class RegistroDoRanking:
+    reserva_id: int
+    espaco_id: int
+    situacao: SituacaoReserva
+
+
+class RankingDeEspacos(Protocol):
+    """Projeção do total de reservas que contam, por espaço (RDS-12).
+
+    Reconstruível do PostgreSQL e nunca decide nada (DEC-28). Uma operação com
+    a projeção fora do ar lança `RankingIndisponivel`.
+    """
+
+    def aplicar(
+        self, reserva_id: int, espaco_id: int, situacao: SituacaoReserva
+    ) -> None:
+        """Faz a reserva contar ou deixar de contar, conforme a situação.
+
+        Por estado, não por evento: a reserva conta no máximo uma vez, e repetir,
+        atrasar ou trocar a ordem das chamadas termina no estado da última
+        aplicada. Sem o ranking montado, não grava nada, mas avança a `versao`.
+        """
+
+    def top(self, limite: int) -> tuple[tuple[int, int], ...] | None:
+        """Pares (espaço, total) em ordem de total decrescente e, no empate, de
+        id do espaço crescente. Espaços com total zero não aparecem.
+
+        `None` se o ranking não está montado (miss); `()` se montado e vazio.
+        Limite <= 0 lança `ValueError`.
+        """
+
+    def versao(self) -> int:
+        """Contador que `aplicar` avança a cada chamada, montado ou não.
+
+        Leia-o **antes** de consultar o PostgreSQL e passe-o a `substituir`.
+        """
+
+    def substituir(
+        self, registros: Iterable[RegistroDoRanking], *, versao: int
+    ) -> bool:
+        """Recria o ranking inteiro a partir do que está no PostgreSQL.
+
+        Só as reservas cuja situação conta entram. A troca é atômica e só
+        acontece se a `versao` ainda for a lida antes da consulta; senão devolve
+        `False` e nada muda.
         """
