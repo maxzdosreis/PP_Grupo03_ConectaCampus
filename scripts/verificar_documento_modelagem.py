@@ -1,3 +1,9 @@
+"""Confere o texto de modelagem.md contra o código, os arquivos de ambiente e as figuras.
+
+Verifica relações entre módulos, evidências, referências a arquivos, testes e linhas,
+versões, marcadores pendentes e o tamanho do documento em páginas.
+"""
+
 from __future__ import annotations
 
 import argparse

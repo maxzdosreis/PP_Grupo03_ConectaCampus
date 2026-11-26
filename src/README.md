@@ -10,7 +10,7 @@ O projeto se chama `conecta-campus` no Compose (`name:` do `docker-compose.yml`)
 |---|---|---|---|
 | `db` | `postgres:16-alpine` | `DB_PORT_HOST` → 5432 (padrão 5432) | Banco PostgreSQL. Tem `healthcheck` com `pg_isready`, a cada 5 s, até 10 tentativas. |
 | `backend` | `backend/Dockerfile` (`python:3.12-slim`, instala `requirements.txt` e `requirements-dev.txt`) | `BACKEND_PORT_HOST` → 8000 (padrão 8000) | Ao subir, roda `python manage.py migrate --noinput` e depois `python manage.py runserver 0.0.0.0:8000`. Só sobe quando o `db` e o `redis` estão saudáveis (`condition: service_healthy`). Lê as variáveis do `.env` (`env_file`) e recebe do Compose `CORS_ALLOWED_ORIGINS`, [derivada da porta da tela](#derivadas-pelo-compose-a-partir-das-portas), e `REDIS_URL`. |
-| `redis` | `redis:8-alpine` | nenhuma (só a rede interna do Compose) | Cache do backend: guarda a contagem do limite de tentativas de login e de cadastro. Roda com `redis-server --save "" --appendonly no`, só em memória (sem volume): a contagem zera quando ele reinicia. Tem `healthcheck` com `redis-cli ping`, a cada 5 s, até 10 tentativas. |
+| `redis` | `redis:8-alpine` | nenhuma (só a rede interna do Compose) | Cache do backend: guarda os contadores do limite de tentativas (login, cadastro, troca de senha e alteração de usuários) e projeções reconstruíveis do PostgreSQL (agenda do dia, fila e contagens de reservas, ranking de espaços e cópia do espaço). Roda com `redis-server --save "" --appendonly no`, só em memória (sem volume): os contadores zeram quando ele reinicia, e as projeções se refazem pelo `reconstruir_agenda_redis` ou, no caso da agenda e do espaço, na própria leitura. Tem `healthcheck` com `redis-cli ping`, a cada 5 s, até 10 tentativas. |
 | `frontend` | `frontend/Dockerfile` (`node:24-alpine`, `npm ci`) | `FRONTEND_PORT_HOST` → 5173 (padrão 5173) | Servidor de desenvolvimento do Vite (`npm run dev -- --host 0.0.0.0`). Recebe só `VITE_API_URL`, [derivada da porta da API](#derivadas-pelo-compose-a-partir-das-portas), e `CHOKIDAR_USEPOLLING=true`. Sobe depois do `backend`. |
 
 ## Volumes
@@ -25,7 +25,7 @@ O projeto se chama `conecta-campus` no Compose (`name:` do `docker-compose.yml`)
 
 ## Redis com persistência (opcional, para a demonstração)
 
-O Redis padrão não persiste nada: a agenda e o índice de reservas são projeções que o PostgreSQL reconstrói, e a contagem do limite de tentativas zera ao reiniciar. O arquivo `docker-compose.redis-persistente.yml` é um override que só serve para a demonstração, para comparar "reinicia e perde tudo" com "reinicia e continua". **Não é para produção.**
+O Redis padrão não persiste nada: a agenda, o índice de reservas (fila e contagens), o ranking de espaços e a cópia do espaço são projeções que o PostgreSQL reconstrói, e a contagem do limite de tentativas zera ao reiniciar. O arquivo `docker-compose.redis-persistente.yml` é um override que só serve para a demonstração, para comparar "reinicia e perde tudo" com "reinicia e continua". **Não é para produção.**
 
 ```powershell
 docker compose -f docker-compose.yml -f docker-compose.redis-persistente.yml up -d redis
@@ -80,7 +80,7 @@ O `docker-compose.prod.yml` sobe o sistema sem as facilidades do desenvolvimento
 | Serviço | Imagem / build | Porta no seu computador | O que faz |
 |---|---|---|---|
 | `db` | `postgres:16-alpine` | nenhuma | Banco PostgreSQL só na rede interna, com volume próprio. |
-| `redis` | `redis:8-alpine` | nenhuma | Contador do limite de tentativas, sem persistência, como no modo padrão. |
+| `redis` | `redis:8-alpine` | nenhuma | Contadores do limite de tentativas e projeções do PostgreSQL, sem persistência, como no modo padrão. |
 | `migrar` | `backend/Dockerfile.prod` | nenhuma | Tarefa de uso único: `python manage.py migrate --noinput` e sai. |
 | `backend` | `backend/Dockerfile.prod` (`python:3.12-slim`, só `requirements.txt`) | nenhuma (`expose` 8000, rede interna) | gunicorn (`config.wsgi:application`) como usuário `aplicacao`, sem root. Sobe depois de `db` e `redis` saudáveis e de `migrar` concluído. Healthcheck em `/api/health/` (banco e cache). |
 | `frontend` | `frontend/Dockerfile.prod` (build com `node:24-alpine`, servido por `nginx:1.29-alpine`) | `FRONTEND_PORT_HOST` → 80 (padrão **8080**) | nginx: serve a tela compilada e repassa `/api/`, `/admin/` e `/static/` ao `backend`. Sobe depois do `backend` saudável. |

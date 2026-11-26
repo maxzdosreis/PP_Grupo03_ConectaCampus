@@ -40,6 +40,8 @@ flowchart TB
 %% sem-import: RES_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
 %% sem-import: CON_INFRA -> PG | src/backend/config/settings.py | "ENGINE": "django.db.backends.postgresql"
 %% sem-import: CON_API -> REDIS | src/backend/config/settings.py | "BACKEND": "django.core.cache.backends.redis.RedisCache"
+%% sem-import: RES_INFRA -> REDIS | src/backend/config/settings.py | "BACKEND": "django.core.cache.backends.redis.RedisCache"
+%% sem-import: ESP_INFRA -> REDIS | src/backend/config/settings.py | "BACKEND": "django.core.cache.backends.redis.RedisCache"
 %% As setas entre as camadas de um mesmo contexto, as de cada contexto para compartilhado e a única
 %% ligação entre contextos (reservas.infrastructure → espacos.publico) estão na Figura 2
 %% (regras-de-dependencia.mmd); aqui elas cruzariam a figura toda e dobrariam a altura.
@@ -119,6 +121,8 @@ flowchart TB
   RES_INFRA ==>|"SQL (ORM)"| PG
   CON_INFRA ==>|"SQL (ORM)"| PG
   CON_API ==>|"contadores de tentativas"| REDIS
+  RES_INFRA ==>|"projeções: agenda, filas, ranking"| REDIS
+  ESP_INFRA ==>|"cache de espaço"| REDIS
 
   subgraph LEGENDA["Legenda"]
     LEG_A["api"]:::api

@@ -31,7 +31,7 @@ Integrantes: Max Zimmermann dos Reis, Matheus Cezar Santos e Eduardo Almeida da 
 | Django REST Framework | 3.18.3 | API REST |
 | Simple JWT | 5.5.1 | tokens de acesso e de renovação |
 | PostgreSQL | 16 (`postgres:16-alpine`) | persistência |
-| Redis | 8 (`redis:8-alpine`) | contagem dos limites de tentativas |
+| Redis | 8 (`redis:8-alpine`) | contadores dos limites de tentativas e projeções do PostgreSQL |
 | Node | 24 (`node:24-alpine`) | execução e build do frontend |
 | React | 19.3.1 | interface |
 | TypeScript | 6.0.3 | linguagem do frontend |
@@ -46,7 +46,7 @@ Banco de dados. O PostgreSQL 16 veio com a liberação do Docker na DEC-02 (a re
 
 Autenticação. A DEC-04 decidiu cadastro, login e dois perfis, para só o Gestor decidir as reservas e o solicitante ser sempre quem está logado (um extra da disciplina). A API usa JWT com o Simple JWT: o token de acesso dura 30 minutos (`JWT_ACCESS_MINUTES`) e o de renovação, 1 dia (`JWT_REFRESH_DAYS`); cada renovação troca o token de renovação e põe o anterior numa lista negra, e sair revoga o atual. [CONFIRMAR COM O GRUPO: motivo de JWT em vez da sessão do Django]. O custo aceito é que o token de acesso não é revogável: uma cópia feita antes de sair vale até expirar.
 
-Limites de tentativas. O Redis 8 guarda só a contagem dos limites de login, cadastro, troca de senha e alteração de usuários pelo Gestor, num script atômico (`_REGISTRAR_TENTATIVA`) que vale para todos os processos da API, inclusive os workers do gunicorn (`GUNICORN_WORKERS`); um cache na memória de cada processo contaria cada um em separado. Sem persistência, a contagem zera quando ele reinicia; fora do ar, essas quatro operações respondem 503 `SERVICO_INDISPONIVEL` em vez de liberar sem limite. O custo é um serviço só para isso.
+Redis. O Redis 8 tem dois usos. Os contadores dos limites de login, cadastro, troca de senha e alteração de usuários pelo Gestor rodam num script atômico (`_REGISTRAR_TENTATIVA`) que vale para todos os processos da API, inclusive os workers do gunicorn (`GUNICORN_WORKERS`); fora do ar, essas operações respondem 503 `SERVICO_INDISPONIVEL` em vez de liberar sem limite. O outro uso são projeções do PostgreSQL, a fonte da verdade (DEC-28): a agenda do dia, a fila de pendentes com as contagens por situação, o ranking de espaços e uma cópia do espaço por 5 minutos. O banco decide o conflito de horário; a consulta volta a ele se a chave faltar ou o Redis cair. Sem persistência, os contadores zeram quando ele reinicia, e as projeções se refazem pelo comando `reconstruir_agenda_redis`. As chaves, os padrões e as falhas estão em `docs/fontes/modelagem/06-redis.md`.
 
 Frontend. O professor liberou o React (DEC-01), e o plano B com templates do Django foi descartado. A tela usa React 19, TypeScript e Vite, com os testes no Vitest sobre a mesma configuração (`vite.config.ts`). [CONFIRMAR COM O GRUPO: motivo da escolha de TypeScript e de Vite]. Ela não valida regra de negócio: mostra as ações e as mensagens que a API devolve. O custo é um segundo projeto, com Node, e o CORS entre as portas (`CORS_ALLOWED_ORIGINS`).
 
@@ -54,7 +54,7 @@ Execução. Docker e Docker Compose foram liberados na DEC-02, com os arquivos d
 
 ## 2. Organização do sistema
 
-O backend tem três contextos com as mesmas quatro camadas, `espacos`, `reservas` e `contas`, mais `compartilhado` (erros e respostas comuns), `exemplos` (dados de exemplo carregados pelos mesmos casos de uso) e `config`, que só compõe. A api valida o formato e chama o caso de uso (só o `dependencias.py` monta a infraestrutura); a application tem os casos de uso e as portas, testados com fakes; o domain, as regras em Python puro; a infrastructure, o ORM. Contextos não se importam: `reservas` guarda o espaço só pelo id e o consulta pela porta `ConsultaDeEspacos`, implementada por `ConsultaDeEspacosViaFachada`, que chama `espacos.publico`. O import-linter confere essas regras em dez contratos, e a DEC-08 fixa a cobertura dos testes: 100% de linhas e ramos nas camadas domain e application de `espacos` e `reservas` e, no total, 99%.
+O backend tem três contextos com as mesmas quatro camadas, `espacos`, `reservas` e `contas`, mais `compartilhado` (erros e respostas comuns), `exemplos` (dados de exemplo carregados pelos mesmos casos de uso) e `config`, que só compõe. A api valida o formato e chama o caso de uso (só o `dependencias.py` monta a infraestrutura); a application tem os casos de uso e as portas, testados com fakes; o domain, as regras em Python puro; a infrastructure, o ORM. Contextos não se importam: `reservas` guarda o espaço só pelo id e o consulta pela porta `ConsultaDeEspacos`, implementada por `ConsultaDeEspacosViaFachada`, que chama `espacos.publico`. O import-linter confere essas regras em 11 contratos, e a DEC-08 fixa a cobertura dos testes: 100% de linhas e ramos nas camadas domain e application de `espacos` e `reservas` e, no total, 99%.
 
 ![Figura 1 — Visão geral](visao-geral.png)
 
@@ -90,6 +90,6 @@ O diagrama entidade-relacionamento do banco e a tabela das restrições ficaram 
 
 ## 5. Qualidade e limitações assumidas
 
-Testes com pytest, na meta da DEC-08, e Vitest, ruff, ESLint, o import-linter e scripts que conferem as figuras e os requisitos contra o código. Limitações assumidas: o token de acesso não é revogável; a contagem zera quando o Redis reinicia, e sem ele as operações limitadas respondem 503; desativar um espaço não cancela as reservas dele (DEC-06); o fuso é sempre o de Brasília; e o modo de produção não tem HTTPS.
+Testes com pytest, na meta da DEC-08, e Vitest, ruff, ESLint, o import-linter e scripts que conferem as figuras e os requisitos contra o código. Limitações assumidas: o token de acesso não é revogável; os contadores de tentativas zeram quando o Redis reinicia (as projeções se refazem) e, sem ele, as quatro operações limitadas respondem 503; desativar um espaço não cancela as reservas dele (DEC-06); o fuso é sempre o de Brasília; e o modo de produção não tem HTTPS.
 
 <!-- corpo:fim -->
