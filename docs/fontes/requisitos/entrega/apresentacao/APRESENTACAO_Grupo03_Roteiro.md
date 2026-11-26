@@ -214,14 +214,14 @@ Palavras: 143 · Tempo: 66 s
 
 - IDs: RF01 no documento, RF-01 na fonte (Anexo A)
 - Versão 0.1 → 0.2 → 1.0 (DEC-17); cabeçalho em todo documento
-- 25 decisões (DEC-01 a DEC-25)
-- 5 pedidos de mudança (CR-01 a CR-05), aplicados
+- 28 decisões (DEC-01 a DEC-28)
+- 10 pedidos de mudança (CR-01 a CR-10), aplicados
 
 **Fala**
 
-> Sobre os identificadores: no documento, os requisitos são RF01, RNF01 e RN01. Na fonte oficial são RF-01 e assim por diante, e uma tabela no anexo A faz a correspondência. A versão segue a DEC-17: 0.1 para o rascunho, 0.2 depois da revisão e 1.0 para a primeira baseline aprovada. Todo documento leva no topo identificador, versão, estado, autor, revisor, aprovador e histórico. Hoje estamos na 0.1; a baseline 1.0 existe como candidata, aguardando aprovação. São 25 decisões registradas. As principais: dois perfis de acesso, na DEC-04; espaço nunca é excluído, só desativado, na DEC-06; e a agenda do dia sem dados pessoais, na DEC-11. E há 5 pedidos de mudança, os CRs. O CR-01 a CR-04 aplicam as quatro mudanças da Aula 7, e o CR-05 ajustou os papéis. Todos já estão aplicados na especificação.
+> Sobre os identificadores: no documento, os requisitos são RF01, RNF01 e RN01. Na fonte oficial são RF-01 e assim por diante, e uma tabela no anexo A faz a correspondência. A versão segue a DEC-17: 0.1 para o rascunho, 0.2 depois da revisão e 1.0 para a primeira baseline aprovada. Todo documento leva no topo identificador, versão, estado, autor, revisor, aprovador e histórico. Hoje estamos na 0.1; a baseline 1.0 existe como candidata, aguardando aprovação. São 28 decisões registradas. As principais: dois perfis de acesso, na DEC-04; espaço nunca é excluído, só desativado, na DEC-06; e a agenda do dia sem dados pessoais, na DEC-11. E há 10 pedidos de mudança, os CRs. O CR-01 a CR-04 aplicam as mudanças da Aula 7, o CR-05 ajustou os papéis, e o CR-06 a CR-10 vieram depois, da gestão de usuários ao ranking. Todos já estão aplicados na especificação.
 
-Palavras: 136 · Tempo: 63 s
+Palavras: 147 · Tempo: 68 s
 
 **Passagem:** "Todos já estão aplicados na especificação." (o encerramento é do [INTEGRANTE 1])
 
