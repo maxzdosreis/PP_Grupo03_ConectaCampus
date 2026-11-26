@@ -49,7 +49,7 @@ Medido em 22/11/2026. Base do runbook da parte 2. Este documento não faz deploy
 | Crescimento do banco por reserva | **cerca de 890 B por reserva** com 3 registros de histórico (reserva e índices 308 B, cada registro 186 B) | `pg_total_relation_size` |
 | Disco do volume do PostgreSQL (visão do Docker) | 49,7 MB (vazio) e 75,4 MB (10 mil reservas); o volume inclui WAL | `docker system df -v` |
 | Backup do PostgreSQL com 10 mil reservas | `pg_dump` SQL 4,36 MB, SQL com gzip 336 kB, formato custom (`-Fc`) 377 kB | `pg_dump` |
-| Redis | 0 chaves 1 min depois da carga; 1,63 MB usados. Guarda só contadores de limite (janela de 1 min a 1 hora) | `redis-cli dbsize` e `info memory` |
+| Redis | 0 chaves 1 min depois da carga; 1,63 MB usados. Guarda só contadores de limite (janela de 1 min a 1 hora) (medição anterior à DEC-28; ver a nota abaixo) | `redis-cli dbsize` e `info memory` |
 | Logs na carga A+B (db e Redis incluídos) | nginx 448 kB e backend 431 kB para ~4.100 requisições (**cerca de 210 B por requisição somando os dois**); db 182 kB; redis 5 kB. O healthcheck de 10 s do backend e do frontend entra nesses números | `docker logs` |
 
 ### Estimativas (não medidas)
@@ -107,6 +107,8 @@ Observação de carga: na medição, 3 workers síncronos com 4 vCPU saturaram c
 - Limites `mem_limit` nos serviços, quando a VPS for pequena.
 
 **O projeto não precisa de:** servidor de e-mail (notificações estão fora do 1.0 por DEC-24), fila de tarefas, CDN, balanceador, segundo servidor, nem Redis persistente. Quando o Redis reinicia, os contadores de limite recomeçam do zero: o efeito é só reabrir a janela de tentativas; ele **não precisa entrar no backup**, basta documentar isso. Se o Redis estiver fora do ar, login e cadastro respondem 503 em vez de liberar (comportamento da AUT-08).
+
+*Nota de 25/11/2026 (DOC-01):* as medições acima (RAM, "0 chaves", "guarda só contadores") foram feitas antes das projeções da DEC-28 e não foram refeitas. Depois dela, o Redis também guarda projeções pequenas e reconstruíveis do PostgreSQL (agenda, fila e contagens, ranking, cópia de espaço); ao reiniciar, `reconstruir_agenda_redis` as refaz, e as consultas leem do banco enquanto isso. Ele continua fora do backup, e "nem Redis persistente" vale para o modo padrão (o override com AOF é só para a demonstração).
 
 ## 5. Lacunas e riscos do repositório
 

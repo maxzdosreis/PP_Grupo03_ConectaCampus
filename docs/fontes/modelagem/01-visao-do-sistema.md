@@ -1,6 +1,6 @@
 ## 1. Visão do sistema
 
-Quatro serviços do Docker Compose: `frontend` entrega o app React, `backend` expõe a API Django/DRF, `db` é o PostgreSQL 16 e `redis` guarda, só em memória, os contadores do limite de tentativas de `contas.api` (login, cadastro, troca de senha e alteração de usuários pelo Gestor; AUT-08, AUT-10 e AUT-11). No `backend`, cada contexto (`espacos`, `reservas`, `contas`) tem as mesmas quatro camadas.
+Quatro serviços do Docker Compose: `frontend` entrega o app React, `backend` expõe a API Django/DRF, `db` é o PostgreSQL 16 e `redis` guarda, só em memória, os contadores do limite de tentativas de `contas.api` (login, cadastro, troca de senha e alteração de usuários pelo Gestor; AUT-08, AUT-10 e AUT-11) e projeções do PostgreSQL que `reservas.infrastructure` e `espacos.infrastructure` leem e gravam (agenda do dia, fila e contagens, ranking de espaços e cache de espaço; DEC-28): o PostgreSQL segue como fonte da verdade, e as projeções se refazem a partir dele ([`06-redis.md`](06-redis.md)). No `backend`, cada contexto (`espacos`, `reservas`, `contas`) tem as mesmas quatro camadas.
 
 ![Figura 1 — Visão geral](visao-geral.png)
 
@@ -8,7 +8,7 @@ Quatro serviços do Docker Compose: `frontend` entrega o app React, `backend` ex
 
 ![Figura 2 — Regras de dependência](regras-de-dependencia.png)
 
-**Figura 2 — Regras de dependência.** O que cada camada pode importar e o contrato do import-linter (C1 a C10) que o garante.
+**Figura 2 — Regras de dependência.** O que cada camada pode importar e o contrato do import-linter (C1 a C11) que o garante.
 
 | Legenda | Significado |
 |---|---|
