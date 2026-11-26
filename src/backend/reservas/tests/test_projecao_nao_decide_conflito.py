@@ -15,7 +15,7 @@ from reservas.tests.redis_de_teste import (
     ocupados_do_postgres,
     ocupados_do_redis,
     projetar_dia,
-    redis_limpo_depois,
+    redis_limpo_depois,  # noqa: F401
 )
 
 pytestmark = [

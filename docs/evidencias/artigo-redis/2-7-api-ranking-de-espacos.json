@@ -1,0 +1,71 @@
+{
+  "_origem": {
+    "comando_com_redis": "curl.exe -s 'http://localhost:8000/api/reservas/ranking-de-espacos/' -H 'Authorization: Bearer <TOKEN-REMOVIDO>'",
+    "comando_sem_projecao": "redis-cli UNLINK conecta-campus:1:ranking:montado  (so esta chave) e o mesmo curl",
+    "data": "2026-11-26 00:01:28 -0300",
+    "commit": "de351d0",
+    "redis": "8.10.3",
+    "modo": "padrao (sem persistencia)",
+    "perfil": "GESTOR",
+    "chave_apagada": "conecta-campus:1:ranking:montado",
+    "exists_antes": "1",
+    "exists_depois_de_apagar": "0",
+    "tempos_ms_informativos": {
+      "com_projecao": 63.4,
+      "sem_projecao": 103.1
+    },
+    "token": "removido (<TOKEN-REMOVIDO>); chamada feita por urllib com o cabecalho Authorization"
+  },
+  "http_com_projecao": 200,
+  "resposta_com_projecao": {
+    "mensagem": "3 espaços no ranking.",
+    "dados": [
+      {
+        "posicao": 1,
+        "espaco_id": 5,
+        "nome": "Quadra de Tênis 1",
+        "total": 2
+      },
+      {
+        "posicao": 2,
+        "espaco_id": 1,
+        "nome": "Quadra Poliesportiva Central",
+        "total": 1
+      },
+      {
+        "posicao": 3,
+        "espaco_id": 2,
+        "nome": "Campo de Futebol Principal",
+        "total": 1
+      }
+    ]
+  },
+  "http_sem_projecao": 200,
+  "resposta_sem_projecao": {
+    "mensagem": "3 espaços no ranking.",
+    "dados": [
+      {
+        "posicao": 1,
+        "espaco_id": 5,
+        "nome": "Quadra de Tênis 1",
+        "total": 2
+      },
+      {
+        "posicao": 2,
+        "espaco_id": 1,
+        "nome": "Quadra Poliesportiva Central",
+        "total": 1
+      },
+      {
+        "posicao": 3,
+        "espaco_id": 2,
+        "nome": "Campo de Futebol Principal",
+        "total": 1
+      }
+    ]
+  },
+  "comparacao": {
+    "http_iguais": true,
+    "corpos_identicos": true
+  }
+}

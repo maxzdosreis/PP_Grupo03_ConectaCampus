@@ -1,0 +1,131 @@
+# Comando: T="reservas/tests/test_agenda_do_dia.py reservas/tests/test_indice_de_reservas.py 
+#   reservas/tests/test_ranking_de_espacos.py reservas/tests/test_repositorio_com_agenda.py 
+#   reservas/tests/test_concorrencia_de_criacao.py reservas/tests/test_concorrencia_do_ranking.py 
+#   reservas/tests/test_projecao_nao_decide_conflito.py reservas/tests/test_falhas_do_redis.py 
+#   reservas/tests/test_propriedades_das_projecoes.py 
+#   reservas/tests/test_reconstrucao_com_escritas_no_meio.py 
+#   reservas/tests/test_reconstruir_agenda.py reservas/tests/test_reconstruir_indice.py 
+#   reservas/tests/test_reconstruir_ranking.py reservas/tests/test_comando_reconstruir_agenda.py 
+#   reservas/tests/test_api_agenda_sincronizada.py reservas/tests/test_api_fila_de_pendentes.py 
+#   reservas/tests/test_api_ranking_de_espacos.py espacos/tests/test_cache_de_espacos.py 
+#   espacos/tests/test_leitor_de_espacos_em_cache.py espacos/tests/test_repositorio_que_invalida.py 
+#   espacos/tests/test_api_cache_de_espacos.py"
+#   echo "## (a) pytest --collect-only -q (contagem por arquivo)"
+#   docker compose exec -T backend sh -c "pytest --collect-only -q $T -p no:cacheprovider 2>&1 | 
+#   tail -n 60"
+#   echo; echo "## (a) execucao em lote, com tempo, nome de cada teste (-v) so dos destaques e 
+#   resumo"
+#   docker compose exec -T backend sh -c "pytest $T --no-cov -q -p no:cacheprovider --durations=0 
+#   2>&1 | tail -n 12"
+#   echo; echo "## destaques: concorrencia de criacao e 'Redis nao decide' (-v)"
+#   docker compose exec -T backend sh -c "pytest reservas/tests/test_concorrencia_de_criacao.py 
+#   reservas/tests/test_projecao_nao_decide_conflito.py --no-cov -v -p no:cacheprovider 2>&1 | grep 
+#   -E 'PASSED|FAILED|ERROR|passed|failed'"
+#   echo; echo "## (d) cobertura DESSE subconjunto (informativa; NAO e a cobertura da suite 
+#   inteira)"
+#   docker compose exec -T backend sh -c "pytest $T --cov=reservas.infrastructure 
+#   --cov=espacos.infrastructure --cov-report=term -q -p no:cacheprovider --cov-fail-under=0 2>&1 | 
+#   grep -E 
+#   'agenda_redis|indice_redis|ranking_redis|cache_de_espacos|repositorio_com_agenda|repositorio_que
+#   _invalida|TOTAL|passed|failed'"
+# Data: 2026-11-26 00:10:15 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; pytest no container (Redis banco 1)
+#
+## (a) pytest --collect-only -q (contagem por arquivo)
+reservas/tests/test_repositorio_com_agenda.py::test_listar_para_indice_delega_ao_repositorio_interno
+reservas/tests/test_repositorio_com_agenda.py::test_o_ranking_recebe_a_reserva_confirmada_depois_do_commit
+reservas/tests/test_repositorio_com_agenda.py::test_o_ranking_acompanha_confirmar_concluir_e_cancelar
+reservas/tests/test_repositorio_com_agenda.py::test_cancelar_a_confirmada_tira_o_espaco_do_ranking
+reservas/tests/test_repositorio_com_agenda.py::test_o_ranking_nao_montado_so_avanca_a_versao
+reservas/tests/test_repositorio_com_agenda.py::test_falha_so_do_ranking_atualiza_agenda_e_indice_e_deixa_um_aviso
+reservas/tests/test_repositorio_com_agenda.py::test_falha_da_agenda_e_do_indice_ainda_atualiza_o_ranking
+reservas/tests/test_repositorio_com_agenda.py::test_acoes_do_ranking_em_ordem_invertida_terminam_no_estado_atual
+reservas/tests/test_repositorio_com_agenda.py::test_situacao_que_nao_conta_chega_ao_ranking_para_ele_tirar_a_reserva
+reservas/tests/test_repositorio_com_agenda.py::test_o_ranking_do_decorator_e_consultado_com_a_situacao_atual_lida_do_repositorio
+reservas/tests/test_repositorio_com_agenda.py::test_contar_por_espaco_e_listar_para_ranking_delegam_ao_repositorio_interno
+reservas/tests/test_repositorio_com_agenda.py::test_as_leituras_da_fila_e_da_contagem_sao_delegadas_ao_repositorio_interno
+reservas/tests/test_propriedades_das_projecoes.py::TestMaquinaDasProjecoes::runTest
+reservas/tests/test_reconstruir_agenda.py::test_reconstroi_de_uma_agenda_vazia_varios_espacos_e_datas
+reservas/tests/test_reconstruir_agenda.py::test_a_segunda_execucao_deixa_a_agenda_e_o_resultado_iguais
+reservas/tests/test_reconstruir_agenda.py::test_corrige_membro_de_reserva_cancelada_e_membro_que_faltava
+reservas/tests/test_reconstruir_agenda.py::test_dia_projetado_sem_reserva_ativa_vira_vazio_e_conta_como_esvaziado
+reservas/tests/test_reconstruir_agenda.py::test_dia_projetado_que_ja_estava_vazio_nao_conta_como_esvaziado
+reservas/tests/test_reconstruir_agenda.py::test_dia_anterior_a_hoje_nao_e_tocado
+reservas/tests/test_reconstruir_agenda.py::test_hoje_e_a_data_de_brasilia_mesmo_quando_o_utc_ja_e_o_dia_seguinte
+reservas/tests/test_reconstruir_agenda.py::test_so_reservas_solicitadas_e_confirmadas_entram
+reservas/tests/test_reconstruir_agenda.py::test_versao_que_avanca_no_meio_faz_nova_tentativa_e_grava
+reservas/tests/test_reconstruir_agenda.py::test_versao_que_avanca_sempre_descarta_o_dia_sem_lancar_e_segue_para_o_proximo
+reservas/tests/test_reconstruir_agenda.py::test_agenda_indisponivel_sobe_sem_ser_engolida[dias_projetados]
+reservas/tests/test_reconstruir_agenda.py::test_agenda_indisponivel_sobe_sem_ser_engolida[versao]
+reservas/tests/test_reconstruir_agenda.py::test_agenda_indisponivel_sobe_sem_ser_engolida[substituir]
+reservas/tests/test_reconstruir_agenda.py::test_mudanca_no_banco_sem_aviso_a_agenda_faz_reler_antes_de_gravar
+reservas/tests/test_reconstruir_agenda.py::test_banco_que_nao_para_de_mudar_sem_aviso_descarta_o_dia
+reservas/tests/test_reconstruir_indice.py::test_reconstroi_o_indice_do_banco_e_conta_reservas_e_pendentes
+reservas/tests/test_reconstruir_indice.py::test_le_o_banco_em_lotes_sem_trazer_tudo_de_uma_vez
+reservas/tests/test_reconstruir_indice.py::test_banco_vazio_deixa_o_indice_montado_e_vazio
+reservas/tests/test_reconstruir_indice.py::test_tenta_de_novo_quando_a_versao_avanca_no_meio
+reservas/tests/test_reconstruir_indice.py::test_descarta_sem_erro_depois_de_esgotar_as_tentativas
+reservas/tests/test_reconstruir_indice.py::test_indice_indisponivel_sobe
+reservas/tests/test_reconstruir_ranking.py::test_reconstroi_o_ranking_do_banco_e_conta_espacos_e_reservas_contadas
+reservas/tests/test_reconstruir_ranking.py::test_banco_vazio_deixa_o_ranking_montado_e_vazio
+reservas/tests/test_reconstruir_ranking.py::test_le_o_banco_em_lotes_sem_trazer_tudo_de_uma_vez
+reservas/tests/test_reconstruir_ranking.py::test_reconstruir_de_novo_da_o_mesmo_resultado
+reservas/tests/test_reconstruir_ranking.py::test_refaz_a_leitura_quando_uma_aplicacao_chega_no_meio
+reservas/tests/test_reconstruir_ranking.py::test_descarta_sem_excecao_depois_das_tentativas_quando_a_versao_nao_para
+reservas/tests/test_reconstruir_ranking.py::test_ranking_indisponivel_sobe_para_quem_chamou
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_hit_nao_toca_o_repositorio
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_miss_le_o_repositorio_e_guarda
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_cache_indisponivel_le_o_repositorio_sem_lancar
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_falha_ao_guardar_ainda_devolve_o_espaco
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_espaco_inexistente_nao_e_guardado_e_continua_nao_encontrado
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_espaco_inativo_vindo_do_cache_continua_lancando_espaco_inativo
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_versao_que_avanca_entre_a_leitura_e_a_gravacao_impede_de_guardar
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_entrada_quebrada_do_cache_vira_miss
+espacos/tests/test_leitor_de_espacos_em_cache.py::test_a_trava_e_a_validacao_para_reservar_leem_o_repositorio_simples
+espacos/tests/test_repositorio_que_invalida.py::test_salvar_so_invalida_depois_do_commit
+espacos/tests/test_repositorio_que_invalida.py::test_invalida_depois_de_cada_tipo_de_escrita[editar]
+espacos/tests/test_repositorio_que_invalida.py::test_invalida_depois_de_cada_tipo_de_escrita[desativar]
+espacos/tests/test_repositorio_que_invalida.py::test_invalida_depois_de_cada_tipo_de_escrita[reativar]
+espacos/tests/test_repositorio_que_invalida.py::test_rollback_nao_invalida
+espacos/tests/test_repositorio_que_invalida.py::test_salvar_que_falha_nao_agenda_invalidacao
+espacos/tests/test_repositorio_que_invalida.py::test_falha_do_cache_na_invalidacao_so_vira_log
+espacos/tests/test_repositorio_que_invalida.py::test_delega_os_demais_metodos_do_protocolo
+
+462 tests collected in 19.64s
+
+## (a) execucao em lote, com tempo, nome de cada teste (-v) so dos destaques e resumo
+0.01s call     reservas/tests/test_api_fila_de_pendentes.py::test_parametro_invalido_recebe_400_com_o_campo[consulta0-pagina]
+0.01s teardown reservas/tests/test_indice_de_reservas.py::test_a_fila_e_o_conjunto_de_solicitadas_tem_sempre_os_mesmos_ids[redis]
+0.01s teardown reservas/tests/test_api_ranking_de_espacos.py::test_limite_invalido_recebe_400_com_o_campo[0]
+0.01s setup    reservas/tests/test_agenda_do_dia.py::test_dias_projetados_ignora_a_chave_de_versao[em_memoria]
+0.01s call     reservas/tests/test_indice_de_reservas.py::test_substituir_de_novo_com_os_mesmos_dados_e_idempotente[redis]
+0.01s call     reservas/tests/test_api_ranking_de_espacos.py::test_ranking_vem_em_ordem_com_posicao_nome_e_total
+0.01s setup    reservas/tests/test_ranking_de_espacos.py::test_sinal_montado_vale_um
+0.01s setup    reservas/tests/test_ranking_de_espacos.py::test_substituir_monta_do_zero_so_com_as_reservas_que_contam[em_memoria]
+0.01s setup    reservas/tests/test_agenda_do_dia.py::test_fake_indisponivel_lanca_agenda_indisponivel[substituir]
+
+(818 durations < 0.005s hidden.  Use -vv to show these durations.)
+462 passed in 154.17s (0:02:34)
+
+## destaques: concorrencia de criacao e 'Redis nao decide' (-v)
+reservas/tests/test_projecao_nao_decide_conflito.py::test_projecao_que_diz_livre_nao_impede_o_conflito_e_a_reconstrucao_a_corrige PASSED [ 12%]
+reservas/tests/test_projecao_nao_decide_conflito.py::test_projecao_que_diz_ocupado_nao_impede_a_reserva_e_a_reconstrucao_a_corrige PASSED [ 25%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_simultaneas_no_mesmo_horario_deixam_so_uma_reserva[com_projecao] PASSED [ 37%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_simultaneas_no_mesmo_horario_deixam_so_uma_reserva[sem_projecao] PASSED [ 50%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_simultaneas_em_espacos_diferentes_nao_geram_falso_conflito[com_projecao] PASSED [ 62%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_simultaneas_em_espacos_diferentes_nao_geram_falso_conflito[sem_projecao] PASSED [ 75%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_com_sobreposicao_parcial_aceitam_so_horarios_que_nao_se_tocam[com_projecao] PASSED [ 87%]
+reservas/tests/test_concorrencia_de_criacao.py::test_criacoes_com_sobreposicao_parcial_aceitam_so_horarios_que_nao_se_tocam[sem_projecao] PASSED [100%]
+============================== 8 passed in 16.35s ==============================
+
+## (d) cobertura DESSE subconjunto (informativa; NAO e a cobertura da suite inteira)
+espacos/infrastructure/cache_de_espacos_redis.py        71      0      6      0   100%
+espacos/infrastructure/repositorio_que_invalida.py      37      0      0      0   100%
+reservas/infrastructure/agenda_redis.py                121      0     12      0   100%
+reservas/infrastructure/indice_redis.py                117      0     16      0   100%
+reservas/infrastructure/ranking_redis.py               111      0     14      0   100%
+reservas/infrastructure/repositorio_com_agenda.py       84      0      8      0   100%
+TOTAL                                                  869     61    102      4    91%
+462 passed in 164.65s (0:02:44)

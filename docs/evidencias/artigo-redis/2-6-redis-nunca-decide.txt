@@ -1,0 +1,92 @@
+# Comando: R='docker compose exec -T redis redis-cli'; K=conecta-campus:1; 
+#   API=http://localhost:8000/api
+#   A="Authorization: Bearer $TS"; J='Content-Type: application/json'
+#   CH=$K:agenda:espaco:5:2026-12-03
+#   CORPO='{"espaco_id":5,"data":"2026-12-03","hora_inicio":"15:00","hora_fim":"16:00","finalidade":
+#   "Teste DOC-02 (evidencia)"}'
+#   echo "## 0. Garante que o dia ja esta projetado (a leitura repovoa o dia: miss -> PostgreSQL -> 
+#   Redis)"; curl -s -o /dev/null -w "ocupacao HTTP %{http_code}
+#   " "$API/reservas/ocupacao/?espaco=5&data=2026-12-03" -H "$A"; $R ZRANGE $CH 0 -1 WITHSCORES | 
+#   paste -sd" "
+#   echo; echo "## 1. Cria a reserva de teste (Quadra de Tenis 1, 03/12/2026 15:00-16:00)"
+#   echo "> curl -s -X POST $API/reservas/ -H 'Authorization: Bearer <TOKEN-REMOVIDO>' -d '$CORPO'"
+#   RESP=$(curl -s -w '\nHTTP %{http_code}' -X POST $API/reservas/ -H "$A" -H "$J" -d "$CORPO"); 
+#   echo "$RESP"
+#   ID=$(echo "$RESP" | head -1 | python -c "import 
+#   sys,json;print(json.load(sys.stdin)['dados']['id'])"); echo "ID da reserva de teste: $ID"
+#   echo; echo "## 2. Projecao da agenda do dia e o contador de versao (so existe depois de uma 
+#   escrita)"
+#   $R ZRANGE $CH 0 -1 WITHSCORES | paste -sd' '; echo "versao:"; $R GET 
+#   $K:agenda:versao:espaco:5:2026-12-03; $R TTL $CH
+#   echo; echo "## 3. ZREM: remove SO o membro desta reserva da projecao (o PostgreSQL continua com 
+#   a reserva)"
+#   echo "> ZREM $CH $ID:960:SOLICITADA"; $R ZREM $CH "$ID:960:SOLICITADA"; $R ZRANGE $CH 0 -1 
+#   WITHSCORES | paste -sd' '
+#   echo; echo "## 4. Ocupacao do dia lida da projecao adulterada (o horario aparece LIVRE; a 
+#   projecao esta desatualizada)"
+#   echo "> GET $API/reservas/ocupacao/?espaco=5&data=2026-12-03"; curl -s 
+#   "$API/reservas/ocupacao/?espaco=5&data=2026-12-03" -H "$A"; echo
+#   echo; echo "## 5. Nova reserva no MESMO espaco e horario: quem decide e o PostgreSQL (restricao 
+#   de exclusao) -> 409"
+#   curl -s -w '\nHTTP %{http_code}\n' -X POST $API/reservas/ -H "$A" -H "$J" -d "$CORPO"
+#   echo; echo "## 6. A projecao continua sem o membro (a recusa nao a corrigiu)"; $R ZRANGE $CH 0 
+#   -1 WITHSCORES | paste -sd' '
+#   echo; echo "## 7. Reconstrucao corrige a projecao"; docker compose exec -T backend python 
+#   manage.py reconstruir_agenda_redis
+#   $R ZRANGE $CH 0 -1 WITHSCORES | paste -sd' '
+#   echo "> GET $API/reservas/ocupacao/?espaco=5&data=2026-12-03"; curl -s 
+#   "$API/reservas/ocupacao/?espaco=5&data=2026-12-03" -H "$A"; echo
+#   echo; echo "## 8. Limpeza: cancela a reserva de teste $ID (PATCH situacao CANCELADA)"
+#   curl -s -w '\nHTTP %{http_code}\n' -X PATCH $API/reservas/$ID/situacao/ -H "$A" -H "$J" -d 
+#   '{"situacao":"CANCELADA","motivo":"Reserva de teste da DOC-02, cancelada ao fim da 
+#   evidencia."}' | cut -c1-420
+#   $R ZRANGE $CH 0 -1 WITHSCORES | paste -sd' '
+# Data: 2026-11-26 00:00:30 -0300
+# Commit: de351d0 (alteracoes locais em src/scripts/docs-fontes: 0)
+# Redis: 8.10.3
+# Modo: padrao; reserva de teste criada e cancelada
+#
+## 0. Garante que o dia ja esta projetado (a leitura repovoa o dia: miss -> PostgreSQL -> Redis)
+ocupacao HTTP 200
+_ -1
+
+## 1. Cria a reserva de teste (Quadra de Tenis 1, 03/12/2026 15:00-16:00)
+> curl -s -X POST http://localhost:8000/api/reservas/ -H 'Authorization: Bearer <TOKEN-REMOVIDO>' -d '{"espaco_id":5,"data":"2026-12-03","hora_inicio":"15:00","hora_fim":"16:00","finalidade":"Teste DOC-02 (evidencia)"}'
+{"mensagem":"Reserva solicitada com sucesso. Aguarde a confirmação do gestor.","dados":{"id":20,"espaco_id":5,"solicitante":{"usuario_id":2,"nome":"Bruno Lima","matricula":"2026101"},"data":"2026-12-03","hora_inicio":"15:00","hora_fim":"16:00","finalidade":"Teste DOC-02 (evidencia)","situacao":"SOLICITADA","situacao_rotulo":"Solicitada","motivo_da_situacao":null,"criada_em":"2026-11-26T00:00:31.965031-03:00","acoes_disponiveis":[{"situacao":"CANCELADA","rotulo":"Cancelar","exige_motivo":true}]}}
+HTTP 201
+ID da reserva de teste: 20
+
+## 2. Projecao da agenda do dia e o contador de versao (so existe depois de uma escrita)
+_ -1 20:960:SOLICITADA 900
+versao:
+3
+777565
+
+## 3. ZREM: remove SO o membro desta reserva da projecao (o PostgreSQL continua com a reserva)
+> ZREM conecta-campus:1:agenda:espaco:5:2026-12-03 20:960:SOLICITADA
+1
+_ -1
+
+## 4. Ocupacao do dia lida da projecao adulterada (o horario aparece LIVRE; a projecao esta desatualizada)
+> GET http://localhost:8000/api/reservas/ocupacao/?espaco=5&data=2026-12-03
+{"mensagem":"Nenhum horário ocupado neste dia.","dados":{"data":"2026-12-03","horario_de_abertura":"07:00","horario_de_fechamento":"00:00","reservavel":true,"motivo_indisponivel":null,"ocupados":[],"livres":[{"hora_inicio":"07:00","hora_fim":"00:00"}]}}
+
+## 5. Nova reserva no MESMO espaco e horario: quem decide e o PostgreSQL (restricao de exclusao) -> 409
+{"erro":{"codigo":"CONFLITO_DE_HORARIO","mensagem":"Este espaço já tem uma reserva Solicitada em 03/12/2026 15:00–16:00. Escolha outro horário."}}
+HTTP 409
+
+## 6. A projecao continua sem o membro (a recusa nao a corrigiu)
+_ -1
+
+## 7. Reconstrucao corrige a projecao
+Agenda reconstruída: 2 dias, 3 reservas, 0 dias esvaziados.
+Filas e contagens reconstruídas: 12 reservas, 2 pendentes.
+Ranking de espaços reconstruído: 3 espaços, 4 reservas contadas.
+_ -1 20:960:SOLICITADA 900
+> GET http://localhost:8000/api/reservas/ocupacao/?espaco=5&data=2026-12-03
+{"mensagem":"1 horário ocupado neste dia.","dados":{"data":"2026-12-03","horario_de_abertura":"07:00","horario_de_fechamento":"00:00","reservavel":true,"motivo_indisponivel":null,"ocupados":[{"hora_inicio":"15:00","hora_fim":"16:00","situacao":"SOLICITADA","situacao_rotulo":"Solicitada"}],"livres":[{"hora_inicio":"07:00","hora_fim":"15:00"},{"hora_inicio":"16:00","hora_fim":"00:00"}]}}
+
+## 8. Limpeza: cancela a reserva de teste 20 (PATCH situacao CANCELADA)
+{"mensagem":"Reserva cancelada com sucesso.","dados":{"id":20,"espaco_id":5,"solicitante":{"usuario_id":2,"nome":"Bruno Lima","matricula":"2026101"},"data":"2026-12-03","hora_inicio":"15:00","hora_fim":"16:00","finalidade":"Teste DOC-02 (evidencia)","situacao":"CANCELADA","situacao_rotulo":"Cancelada","motivo_da_situacao":"Reserva de teste da DOC-02, cancelada ao fim da evidencia.","criada_em":"2026-11-26T00:00:31.96
+HTTP 200
+_ -1
